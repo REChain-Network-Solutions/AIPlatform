@@ -1,0 +1,13 @@
+{
+  "id": "pd-285c0ab7-0003-5000-9000-0e1166498fda",
+  "type": "sbp_payout_recipient",
+  "status": "waiting_for_operation",
+  "created_at": "2021-06-16T13:04:55.633Z",
+  "metadata": {
+    "order_id": 37
+  },
+  "cancellation_details": {
+    "party": "yoo_money",
+    "reason": "expired_by_timeout"
+  }
+}

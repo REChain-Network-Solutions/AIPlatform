@@ -1,0 +1,82 @@
+// Credits: https: //kennethnym.com/blog/progressive-blur-in-css/
+
+.lqd-progressive-blur-filter {
+
+	&:nth-child(1) {
+		backdrop-filter: blur(calc(var(--base-val, 1) * 1px));
+		mask: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 1) 10%, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 0) 40%);
+	}
+
+	&:nth-child(2) {
+		backdrop-filter: blur(calc(var(--base-val, 1) * 2px));
+		mask: linear-gradient(rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 0) 50%);
+	}
+
+	&:nth-child(3) {
+		backdrop-filter: blur(calc(var(--base-val, 1) * 4px));
+		mask: linear-gradient(rgba(0, 0, 0, 0) 15%, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 1) 50%, rgba(0, 0, 0, 0) 60%);
+	}
+
+	&:nth-child(4) {
+		backdrop-filter: blur(calc(var(--base-val, 1) * 8px));
+		mask: linear-gradient(rgba(0, 0, 0, 0) 20%, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 70%);
+	}
+
+	&:nth-child(5) {
+		backdrop-filter: blur(calc(var(--base-val, 1) * 16px));
+		mask: linear-gradient(rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 1) 80%, rgba(0, 0, 0, 0) 90%);
+	}
+
+	&:nth-child(6) {
+		backdrop-filter: blur(calc(var(--base-val, 1) * 32px));
+		mask: linear-gradient(rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 1) 80%);
+	}
+
+	&:nth-child(7) {
+		backdrop-filter: blur(calc(var(--base-val, 1) * 64px));
+		mask: linear-gradient(rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 1) 100%);
+	}
+
+	&.reverse {
+
+		// Reverse version - top to bottom blur
+		&:nth-child(1) {
+			backdrop-filter: blur(calc(var(--base-val, 1) * 64px));
+			mask: linear-gradient(rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 30%);
+		}
+
+		&:nth-child(2) {
+			backdrop-filter: blur(calc(var(--base-val, 1) * 32px));
+			mask: linear-gradient(rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 0) 40%);
+		}
+
+		&:nth-child(3) {
+			backdrop-filter: blur(calc(var(--base-val, 1) * 16px));
+			mask: linear-gradient(rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 10%, rgba(0, 0, 0, 0) 40%);
+		}
+
+		&:nth-child(4) {
+			backdrop-filter: blur(calc(var(--base-val, 1) * 8px));
+			mask: linear-gradient(rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 0) 50%);
+		}
+
+		&:nth-child(5) {
+			backdrop-filter: blur(calc(var(--base-val, 1) * 4px));
+			mask: linear-gradient(rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 30%, rgba(0, 0, 0, 0) 60%);
+		}
+
+		&:nth-child(6) {
+			backdrop-filter: blur(calc(var(--base-val, 1) * 2px));
+			mask: linear-gradient(rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 0) 70%);
+		}
+
+		&:nth-child(7) {
+			backdrop-filter: blur(calc(var(--base-val, 1) * 1px));
+			mask: linear-gradient(rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 1) 60%, rgba(0, 0, 0, 0) 90%);
+		}
+	}
+}
+
+.lqd-progressive-blur-gradient {
+	// background: linear-gradient(transparent, hsl(var(--background)/50%));
+}

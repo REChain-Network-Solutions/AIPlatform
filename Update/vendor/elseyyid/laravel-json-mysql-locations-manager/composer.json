@@ -1,0 +1,25 @@
+{
+  "name": "elseyyid/laravel-json-mysql-locations-manager",
+  "type": "package",
+  "description": "Laravel Json Locations Manager. Import all app language strings from lang folder",
+  "keywords": ["laravel","laravel 5.4", "laravel 8", "laravel 9", "laravel 10", "laravel 11", "Laravel Json Locations Manager MySQL",  "Laravel Json Locations Manager", "Laravel Localization Using Translation Strings As Keys"],
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "require": {
+    "php": ">=5.3.0"
+  },
+  "authors": [
+    {
+      "name": "Omar Elseyyid",
+      "email": "mhmoud.omar3@gmail.com"
+    }
+  ],
+  "autoload":{
+    "psr-4": {
+      "Elseyyid\\LaravelJsonLocationsManager\\": "src/"
+    }
+  },
+  "config": {
+      "preferred-install": "dist"
+  }
+}

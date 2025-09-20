@@ -1,0 +1,14 @@
+{
+  "type": "bank_card",
+  "id": "22d6d597-000f-5000-9000-145f6df21d6f",
+  "saved": false,
+  "status": "pending",
+  "holder": {
+    "account_id": "100500",
+    "gateway_id": "100700"
+  },
+  "confirmation": {
+    "type": "redirect",
+    "confirmation_url": "https://yoomoney.ru/checkout/payment-methods/v1/contract?orderId=2f244b8d-0037-5000-8000-0122855e68fc"
+  }
+}

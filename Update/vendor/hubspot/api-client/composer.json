@@ -1,0 +1,40 @@
+{
+    "name": "hubspot/api-client",
+    "version": "12.2.0",
+    "description": "Hubspot API client",
+    "keywords": [
+        "hubspot",
+        "swagger",
+        "php",
+        "sdk",
+        "api"
+    ],
+    "homepage": "https://hubspot.com/",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "HubSpot",
+            "homepage": "https://hubspot.com/"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "guzzlehttp/guzzle": "^7.3",
+        "guzzlehttp/psr7": "^1.7 || ^2.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.4",
+        "phpunit/phpunit": "^9.5",
+        "phpspec/phpspec": "^7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "HubSpot\\Client\\" : "codegen/",
+            "HubSpot\\" : "lib/",
+            "Hubspot\\Tests\\": "tests/"
+        }
+    }
+}

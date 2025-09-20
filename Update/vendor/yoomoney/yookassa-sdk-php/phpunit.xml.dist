@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         beStrictAboutCoversAnnotation="true"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTestsThatDoNotTestAnything="false"
+         beStrictAboutTodoAnnotatedTests="true"
+         bootstrap="vendor/autoload.php"
+         convertDeprecationsToExceptions="true"
+         cacheResultFile="build/result.json"
+         colors="true"
+         columns="max"
+         executionOrder="depends,defects"
+         failOnRisky="true"
+         failOnWarning="true"
+         timeoutForSmallTests="5"
+         timeoutForMediumTests="10"
+         timeoutForLargeTests="30"
+>
+    <testsuites>
+        <testsuite name="all">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage cacheDirectory="build/code-coverage">
+        <include>
+            <directory suffix=".php">lib</directory>
+        </include>
+    </coverage>
+
+    <php>
+        <ini name="zend.enable_gc" value="0"/>
+        <ini name="memory_limit" value="-1"/>
+        <env name="FAST_LINT_TEST_CASES" value="1"/>
+    </php>
+
+</phpunit>

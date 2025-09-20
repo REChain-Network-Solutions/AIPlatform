@@ -1,0 +1,9 @@
+
+/vendor/
+.idea
+.phpdoc
+composer.lock
+/build/
+phpunit.xml
+lsp
+/.php-cs-fixer.cache

@@ -1,0 +1,12 @@
+{
+  "id": "se-d6b9b3fa-0cb8-4aa8-b3c0-254bf0358d4c",
+  "status": "pending",
+  "created_at": "2019-03-12T11:10:41.802Z",
+  "itn": "123456789012",
+  "phone": "79297771234",
+  "confirmation": {
+    "type": "redirect",
+    "confirmation_url": "https://himself-ktr.nalog.ru/settings/partners"
+  },
+  "test": false
+}

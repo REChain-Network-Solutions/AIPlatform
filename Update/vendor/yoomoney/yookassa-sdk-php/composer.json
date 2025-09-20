@@ -1,0 +1,69 @@
+{
+  "name": "yoomoney/yookassa-sdk-php",
+  "description": "This is a developer tool for integration with YooMoney.",
+  "type": "library",
+  "license": "MIT",
+  "homepage": "https://yookassa.ru/developers/api",
+  "keywords": ["yoomoney", "yookassa", "payments", "api", "sdk"],
+  "authors": [
+    {
+      "name": "YooMoney",
+      "email": "cms@yoomoney.ru"
+    }
+  ],
+  "repositories": [
+    {"type": "composer", "url": "https://nexus.yooteam.ru/repository/composer-proxy-packagist-org/"},
+    {"packagist": false}
+  ],
+  "dist": {
+    "type": "zip",
+    "url": "https://git.yoomoney.ru/rest/api/latest/projects/SDK/repos/yookassa-sdk-php/archive?at=refs%2Ftags%2F3.10.0&format=zip"
+  },
+  "version": "3.10.0",
+  "require": {
+    "php": ">=8.0",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*",
+    "yoomoney/yookassa-sdk-validator": "^1.0",
+    "php-ds/php-ds": "^1.4",
+    "psr/log": "^2.0 || ^3.0"
+  },
+  "require-dev": {
+    "ext-xml": "*",
+    "phpunit/phpunit": "^9.6",
+    "mockery/mockery": "^1.5",
+    "php-parallel-lint/php-parallel-lint": "^1.3",
+    "phpmd/phpmd": "^2.13",
+    "friendsofphp/php-cs-fixer": "^3.15",
+    "phpstan/phpstan": "^1.10",
+    "yoomoney/yookassa-fakerphp": "^1.0"
+  },
+  "scripts": {
+    "test": [
+      "@phpunit",
+      "@phpcsf",
+      "@phpmd"
+    ],
+    "ci": [
+      "@phplint",
+      "@phpunit",
+      "@phpcsf",
+      "@phpmd"
+    ],
+    "phplint": "vendor/bin/parallel-lint --exclude vendor/ --exclude .idea/ --exclude tests/ --exclude lsp/ -e php .",
+    "phpunit": "vendor/bin/phpunit -derror_reporting=32759 --configuration=phpunit.xml.dist --no-coverage",
+    "phpcsf": "vendor/bin/php-cs-fixer fix . --config=.php-cs-fixer.dist.php",
+    "phpmd": "vendor/bin/phpmd --exclude vendor/,.idea/,tests/,lsp/ --suffixes php . text phpmd.xml"
+  },
+  "autoload": {
+    "psr-4": {
+      "YooKassa\\": "lib/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\YooKassa\\": "tests/"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "type": "sbp_payout_recipient",
+  "last_name": "Иванов",
+  "first_name": "Иван",
+  "middle_name": "Иванович",
+  "metadata": {
+    "recipient_id": "37"
+  }
+}

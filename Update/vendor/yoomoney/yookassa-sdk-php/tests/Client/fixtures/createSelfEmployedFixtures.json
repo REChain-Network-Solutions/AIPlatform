@@ -1,0 +1,7 @@
+{
+  "itn": "123456789012",
+  "phone": "79001002030",
+  "confirmation": {
+    "type": "redirect"
+  }
+}

@@ -1,0 +1,347 @@
+<?php
+
+/*
+* The MIT License
+*
+* Copyright (c) 2025 "YooMoney", NBСO LLC
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
+*/
+
+namespace Tests\YooKassa\Request\PersonalData;
+
+use Exception;
+use Tests\YooKassa\AbstractTestCase;
+use Datetime;
+use YooKassa\Model\Metadata;
+use YooKassa\Request\PersonalData\PersonalDataType\PayoutStatementRecipientPersonalDataRequest;
+
+/**
+ * PayoutStatementRecipientPersonalDataRequestTest
+ *
+ * @category    ClassTest
+ * @author      cms@yoomoney.ru
+ * @link        https://yookassa.ru/developers/api
+ */
+class PayoutStatementRecipientPersonalDataRequestTest extends AbstractTestCase
+{
+    protected PayoutStatementRecipientPersonalDataRequest $object;
+
+    /**
+     * @return PayoutStatementRecipientPersonalDataRequest
+     */
+    protected function getTestInstance(): PayoutStatementRecipientPersonalDataRequest
+    {
+        return new PayoutStatementRecipientPersonalDataRequest();
+    }
+
+    /**
+     * @return void
+     */
+    public function testPayoutStatementRecipientPersonalDataRequestClassExists(): void
+    {
+        $this->object = $this->getMockBuilder(PayoutStatementRecipientPersonalDataRequest::class)->getMockForAbstractClass();
+        $this->assertTrue(class_exists(PayoutStatementRecipientPersonalDataRequest::class));
+        $this->assertInstanceOf(PayoutStatementRecipientPersonalDataRequest::class, $this->object);
+    }
+
+    /**
+     * Test property "type"
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testType(): void
+    {
+        $instance = $this->getTestInstance();
+        self::assertNotNull($instance->getType());
+        self::assertNotNull($instance->type);
+        self::assertContains($instance->getType(), ['payout_statement_recipient']);
+        self::assertContains($instance->type, ['payout_statement_recipient']);
+    }
+
+    /**
+     * Test invalid property "type"
+     * @dataProvider invalidTypeDataProvider
+     * @param mixed $value
+     * @param string $exceptionClass
+     *
+     * @return void
+     */
+    public function testInvalidType(mixed $value, string $exceptionClass): void
+    {
+        $instance = $this->getTestInstance();
+
+        $this->expectException($exceptionClass);
+        $instance->setType($value);
+    }
+
+    /**
+     * @return array[]
+     * @throws Exception
+     */
+    public function invalidTypeDataProvider(): array
+    {
+        $instance = $this->getTestInstance();
+        return $this->getInvalidDataProviderByType($instance->getValidator()->getRulesByPropName('_type'));
+    }
+
+    /**
+     * Test property "last_name"
+     * @dataProvider validLastNameDataProvider
+     * @param mixed $value
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testLastName(mixed $value): void
+    {
+        $instance = $this->getTestInstance();
+        $instance->setLastName($value);
+        self::assertNotNull($instance->getLastName());
+        self::assertNotNull($instance->last_name);
+        self::assertEquals($value, is_array($value) ? $instance->getLastName()->toArray() : $instance->getLastName());
+        self::assertEquals($value, is_array($value) ? $instance->last_name->toArray() : $instance->last_name);
+        self::assertMatchesRegularExpression("/^[—–‐\\-a-zA-Zа-яёА-ЯЁ ]*$/u", $instance->getLastName());
+        self::assertMatchesRegularExpression("/^[—–‐\\-a-zA-Zа-яёА-ЯЁ ]*$/u", $instance->last_name);
+        self::assertLessThanOrEqual(200, is_string($instance->getLastName()) ? mb_strlen($instance->getLastName()) : $instance->getLastName());
+        self::assertLessThanOrEqual(200, is_string($instance->last_name) ? mb_strlen($instance->last_name) : $instance->last_name);
+        self::assertGreaterThanOrEqual(1, is_string($instance->getLastName()) ? mb_strlen($instance->getLastName()) : $instance->getLastName());
+        self::assertGreaterThanOrEqual(1, is_string($instance->last_name) ? mb_strlen($instance->last_name) : $instance->last_name);
+    }
+
+    /**
+     * Test invalid property "last_name"
+     * @dataProvider invalidLastNameDataProvider
+     * @param mixed $value
+     * @param string $exceptionClass
+     *
+     * @return void
+     */
+    public function testInvalidLastName(mixed $value, string $exceptionClass): void
+    {
+        $instance = $this->getTestInstance();
+
+        $this->expectException($exceptionClass);
+        $instance->setLastName($value);
+    }
+
+    /**
+     * @return array[]
+     * @throws Exception
+     */
+    public function validLastNameDataProvider(): array
+    {
+        $instance = $this->getTestInstance();
+        return $this->getValidDataProviderByType($instance->getValidator()->getRulesByPropName('_last_name'));
+    }
+
+    /**
+     * @return array[]
+     * @throws Exception
+     */
+    public function invalidLastNameDataProvider(): array
+    {
+        $instance = $this->getTestInstance();
+        return $this->getInvalidDataProviderByType($instance->getValidator()->getRulesByPropName('_last_name'));
+    }
+
+    /**
+     * Test property "first_name"
+     * @dataProvider validFirstNameDataProvider
+     * @param mixed $value
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testFirstName(mixed $value): void
+    {
+        $instance = $this->getTestInstance();
+        $instance->setFirstName($value);
+        self::assertNotNull($instance->getFirstName());
+        self::assertNotNull($instance->first_name);
+        self::assertEquals($value, is_array($value) ? $instance->getFirstName()->toArray() : $instance->getFirstName());
+        self::assertEquals($value, is_array($value) ? $instance->first_name->toArray() : $instance->first_name);
+        self::assertMatchesRegularExpression("/^[—–‐\\-a-zA-Zа-яёА-ЯЁ ]*$/u", $instance->getFirstName());
+        self::assertMatchesRegularExpression("/^[—–‐\\-a-zA-Zа-яёА-ЯЁ ]*$/u", $instance->first_name);
+        self::assertLessThanOrEqual(100, is_string($instance->getFirstName()) ? mb_strlen($instance->getFirstName()) : $instance->getFirstName());
+        self::assertLessThanOrEqual(100, is_string($instance->first_name) ? mb_strlen($instance->first_name) : $instance->first_name);
+        self::assertGreaterThanOrEqual(1, is_string($instance->getFirstName()) ? mb_strlen($instance->getFirstName()) : $instance->getFirstName());
+        self::assertGreaterThanOrEqual(1, is_string($instance->first_name) ? mb_strlen($instance->first_name) : $instance->first_name);
+    }
+
+    /**
+     * Test invalid property "first_name"
+     * @dataProvider invalidFirstNameDataProvider
+     * @param mixed $value
+     * @param string $exceptionClass
+     *
+     * @return void
+     */
+    public function testInvalidFirstName(mixed $value, string $exceptionClass): void
+    {
+        $instance = $this->getTestInstance();
+
+        $this->expectException($exceptionClass);
+        $instance->setFirstName($value);
+    }
+
+    /**
+     * @return array[]
+     * @throws Exception
+     */
+    public function validFirstNameDataProvider(): array
+    {
+        $instance = $this->getTestInstance();
+        return $this->getValidDataProviderByType($instance->getValidator()->getRulesByPropName('_first_name'));
+    }
+
+    /**
+     * @return array[]
+     * @throws Exception
+     */
+    public function invalidFirstNameDataProvider(): array
+    {
+        $instance = $this->getTestInstance();
+        return $this->getInvalidDataProviderByType($instance->getValidator()->getRulesByPropName('_first_name'));
+    }
+
+    /**
+     * Test property "middle_name"
+     * @dataProvider validMiddleNameDataProvider
+     * @param mixed $value
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testMiddleName(mixed $value): void
+    {
+        $instance = $this->getTestInstance();
+        self::assertEmpty($instance->getMiddleName());
+        self::assertEmpty($instance->middle_name);
+        $instance->setMiddleName($value);
+        self::assertEquals($value, is_array($value) ? $instance->getMiddleName()->toArray() : $instance->getMiddleName());
+        self::assertEquals($value, is_array($value) ? $instance->middle_name->toArray() : $instance->middle_name);
+        if (!empty($value)) {
+            self::assertNotNull($instance->getMiddleName());
+            self::assertNotNull($instance->middle_name);
+            self::assertMatchesRegularExpression("/^[—–‐\\-a-zA-Zа-яёА-ЯЁ ]*$/u", $instance->getMiddleName());
+            self::assertMatchesRegularExpression("/^[—–‐\\-a-zA-Zа-яёА-ЯЁ ]*$/u", $instance->middle_name);
+            self::assertLessThanOrEqual(200, is_string($instance->getMiddleName()) ? mb_strlen($instance->getMiddleName()) : $instance->getMiddleName());
+            self::assertLessThanOrEqual(200, is_string($instance->middle_name) ? mb_strlen($instance->middle_name) : $instance->middle_name);
+            self::assertGreaterThanOrEqual(1, is_string($instance->getMiddleName()) ? mb_strlen($instance->getMiddleName()) : $instance->getMiddleName());
+            self::assertGreaterThanOrEqual(1, is_string($instance->middle_name) ? mb_strlen($instance->middle_name) : $instance->middle_name);
+        }
+    }
+
+    /**
+     * Test invalid property "middle_name"
+     * @dataProvider invalidMiddleNameDataProvider
+     * @param mixed $value
+     * @param string $exceptionClass
+     *
+     * @return void
+     */
+    public function testInvalidMiddleName(mixed $value, string $exceptionClass): void
+    {
+        $instance = $this->getTestInstance();
+
+        $this->expectException($exceptionClass);
+        $instance->setMiddleName($value);
+    }
+
+    /**
+     * @return array[]
+     * @throws Exception
+     */
+    public function validMiddleNameDataProvider(): array
+    {
+        $instance = $this->getTestInstance();
+        return $this->getValidDataProviderByType($instance->getValidator()->getRulesByPropName('_middle_name'));
+    }
+
+    /**
+     * @return array[]
+     * @throws Exception
+     */
+    public function invalidMiddleNameDataProvider(): array
+    {
+        $instance = $this->getTestInstance();
+        return $this->getInvalidDataProviderByType($instance->getValidator()->getRulesByPropName('_middle_name'));
+    }
+
+    /**
+     * Test property "birthdate"
+     * @dataProvider validBirthdateDataProvider
+     * @param mixed $value
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testBirthdate(mixed $value): void
+    {
+        $instance = $this->getTestInstance();
+        $instance->setBirthdate($value);
+        self::assertNotNull($instance->getBirthdate());
+        self::assertNotNull($instance->birthdate);
+        if ($value instanceof Datetime) {
+            self::assertEquals($value, $instance->getBirthdate());
+            self::assertEquals($value, $instance->birthdate);
+        } else {
+            self::assertEquals(new Datetime($value), $instance->getBirthdate());
+            self::assertEquals(new Datetime($value), $instance->birthdate);
+        }
+    }
+
+    /**
+     * Test invalid property "birthdate"
+     * @dataProvider invalidBirthdateDataProvider
+     * @param mixed $value
+     * @param string $exceptionClass
+     *
+     * @return void
+     */
+    public function testInvalidBirthdate(mixed $value, string $exceptionClass): void
+    {
+        $instance = $this->getTestInstance();
+
+        $this->expectException($exceptionClass);
+        $instance->setBirthdate($value);
+    }
+
+    /**
+     * @return array[]
+     * @throws Exception
+     */
+    public function validBirthdateDataProvider(): array
+    {
+        $instance = $this->getTestInstance();
+        return $this->getValidDataProviderByType($instance->getValidator()->getRulesByPropName('_birthdate'));
+    }
+
+    /**
+     * @return array[]
+     * @throws Exception
+     */
+    public function invalidBirthdateDataProvider(): array
+    {
+        $instance = $this->getTestInstance();
+        return $this->getInvalidDataProviderByType($instance->getValidator()->getRulesByPropName('_birthdate'));
+    }
+}

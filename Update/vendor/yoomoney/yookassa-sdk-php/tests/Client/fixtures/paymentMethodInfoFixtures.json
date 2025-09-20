@@ -1,0 +1,22 @@
+{
+  "type": "bank_card",
+  "id": "22e12f66-000f-5000-8000-18db351245c7",
+  "saved": true,
+  "status": "active",
+  "holder": {
+    "account_id": "100500"
+  },
+  "card": {
+    "first6": "555555",
+    "last4": "4444",
+    "expiry_month": "07",
+    "expiry_year": "2022",
+    "card_type": "Mir",
+    "card_product": {
+      "code": "MCP",
+      "name": "MIR Privilege"
+    },
+    "issuer_country": "RU",
+    "issuer_name": "Sberbank"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "id": "in-e44e8088-bd73-43b1-959a-954f3a7d0c54",
+  "status": "pending",
+  "cart": [
+    {
+      "description": "Товар арт. 12345",
+      "price": {
+        "value": "9.00",
+        "currency": "RUB"
+      },
+      "discount_price": {
+        "value": "7.00",
+        "currency": "RUB"
+      },
+      "quantity": 1.000
+    },
+    {
+      "description": "Товар арт. 67890",
+      "price": {
+        "value": "1.00",
+        "currency": "RUB"
+      },
+      "quantity": 3.000
+    }
+  ],
+  "delivery_method": {
+    "type": "self",
+    "url": "https://yookassa.ru/my/i/Zqncq0lhxSqo/a"
+  },
+  "created_at": "2024-10-01T11:37:15.137Z",
+  "expires_at": "2024-10-18T10:51:18.139Z",
+  "description": "Счет на оплату заказа номер 37",
+  "metadata": {
+    "order_id": "37"
+  }
+}

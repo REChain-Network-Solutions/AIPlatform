@@ -1,0 +1,71 @@
+{
+    "name": "dcblogdev/laravel-xero",
+    "description": "A Laravel Xero package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "David Carr",
+            "email": "dave@dcblog.dev",
+            "homepage": "https://dcblog.dev"
+        }
+    ],
+    "homepage": "https://github.com/dcblogdev/laravel-xero",
+    "keywords": ["Laravel", "Xero"],
+    "require": {
+        "illuminate/support": "5.5.x|5.6.x|5.7.x|5.8.x|6.x|7.x|8.x|9.x|10.x|11.x|12.x",
+        "league/oauth2-client": "^1.4|^2.8.1",
+        "guzzlehttp/guzzle": "6.x|^7.9.3",
+        "ext-json": "*",
+        "ext-fileinfo": "*",
+        "ext-curl": "*"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^7.0|^10.3",
+        "pestphp/pest": "^1.21|^v3.8.2",
+        "pestphp/pest-plugin-laravel": "^v3.2.0",
+        "pestphp/pest-plugin-type-coverage": "^3.5.1",
+        "larastan/larastan": "^3.4",
+        "mockery/mockery": "^1.6.12",
+        "laravel/pint": "^1.22.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dcblogdev\\Xero\\": "src/",
+            "Dcblogdev\\Xero\\database\\factories\\": "database/factories/",
+            "Dcblogdev\\Xero\\Tests\\": "tests"
+        }
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/TestCase.php"
+        ]
+    },
+    "scripts": {
+        "pint": "vendor/bin/pint",
+        "stan": "phpstan analyse",
+        "pest": "pest",
+        "pest-type-coverage": "pest --type-coverage",
+        "pest-coverage": "pest --parallel --coverage",
+        "check": [
+            "@pint",
+            "@stan",
+            "@pest-type-coverage",
+            "@pest-coverage"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Dcblogdev\\Xero\\XeroServiceProvider"
+            ],
+            "aliases": {
+                "Xero": "Dcblogdev\\Xero\\Facades\\Xero"
+            }
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}
