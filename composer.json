@@ -45,9 +45,13 @@
 		}
 	],
 	"require": {
-		"php": "^8.2",
+		"php": "^8.3",
 		"ext-curl": "*",
 		"ext-zip": "*",
+		"ext-json": "*",
+		"ext-openssl": "*",
+		"ext-mbstring": "*",
+		"ext-pdo": "*",
 		"ably/ably-php": "^1.1",
 		"abraham/twitteroauth": "^7.0",
 		"akaunting/laravel-setting": "^1.2",
@@ -185,12 +189,19 @@
 	},
 	"config": {
 		"optimize-autoloader": true,
-		"preferred-install": "dist",
 		"sort-packages": true,
 		"allow-plugins": {
 			"pestphp/pest-plugin": true,
-			"php-http/discovery": true
-		}
+			"php-http/discovery": true,
+			"php-http/guzzle7-adapter": true,
+			"php-http/message": true
+		},
+		"platform-check": true,
+		"preferred-install": {
+			"*": "dist"
+		},
+		"process-timeout": 3600,
+		"secure-http": true
 	},
 	"minimum-stability": "stable",
 	"prefer-stable": true

@@ -4,11 +4,58 @@ import fs from 'fs';
 import path, { resolve } from 'path';
 import { homedir } from 'os';
 import mkcert from 'vite-plugin-mkcert';
+import { visualizer } from 'rollup-plugin-visualizer';
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
+import { compression } from 'vite-plugin-compression2';
+import { ViteMinifyPlugin } from 'vite-plugin-minify';
+import { chunkSplitPlugin } from 'vite-plugin-chunk-split';
 
 const laravelInputs = [];
 const themeAppJsFiles = [];
 const excludedThemeDirs = [ 'vendor' ];
-const plugins = [];
+const plugins = [
+    // Visualize bundle size
+    visualizer({
+        open: false,
+        gzipSize: true,
+        brotliSize: true,
+    }),
+    
+    // Image optimization
+    ViteImageOptimizer({
+        png: {
+            quality: 80,
+        },
+        jpeg: {
+            quality: 80,
+        },
+        jpg: {
+            quality: 80,
+        },
+        webp: {
+            lossless: true,
+        },
+    }),
+    
+    // Gzip and Brotli compression
+    compression({
+        algorithm: 'brotliCompress',
+        exclude: [/^(.*\.(js|css|html|svg|json|woff2?|eot|ttf|otf))$/],
+    }),
+    
+    // Minify HTML
+    ViteMinifyPlugin({}),
+    
+    // Code splitting
+    chunkSplitPlugin({
+        strategy: 'single-vendor',
+        customSplitting: {
+            'vendor': ['vue', 'vue-router', 'axios', 'lodash'],
+            'element-plus': ['element-plus'],
+            'echarts': ['echarts'],
+        },
+    }),
+];
 
 // adding theme files
 const themes = fs.readdirSync( 'resources/views', { withFileTypes: true } )
