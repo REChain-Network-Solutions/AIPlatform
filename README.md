@@ -1,7 +1,5 @@
 # AIPlatform 🚀
 
-![AIPlatform Logo](docs/assets/logo.png)
-
 > **Next-Generation Decentralized AI Platform** — built by [REChain Network Solutions](https://github.com/REChain-Network-Solutions) to enable scalable, secure, and collaborative AI systems for everyone.
 
 ---
