@@ -15,7 +15,7 @@
 		"axios": "^1.12.2",
 		"blade-formatter": "^1.42.2",
 		"del": "^7.0.0",
-		"eslint": "^8.56.0",
+		"eslint": "^9.38.0",
 		"eslint-plugin-tailwindcss": "^3.14.0",
 		"gulp": "^5.0.0",
 		"gulp-babel": "^8.0.0",
