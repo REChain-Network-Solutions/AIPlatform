@@ -36,7 +36,7 @@
 		"vite-plugin-mkcert": "^1.17.8"
 	},
 	"dependencies": {
-		"@11labs/client": "^0.1.3",
+		"@11labs/client": "^0.2.0",
 		"@alpinejs/intersect": "^3.14.8",
 		"@alpinejs/sort": "^3.14.9",
 		"@floating-ui/dom": "^1.7.3",
