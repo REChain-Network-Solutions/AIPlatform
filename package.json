@@ -8,7 +8,7 @@
 		"watch": "gulp watch"
 	},
 	"devDependencies": {
-		"@angular-eslint/template-parser": "^17.2.1",
+		"@angular-eslint/template-parser": "^20.5.1",
 		"@tailwindcss/forms": "^0.5.7",
 		"@tailwindcss/typography": "^0.5.12",
 		"autoprefixer": "^10.4.14",
@@ -30,7 +30,7 @@
 		"postcss": "^8.4.45",
 		"pusher-js": "^8.4.0-rc2",
 		"sass": "^1.62.0",
-		"tailwindcss": "^3.4.15",
+		"tailwindcss": "^4.1.16",
 		"tailwindcss-motion": "^1.1.1",
 		"vite": "^7.1.12",
 		"vite-plugin-mkcert": "^1.17.9"
