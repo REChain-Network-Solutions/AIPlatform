@@ -29,10 +29,10 @@
 		"lodash": "^4.17.21",
 		"postcss": "^8.4.45",
 		"pusher-js": "^8.4.0-rc2",
-		"sass": "^1.62.0",
+		"sass": "^1.93.3",
 		"tailwindcss": "^4.1.16",
 		"tailwindcss-motion": "^1.1.1",
-		"vite": "^7.1.12",
+		"vite": "^7.2.1",
 		"vite-plugin-mkcert": "^1.17.9"
 	},
 	"dependencies": {
