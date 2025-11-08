@@ -32,7 +32,7 @@
 		"sass": "^1.93.3",
 		"tailwindcss": "^4.1.16",
 		"tailwindcss-motion": "^1.1.1",
-		"vite": "^7.2.1",
+		"vite": "^7.2.2",
 		"vite-plugin-mkcert": "^1.17.9"
 	},
 	"dependencies": {
@@ -43,12 +43,12 @@
 		"@imacrayon/alpine-ajax": "^0.12.5",
 		"@microsoft/fetch-event-source": "^2.0.1",
 		"@tiptap/core": "^3.2.0",
-		"@tiptap/extension-bubble-menu": "^3.10.2",
+		"@tiptap/extension-bubble-menu": "^3.10.3",
 		"@tiptap/extension-code": "^3.2.0",
 		"@tiptap/extension-code-block-lowlight": "^3.10.3",
 		"@tiptap/extension-floating-menu": "^3.10.2",
 		"@tiptap/extension-image": "^3.10.2",
-		"@tiptap/pm": "^3.2.0",
+		"@tiptap/pm": "^3.10.3",
 		"@tiptap/starter-kit": "^3.10.2",
 		"lowlight": "^3.3.0",
 		"picmo": "^5.8.5",
