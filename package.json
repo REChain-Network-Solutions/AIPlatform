@@ -42,7 +42,7 @@
 		"@floating-ui/dom": "^1.7.3",
 		"@imacrayon/alpine-ajax": "^0.12.5",
 		"@microsoft/fetch-event-source": "^2.0.1",
-		"@tiptap/core": "^3.2.0",
+		"@tiptap/core": "^3.10.5",
 		"@tiptap/extension-bubble-menu": "^3.10.3",
 		"@tiptap/extension-code": "^3.2.0",
 		"@tiptap/extension-code-block-lowlight": "^3.10.3",
