@@ -32,7 +32,7 @@
 		"sass": "^1.94.2",
 		"tailwindcss": "^4.1.16",
 		"tailwindcss-motion": "^1.1.1",
-		"vite": "^7.2.4",
+		"vite": "^7.2.6",
 		"vite-plugin-mkcert": "^1.17.9"
 	},
 	"dependencies": {
