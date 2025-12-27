@@ -78,6 +78,7 @@ class MarketplaceServiceProvider extends ServiceProvider
         'chatbot-telegram'       => \App\Extensions\ChatbotTelegram\System\ChatbotTelegramServiceProvider::class,
         'chatbot-whatsapp'       => \App\Extensions\ChatbotWhatsapp\System\ChatbotWhatsappServiceProvider::class,
         'chatbot-messenger'      => \App\Extensions\ChatbotMessenger\System\ChatbotMessengerServiceProvider::class,
+        'chatbot-instagram'      => \App\Extensions\ChatbotInstagram\System\ChatbotInstagramServiceProvider::class,
         'marketing-bot'          => \App\Extensions\MarketingBot\System\MarketingBotServiceProvider::class,
         'migration'              => \App\Extensions\Migration\System\MigrationServiceProvider::class,
         'live-customizer'        => \App\Extensions\LiveCustomizer\System\LiveCustomizerServiceProvider::class,

@@ -174,6 +174,8 @@ class RazorpayService implements BaseGatewayService, ProductInterface
 
     public static function subscribe($plan): View
     {
+        $gateway = self::geteway();
+
         $order_id = 'ORDER-' . strtoupper(Str::random(13));
 
         $newDiscountedPrice = $plan->price;
@@ -185,12 +187,20 @@ class RazorpayService implements BaseGatewayService, ProductInterface
             }
         }
 
-        return view('panel.user.finance.subscription.' . self::$GATEWAY_CODE, compact('plan', 'newDiscountedPrice', 'order_id', 'coupon'));
+        $taxRate = $gateway?->tax ?? 0;
+        $taxValue = taxToVal($newDiscountedPrice, $taxRate);
+
+        return view(
+            'panel.user.finance.subscription.' . self::$GATEWAY_CODE,
+            compact('plan', 'newDiscountedPrice', 'order_id', 'coupon', 'taxRate', 'taxValue')
+        );
     }
 
     public static function subscribeCheckout(Request $request, $referral = null)
     {
         $planID = $request->input('planID', null);
+
+        $user = Auth::user();
 
         $plan = Plan::query()
             ->where('id', $planID)
@@ -217,12 +227,46 @@ class RazorpayService implements BaseGatewayService, ProductInterface
 
             $api = self::client();
 
-            $data = $api->subscription->create([
+            $discount = 0;
+            $offerId = null;
+            $coupon = checkCouponInRequest(request('coupon'));
+            if ($coupon) {
+
+                $offerId = $coupon->getAttribute('razorpay_offer_id');
+
+                $discount = ($plan->price * ($coupon->discount / 100));
+            }
+
+            $taxRate = $gateway->tax ?? 0;
+            $subTotal = max($plan->price - $discount, 0);
+            $taxValue = taxToVal($subTotal, $taxRate);
+            $totalAmount = $subTotal + $taxValue;
+
+            $subscriptionPayload = [
                 'plan_id'         => $planId,
                 'total_count'     => 6,
                 'quantity'        => 1,
                 'customer_notify' => 0,
-            ]);
+            ];
+
+            if ($offerId) {
+                $subscriptionPayload['offer_id'] = $offerId;
+            }
+
+            if ($taxValue > 0) {
+                $subscriptionPayload['addons'] = [
+                    [
+                        'item' => [
+                            'name'        => __('Tax'),
+                            'amount'      => (int) round($taxValue * 100),
+                            'currency'    => 'INR',
+                            'description' => __('Tax @:rate%', ['rate' => $taxRate]),
+                        ],
+                    ],
+                ];
+            }
+
+            $data = $api->subscription->create($subscriptionPayload);
 
             Subscriptions::query()
                 ->create([
@@ -233,10 +277,10 @@ class RazorpayService implements BaseGatewayService, ProductInterface
                     'stripe_price'  => null,
                     'quantity'      => 1,
                     'trial_ends_at' => null,
-                    'tax_rate'      => 0,
-                    'tax_value'     => 0,
-                    'coupon'        => null,
-                    'total_amount'  => $plan->price,
+                    'tax_rate'      => $taxRate,
+                    'tax_value'     => $taxValue,
+                    'coupon'        => request('coupon'),
+                    'total_amount'  => $totalAmount,
                     'plan_id'       => $plan->id,
                     'paid_with'     => self::$GATEWAY_CODE,
                 ]);
@@ -247,17 +291,17 @@ class RazorpayService implements BaseGatewayService, ProductInterface
                     'plan_id'            => $plan->id,
                     'user_id'            => auth()->id(),
                     'payment_type'       => self::$GATEWAY_CODE,
-                    'price'              => $plan->price,
+                    'price'              => $totalAmount,
                     'affiliate_earnings' => 0,
                     'status'             => 'WAITING',
                     'country'            => $user->country ?? 'Unknown',
-                    'tax_rate'           => 0,
+                    'tax_rate'           => $taxRate,
                     'type'               => 'subscription',
-                    'tax_value'          => 0,
+                    'tax_value'          => $taxValue,
                     'payload'            => $data->toArray(),
                 ]);
 
-            \App\Models\Usage::getSingle()->updateSalesCount($plan->price);
+            \App\Models\Usage::getSingle()->updateSalesCount($totalAmount);
 
             $short_link = $data['short_url'];
 
@@ -287,6 +331,17 @@ class RazorpayService implements BaseGatewayService, ProductInterface
 
         $api = self::client();
 
+        $discount = 0;
+        $coupon = checkCouponInRequest(request('coupon'));
+        if ($coupon) {
+            $discount = ($plan->price * ($coupon->discount / 100));
+        }
+
+        $taxRate = $gateway->tax ?? 0;
+        $subTotal = max($plan->price - $discount, 0);
+        $taxValue = taxToVal($subTotal, $taxRate);
+        $totalAmount = $subTotal + $taxValue;
+
         try {
             $order = UserOrder::query()
                 ->create([
@@ -294,18 +349,18 @@ class RazorpayService implements BaseGatewayService, ProductInterface
                     'plan_id'            => $plan->id,
                     'user_id'            => $user->id,
                     'payment_type'       => self::$GATEWAY_CODE,
-                    'price'              => $plan->price,
+                    'price'              => $totalAmount,
                     'affiliate_earnings' => 0,
                     'status'             => 'WAITING',
                     'country'            => $user->country ?? 'Unknown',
-                    'tax_rate'           => 0,
-                    'tax_value'          => 0,
+                    'tax_rate'           => $taxRate,
+                    'tax_value'          => $taxValue,
                     'type'               => 'token-pack',
                     'payload'            => [],
                 ]);
 
             $paymentLink = $api->paymentLink->create([
-                'amount'         => $plan->price * 100,
+                'amount'         => (int) round($totalAmount * 100),
                 'currency'       => 'INR',
                 'accept_partial' => true,
                 'reference_id'   => $orderID,
@@ -326,7 +381,7 @@ class RazorpayService implements BaseGatewayService, ProductInterface
                 'payload'  => $paymentLink->toArray(),
             ]);
 
-            \App\Models\Usage::getSingle()->updateSalesCount($plan->price);
+            \App\Models\Usage::getSingle()->updateSalesCount($totalAmount);
 
             return redirect()->to($paymentLink['short_url']);
 
@@ -339,9 +394,26 @@ class RazorpayService implements BaseGatewayService, ProductInterface
 
     public static function prepaid($plan)
     {
+        $gateway = self::geteway();
+
         $order_id = 'ORDER-' . strtoupper(Str::random(13));
 
-        return view('panel.user.finance.prepaid.' . self::$GATEWAY_CODE, compact('plan', 'order_id'));
+        $newDiscountedPrice = $plan->price;
+        $coupon = checkCouponInRequest();
+        if ($coupon) {
+            $newDiscountedPrice = $plan->price - ($plan->price * ($coupon->discount / 100));
+            if ($newDiscountedPrice != floor($newDiscountedPrice)) {
+                $newDiscountedPrice = number_format($newDiscountedPrice, 2);
+            }
+        }
+
+        $taxRate = $gateway?->tax ?? 0;
+        $taxValue = taxToVal($newDiscountedPrice, $taxRate);
+
+        return view(
+            'panel.user.finance.prepaid.' . self::$GATEWAY_CODE,
+            compact('plan', 'order_id', 'newDiscountedPrice', 'taxRate', 'taxValue')
+        );
     }
 
     public static function subscribeCancel(?User $internalUser = null)

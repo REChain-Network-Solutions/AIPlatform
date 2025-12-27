@@ -75,15 +75,10 @@ class Veo31 implements TextToVideoModelInterface
      */
     protected function buildEndpoint(string $mode): string
     {
-        // Map modes to their endpoint structures
-        return match ($mode) {
-            'text-to-video-fast'             => 'fal-ai/veo3.1/fast',
-            'first-last-frame-to-video'      => 'fal-ai/veo3.1/first-last-frame-to-video',
-            'first-last-frame-to-video-fast' => 'fal-ai/veo3.1/fast/first-last-frame-to-video',
-            'image-to-video'                 => 'fal-ai/veo3.1/image-to-video',
-            'image-to-video-fast'            => 'fal-ai/veo3.1/fast/image-to-video',
-            'reference-to-video'             => 'fal-ai/veo3.1/reference-to-video',
-            default                          => 'fal-ai/veo3.1', // Default fallback & 'text-to-video' case
-        };
+        if (! str_starts_with($mode, 'fal-ai/')) {
+            $mode = "fal-ai/$mode";
+        }
+
+        return $mode;
     }
 }

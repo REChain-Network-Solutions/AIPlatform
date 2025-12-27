@@ -6,11 +6,11 @@
 </a>
 
 <button
-    class="lqd-navbar-expander fixed start-[--navbar-width] top-[calc(var(--header-height)/2)] z-[999] inline-flex size-6 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-button border-0 bg-foreground/10 p-0 text-heading-foreground backdrop-blur-sm transition-all hover:bg-heading-foreground hover:text-heading-background group-[.navbar-shrinked]/body:!start-[80px] group-[.navbar-shrinked]/body:rotate-180 max-lg:hidden"
+    class="lqd-navbar-expander fixed start-[--navbar-width] top-[calc(var(--header-height)/2)] z-[999] inline-flex size-6 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-button border-0 bg-foreground/10 p-0 text-heading-foreground backdrop-blur-sm transition-all hover:bg-heading-foreground hover:text-heading-background group-[.navbar-shrinked]/body:!start-[80px] group-[.navbar-shrinked]/body:rotate-180 max-lg:hidden rtl:translate-x-1/2"
     x-init
     @click.prevent="$store.navbarShrink.toggle()"
 >
-    <x-tabler-chevron-left class="w-4" />
+    <x-tabler-chevron-left class="w-4 rtl:rotate-180" />
 </button>
 
 <aside

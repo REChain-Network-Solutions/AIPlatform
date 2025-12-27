@@ -8,41 +8,6 @@
         onsubmit="return frontendSettingsSave();"
         enctype="multipart/form-data"
     >
-        <div
-            class="alert alert-info alert-deprecated"
-            role="alert"
-        >
-            <svg
-                class="inline align-middle"
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-            >
-                <path
-                    stroke="none"
-                    d="M0 0h24v24H0z"
-                    fill="none"
-                ></path>
-                <path
-                    d="M9.103 2h5.794a3 3 0 0 1 2.122 .879l4.101 4.1a3 3 0 0 1 .88 2.125v5.794a3 3 0 0 1 -.879 2.122l-4.1 4.101a3 3 0 0 1 -2.123 .88h-5.795a3 3 0 0 1 -2.122 -.88l-4.101 -4.1a3 3 0 0 1 -.88 -2.124v-5.794a3 3 0 0 1 .879 -2.122l4.1 -4.101a3 3 0 0 1 2.125 -.88z"
-                >
-                </path>
-                <path d="M12 9h.01"></path>
-                <path d="M11 12h1v4h1"></path>
-            </svg>
-            <span
-                class="cursor-pointer"
-                onclick="return showDeprecated();"
-            >
-                {{ __('Some of the inputs were deprecated. Show them and edit.') }}
-            </span>
-        </div>
         <h3 class="mb-[25px] text-[20px]">{{ __('General Settings') }}</h3>
         <div class="row mb-4">
             <div class="col-md-12">
@@ -189,11 +154,10 @@
                 </div>
             </div>
 
-            <div class="col-md-12 deprecated hidden">
+            <div class="col-md-12">
                 <div class="mb-3">
                     <label class="form-label">
                         {{ __('PreHeader Title') }}
-                        <span class="text-red-500/80">{{ __('Deprecated') }}</span>
                     </label>
                     <input
                         class="form-control"
@@ -205,11 +169,11 @@
                 </div>
             </div>
 
-            <div class="col-md-12 deprecated hidden">
+            <div class="col-md-12">
                 <div class="mb-3">
                     <label class="form-label">
                         {{ __('PreHeader Text') }}
-                        <span class="text-red-500/80">{{ __('Deprecated') }}</span>
+
                     </label>
                     <input
                         class="form-control"
@@ -221,11 +185,11 @@
                 </div>
             </div>
 
-            <div class="col-md-12 deprecated hidden">
+            <div class="col-md-12">
                 <div class="mb-3">
                     <label class="form-label">
                         {{ __('Sign In Text') }}
-                        <span class="text-red-500/80">{{ __('Deprecated') }}</span>
+
                     </label>
                     <input
                         class="form-control"
@@ -237,11 +201,11 @@
                 </div>
             </div>
 
-            <div class="col-md-12 deprecated hidden">
+            <div class="col-md-12">
                 <div class="mb-3">
                     <label class="form-label">
                         {{ __('Sign Up Text') }}
-                        <span class="text-red-500/80">{{ __('Deprecated') }}</span>
+
                     </label>
                     <input
                         class="form-control"
@@ -253,11 +217,11 @@
                 </div>
             </div>
 
-            <div class="col-md-12 deprecated hidden">
+            <div class="col-md-12">
                 <div class="mb-3">
                     <label class="form-label">
                         {{ __('Hero Subtitle') }}
-                        <span class="text-red-500/80">{{ __('Deprecated') }}</span>
+
                     </label>
                     <input
                         class="form-control"
@@ -269,11 +233,11 @@
                 </div>
             </div>
 
-            <div class="col-md-12 deprecated hidden">
+            <div class="col-md-12">
                 <div class="mb-3">
                     <label class="form-label">
                         {{ __('Hero Title') }}
-                        <span class="text-red-500/80">{{ __('Deprecated') }}</span>
+
                     </label>
                     <input
                         class="form-control"
@@ -304,11 +268,11 @@
 
             </div>
 
-            <div class="col-md-12 deprecated hidden">
+            <div class="col-md-12">
                 <div class="mb-3">
                     <label class="form-label">
                         {{ __('Hero Description') }}
-                        <span class="text-red-500/80">{{ __('Deprecated') }}</span>
+
                     </label>
                     <input
                         class="form-control"
@@ -319,11 +283,11 @@
                     >
                 </div>
             </div>
-            <div class="col-md-12 deprecated hidden">
+            <div class="col-md-12">
                 <div class="mb-3">
                     <label class="form-label">
                         {{ __('Hero Scroll Text') }}
-                        <span class="text-red-500/80">{{ __('Deprecated') }}</span>
+
                     </label>
                     <input
                         class="form-control"
@@ -461,11 +425,11 @@
 					@endif
 
 
-					<div class="col-md-12 deprecated hidden">
+					<div class="col-md-12">
                         <div class="mb-3">
                             <label class="form-label">
                                 {{ __('Footer Header') }}
-                                <span class="text-red-500/80">{{ __('Deprecated') }}</span>
+
                             </label>
                             <input
                                 class="form-control"
@@ -477,11 +441,11 @@
                         </div>
                     </div>
 
-                    <div class="col-md-12 deprecated hidden">
+                    <div class="col-md-12">
                         <div class="mb-3">
                             <label class="form-label">
                                 {{ __('Footer Header Small Text') }}
-                                <span class="text-red-500/80">{{ __('Deprecated') }}</span>
+
                             </label>
                             <input
                                 class="form-control"
@@ -492,11 +456,11 @@
                             >
                         </div>
                     </div>
-                    <div class="col-md-12 deprecated hidden">
+                    <div class="col-md-12">
                         <div class="mb-3">
                             <label class="form-label">
                                 {{ __('Footer Text') }}
-                                <span class="text-red-500/80">{{ __('Deprecated') }}</span>
+
                             </label>
                             <input
                                 class="form-control"
@@ -508,11 +472,10 @@
                         </div>
                     </div>
 
-                    <div class="col-md-12 deprecated hidden">
+                    <div class="col-md-12">
                         <div class="mb-3">
                             <label class="form-label">
                                 {{ __('Footer Button Text') }}
-                                <span class="text-red-500/80">{{ __('Deprecated') }}</span>
                             </label>
                             <input
                                 class="form-control"
@@ -1123,12 +1086,6 @@
 		}
 
 	</script>
-    <script>
-        function showDeprecated() {
-            $('.deprecated').toggleClass('hidden');
-            toastr.success(@json(__('Deprecated inputs are editable now.')))
-        }
-    </script>
     <script>
         $(document).ready(function() {
             'use strict';

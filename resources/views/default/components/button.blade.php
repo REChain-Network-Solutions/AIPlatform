@@ -62,12 +62,18 @@
     }
 @endphp
 
-<{{ $tag }}
-    {{ $attributes->withoutTwMergeClasses()->twMerge($base_class, $variant, $size, $hoverVariant, $attributes->get('class')) }}
-    @if ($tag === 'a') href="{{ $href }}"
+@if ($tag === 'a')
+    <a
+        href="{{ $href }}"
+        {{ $attributes->withoutTwMergeClasses()->twMerge($base_class, $variant, $size, $hoverVariant, $attributes->get('class')) }}
+    >
+        {{ $slot }}
+    </a>
 @else
-    type="{{ $type }}" @endif
-    {{ $attributes }}
->
-    {{ $slot }}
-    </{{ $tag }}>
+    <button
+        type="{{ $type }}"
+        {{ $attributes->withoutTwMergeClasses()->twMerge($base_class, $variant, $size, $hoverVariant, $attributes->get('class')) }}
+    >
+        {{ $slot }}
+    </button>
+@endif

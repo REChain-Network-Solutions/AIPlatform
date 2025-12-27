@@ -68,7 +68,7 @@
                 <x-forms.input
                     id="prompt"
                     @class([
-                        'm-0 w-full border-none bg-transparent py-3 pe-[100px] text-heading-foreground focus:outline-none focus:ring-0 max-md:max-h-[200px] max-md:pe-2 max-md:ps-0 max-md:text-[16px]',
+                        'm-0 w-full border-none bg-transparent py-3 pe-[140px] text-heading-foreground focus:outline-none focus:ring-0 max-md:max-h-[200px] max-md:pe-11 max-md:ps-0 max-md:text-[16px]',
                         'ps-16' => $category->slug !== 'ai_pdf',
                     ])
                     container-class="w-full"

@@ -39,7 +39,7 @@
             <span class="inline-flex items-center gap-3">
                 @if (request()->route()->getName() !== 'dashboard.user.index')
                     <label
-                        class="relative z-10 inline-grid size-[18px] cursor-pointer select-none place-items-center rounded bg-foreground/5 text-primary before:absolute before:left-1/2 before:top-1/2 before:size-8 before:-translate-x-1/2 before:-translate-y-1/2"
+                        class="document-checkbox-label relative z-10 inline-grid size-[18px] cursor-pointer select-none place-items-center rounded bg-foreground/5 text-primary before:absolute before:left-1/2 before:top-1/2 before:size-8 before:-translate-x-1/2 before:-translate-y-1/2"
                         for="doc-select-all-visible"
                     >
                         <input
@@ -94,7 +94,7 @@
 </div>
 
 <div
-    class="pointer-events-none fixed bottom-8 end-0 start-0 transition-all lg:start-[--navbar-width]"
+    class="pointer-events-none fixed bottom-8 end-0 start-0 z-10 transition-all lg:start-[--navbar-width]"
     x-init=""
     x-cloak
     x-show="$store.documentsSelection.selectedItems.length > 0"

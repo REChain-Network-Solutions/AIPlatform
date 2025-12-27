@@ -18,6 +18,7 @@ use JsonException;
 use OpenAI;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class AssistantService
 {
@@ -332,19 +333,63 @@ class AssistantService
     public function listModels(): array|Collection
     {
         try {
-            $response = $this->client->get(Helper::parseUrl(self::BASE_URL . self::MODELS), [
-                'headers' => $this->getHeaders(),
-            ])->getBody()->getContents();
+            $response = $this->client->get(
+                Helper::parseUrl(self::BASE_URL . self::MODELS),
+                ['headers' => $this->getHeaders()]
+            )->getBody()->getContents();
 
-            $models = json_decode($response, true, 512, JSON_THROW_ON_ERROR)['data'];
+            $data = json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+            $models = $data['data'] ?? [];
 
-            return collect($models)->filter(function ($model) {
-                return str_starts_with($model['id'], 'gpt');
-            })->reject(function ($model) {
-                return str_starts_with($model['id'], 'gpt-5-') || $model['id'] === 'gpt-5' || $model['id'] === 'gpt-image-1';
-            });
+            $unsupportedExact = [
+                'gpt-5',
+                'gpt-image-1',
+                'gpt-image-1.5',
+                'gpt-3.5-turbo-instruct',
+                'gpt-3.5-turbo-instruct-0914',
+            ];
 
-        } catch (Exception $e) {
+            $blockSubstrings = [
+                'realtime',    // gpt-realtime*, gpt-4o*-realtime-*
+                'audio',       // gpt-audio*, gpt-4o*-audio-*
+                'search',      // gpt-4o*-search-*
+                'transcribe',  // gpt-4o*-transcribe*
+                'diarize',     // gpt-4o-transcribe-diarize
+                'tts',         // gpt-4o*-tts*
+                'image-1',     // gpt-image-1-mini vb.
+                'instruct',    // gpt-3.5-turbo-instruct ailesi
+            ];
+
+            $collection = collect($models)->filter(function ($model) use ($unsupportedExact, $blockSubstrings) {
+                if (! isset($model['id']) || ! is_string($model['id'])) {
+                    return false;
+                }
+
+                $id = $model['id'];
+
+                if (! str_starts_with($id, 'gpt')) {
+                    return false;
+                }
+
+                if (in_array($id, $unsupportedExact, true)) {
+                    return false;
+                }
+
+                if (str_starts_with($id, 'gpt-5-')) {
+                    return false;
+                }
+
+                foreach ($blockSubstrings as $needle) {
+                    if (str_contains($id, $needle)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            })->values();
+
+            return $collection;
+        } catch (Throwable $e) {
             return [];
         }
     }

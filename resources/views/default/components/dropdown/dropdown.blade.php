@@ -4,11 +4,17 @@
 	before:absolute before:-inset-3 before:pointer-events-none
 	focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
 	group-[&.lqd-is-active]/dropdown:before:pointer-events-auto';
-    $dropdown_base_class = 'lqd-dropdown-dropdown absolute top-full opacity-0 invisible z-[1000] translate-y-1 pointer-events-none transition
+    $dropdown_base_class = 'lqd-dropdown-dropdown absolute opacity-0 invisible z-[1000] translate-y-1 pointer-events-none transition
 		before:absolute before:bottom-full before:-top-[--dropdown-offset] before:inset-x-0
 		[&.lqd-is-active]/dropdown:opacity-100 [&.lqd-is-active]/dropdown:visible [&.lqd-is-active]/dropdown:translate-y-0 [&.lqd-is-active]/dropdown:pointer-events-auto';
     $dropdown_content_base_class =
         'lqd-dropdown-dropdown-content w-44 border border-dropdown-border rounded-dropdown bg-dropdown-background text-dropdown-foreground shadow-lg shadow-black/5';
+
+    if ($teleport) {
+        $dropdown_base_class .= ' top-0';
+    } else {
+        $dropdown_base_class .= ' top-full';
+    }
 
     if ($anchor === 'start') {
         $dropdown_base_class .= ' start-0';

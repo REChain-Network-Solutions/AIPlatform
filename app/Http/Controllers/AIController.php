@@ -909,10 +909,10 @@ class AIController extends Controller
         }
 
         $engineCheck = match ($param['image_generator']) {
-            'flux-pro', 'ideogram', 'flux-pro-kontext', 'nano-banana', 'seedream/v4/text-to-image' => EngineEnum::FAL_AI->value,
+            'flux-pro', 'ideogram', 'flux-pro-kontext', 'nano-banana', 'nano-banana-pro', 'seedream/v4/text-to-image' => EngineEnum::FAL_AI->value,
             EntityEnum::MIDJOURNEY->value  => EngineEnum::PI_API->value,
-            EntityEnum::GPT_IMAGE_1->value => EngineEnum::OPEN_AI->value,
-            default                        => $param['image_generator'],
+            EntityEnum::GPT_IMAGE_1->value, EntityEnum::GPT_IMAGE_1_5->value => EngineEnum::OPEN_AI->value,
+            default                        => EngineEnum::OPEN_AI->value,
         };
 
         try {
@@ -922,6 +922,8 @@ class AIController extends Controller
                 $model = $this->getKontextModel();
             } elseif ($param['image_generator'] === 'nano-banana') {
                 $model = EntityEnum::NANO_BANANA;
+            } elseif ($param['image_generator'] === 'nano-banana-pro') {
+                $model = EntityEnum::NANO_BANANA_PRO;
             } elseif ($param['image_generator'] === EntityEnum::SEEDREAM_4->value) {
                 $model = EntityEnum::SEEDREAM_4;
             } else {
@@ -938,6 +940,10 @@ class AIController extends Controller
 
             if ($param['image_generator'] === 'gpt-image-1') {
                 $model = EntityEnum::GPT_IMAGE_1;
+            }
+
+            if ($param['image_generator'] === 'gpt-image-1.5' || $param['image_generator'] === 'gpt-image-1-5') {
+                $model = EntityEnum::GPT_IMAGE_1_5;
             }
 
             $driver = Entity::driver($model)->inputImageCount($number_of_images)->calculateCredit();
@@ -1528,14 +1534,15 @@ class AIController extends Controller
     private function processImageGeneration(?EngineEnum $engine, ?EntityEnum $model, array $param): array
     {
         return match (true) {
-            $engine === EngineEnum::FAL_AI && $model === EntityEnum::SEEDREAM_4   => $this->processFalAISeeDreamV4Image($model, $param),
-            $engine === EngineEnum::FAL_AI && $model === EntityEnum::NANO_BANANA  => $this->processFalAINanoBananaImage($model, $param),
-            $engine === EngineEnum::OPEN_AI && $model === EntityEnum::GPT_IMAGE_1 => $this->processOpenAIGptImage1($model, $param),
-            $engine === EngineEnum::OPEN_AI                                       => $this->processOpenAIImage($model, $param),
-            $engine === EngineEnum::STABLE_DIFFUSION                              => $this->processStableDiffusionImage($model, $param),
-            $engine === EngineEnum::FAL_AI                                        => $this->processFalAIImage($model, $param),
-            $engine === EngineEnum::PI_API                                        => $this->processPiAPIImage($model, $param),
-            default                                                               => throw new Exception(__('Invalid AI Engine')),
+            $engine === EngineEnum::FAL_AI && $model === EntityEnum::SEEDREAM_4 => $this->processFalAISeeDreamV4Image($model, $param),
+            $engine === EngineEnum::FAL_AI && $model === EntityEnum::NANO_BANANA,
+            $engine === EngineEnum::FAL_AI && $model === EntityEnum::NANO_BANANA_PRO                                        => $this->processFalAINanoBananaImage($model, $param),
+            $engine === EngineEnum::OPEN_AI && ($model === EntityEnum::GPT_IMAGE_1 || $model === EntityEnum::GPT_IMAGE_1_5) => $this->processOpenAIGptImage1($model, $param),
+            $engine === EngineEnum::OPEN_AI                                                                                 => $this->processOpenAIImage($model, $param),
+            $engine === EngineEnum::STABLE_DIFFUSION                                                                        => $this->processStableDiffusionImage($model, $param),
+            $engine === EngineEnum::FAL_AI                                                                                  => $this->processFalAIImage($model, $param),
+            $engine === EngineEnum::PI_API                                                                                  => $this->processPiAPIImage($model, $param),
+            default                                                                                                         => throw new Exception(__('Invalid AI Engine')),
         };
     }
 
@@ -1572,14 +1579,14 @@ class AIController extends Controller
         return '![Image](/' . $savePath . ')';
     }
 
-    public function processOpenAIGptImage1(?EntityEnum $model, array $param)
+    public function processOpenAIGptImage1(?EntityEnum $model, array $param): array
     {
         $images = request('image_src');
 
         $prompt = request('description') ?: request('stable_description');
 
         if (is_null($prompt)) {
-            throw new Exception(__('Invalid Image Prompt'));
+            throw new RuntimeException(__('Invalid Image Prompt'));
         }
 
         $imageContent = null;
@@ -1593,16 +1600,18 @@ class AIController extends Controller
 
             $imageContent = app(CreateImageEditService::class)
                 ->setImages($imagePaths)
+                ->setModel($model?->value)
                 ->setPrompt($prompt)
                 ->generateForAi();
         } else {
             $imageContent = app(\App\Services\Ai\OpenAI\Image\CreateImageService::class)
+                ->setModel($model?->value)
                 ->setPrompt($prompt)
                 ->generateForAi();
         }
 
         if ($imageContent !== null) {
-            $nameOfImage = Str::random(12) . '-DALL-E-' . Str::slug(explode(' ', mb_substr($prompt, 0, 15))[0]) . '.png';
+            $nameOfImage = Str::random(12) . '-GPT-IMG-' . Str::slug(explode(' ', mb_substr($prompt, 0, 15))[0]) . '.png';
 
             $contents = base64_decode($imageContent);
 

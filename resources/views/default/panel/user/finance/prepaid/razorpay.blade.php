@@ -24,7 +24,7 @@
         <div class="container-xl">
             <div class="row row-cards">
                 <div class="col-sm-8 col-lg-8">
-{{--                    @include('panel.user.finance.coupon.index')--}}
+                    @include('panel.user.finance.coupon.index')
                     <form
                         action="{{ route('dashboard.user.payment.prepaid.checkout', ['gateway' => 'razorpay']) }}"
                         method="post"
@@ -34,6 +34,11 @@
                             type="hidden"
                             name="planID"
                             value="{{ $plan->id }}"
+                        >
+                        <input
+                            type="hidden"
+                            name="coupon"
+                            value="{{ request('coupon') }}"
                         >
                         <input
                             type="hidden"

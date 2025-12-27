@@ -194,55 +194,56 @@
     <div class="py-10">
         {{-- Folders row --}}
         @if ($currfolder == null)
-            @if (isset(auth()->user()->folders) && count(auth()->user()->folders) > 0)
-                <div class="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+            <div class="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                @if (isset(auth()->user()->folders) && count(auth()->user()->folders) > 0)
                     <div class="grid grow grid-cols-3 !gap-5 max-md:grid-cols-1">
                         @foreach (auth()->user()->folders ?? [] as $folder)
                             <x-documents.folder :$folder />
                         @endforeach
                     </div>
+                @endif
 
-                    <x-dropdown.dropdown
-                        class:dropdown-dropdown="max-lg:end-auto max-lg:start-0"
-                        :teleport="false"
-                        offsetY="1rem"
-                        anchor="end"
+                <x-dropdown.dropdown
+                    class="shrink-0 md:ms-auto"
+                    class:dropdown-dropdown="max-lg:end-auto max-lg:start-0"
+                    :teleport="false"
+                    offsetY="1rem"
+                    anchor="end"
+                >
+                    <x-slot:trigger
+                        class="px-2 py-1"
+                        variant="link"
+                        size="xs"
                     >
-                        <x-slot:trigger
-                            class="px-2 py-1"
-                            variant="link"
-                            size="xs"
-                        >
-                            {{ __('Options') }}
-                            <x-tabler-dots class="size-5" />
-                        </x-slot:trigger>
-                        <x-slot:dropdown
-                            class="p-1"
-                        >
-                            <form
-                                class="w-full"
-                                x-data="{ selectedAction: 'delete' }"
-                                @submit.prevent="
+                        {{ __('Options') }}
+                        <x-tabler-dots class="size-5" />
+                    </x-slot:trigger>
+                    <x-slot:dropdown
+                        class="p-1"
+                    >
+                        <form
+                            class="w-full"
+                            x-data="{ selectedAction: 'delete' }"
+                            @submit.prevent="
 								if (selectedAction === 'delete') {
 									$store.documentsSelection.bulkDelete('all', {
 										confirmSelectedMessage: '{{ __('Are you sure you want to delete all documents?') }}',
 										deleteUrl: '{{ route('dashboard.user.openai.documents.bulkDelete') }}'
 									});
 								}"
+                        >
+                            <x-button
+                                class="w-full rounded-md hover:bg-rose-500 hover:text-white"
+                                variant="none"
+                                type="submit"
                             >
-                                <x-button
-                                    class="w-full rounded-md hover:bg-rose-500 hover:text-white"
-                                    variant="none"
-                                    type="submit"
-                                >
-                                    <x-tabler-trash class="size-4" />
-                                    {{ __('Delete All') }}
-                                </x-button>
-                            </form>
-                        </x-slot:dropdown>
-                    </x-dropdown.dropdown>
-                </div>
-            @endif
+                                <x-tabler-trash class="size-4" />
+                                {{ __('Delete All') }}
+                            </x-button>
+                        </form>
+                    </x-slot:dropdown>
+                </x-dropdown.dropdown>
+            </div>
         @else
             <div class="mb-6 flex items-center gap-3">
                 <x-button

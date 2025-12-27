@@ -27,5 +27,6 @@ class VerifyCsrfToken extends Middleware
         'dashboard/admin/config/more',
         'translations/lang/update-all',
         'social-media/*',
+        'chatbot/instagram/*',
     ];
 }

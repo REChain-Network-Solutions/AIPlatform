@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
-use MagicAI\Updater\Exceptions\InvalidURLException;
-use MagicAI\Updater\Exceptions\ZipException;
-use RuntimeException;
+use Throwable;
 
 trait HasVersionUpdate
 {
@@ -112,18 +110,33 @@ trait HasVersionUpdate
             Artisan::call('up');
 
             DB::commit();
-        } catch (InvalidURLException|ZipException|RuntimeException $e) {
+        } catch (Throwable $e) {
 
-            Log::error($e->getMessage());
+            Log::error('Update failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace'     => $e->getTraceAsString(),
+            ]);
 
-            DB::rollBack();
+            try {
+                DB::rollBack();
+            } catch (Throwable $dbException) {
+                Log::error('Database rollback failed: ' . $dbException->getMessage());
+            }
 
-            $this->rollbackBackup($backupFileName);
+            try {
+                $this->rollbackBackup($backupFileName);
+            } catch (Throwable $rollbackException) {
+                Log::error('Backup rollback failed: ' . $rollbackException->getMessage());
+            }
 
-            Artisan::call('up');
+            try {
+                Artisan::call('up');
+            } catch (Throwable $upException) {
+                Log::error('Failed to bring application up: ' . $upException->getMessage());
+            }
 
             throw ValidationException::withMessages([
-                'message' => $e->getMessage(),
+                'message' => 'Update failed: ' . $e->getMessage(),
             ]);
         }
 

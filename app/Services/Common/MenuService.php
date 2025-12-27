@@ -64,6 +64,8 @@ class MenuService
 
     public function cacheClearBlade(): void
     {
+        cache()->forget($this->cacheKey());
+
         $byUserId = config('app.menu_cache_by_user_id', false);
 
         if ($byUserId) {
@@ -102,7 +104,6 @@ class MenuService
 
     public function generate(bool $active = true): array
     {
-
         $data = cache()->rememberForever(self::MENU_KEY, function () use ($active) {
             $items = Menu::query()
                 ->with('children')
@@ -177,6 +178,10 @@ class MenuService
 
                 $data[$item['key']] = array_merge($staticData[$item['key']], $item->toArray());
 
+                if ($item->parent_id) {
+                    $data[$item['key']]['show_condition'] = (isset($data[$item['key']]['show_condition']) && $data[$item['key']]['show_condition']) && $item->is_active;
+                }
+
                 if ($item->parent_id == null && $else) {
                     $children = $item->getAttribute('children');
 
@@ -184,9 +189,11 @@ class MenuService
                 }
 
             } elseif ($else) {
+                $showCondition = true;
+
                 $data[$item['key']] = array_merge($item->toArray(), [
                     'active_condition' => false,
-                    'show_condition'   => true,
+                    'show_condition'   => $showCondition,
                     'extension'        => false,
                 ]);
                 if ($item->parent_id == null && $else) {
@@ -1021,7 +1028,7 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => null,
                 'active_condition' => [
-                    'dashboard.user.openai.chat.*',
+                    'dashboard.user.openai.chat.list', 'dashboard.user.openai.chat.chat',
                 ],
                 'show_condition'   => (bool) Helper::setting('feature_ai_chat', null, $setting),
             ],
@@ -1040,7 +1047,7 @@ class MenuService
                 'type'             => 'item',
                 'extension'        => null,
                 'active_condition' => [
-                    'dashboard.user.openai.chat.pro.*',
+                    'dashboard.user.openai.chat.pro.index',
                 ],
                 'show_condition' => MarketplaceHelper::isRegistered('ai-chat-pro') && in_array(setting('ai_chat_display_type', 'menu'), ['menu', 'both_fm']),
             ],
@@ -3568,6 +3575,23 @@ class MenuService
                     'dashboard.admin.social-media.setting.index',
                 ],
                 'show_condition' => Route::has('dashboard.admin.social-media.setting.index'),
+            ],
+            'chatbot_instagram_settings_extension' => [
+                'parent_key'       => 'settings',
+                'key'              => 'chatbot_instagram_settings_extension',
+                'route'            => 'dashboard.admin.chatbot-instagram.settings.index',
+                'label'            => 'Instagram Chatbot Settings',
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 78,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.admin.chatbot-instagram.settings.*',
+                ],
+                'show_condition' => Route::has('dashboard.admin.chatbot-instagram.settings.index'),
             ],
 
             'chat_settings_extension' => [

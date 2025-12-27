@@ -27,6 +27,7 @@
             class="border-none bg-transparent"
             size="lg"
             name="code"
+			value="{{ request('coupon') }}"
             placeholder="{{ __('Coupon Code') }}"
         />
         <x-button

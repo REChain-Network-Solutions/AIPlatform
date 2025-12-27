@@ -17,6 +17,7 @@ class Coupon extends Model
         'is_offer_fixed_price',
         'limit',
         'created_by',
+        'offer_id',
     ];
 
     public function createdBy()

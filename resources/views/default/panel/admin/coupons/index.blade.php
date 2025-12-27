@@ -27,7 +27,16 @@
                     value="{{ old('name') }}"
                     required
                 />
-
+				@if(\App\Models\Gateways::where('code', 'razorpay')->where('is_active', 1)->exists())
+                <x-forms.input
+                    class:container="w-full"
+                    label="{{ __('Razorpay Offer ID') }}"
+                    size="lg"
+                    name="offer_id"
+                    value="{{ old('offer_id') }}"
+                    required
+                />
+				@endif
                 <x-forms.input
                     class:container="w-full lg:w-[48%]"
                     type="number"
@@ -235,6 +244,17 @@
                                                 label="{{ __('Name') }}"
                                                 value="{{ $entry->name }}"
                                             />
+											@if(\App\Models\Gateways::where('code', 'razorpay')->where('is_active', 1)->exists())
+                                            <x-forms.input
+                                                class:container="w-full"
+                                                id="offer_id"
+                                                size="lg"
+                                                name="offer_id"
+                                                required
+                                                label="{{ __('Razorpay Offer ID') }}"
+                                                value="{{ $entry->offer_id }}"
+                                            />
+											@endif
 
                                             <x-forms.input
                                                 class:container="w-full md:w-[48%]"

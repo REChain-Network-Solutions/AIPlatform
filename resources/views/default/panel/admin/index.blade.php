@@ -26,6 +26,19 @@
 
 @section('content')
     <div class="py-10">
+		@if($vip_membership && data_get($vip_membership, 'stripe_status') === 'past_due' && data_get($vip_membership, 'updateLink'))
+			<x-alert variant="danger" class="mb-6" size="md">
+				<p>
+					{{ data_get($vip_membership, 'text') }}
+				</p>
+				<a
+					target="_blank"
+					class="text-blue-600"
+					href="{{ data_get($vip_membership, 'updateLink') }}"
+				>@lang('Update Payment Information')</a>
+			</x-alert>
+		@endif
+
         @if ($gatewayError == true)
             <x-alert class="mb-11">
                 <p>

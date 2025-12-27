@@ -142,6 +142,13 @@ enum EntityEnum: string
 
     case GPT_5_PRO = 'gpt-5-pro';
 
+    case GPT_5_1 = 'gpt-5.1';
+
+    case GPT_5_1_CHAT = 'gpt-5.1-chat-latest';
+
+    case GPT_5_2 = 'gpt-5.2';
+    case GPT_5_2_PRO = 'gpt-5.2-pro';
+
     case SORA_2 = 'sora-2';
 
     case SORA_2_PRO = 'sora-2-pro';
@@ -184,12 +191,14 @@ enum EntityEnum: string
 
     // Gemini
     case GEMINI_2_5_FLASH_PREVIEW_05_20 = 'gemini-2.5-flash-preview-05-20';
+    case GEMINI_3_PRO_PREVIEW = 'gemini-3-pro-preview';
     case GEMINI_2_5_PRO = 'gemini-2.5-pro';
     case GEMINI_2_0_FLASH = 'gemini-2.0-flash';
     case GEMINI_2_0_FLASH_LITE = 'gemini-2.0-flash-lite';
     case GEMINI_1_5_PRO = 'gemini-1.5-pro';
     case GEMINI_EMBEDDING_EXP = 'gemini-embedding-exp';
     case GEMINI_1_5_FLASH = 'gemini-1.5-flash';
+    case GEMINI_3_FLASH = 'gemini-3-flash-preview';
     case GEMINI_TEXT_EMBEDDING_004 = 'text-embedding-004';
 
     case CLIPDROP = 'clipdrop';
@@ -243,6 +252,7 @@ enum EntityEnum: string
     case DALL_E_3 = 'dall-e-3';
 
     case GPT_IMAGE_1 = 'gpt-image-1';
+    case GPT_IMAGE_1_5 = 'gpt-image-1.5';
 
     case TTS_1 = 'tts-1';
     case TTS_1_HD = 'tts-1-hd';
@@ -254,6 +264,8 @@ enum EntityEnum: string
     case GROK_3_MINI_FAST = 'grok-3-mini-fast';
     case GROK_4 = 'grok-4-0709';
     case GROK_4_FAST = 'grok-4-fast-reasoning';
+    case GROK_4_1_FAST_REASONING = 'grok-4-1-fast-reasoning';
+    case GROK_4_1_FAST_NON_REASONING = 'grok-4-1-fast-non-reasoning';
 
     case GAMMA_AI = 'gamma-ai';
     case VEED = 'veed';
@@ -272,6 +284,10 @@ enum EntityEnum: string
     case NANO_BANANA = 'nano-banana';
 
     case NANO_BANANA_EDIT = 'nano-banana/edit';
+
+    case NANO_BANANA_PRO = 'nano-banana-pro';
+
+    case NANO_BANANA_PRO_EDIT = 'nano-banana-pro/edit';
 
     case SEEDREAM_4 = 'seedream/v4/text-to-image';
 
@@ -383,6 +399,9 @@ enum EntityEnum: string
             self::GPT_5,
             self::GPT_5_CHAT,
             self::GPT_5_PRO,
+            self::GPT_5_1,
+            self::GPT_5_2,
+            self::GPT_5_2_PRO,
             self::GPT_5_MINI,
             self::GPT_5_NANO => true,
             default          => false,
@@ -439,6 +458,7 @@ enum EntityEnum: string
             self::DALL_E_2                    => __('DALL-E 2 The previous DALL·E model released in Nov 2022.'),
             self::DALL_E_3                    => __('DALL-E 3 The latest DALL·E model released in Nov 2023.'),
             self::GPT_IMAGE_1                 => __('GPT-IMAGE-1 The latest image model released in Nov 2025.'),
+            self::GPT_IMAGE_1_5               => __('GPT-IMAGE-1.5 The latest image model released in Dec 2025.'),
             self::TTS_1                       => __('TTS 1 The latest text to speech model, optimized for speed.'),
             self::TTS_1_HD                    => __('TTS 1 HD The latest text to speech model, optimized for quality.'),
             self::GPT_4_O                     => __('GPT-4o Most advanced works for Vision, multimodal flagship model that’s cheaper and faster than GPT-4 Turbo.  (Updated Knowleddge cutoff of Oct 2023, 128k)'),
@@ -460,6 +480,11 @@ enum EntityEnum: string
             self::GPT_5_NANO                  => __('GPT-5 Nano (May 31, 2024 knowledge cutoff, 128k max output tokens.)'),
             self::GPT_5_CHAT                  => __('GPT-5 Chat (Sep 30, 2024 knowledge cutoff, 128k max output tokens.)'),
             self::GPT_5_PRO                   => __('GPT-5 Pro (Sep 30, 2024 knowledge cutoff, 272k max output tokens.)'),
+            self::GPT_5_1                     => __('GPT-5.1 (Sep 30, 2024 knowledge cutoff, 128k max output tokens.)'),
+            self::GPT_5_1_CHAT                => __('GPT-5.1 Chat (Sep 30, 2024 knowledge cutoff, 16k max output tokens.)'),
+            self::GPT_5_2                     => __('GPT-5.2 (Aug 31, 2025 knowledge cutoff, 128k max output tokens.)'),
+            self::GPT_5_2_PRO                 => __('GPT-5.2 Pro (Aug 31, 2025 knowledge cutoff, 128k max output tokens.)'),
+
             self::SORA_2                      => __('Sora 2 (Flagship video generation with synced audio)'),
             self::SORA_2_PRO                  => __('Sora 2 Pro (Most advanced synced-audio video generation)'),
             // Anthropic
@@ -487,12 +512,14 @@ enum EntityEnum: string
             self::HEYGEN               => __('Heygen'),
             self::PEBBLELY             => __('Pebblely'),
             // Gemini
+            self::GEMINI_3_PRO_PREVIEW           => __('Gemini 3 Pro Preview The most intelligent model family to date, built on a foundation of state-of-the-art reasoning.'),
             self::GEMINI_2_5_FLASH_PREVIEW_05_20 => __('Gemini 2.5 Flash Preview 05-20 Adaptive thinking, cost efficiency'),
             self::GEMINI_2_5_PRO                 => __('Gemini 2.5 Pro Preview Enhanced thinking and reasoning, multimodal understanding, advanced coding, and more'),
             self::GEMINI_2_0_FLASH               => __('Gemini 2.0 Flash Next generation features, speed, thinking, realtime streaming, and multimodal generation'),
             self::GEMINI_2_0_FLASH_LITE          => __('Gemini 2.0 Flash-Lite Cost efficiency and low latency'),
             self::GEMINI_1_5_PRO                 => __('Gemini 1.5 Pro Complex reasoning tasks requiring more intelligence'),
             self::GEMINI_1_5_FLASH               => __('Gemini 1.5 Flash Fast and versatile performance across a diverse variety of tasks'),
+            self::GEMINI_3_FLASH                 => __('Gemini 3 Flash Advanced reasoning, coding, and multimodal capabilities with high speed'),
             self::GEMINI_EMBEDDING_EXP           => __('Gemini Embedding Measuring the relatedness of text strings'),
             self::GEMINI_TEXT_EMBEDDING_004      => __('Gemini Text Embeding 004'),
             // Deepseek
@@ -523,14 +550,16 @@ enum EntityEnum: string
             // Midjourney
             self::MIDJOURNEY => __('Midjourney'),
             // X AI
-            self::GROK_2_1212        => __('Grok 2 1212'),
-            self::GROK_2_VISION_1212 => __('Grok 2 Vision 1212'),
-            self::GROK_3             => __('Grok 3'),
-            self::GROK_3_MINI        => __('Grok 3 Mini'),
-            self::GROK_3_FAST        => __('Grok 3 Fast'),
-            self::GROK_3_MINI_FAST   => __('Grok 3 Mini Fast'),
-            self::GROK_4             => __('Grok 4'),
-            self::GROK_4_FAST        => __('Grok 4 Fast'),
+            self::GROK_2_1212                 => __('Grok 2 1212'),
+            self::GROK_2_VISION_1212          => __('Grok 2 Vision 1212'),
+            self::GROK_3                      => __('Grok 3'),
+            self::GROK_3_MINI                 => __('Grok 3 Mini'),
+            self::GROK_3_FAST                 => __('Grok 3 Fast'),
+            self::GROK_3_MINI_FAST            => __('Grok 3 Mini Fast'),
+            self::GROK_4                      => __('Grok 4'),
+            self::GROK_4_FAST                 => __('Grok 4 Fast'),
+            self::GROK_4_1_FAST_REASONING     => __('Grok 4.1 Fast Reasoning'),
+            self::GROK_4_1_FAST_NON_REASONING => __('Grok 4.1 Fast Non-Reasoning'),
             // Gamma AI
             self::GAMMA_AI => __('Gamma AI'),
             // FAL AI
@@ -550,6 +579,8 @@ enum EntityEnum: string
             self::FLUX_PRO                               => __('Flux Pro'),
             self::NANO_BANANA                            => __('Nano Banana'),
             self::NANO_BANANA_EDIT                       => __('Nano Banana Edit'),
+            self::NANO_BANANA_PRO                        => __('Nano Banana Pro'),
+            self::NANO_BANANA_PRO_EDIT                   => __('Nano Banana Pro Edit'),
             self::SEEDREAM_4                             => __('SeeDream v4 '),
             self::SEEDREAM_4_EDIT                        => __('SeeDream v4 Edit'),
             self::FLUX_PRO_KONTEXT_MAX_MULTI             => __('Flux Pro Kontext Max Multi'),
@@ -663,6 +694,7 @@ enum EntityEnum: string
             self::DALL_E_2,
             self::DALL_E_3,
             self::GPT_IMAGE_1,
+            self::GPT_IMAGE_1_5,
             self::TTS_1,
             self::TTS_1_HD,
             self::GPT_4_O,
@@ -683,6 +715,10 @@ enum EntityEnum: string
             self::GPT_5_NANO,
             self::GPT_5_CHAT,
             self::GPT_5_PRO,
+            self::GPT_5_1,
+            self::GPT_5_1_CHAT,
+            self::GPT_5_2,
+            self::GPT_5_2_PRO,
             self::SORA_2,
             self::SORA_2_PRO,
             self::GPT_O_4_MINI => EngineEnum::OPEN_AI,
@@ -720,12 +756,14 @@ enum EntityEnum: string
             // Pebblely
             self::PEBBLELY => EngineEnum::PEBBLELY,
             // Gemini
+            self::GEMINI_3_PRO_PREVIEW,
             self::GEMINI_2_5_FLASH_PREVIEW_05_20,
             self::GEMINI_2_5_PRO,
             self::GEMINI_2_0_FLASH,
             self::GEMINI_2_0_FLASH_LITE,
             self::GEMINI_1_5_PRO,
             self::GEMINI_1_5_FLASH,
+            self::GEMINI_3_FLASH,
             self::GEMINI_EMBEDDING_EXP,
             self::GEMINI_TEXT_EMBEDDING_004 => EngineEnum::GEMINI,
             // Unsplash
@@ -753,7 +791,8 @@ enum EntityEnum: string
             // PIAPI
             self::MIDJOURNEY => EngineEnum::PI_API,
             // X AI
-            self::GROK_2_1212, self::GROK_2_VISION_1212, self::GROK_3, self::GROK_3_MINI, self::GROK_3_FAST, self::GROK_3_MINI_FAST, self::GROK_4, self::GROK_4_FAST => EngineEnum::X_AI,
+            self::GROK_2_1212, self::GROK_2_VISION_1212, self::GROK_3, self::GROK_3_MINI, self::GROK_3_FAST,
+            self::GROK_3_MINI_FAST, self::GROK_4, self::GROK_4_FAST, self::GROK_4_1_FAST_REASONING, self::GROK_4_1_FAST_NON_REASONING => EngineEnum::X_AI,
             // Gamma AI
             self::GAMMA_AI => EngineEnum::GAMMA_AI,
             // FAL AI
@@ -761,7 +800,7 @@ enum EntityEnum: string
             self::VEO_3_1_TEXT_TO_VIDEO, self::VEO_3_1_TEXT_TO_VIDEO_FAST, self::VEO_3_1_FIRST_LAST_FRAME_TO_VIDEO, self::VEO_3_1_FIRST_LAST_FRAME_TO_VIDEO_FAST, self::VEO_3_1_IMAGE_TO_VIDEO, self::VEO_3_1_IMAGE_TO_VIDEO_FAST, self::VEO_3_1_REFERENCE_TO_VIDEO,
             self::VEO_3, self::VEO_3_FAST,
             self::KLING_2_5_TURBO_PRO_TTV, self::KLING_2_5_TURBO_PRO_ITV, self::KLING_2_5_TURBO_STANDARD_ITV,
-            self::KLING_VIDEO, self::VIDEO_UPSCALER, self::COGVIDEOX_5B, self::ANIMATEDIFF_V2V, self::FAST_ANIMATEDIFF_TURBO, self::FLUX_PRO, self::NANO_BANANA, self::NANO_BANANA_EDIT, self::SEEDREAM_4, self::SEEDREAM_4_EDIT, self::IMAGEN_4, self::FLUX_PRO_KONTEXT_MAX_MULTI, self::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE, self::FLUX_PRO_KONTEXT, self::FLUX_PRO_1_1, self::FLUX_REALISM, self::FLUX_SCHNELL, self::IDEOGRAM,
+            self::KLING_VIDEO, self::VIDEO_UPSCALER, self::COGVIDEOX_5B, self::ANIMATEDIFF_V2V, self::FAST_ANIMATEDIFF_TURBO, self::FLUX_PRO, self::NANO_BANANA, self::NANO_BANANA_EDIT, self::NANO_BANANA_PRO, self::NANO_BANANA_PRO_EDIT, self::SEEDREAM_4, self::SEEDREAM_4_EDIT, self::IMAGEN_4, self::FLUX_PRO_KONTEXT_MAX_MULTI, self::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE, self::FLUX_PRO_KONTEXT, self::FLUX_PRO_1_1, self::FLUX_REALISM, self::FLUX_SCHNELL, self::IDEOGRAM,
             self::KLING, self::KLING_2_1, self::KLING_IMAGE, self::LUMA_DREAM_MACHINE, self::HAIPER, self::MINIMAX => EngineEnum::FAL_AI,
             // Creatify
             self::AD_MARKETING_VIDEO => EngineEnum::CREATIFY,
@@ -840,6 +879,7 @@ enum EntityEnum: string
             self::DALL_E_2                    => OpenAI\DallE2Driver::class,
             self::DALL_E_3                    => OpenAI\DallE3Driver::class,
             self::GPT_IMAGE_1                 => OpenAI\GptImage1Driver::class,
+            self::GPT_IMAGE_1_5               => OpenAI\GptImage15Driver::class,
             self::TTS_1                       => OpenAI\TTS1Driver::class,
             self::TTS_1_HD                    => OpenAI\TTS1HDDriver::class,
             self::GPT_4_O                     => OpenAI\GPT4ODriver::class,
@@ -861,6 +901,10 @@ enum EntityEnum: string
             self::GPT_5_NANO                  => OpenAI\GPT5NanoDriver::class,
             self::GPT_5_CHAT                  => OpenAI\GPT5ChatDriver::class,
             self::GPT_5_PRO                   => OpenAI\GPT5ProDriver::class,
+            self::GPT_5_1                     => OpenAI\GPT51Driver::class,
+            self::GPT_5_1_CHAT                => OpenAI\GPT51ChatDriver::class,
+            self::GPT_5_2                     => OpenAI\GPT52Driver::class,
+            self::GPT_5_2_PRO                 => OpenAI\GPT52ProDriver::class,
             self::SORA_2                      => OpenAI\Sora2Driver::class,
             self::SORA_2_PRO                  => OpenAI\Sora2ProDriver::class,
 
@@ -882,12 +926,14 @@ enum EntityEnum: string
             self::VOYAGE_LARGE_2       => Anthropic\VoyageLarge2Driver::class,
             self::VOYAGE_CODE_2        => Anthropic\VoyageCode2Driver::class,
             // Gemini
+            self::GEMINI_3_PRO_PREVIEW           => Gemini\Gemini3ProPreviewDriver::class,
             self::GEMINI_2_5_FLASH_PREVIEW_05_20 => Gemini\Gemini25FlashPreview0417Driver::class,
             self::GEMINI_2_5_PRO                 => Gemini\Gemini25ProExp0325Driver::class,
             self::GEMINI_2_0_FLASH               => Gemini\Gemini20FlashDriver::class,
             self::GEMINI_2_0_FLASH_LITE          => Gemini\Gemini20FlashLiteDriver::class,
             self::GEMINI_1_5_PRO                 => Gemini\Gemini15ProDriver::class,
             self::GEMINI_1_5_FLASH               => Gemini\Gemini15FlashDriver::class,
+            self::GEMINI_3_FLASH                 => Gemini\Gemini3FlashDriver::class,
             self::GEMINI_EMBEDDING_EXP           => Gemini\GeminiEmbeddingExpDriver::class,
             self::GEMINI_TEXT_EMBEDDING_004      => Gemini\GeminiTextEmbeding004Driver::class,
             // Deepseek
@@ -917,14 +963,17 @@ enum EntityEnum: string
             // PiAPI
             self::MIDJOURNEY => MidjourneyDriver::class,
             // X AI
-            self::GROK_2_1212        => XAI\Grok21212Driver::class,
-            self::GROK_2_VISION_1212 => XAI\Grok2Vision1212Driver::class,
-            self::GROK_3             => XAI\Grok3Driver::class,
-            self::GROK_3_MINI        => XAI\Grok3MiniDriver::class,
-            self::GROK_3_FAST        => XAI\Grok3FastDriver::class,
-            self::GROK_3_MINI_FAST   => XAI\Grok3MiniFastDriver::class,
-            self::GROK_4             => XAI\Grok4Driver::class,
-            self::GROK_4_FAST        => XAI\Grok4FastDriver::class,
+            self::GROK_2_1212                 => XAI\Grok21212Driver::class,
+            self::GROK_2_VISION_1212          => XAI\Grok2Vision1212Driver::class,
+            self::GROK_3                      => XAI\Grok3Driver::class,
+            self::GROK_3_MINI                 => XAI\Grok3MiniDriver::class,
+            self::GROK_3_FAST                 => XAI\Grok3FastDriver::class,
+            self::GROK_3_MINI_FAST            => XAI\Grok3MiniFastDriver::class,
+            self::GROK_4                      => XAI\Grok4Driver::class,
+            self::GROK_4_FAST                 => XAI\Grok4FastDriver::class,
+            self::GROK_4_1_FAST_REASONING     => XAI\Grok41FastReasoningDriver::class,
+            self::GROK_4_1_FAST_NON_REASONING => XAI\Grok41FastNonReasoningDriver::class,
+
             // Gamma AI
             self::GAMMA_AI => GammaAIDriver::class,
             // FAL AI
@@ -943,6 +992,8 @@ enum EntityEnum: string
             self::FLUX_PRO                               => FalAI\FluxProDriver::class,
             self::NANO_BANANA                            => FalAI\NanoBananaDriver::class,
             self::NANO_BANANA_EDIT                       => FalAI\NanoBananaEditDriver::class,
+            self::NANO_BANANA_PRO                        => FalAI\NanoBananaProDriver::class,
+            self::NANO_BANANA_PRO_EDIT                   => FalAI\NanoBananaProEditDriver::class,
             self::SEEDREAM_4                             => FalAI\SeeDream4Driver::class,
             self::SEEDREAM_4_EDIT                        => FalAI\SeeDream4EditDriver::class,
             self::IMAGEN_4                               => FalAI\Imagen4Driver::class,
@@ -1038,6 +1089,7 @@ enum EntityEnum: string
             self::DALL_E_2               => 0.04,
             self::DALL_E_3               => 0.08,
             self::GPT_IMAGE_1            => 0.042,
+            self::GPT_IMAGE_1_5          => 0.20,
             self::TTS_1, self::GPT_4_O => 0.00001995,
             self::GPT_4_O_MINI                => 0.000000798,
             self::GPT_4_O_SEARCH_PREVIEW      => 0.0000133,
@@ -1057,6 +1109,10 @@ enum EntityEnum: string
             self::GPT_5_NANO                  => 0.000000530,
             self::GPT_5_CHAT                  => 0.00001000,
             self::GPT_5_PRO                   => 0.00016,
+            self::GPT_5_1                     => 0.0000133,
+            self::GPT_5_1_CHAT                => 0.0000133,
+            self::GPT_5_2                     => 0.00175,
+            self::GPT_5_2_PRO                 => 0.021,
             self::SORA_2                      => 0.10,
             self::SORA_2_PRO                  => 0.50,
 
@@ -1085,6 +1141,7 @@ enum EntityEnum: string
             self::PEBBLELY        => 0.019,
 
             // Gemini
+            self::GEMINI_3_PRO_PREVIEW           => 0.0001197,
             self::GEMINI_2_5_FLASH_PREVIEW_05_20 => 0.00000333,
             self::GEMINI_2_5_PRO                 => 0.00001333,
             self::GEMINI_2_0_FLASH               => 0.00000053,
@@ -1092,6 +1149,7 @@ enum EntityEnum: string
             self::GEMINI_1_5_PRO                 => 0.00001333,
             self::GEMINI_EMBEDDING_EXP           => 0.00001,
             self::GEMINI_1_5_FLASH               => 0.00000051,
+            self::GEMINI_3_FLASH                 => 0.00000266,
             self::GEMINI_TEXT_EMBEDDING_004      => 0.00001,
 
             // Unsplash
@@ -1124,18 +1182,22 @@ enum EntityEnum: string
 
             // X AI
             self::GROK_2_1212, self::GROK_2_VISION_1212 => 0.00001333,
-            self::GROK_3           => 0.00002,
-            self::GROK_3_MINI      => 0.00000067,
-            self::GROK_3_FAST      => 0.00003333,
-            self::GROK_3_MINI_FAST => 0.000001,
-            self::GROK_4           => 0.000011000,
-            self::GROK_4_FAST      => 0.000000650,
+            self::GROK_3                      => 0.00002,
+            self::GROK_3_MINI                 => 0.00000067,
+            self::GROK_3_FAST                 => 0.00003333,
+            self::GROK_3_MINI_FAST            => 0.000001,
+            self::GROK_4                      => 0.000011000,
+            self::GROK_4_FAST                 => 0.000000650,
+            self::GROK_4_1_FAST_REASONING     => 0.00001995,
+            self::GROK_4_1_FAST_NON_REASONING => 0.00001995,
 
             // FAL AI
-            self::NANO_BANANA => 0.039,
-            self::SEEDREAM_4  => 0.03,
+            self::NANO_BANANA     => 0.039,
+            self::NANO_BANANA_PRO => 0.039,
+            self::SEEDREAM_4      => 0.03,
             self::FLUX_PRO_1_1, self::FLUX_REALISM, self::IMAGEN_4 => 0.04,
             self::NANO_BANANA_EDIT, self::SEEDREAM_4_EDIT => 0.4,
+            self::NANO_BANANA_PRO_EDIT                   => 0.4,
             self::GAMMA_AI                               => 0.01,
             self::VEO_2                                  => 2.5,
             self::VEED                                   => 0.35,
@@ -1389,6 +1451,10 @@ enum EntityEnum: string
                 self::GPT_5_NANO,
                 self::GPT_5_CHAT,
                 self::GPT_5_PRO,
+                self::GPT_5_1,
+                self::GPT_5_1_CHAT,
+                self::GPT_5_2,
+                self::GPT_5_2_PRO,
                 self::DEEPSEEK_CHAT,
                 self::DEEPSEEK_REASONER,
             ]

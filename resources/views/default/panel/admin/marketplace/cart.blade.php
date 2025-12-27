@@ -83,6 +83,13 @@
                                 </x-button>
                             @endif
                         </div>
+
+						<div
+							class="mt-2 text-sm text-blue-600"
+							id="coupon_message"
+						>
+							{{ trans('Each coupon can only be redeemed once.') }}
+						</div>
                         @error('coupon_code')
                             <div
                                 class="mt-2 text-sm text-red-500"

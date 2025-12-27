@@ -138,6 +138,8 @@ class MarketPlaceController extends Controller
             $this->extensionRepository->supportExtensions()
         );
 
+        $items = collect($items)->where('type', '!=', 'bundle')->toArray();
+
         return view('panel.admin.marketplace.licensed', compact('items', 'cart'));
     }
 

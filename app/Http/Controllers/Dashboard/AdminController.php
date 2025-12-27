@@ -83,18 +83,14 @@ class AdminController extends Controller
     {
         $this->service->setCache();
 
-        if (Cache::has('vip_membership')) {
-            $vip_membership = Helper::isUserVIP();
-        } else {
-            $vip_membership = Cache::get('vip_membership') ?: false;
-        }
+        $vip_membership = Helper::isUserVIP();
 
         return view('panel.admin.index', [
             'activity'              => $this->service->activity(),
             'latestOrders'   		     => $this->service->latestOrders(),
             'recentTransactions'    => $this->service->getRecentTransactions(),
             'gatewayError'          => false,
-            'vip_membership'        => (bool) $vip_membership,
+            'vip_membership'        => $vip_membership,
         ]);
     }
 
@@ -1367,12 +1363,14 @@ class AdminController extends Controller
             'limit'     => 'required|integer|min:-1',
             'code'      => 'required|in:auto,manual',
             'codeInput' => 'required_if:code,manual|max:20',
+            'offer_id'  => 'nullable',
         ]);
 
         $newCoupon = new Coupon;
         $newCoupon->name = $request->input('name');
         $newCoupon->discount = $request->input('discount');
         $newCoupon->limit = $request->input('limit');
+        $newCoupon->offer_id = $request->input('offer_id');
         $newCoupon->created_by = auth()->user()->id;
 
         // Check if the "code" field is set to "manual" and set the "codeInput" attribute accordingly.
@@ -1397,12 +1395,14 @@ class AdminController extends Controller
             'name'     => 'required|string|max:255',
             'discount' => 'required|numeric|min:0|max:100',
             'limit'    => 'required|integer|min:-1',
+            'offer_id' => null,
         ]);
 
         $newCoupon = Coupon::where('is_offer', false)->find($id);
         $newCoupon->name = $request->input('name');
         $newCoupon->discount = $request->input('discount');
         $newCoupon->limit = $request->input('limit');
+        $newCoupon->offer_id = $request->input('offer_id');
 
         $newCoupon->save();
 

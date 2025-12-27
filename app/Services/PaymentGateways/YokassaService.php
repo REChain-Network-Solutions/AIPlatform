@@ -327,20 +327,44 @@ class YokassaService
 
             $client = new Client;
             $client->setAuth($shop_id, $key);
+
+            $amountStr = number_format((float) $newDiscountedPrice, 2, '.', ''); // "199.90"
+            $currency = $currency ?: 'RUB';
+
+            $items = [
+                [
+                    'description'     => 'Order No. 1',
+                    'quantity'        => '1.0',
+                    'amount'          => ['value' => $amountStr, 'currency' => $currency],
+                    'vat_code'        => 1,
+                    'payment_subject' => 'service',
+                    'payment_mode'    => 'full_payment',
+                ],
+            ];
+
+            $receipt = [
+                'customer' => [
+                    'email' => Auth::user()->email,
+                ],
+                'items' => $items,
+            ];
+
             $payment = $client->createPayment(
                 [
                     'amount' => [
-                        'value'    => $newDiscountedPrice,
+                        'value'    => $amountStr,
                         'currency' => $currency,
                     ],
                     'confirmation' => [
-                        'type' => 'embedded',
+                        'type' => 'embedded', // confirmation_token döner
                     ],
                     'capture'     => true,
                     'description' => 'Order No. 1',
+                    'receipt'     => $receipt, // <-- HATAYI ÇÖZEN KISIM
                 ],
-                uniqid('', true)
+                uniqid('', true) // idempotence key
             );
+
             $confirmation_token = $payment->confirmation->confirmation_token;
             $payment_id = $payment->id;
 

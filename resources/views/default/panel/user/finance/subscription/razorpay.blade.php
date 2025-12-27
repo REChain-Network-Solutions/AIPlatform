@@ -24,7 +24,7 @@
         <div class="container-xl">
             <div class="row row-cards">
                 <div class="col-sm-8 col-lg-8">
-                    {{--                    @include('panel.user.finance.coupon.index') --}}
+                    @include('panel.user.finance.coupon.index')
                     <form
                         action="{{ route('dashboard.user.payment.subscription.checkout', ['gateway' => 'razorpay']) }}"
                         method="post"
@@ -45,6 +45,11 @@
                             name="gateway"
                             value="razorpay"
                         >
+						<input
+							type="hidden"
+							name="coupon"
+							value="{{ request('coupon') }}"
+						>
                         <div class="row">
                             <div class="col-md-12 col-xl-12 mt-3">
                                 <x-button

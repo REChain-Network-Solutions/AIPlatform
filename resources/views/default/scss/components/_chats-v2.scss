@@ -380,6 +380,28 @@
 		--button-border: var(--border);
 	}
 
+	html[dir=rtl] & {
+
+		.chats-sidebar-wrap {
+			@apply lg:translate-x-full;
+	
+			&.active {
+				@apply lg:translate-x-0;
+			}
+		}
+
+		.lqd-dropdown-dropdown {
+			@apply lg:translate-x-full;
+		}
+
+		&.lqd-is-active {
+
+			.lqd-dropdown-dropdown {
+				@apply lg:translate-x-0;
+			}
+		}
+	}
+
 	@media(min-width: 1300px) {
 
 		.multi-model-response-wrap {

@@ -199,7 +199,7 @@ class CommonController extends Controller
             }
 
             // Decide type
-            $fileType = str_starts_with($mimeType, 'image/') ? 'image' : 'other';
+            $fileType = str_starts_with($mimeType, 'image/') ? 'images' : 'other';
 
             // Directory per user
             $relativePath = "uploads/media/{$fileType}/u-" . auth()->id();
@@ -247,7 +247,7 @@ class CommonController extends Controller
                     continue;
                 }
 
-                if ($fileType === 'image') {
+                if ($fileType === 'images') {
                     $images[] = $publicPath;
                 } else {
                     $others[] = $publicPath;

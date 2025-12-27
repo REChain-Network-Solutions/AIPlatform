@@ -17,7 +17,7 @@
         </div>
         <div
             class="chat-content-container group relative max-w-[calc(100%-64px)] rounded-[2em] bg-secondary text-secondary-foreground dark:bg-zinc-700 dark:text-primary-foreground">
-            <div class="chat-content px-5 py-3.5">
+            <div class="chat-content px-5 py-3.5 max-md:break-all">
                 {{ $message->input }}
             </div>
             <div

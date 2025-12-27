@@ -154,7 +154,7 @@
         @if ($openai->type == 'image')
             formData.append('image_generator', imageGenerator);
 
-            if (imageGenerator === 'openai' || imageGenerator === 'gpt-image-1') {
+            if (imageGenerator === 'openai' || imageGenerator === 'gpt-image-1' || imageGenerator === 'gpt-image-1-5') {
 
 
                 formData.append('image_style', $("#image_style").val());
@@ -174,6 +174,10 @@
                 if (imageGenerator === 'gpt-image-1') {
                     formData.append("stable_description", $("#gpt_1_description").val());
                 }
+
+				if (imageGenerator === 'gpt-image-1-5') {
+					formData.append("stable_description", $("#gpt_1_5_description").val());
+				}
 
             } else {
                 formData.append('type', stablediffusionType);

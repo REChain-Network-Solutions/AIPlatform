@@ -183,7 +183,7 @@
             </span>
             <div
                 class="chat-content-container group relative max-w-[calc(100%-64px)] rounded-[2em] bg-secondary text-secondary-foreground dark:bg-zinc-700 dark:text-primary-foreground">
-                <div class="chat-content px-5 py-3.5"></div>
+                <div class="chat-content px-5 py-3.5 max-md:break-all"></div>
                 <div
                     class="lqd-chat-actions-wrap pointer-events-auto invisible absolute -start-5 bottom-0 flex flex-col gap-2 leading-5 opacity-0 transition-all group-hover:!visible group-hover:!opacity-100">
                     <div class="lqd-clipboard-copy-wrap group/copy-wrap flex flex-col gap-2 transition-all">

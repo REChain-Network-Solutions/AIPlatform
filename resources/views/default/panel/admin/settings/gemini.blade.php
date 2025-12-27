@@ -107,7 +107,7 @@
 						$geminiDrivers = \App\Domains\Entity\EntityStats::word()
 							->filterByEngine(\App\Domains\Engine\Enums\EngineEnum::GEMINI)
 							->list();
-						$current_gemini_model = EntityEnum::fromSlug(setting('gemini_default_model', EntityEnum::GEMINI_1_5_FLASH->slug()))->slug();
+						$current_gemini_model = EntityEnum::fromSlug(setting('gemini_default_model', EntityEnum::GEMINI_3_FLASH->slug()))->slug();
 					@endphp
 					<x-model-select-list-with-change-alert :listLabel="'Default Gemini Word Model'" :listId="'gemini_default_model'" currentModel="{{ $current_gemini_model }}" :drivers="$geminiDrivers" />
                 </div>

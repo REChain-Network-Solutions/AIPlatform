@@ -1,5 +1,5 @@
-@if ($vip_membership === false && $app_is_not_demo)
-	<x-card
+@if ((! $vip_membership) && $app_is_not_demo)
+    <x-card
         class="relative flex items-center border-4"
         class:body="static rounded-[inherit] only:grow-0 lg:p-10 w-full"
         id="{{ 'admin-card-' . ($widget?->name?->value ?? 'premium-advantages') }}"
@@ -9,7 +9,7 @@
             effect="3"
         />
 
-        <div class="mb-6 absolute right-8 inline-grid size-14 place-content-center rounded-xl bg-gradient-to-br from-gradient-from via-gradient-via to-gradient-to text-white">
+        <div class="absolute end-8 mb-6 inline-grid size-14 place-content-center rounded-xl bg-gradient-to-br from-gradient-from via-gradient-via to-gradient-to text-white">
             <x-tabler-diamond
                 class="size-10"
                 stroke-width="1.5"
@@ -53,7 +53,7 @@
                             </linearGradient>
                         </defs>
                     </svg>
-                    {!! $feature !!} <x-info-tooltip :text="$tooltip"/>
+                    {!! $feature !!} <x-info-tooltip :text="$tooltip" />
                 </li>
             @endforeach
         </ul>

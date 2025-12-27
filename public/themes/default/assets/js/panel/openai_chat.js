@@ -433,7 +433,7 @@ function formatString(string, options = {}) {
 
 							words.forEach(word => {
 								if (word.trim() !== '') {
-									wrappedContent += `<span class="animated-el ${word === '[DONE]' ? 'done-signal' : ''}">${word}</span>`;
+									wrappedContent += `<span class="animated-el ${word.includes('[DONE]') ? 'done-signal' : ''}">${word}</span>`;
 								} else {
 									wrappedContent += word; // Preserve whitespace
 								}
@@ -986,7 +986,7 @@ function sendRequest(type, images, responseObj, sharedMessageUUID = null) {
 			if (txt == null) return;
 
 			const responseIndex = aiResponses.findIndex(response => response.responseId === responseObj.responseId);
-			const isDoneSignal = txt === '[DONE]';
+			const isDoneSignal = txt.includes('[DONE]');
 
 			if (isDoneSignal) {
 				messages.push({

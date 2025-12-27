@@ -177,6 +177,7 @@
 							label="{{ $field['label'] }}"
 							type="{{ $field['type'] }}"
 							size="lg"
+							required
 						/>
 					@endif
 				@endforeach

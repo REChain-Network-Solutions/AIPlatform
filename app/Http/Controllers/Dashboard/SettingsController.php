@@ -831,6 +831,7 @@ class SettingsController extends Controller
                 'sora_active'                    => $request->sora_active,
                 'openai_file_search'             => $request->openai_file_search,
                 'enabled_gpt_image_1'            => $request->enabled_gpt_image_1,
+                'enabled_gpt_image_1_5'          => $request->enabled_gpt_image_1_5,
                 'openai_reasoning_models_effort' => $request->openai_reasoning_models_effort,
             ])->save();
 

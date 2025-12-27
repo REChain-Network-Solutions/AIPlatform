@@ -767,63 +767,40 @@ document.addEventListener( 'alpine:init', () => {
 			[':style']() {
 				if ( !this.teleport ) return;
 
+				const { top, bottom, left, right } = this.parentRect;
+				const { width: dropWidth, height: dropHeight } = this.dropdownRect;
+				const { innerWidth: vw, innerHeight: vh, scrollY } = window;
 				const isRTL = document.dir === 'rtl' || document.documentElement.dir === 'rtl';
-				let yAnchor = 'top';
-				let yAnchorOpposite = 'bottom';
-				let yValue = this.parentRect.top + this.parentRect.height + window.scrollY;
-				let xAnchor = isRTL ? 'inset-inline-end' : 'inset-inline-start';
-				let xAnchorOpposite = isRTL ? 'inset-inline-start' : 'inset-inline-end';
-				let xValue = isRTL ? window.innerWidth - this.parentRect.right : this.parentRect.left;
 
-				// Check if dropdown would overflow bottom of viewport
-				const wouldOverflowBottom = this.parentRect.bottom + this.dropdownRect.height > window.innerHeight;
-				const hasSpaceAbove = this.parentRect.top - this.dropdownRect.height > 0;
+				// Vertical: default below parent, adjust if overflows
+				let blockValue = bottom + scrollY;
 
-				if (wouldOverflowBottom && hasSpaceAbove) {
-					yAnchor = 'bottom';
-					yAnchorOpposite = 'top';
-					yValue = window.innerHeight - this.parentRect.top + window.scrollY;
+				// If overflows bottom, try shifting up
+				if (bottom + dropHeight > vh) {
+					const shifted = vh - dropHeight + scrollY;
+					blockValue = Math.max(scrollY, shifted);
 				}
 
-				// Handle horizontal positioning with RTL support
-				if (this.preferredAnchor === 'end') {
-					if (isRTL) {
-						xAnchor = 'inset-inline-start';
-						xAnchorOpposite = 'inset-inline-end';
-						xValue = this.parentRect.left;
-					} else {
-						xAnchor = 'inset-inline-end';
-						xAnchorOpposite = 'inset-inline-start';
-						xValue = window.innerWidth - this.parentRect.right;
-					}
-				} else {
-					// Default to start positioning (already set above based on RTL)
-				}
+				// Horizontal positioning with preferredAnchor and overflow handling
+				const anchorAtEnd = this.preferredAnchor === 'end';
+				const inlineStart = isRTL ? vw - right : left;
+				const inlineEnd = isRTL ? vw - left : right;
 
-				// Check if dropdown would overflow viewport edges
-				const wouldOverflowRight = this.parentRect.left + this.dropdownRect.width > window.innerWidth;
-				const wouldOverflowLeft = this.parentRect.right - this.dropdownRect.width < 0;
+				const overflowsEnd = (anchorAtEnd ? inlineEnd : inlineStart) + dropWidth > vw;
+				const overflowsStart = (anchorAtEnd ? inlineEnd : inlineStart) - dropWidth < 0;
+				const shouldFlip = anchorAtEnd ? overflowsStart : overflowsEnd;
 
-				if (isRTL) {
-					if (wouldOverflowLeft && this.preferredAnchor !== 'end') {
-						xAnchor = 'inset-inline-start';
-						xAnchorOpposite = 'inset-inline-end';
-						xValue = this.parentRect.left;
-					}
-				} else {
-					if (wouldOverflowRight && this.preferredAnchor !== 'end') {
-						xAnchor = 'inset-inline-end';
-						xAnchorOpposite = 'inset-inline-start';
-						xValue = window.innerWidth - this.parentRect.right;
-					}
-				}
+				const inlineAnchor = shouldFlip !== anchorAtEnd ? 'inset-inline-end' : 'inset-inline-start';
+				const inlineValue = shouldFlip !== anchorAtEnd
+					? Math.max(0, Math.min(vw - dropWidth, vw - inlineEnd))
+					: Math.max(0, Math.min(vw - dropWidth, inlineStart));
 
-				return ({
-					[xAnchorOpposite]: 'auto',
-					[xAnchor]: `${xValue}px`,
-					[yAnchorOpposite]: 'auto',
-					[yAnchor]: `calc(${yValue}px + ${this.offsetY})`,
-				});
+				return {
+					'inset-inline-start': inlineAnchor === 'inset-inline-start' ? `${inlineValue}px` : 'auto',
+					'inset-inline-end': inlineAnchor === 'inset-inline-end' ? `${inlineValue}px` : 'auto',
+					top: `calc(${blockValue}px + ${this.offsetY})`,
+					bottom: 'auto',
+				};
 			}
 		}
 	} ) );

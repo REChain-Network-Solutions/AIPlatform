@@ -94,7 +94,7 @@ class ChatbotController extends Controller
 
                 break;
             case EngineEnum::GEMINI->value:
-                $default_model = EntityEnum::fromSlug(setting('gemini_default_model', EntityEnum::GEMINI_1_5_FLASH->value));
+                $default_model = EntityEnum::fromSlug(setting('gemini_default_model', EntityEnum::GEMINI_3_FLASH->value));
 
                 break;
             default:

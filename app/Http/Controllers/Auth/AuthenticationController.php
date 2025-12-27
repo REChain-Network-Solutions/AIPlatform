@@ -214,7 +214,7 @@ class AuthenticationController extends Controller
         // Dynamic validation for optional fields
         foreach ($optionalFields as $field => $msg) {
             if (setting("registration_fields_{$field}", 0)) {
-                $isRequired = setting("registration_fields_{$field}_required", 0);
+                $isRequired = true;
 
                 // Base validation rules for optional fields
                 $fieldRules = ['string', 'max:255'];

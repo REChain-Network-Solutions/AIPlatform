@@ -58,6 +58,10 @@
 			}
 		}
 
+		.document-checkbox-label {
+			display: none;
+		}
+
 		&:hover {
 			background-color: transparent;
 			transform: translateY(-3px);

@@ -88,12 +88,12 @@ class Helper
         return $extensionsCollection->isNotEmpty();
     }
 
-    public static function isUserVIP(): bool
+    public static function isUserVIP()
     {
-        return (bool) Cache::remember('vip_membership', 300, function () {
+        return Cache::remember('vip_membership', 300, function () {
             $marketSubscription = app(ExtensionRepositoryInterface::class)->subscription()->json();
 
-            return data_get($marketSubscription, 'data.stripe_status') === 'active';
+            return data_get($marketSubscription, 'data');
         });
     }
 
@@ -113,7 +113,7 @@ class Helper
             return false;
         }
 
-        return self::isUserVIP();
+        return (bool) self::isUserVIP();
     }
 
     public static function marketplacePaymentMessage(string $status): string

@@ -15,7 +15,7 @@ class GeminiService
 
     public const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/';
 
-    public function streamGenerateContent($entity = EntityEnum::GEMINI_1_5_FLASH->value): PromiseInterface|Response
+    public function streamGenerateContent($entity = EntityEnum::GEMINI_3_FLASH->value): PromiseInterface|Response
     {
         ApiHelper::setGeminiKey();
 
@@ -29,7 +29,7 @@ class GeminiService
         return $client->withOptions(['stream' => true])->post($url, $body);
     }
 
-    public function generateContent($entity = EntityEnum::GEMINI_1_5_FLASH->value): PromiseInterface|Response
+    public function generateContent($entity = EntityEnum::GEMINI_3_FLASH->value): PromiseInterface|Response
     {
 
         ApiHelper::setGeminiKey();
