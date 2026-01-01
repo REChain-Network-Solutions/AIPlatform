@@ -8,10 +8,10 @@
 		"watch": "gulp watch"
 	},
 	"devDependencies": {
-		"@angular-eslint/template-parser": "^17.2.1",
+		"@angular-eslint/template-parser": "^21.1.0",
 		"@tailwindcss/forms": "^0.5.11",
 		"@tailwindcss/typography": "^0.5.12",
-		"autoprefixer": "^10.4.14",
+		"autoprefixer": "^10.4.23",
 		"axios": "^1.8.4",
 		"blade-formatter": "^1.42.2",
 		"del": "^7.0.0",
@@ -45,7 +45,7 @@
 		"@tiptap/core": "^3.14.0",
 		"@tiptap/extension-bubble-menu": "^3.2.0",
 		"@tiptap/extension-code": "^3.2.0",
-		"@tiptap/extension-code-block-lowlight": "^3.2.0",
+		"@tiptap/extension-code-block-lowlight": "^3.14.0",
 		"@tiptap/extension-floating-menu": "^3.14.0",
 		"@tiptap/extension-image": "^3.2.0",
 		"@tiptap/pm": "^3.2.0",
