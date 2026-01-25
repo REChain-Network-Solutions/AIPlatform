@@ -1,0 +1,9 @@
+{
+    "require": {
+        "orhanerday/open-ai": "^4.8",
+        "google/cloud-text-to-speech": "^1.7",
+        "firebase/php-jwt": "^6.10",
+        "aws/aws-sdk-php": "^3.295",
+        "smalot/pdfparser": "^2.8"
+    }
+}

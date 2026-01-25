@@ -1,0 +1,12 @@
+:root{
+	--magicai-color-brand: rebeccapurple;
+	--magicai-color-1: #ddd;
+	--magicai-color-2: #fff;
+	--magicai-color-3: #eee;
+	--magicai-color-4: #000;
+	--magicai-color-5: #444;
+	--magicai-border: 1px solid #ddd;
+	--magicai-border-hoverColor: #000;
+	--magicai-border-r: 12px;
+	--magicai-border-r-2: 4px;
+}

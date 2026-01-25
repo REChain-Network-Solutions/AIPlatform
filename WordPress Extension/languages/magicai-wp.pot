@@ -1,0 +1,3442 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: MagicAI for WordPress\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-02-16 10:34+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.6.6; wp-6.4.3\n"
+"X-Domain: magicai-wp"
+
+#: includes/helper.php:1590 includes/helper.php:1592
+msgid " - (Female)"
+msgstr ""
+
+#: includes/helper.php:1591
+msgid " - (Male)"
+msgstr ""
+
+#: includes/admin/views/tabs/post.php:48
+msgid "(Enter the API key!)"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:122
+msgid "0s"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:123
+msgid "1s"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:124
+msgid "2s"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:67
+msgid "3D Model"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:125
+msgid "3s"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:126
+msgid "4s"
+msgstr ""
+
+#: includes/helper.php:843
+msgid "A cozy library with floor-to-ceiling bookshelves and a fireplace"
+msgstr ""
+
+#: includes/helper.php:849
+msgid ""
+"A cyberpunk hacker in a neon-lit room surrounded by floating computer code"
+msgstr ""
+
+#: includes/helper.php:840
+msgid "A fire-breathing dragon wearing a top hat and sunglasses"
+msgstr ""
+
+#: includes/helper.php:842
+msgid "A futuristic cityscape with flying cars and holographic billboards"
+msgstr ""
+
+#: includes/helper.php:848
+msgid ""
+"A grand castle atop a mountain with a cascading waterfall in the background"
+msgstr ""
+
+#: includes/helper.php:844
+msgid "A playful kitten riding a skateboard down a winding road"
+msgstr ""
+
+#: includes/helper.php:841
+msgid "A serene beach at sunset with palm trees swaying in the breeze"
+msgstr ""
+
+#: includes/helper.php:846
+msgid "A steampunk-style airship sailing through the clouds"
+msgstr ""
+
+#: includes/helper.php:847
+msgid "A whimsical underwater world with talking fish and mermaids"
+msgstr ""
+
+#: includes/helper.php:1415
+msgid "Abhishek (Male)"
+msgstr ""
+
+#: includes/helper.php:1412
+msgid "Abigail (Female)"
+msgstr ""
+
+#: includes/classes/chatbot.php:321 includes/classes/chatbot.php:719
+#: includes/classes/chatbot.php:982 includes/classes/chatbot.php:1270
+#: includes/admin/views/tabs/yt-post.php:18
+msgid "Action"
+msgstr ""
+
+#: includes/helper.php:624 includes/settings/settings.php:955
+msgid "Actions"
+msgstr ""
+
+#: includes/settings/settings.php:945 includes/settings/settings.php:992
+msgid "Add New"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:135
+msgid "Add new"
+msgstr ""
+
+#: includes/metabox/chatbot.php:217
+msgid "Add PDF and Train"
+msgstr ""
+
+#: includes/metabox/chatbot.php:233
+msgid "Add Q&A and Train"
+msgstr ""
+
+#: includes/metabox/chatbot.php:225
+msgid "Add Text and Train"
+msgstr ""
+
+#: includes/settings/settings.php:520
+msgid "Additional APIs"
+msgstr ""
+
+#: includes/helper.php:1308 includes/helper.php:1414
+msgid "Aditi (Female)"
+msgstr ""
+
+#: includes/helper.php:1416 includes/helper.php:1492
+msgid "Aditya (Male)"
+msgstr ""
+
+#: includes/helper.php:1132
+msgid "Afrikaans"
+msgstr ""
+
+#: includes/helper.php:1192
+msgid "Afrikaans (South Africa)"
+msgstr ""
+
+#: includes/helper.php:1507
+msgid "Agata (Female)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:93
+msgid "Aggressive"
+msgstr ""
+
+#: includes/helper.php:1253
+msgid "Ahmed (Male)"
+msgstr ""
+
+#: includes/admin/admin-page-chat.php:22 includes/admin/admin-page-chat.php:23
+msgid "AI Chat"
+msgstr ""
+
+#: includes/admin/admin-page-chat-pdf.php:22
+#: includes/admin/admin-page-chat-pdf.php:23
+msgid "AI Chat PDF"
+msgstr ""
+
+#: includes/admin/admin-page-chatbot.php:22
+#: includes/admin/admin-page-chatbot.php:23
+msgid "AI ChatBot"
+msgstr ""
+
+#: includes/admin/admin-page-generators.php:22
+#: includes/admin/admin-page-generators.php:23
+msgid "AI Generators"
+msgstr ""
+
+#: includes/admin/views/dashboard.php:100
+msgid "AI Hub - Startup & Technology WordPress Theme"
+msgstr ""
+
+#: includes/admin/admin-page-speech-to-text.php:22
+#: includes/admin/admin-page-speech-to-text.php:23
+msgid "AI Speech to Text"
+msgstr ""
+
+#: includes/admin/admin-page-vision.php:22
+#: includes/admin/admin-page-vision.php:23
+msgid "AI Vision"
+msgstr ""
+
+#: includes/admin/admin-page-voiceover.php:22
+#: includes/admin/admin-page-voiceover.php:23
+msgid "AI Voiceover"
+msgstr ""
+
+#: includes/admin/admin-init.php:244 includes/admin/views/generators.php:41
+#: includes/admin/views/dashboard.php:38
+msgid "AI Youtube"
+msgstr ""
+
+#: includes/helper.php:1255
+msgid "Aisha (Female)"
+msgstr ""
+
+#: includes/helper.php:1471
+msgid "Aishwarya (Female)"
+msgstr ""
+
+#: includes/helper.php:1441
+msgid "Akane (Female)"
+msgstr ""
+
+#: includes/helper.php:1413
+msgid "Alex (Male)"
+msgstr ""
+
+#: includes/helper.php:1542
+msgid "Alexander"
+msgstr ""
+
+#: includes/helper.php:1320 includes/helper.php:1349 includes/helper.php:1357
+msgid "Alexander (Male)"
+msgstr ""
+
+#: includes/helper.php:1257
+msgid "Ali (Male)"
+msgstr ""
+
+#: includes/helper.php:1312
+msgid "Alisha (Female)"
+msgstr ""
+
+#: includes/hooks.php:844
+msgid "All Types"
+msgstr ""
+
+#: includes/admin/views/dashboard.php:93
+msgid ""
+"All-in-one SaaS platform to generate AI content and start making money in "
+"minutes."
+msgstr ""
+
+#: includes/admin/views/voiceover.php:50
+msgid "Alloy (Male)"
+msgstr ""
+
+#: includes/helper.php:1536
+msgid "Amardeep (Male)"
+msgstr ""
+
+#: includes/settings/settings.php:532
+msgid "Amazon S3"
+msgstr ""
+
+#: includes/helper.php:1306 includes/helper.php:1316 includes/helper.php:1425
+msgid "Amelia (Female)"
+msgstr ""
+
+#: includes/helper.php:1373 includes/helper.php:1386
+msgid "Amelie (Female)"
+msgstr ""
+
+#: includes/helper.php:1463
+msgid "Amira (Female)"
+msgstr ""
+
+#: includes/helper.php:845
+msgid "An alien landscape with towering mushrooms and bioluminescent plants"
+msgstr ""
+
+#: includes/helper.php:1551
+msgid "Ana"
+msgstr ""
+
+#: includes/helper.php:1387 includes/helper.php:1517 includes/helper.php:1526
+#: includes/helper.php:1556 includes/helper.php:1565
+msgid "Ana (Female)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:68
+msgid "Analog Film"
+msgstr ""
+
+#: includes/helper.php:1261 includes/helper.php:1311
+msgid "Ananya (Female)"
+msgstr ""
+
+#: includes/helper.php:1541
+msgid "Anastasia"
+msgstr ""
+
+#: includes/admin/admin-license.php:107
+msgid "and create your Liquid account before activating the MagicAI."
+msgstr ""
+
+#: includes/helper.php:1439
+msgid "Andrea (Male)"
+msgstr ""
+
+#: includes/helper.php:1260
+msgid "Ane (Female)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:94
+msgid "Angry"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:69
+msgid "Anime"
+msgstr ""
+
+#: includes/helper.php:1417 includes/helper.php:1491 includes/helper.php:1582
+msgid "Anjali (Female)"
+msgstr ""
+
+#: includes/helper.php:1388
+msgid "Anna (Female)"
+msgstr ""
+
+#: includes/classes/chatbot.php:1267
+msgid "Answer"
+msgstr ""
+
+#: includes/classes/chatbot.php:1124
+msgid "Answer does not exists!"
+msgstr ""
+
+#: includes/helper.php:1374 includes/helper.php:1385
+msgid "Antoine (Male)"
+msgstr ""
+
+#: includes/helper.php:1576
+msgid "Anton (Male)"
+msgstr ""
+
+#: includes/helper.php:1603
+msgid "Anya (Female)"
+msgstr ""
+
+#: includes/settings/settings.php:69 includes/settings/settings.php:433
+#: includes/settings/settings.php:505
+msgid "API Key"
+msgstr ""
+
+#: includes/helper.php:1072 includes/helper.php:1133 includes/helper.php:1193
+#: includes/settings/settings.php:155
+msgid "Arabic"
+msgstr ""
+
+#: includes/helper.php:648
+msgid "Are you sure?"
+msgstr ""
+
+#: includes/helper.php:1309
+msgid "Arjun (Male)"
+msgstr ""
+
+#: includes/helper.php:1134
+msgid "Armenian"
+msgstr ""
+
+#: includes/helper.php:1264
+msgid "Arry (Male)"
+msgstr ""
+
+#: includes/helper.php:1262 includes/helper.php:1313
+msgid "Aryan (Male)"
+msgstr ""
+
+#: includes/settings/settings.php:298 includes/settings/settings.php:307
+#: includes/settings/settings.php:310
+msgid "Assistant"
+msgstr ""
+
+#: includes/helper.php:1502 includes/helper.php:1577
+msgid "Astrid (Female)"
+msgstr ""
+
+#: includes/post-types/attachments.php:6
+msgid "Attachments"
+msgstr ""
+
+#: includes/helper.php:1302 includes/helper.php:1328 includes/helper.php:1341
+#: includes/helper.php:1353
+msgid "Ava (Female)"
+msgstr ""
+
+#: includes/helper.php:1126
+msgid "Average"
+msgstr ""
+
+#: includes/settings/settings.php:565
+msgid "AWS Access Key ID"
+msgstr ""
+
+#: includes/settings/settings.php:580 includes/settings/settings.php:585
+msgid "AWS Bucket"
+msgstr ""
+
+#: includes/settings/settings.php:575
+msgid "AWS Default Region"
+msgstr ""
+
+#: includes/settings/settings.php:570
+msgid "AWS Secret Access Key"
+msgstr ""
+
+#: includes/helper.php:1251
+msgid "Ayanda (Female)"
+msgstr ""
+
+#: includes/helper.php:1593
+msgid "Ayşe (Female)"
+msgstr ""
+
+#: includes/helper.php:1135
+msgid "Azerbaijani"
+msgstr ""
+
+#: includes/helper.php:1508
+msgid "Bartosz (Male)"
+msgstr ""
+
+#: includes/settings/settings.php:952
+msgid "Base Model"
+msgstr ""
+
+#: includes/helper.php:1194
+msgid "Basque (Spain)"
+msgstr ""
+
+#: includes/helper.php:1136
+msgid "Belarusian"
+msgstr ""
+
+#: includes/helper.php:1195
+msgid "Bengali (India)"
+msgstr ""
+
+#: includes/helper.php:1321 includes/helper.php:1347 includes/helper.php:1350
+msgid "Benjamin (Male)"
+msgstr ""
+
+#: includes/helper.php:1594
+msgid "Berk (Male)"
+msgstr ""
+
+#: includes/helper.php:1118 includes/settings/settings.php:207
+msgid "Bold"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:95
+msgid "Boring"
+msgstr ""
+
+#: includes/helper.php:1137
+msgid "Bosnian"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:22
+msgid "Both"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:63
+msgid "Bottom Left"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:62
+msgid "Bottom Right"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:96
+msgid "Bright"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:4
+msgid "Bring your words to life."
+msgstr ""
+
+#: includes/helper.php:1138
+msgid "Bulgarian"
+msgstr ""
+
+#: includes/helper.php:1196
+msgid "Bulgarian (Bulgaria)"
+msgstr ""
+
+#: includes/settings/settings.php:951
+msgid "Bytes"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:97
+msgid "Calm"
+msgstr ""
+
+#: includes/helper.php:1595
+msgid "Cansu (Female)"
+msgstr ""
+
+#: includes/helper.php:1518 includes/helper.php:1567
+msgid "Carlos (Male)"
+msgstr ""
+
+#: includes/helper.php:1112 includes/settings/settings.php:201
+msgid "Casual"
+msgstr ""
+
+#: includes/helper.php:1139
+msgid "Catalan"
+msgstr ""
+
+#: includes/helper.php:1197
+msgid "Catalan (Spain) "
+msgstr ""
+
+#: includes/helper.php:1527
+msgid "Catarina (Female)"
+msgstr ""
+
+#: includes/helper.php:1322
+msgid "Charles (Male)"
+msgstr ""
+
+#: includes/helper.php:1300 includes/helper.php:1344 includes/helper.php:1356
+msgid "Charlotte (Female)"
+msgstr ""
+
+#: includes/settings/settings.php:286 includes/admin/admin-init.php:280
+#: includes/admin/views/dashboard.php:68
+msgid "Chat"
+msgstr ""
+
+#: includes/hooks.php:885 includes/settings/settings.php:292
+msgid "ChatBot"
+msgstr ""
+
+#: includes/classes/chatbot.php:224 includes/classes/chatbot.php:267
+#: includes/classes/chatbot.php:391 includes/classes/chatbot.php:424
+#: includes/classes/chatbot.php:564 includes/classes/chatbot.php:780
+#: includes/classes/chatbot.php:822 includes/classes/chatbot.php:1044
+#: includes/classes/chatbot.php:1110 includes/classes/chatbot.php:1332
+msgid "ChatBot data is invalid!"
+msgstr ""
+
+#: includes/admin/views/dashboard.php:96 includes/admin/views/dashboard.php:104
+msgid "Check Envato Page"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:98
+msgid "Cheerful"
+msgstr ""
+
+#: includes/helper.php:1482
+msgid "Chenchen (Male)"
+msgstr ""
+
+#: includes/helper.php:1433
+msgid "Chiara (Female)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:99
+msgid "Chilling"
+msgstr ""
+
+#: includes/helper.php:1140
+msgid "Chinese"
+msgstr ""
+
+#: includes/helper.php:1198
+msgid "Chinese (Hong Kong)"
+msgstr ""
+
+#: includes/helper.php:1073 includes/settings/settings.php:156
+msgid "Chinese (Mandarin)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:70
+msgid "Cinematic"
+msgstr ""
+
+#: includes/helper.php:1278 includes/helper.php:1384
+msgid "Clara (Female)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:126
+msgid "Clip Guidance Preset"
+msgstr ""
+
+#: includes/hooks.php:754 includes/hooks.php:838
+#: includes/admin/admin-init.php:265 includes/shortcodes/shortcodes.php:376
+msgid "Code"
+msgstr ""
+
+#: includes/settings/settings.php:333 includes/admin/views/generators.php:26
+#: includes/admin/views/dashboard.php:53
+msgid "Code Generator"
+msgstr ""
+
+#: includes/admin/views/tabs/code.php:17
+msgid "Code Language or Platform (Wordpress, JS, PHP, Go, etc.)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:100
+msgid "Colorful"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:71
+msgid "Comic Book"
+msgstr ""
+
+#: includes/admin/admin-license.php:117
+msgid "Connect to Liquid Portal"
+msgstr ""
+
+#: includes/classes/chatbot.php:979 includes/shortcodes/shortcodes.php:304
+msgid "Content"
+msgstr ""
+
+#: includes/classes/chatbot.php:836
+msgid "Content does not exists!"
+msgstr ""
+
+#: includes/helper.php:623
+msgid "Conversations"
+msgstr ""
+
+#: includes/metabox/chatbot.php:200
+msgid "Crawl a single URL"
+msgstr ""
+
+#: includes/metabox/chatbot.php:189
+msgid "Crawl a website"
+msgstr ""
+
+#: includes/classes/chatbot.php:315
+msgid "Crawled URLs"
+msgstr ""
+
+#: includes/admin/views/tabs/yt-post.php:23
+msgid "Create a List"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:104
+msgid "Create ChatBot Template"
+msgstr ""
+
+#: includes/admin/views/dashboard.php:101
+msgid "Create jaw-dropping websites for AI Startups."
+msgstr ""
+
+#: includes/admin/views/tabs/yt-post.php:24
+msgid "Create TLDR"
+msgstr ""
+
+#: includes/admin/views/tabs/product.php:52
+#: includes/admin/views/tabs/post.php:71
+#: includes/admin/views/tabs/rss-post.php:66
+msgid "Creativity"
+msgstr ""
+
+#: includes/helper.php:1141
+msgid "Croatian"
+msgstr ""
+
+#: includes/helper.php:1085 includes/settings/settings.php:168
+msgid "Croatian (Croatia)"
+msgstr ""
+
+#: includes/admin/admin-init.php:258 includes/admin/views/generators.php:16
+#: includes/admin/views/dashboard.php:48
+msgid "Custom"
+msgstr ""
+
+#: includes/settings/settings.php:280
+msgid "Custom Generator"
+msgstr ""
+
+#: includes/settings/settings.php:949
+msgid "Custom Name"
+msgstr ""
+
+#: includes/settings/settings.php:500
+msgid "Custom Search JSON API"
+msgstr ""
+
+#: includes/classes/google-search.php:114
+msgid "Custom Search JSON API: Missing API Key"
+msgstr ""
+
+#: includes/classes/google-search.php:121
+msgid "Custom Search JSON API: Missing Search Engine ID"
+msgstr ""
+
+#: includes/helper.php:1142
+msgid "Czech"
+msgstr ""
+
+#: includes/helper.php:1074 includes/helper.php:1199
+#: includes/settings/settings.php:157
+msgid "Czech (Czech Republic)"
+msgstr ""
+
+#: includes/helper.php:1288
+msgid "Daan (Male)"
+msgstr ""
+
+#: includes/helper.php:1443
+msgid "Daisuke (Male)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:11
+msgid "DALL-E"
+msgstr ""
+
+#: includes/settings/settings.php:217
+msgid "DALL-E Settings"
+msgstr ""
+
+#: includes/helper.php:1464
+msgid "Danial (Male)"
+msgstr ""
+
+#: includes/helper.php:1143
+msgid "Danish"
+msgstr ""
+
+#: includes/helper.php:1075 includes/helper.php:1200
+#: includes/settings/settings.php:158
+msgid "Danish (Denmark)"
+msgstr ""
+
+#: includes/helper.php:1546
+msgid "Daria"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:101
+msgid "Dark"
+msgstr ""
+
+#: includes/helper.php:1604
+msgid "Dasha (Female)"
+msgstr ""
+
+#: includes/admin/admin-init.php:321
+msgid "Dashboard"
+msgstr ""
+
+#: includes/classes/logs.php:304 includes/classes/logs.php:353
+#: includes/shortcodes/shortcodes.php:305
+msgid "Date"
+msgstr ""
+
+#: includes/helper.php:1329 includes/helper.php:1338 includes/helper.php:1407
+msgid "David (Male)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:112
+msgid "DDIM"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:113
+msgid "DDPM"
+msgstr ""
+
+#: includes/helper.php:1473
+msgid "Deepthi (Female)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:158
+msgid "Default"
+msgstr ""
+
+#: includes/settings/settings.php:383
+msgid "Default: and related post tags [tag]"
+msgstr ""
+
+#: includes/settings/settings.php:355
+msgid ""
+"Default: write 5 tags about (return only comma separated): about [title]. "
+"The tone of voice should [tone] in [language] language."
+msgstr ""
+
+#: includes/settings/settings.php:376
+msgid ""
+"Default: write 5 tags about (return only comma separated): about [title][tag]"
+". The tone of voice should [tone] in [language] language."
+msgstr ""
+
+#: includes/settings/settings.php:369
+msgid ""
+"Default: write blog post with html tags(h2,p,strong,etc.) about [title][tag]."
+" The tone of voice should [tone] in [language] language. And maximum lenght "
+"[maximum_lenght]"
+msgstr ""
+
+#: includes/settings/settings.php:362
+msgid ""
+"Default: write one blog post title about [title]. The tone of voice should "
+"[tone] in [language] language"
+msgstr ""
+
+#: includes/settings/settings.php:341
+msgid ""
+"Default: write one product title about [title]. The tone of voice should "
+"[tone] in [language] language"
+msgstr ""
+
+#: includes/settings/settings.php:348
+msgid ""
+"Default: write product content with html tags(h2,p,strong,etc.) about [title]"
+". The tone of voice should [tone] in [language] language. And maximum lenght "
+"[maximum_lenght]"
+msgstr ""
+
+#: includes/settings/settings.php:334
+msgid ""
+"Default: You are a [code_language] expert. Write code about [code_request]"
+msgstr ""
+
+#: includes/settings/settings.php:390
+msgid ""
+"Default: You are blog writer. Turn the given transcript text into a blog "
+"post in and translate to [language] language. Group the content and create a "
+"subheading (witth HTML-h2) for each group. Content:"
+msgstr ""
+
+#: includes/settings/settings.php:397
+msgid ""
+"Default: You are transcript editor. Make sense of the given content and "
+"explain the main idea. Your result should be in [language] language. Content:"
+msgstr ""
+
+#: includes/settings/settings.php:404
+msgid ""
+"Default: You are transcript editor. Make sense of the given content and make "
+"a list main ideas. Your result should be in [language] language. Content:"
+msgstr ""
+
+#: includes/settings/settings.php:418
+msgid ""
+"Default: You are transcript editor. Make short pros and cons. Your result "
+"should be in [language] language. Content:"
+msgstr ""
+
+#: includes/settings/settings.php:411
+msgid ""
+"Default: You are transcript editor. Make short TLDR. Your result should be "
+"in [language] language. Content:"
+msgstr ""
+
+#: includes/settings/settings.php:315
+msgid "Define prompts to Assistant for shortcuts!"
+msgstr ""
+
+#: includes/helper.php:515 includes/helper.php:645
+#: includes/classes/chatbot.php:344 includes/classes/chatbot.php:742
+#: includes/classes/chatbot.php:1008 includes/classes/chatbot.php:1296
+msgid "Delete"
+msgstr ""
+
+#: includes/classes/chatbot.php:405 includes/classes/chatbot.php:801
+#: includes/classes/chatbot.php:1065 includes/classes/chatbot.php:1353
+msgid "Deleted"
+msgstr ""
+
+#: includes/helper.php:1596
+msgid "Deniz (Female)"
+msgstr ""
+
+#: includes/settings/settings.php:501
+msgid "Deprecated"
+msgstr ""
+
+#: includes/admin/views/tabs/code.php:9 includes/admin/views/tabs/code.php:11
+msgid "Describe What Kind of Code You Need"
+msgstr ""
+
+#: includes/admin/views/tabs/custom.php:9
+msgid "Describe What You Need"
+msgstr ""
+
+#: includes/classes/logs.php:351
+msgid "Details"
+msgstr ""
+
+#: includes/helper.php:1449
+msgid "Dhanya (Female)"
+msgstr ""
+
+#: includes/helper.php:1472
+msgid "Dhruv (Male)"
+msgstr ""
+
+#: includes/helper.php:1561
+msgid "Diego (Male)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:72
+msgid "Digital Art"
+msgstr ""
+
+#: includes/helper.php:1493
+msgid "Dipti (Female)"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:87
+msgid "Disable if user not logged in?"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:19
+msgid "Disabled"
+msgstr ""
+
+#: includes/helper.php:1315
+msgid "Diya (Female)"
+msgstr ""
+
+#: includes/helper.php:1547
+msgid "Dmitry"
+msgstr ""
+
+#: includes/shortcodes/shortcodes.php:410
+msgid "Document does not exists!"
+msgstr ""
+
+#: includes/admin/views/dashboard.php:14
+msgid "Documentation"
+msgstr ""
+
+#: includes/post-types/documents.php:6
+msgid "Documents"
+msgstr ""
+
+#: includes/helper.php:1119 includes/settings/settings.php:208
+msgid "Dramatic"
+msgstr ""
+
+#: includes/helper.php:1144
+msgid "Dutch"
+msgstr ""
+
+#: includes/helper.php:1201
+msgid "Dutch (Belgium)"
+msgstr ""
+
+#: includes/helper.php:1096 includes/helper.php:1202
+#: includes/settings/settings.php:179
+msgid "Dutch (Netherlands)"
+msgstr ""
+
+#: includes/admin/views/speech-to-text.php:4
+msgid "Easily transform audio into written text."
+msgstr ""
+
+#: includes/helper.php:1572
+msgid "Ebba (Female)"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:51
+msgid "Echo (Male)"
+msgstr ""
+
+#: includes/helper.php:1125
+msgid "Economic"
+msgstr ""
+
+#: includes/helper.php:511 includes/helper.php:644
+#: includes/classes/chatbot.php:1011 includes/classes/chatbot.php:1299
+msgid "Edit"
+msgstr ""
+
+#: includes/helper.php:1562
+msgid "Eduardo (Male)"
+msgstr ""
+
+#: includes/helper.php:1465
+msgid "Eira (Female)"
+msgstr ""
+
+#: includes/helper.php:1503
+msgid "Eirik (Male)"
+msgstr ""
+
+#: includes/helper.php:1348
+msgid "Eleanor (Female)"
+msgstr ""
+
+#: includes/helper.php:1265
+msgid "Elena (Female)"
+msgstr ""
+
+#: includes/helper.php:1411
+msgid "Eli (Male)"
+msgstr ""
+
+#: includes/helper.php:1578
+msgid "Elin (Female)"
+msgstr ""
+
+#: includes/helper.php:1434
+msgid "Elisa (Female)"
+msgstr ""
+
+#: includes/helper.php:1317 includes/helper.php:1382
+msgid "Elise (Female)"
+msgstr ""
+
+#: includes/helper.php:1543
+msgid "Elizabeth"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:4
+msgid ""
+"Embed on your site or dashboard easily and interact with your customers."
+msgstr ""
+
+#: includes/helper.php:1442
+msgid "Emi (Female)"
+msgstr ""
+
+#: includes/helper.php:1282 includes/helper.php:1323 includes/helper.php:1330
+#: includes/helper.php:1351
+msgid "Emily (Female)"
+msgstr ""
+
+#: includes/helper.php:1273 includes/helper.php:1283 includes/helper.php:1287
+#: includes/helper.php:1297 includes/helper.php:1339 includes/helper.php:1369
+#: includes/helper.php:1396
+msgid "Emma (Female)"
+msgstr ""
+
+#: includes/helper.php:1597
+msgid "Emre (Male)"
+msgstr ""
+
+#: includes/helper.php:1145
+msgid "English"
+msgstr ""
+
+#: includes/helper.php:1203
+msgid "English (Australia)"
+msgstr ""
+
+#: includes/helper.php:1204
+msgid "English (India)"
+msgstr ""
+
+#: includes/helper.php:1205
+msgid "English (UK)"
+msgstr ""
+
+#: includes/helper.php:1206
+msgid "English (US)"
+msgstr ""
+
+#: includes/helper.php:1078 includes/settings/settings.php:161
+msgid "English (USA)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:73
+msgid "Enhance"
+msgstr ""
+
+#: includes/admin/views/tabs/rss-post.php:24
+msgid "Enter the Feed URL, please!"
+msgstr ""
+
+#: includes/helper.php:1392 includes/helper.php:1575
+msgid "Erik (Male)"
+msgstr ""
+
+#: includes/helper.php:1146
+msgid "Estonian"
+msgstr ""
+
+#: includes/helper.php:1080 includes/settings/settings.php:163
+msgid "Estonian (Estonia)"
+msgstr ""
+
+#: includes/helper.php:1422
+msgid "Eszter (Female)"
+msgstr ""
+
+#: includes/helper.php:1296 includes/helper.php:1394
+msgid "Eva (Female)"
+msgstr ""
+
+#: includes/helper.php:1113 includes/settings/settings.php:202
+msgid "Excited"
+msgstr ""
+
+#: includes/admin/views/tabs/yt-post.php:22
+msgid "Explain the Main Idea"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:52
+msgid "Fable (Male)"
+msgstr ""
+
+#: includes/helper.php:1426
+msgid "Fajar (Male)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:74
+msgid "Fantasy Art"
+msgstr ""
+
+#: includes/helper.php:1466
+msgid "Farhan (Male)"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:111
+msgid "Fast"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:130
+msgid "FAST BLUE"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:131
+msgid "FAST GREEN"
+msgstr ""
+
+#: includes/helper.php:1252
+msgid "Fatima (Female)"
+msgstr ""
+
+#: includes/helper.php:1395 includes/helper.php:1581
+msgid "Felix (Male)"
+msgstr ""
+
+#: includes/helper.php:1116 includes/settings/settings.php:205
+msgid "Feminine"
+msgstr ""
+
+#: includes/helper.php:1295
+msgid "Fenna (Female)"
+msgstr ""
+
+#: includes/helper.php:1522
+msgid "Fernanda (Female)"
+msgstr ""
+
+#: includes/metabox/chatbot.php:194 includes/metabox/chatbot.php:205
+msgid "Fetch Data"
+msgstr ""
+
+#: includes/admin/views/tabs/rss-post.php:14
+msgid "Fetch RSS"
+msgstr ""
+
+#: includes/admin/views/tabs/rss-post.php:21
+msgid "Fetched Post Title"
+msgstr ""
+
+#: includes/classes/chatbot.php:716
+msgid "File"
+msgstr ""
+
+#: includes/settings/settings.php:950
+msgid "File ID"
+msgstr ""
+
+#: includes/helper.php:1207
+msgid "Filipino (Philippines)"
+msgstr ""
+
+#: includes/helper.php:807
+msgid "Fill the form and click the Generate button"
+msgstr ""
+
+#: includes/settings/settings.php:259
+msgid "Fine Tune"
+msgstr ""
+
+#: includes/settings/settings.php:953
+msgid "Fine Tuned Model"
+msgstr ""
+
+#: includes/helper.php:1147
+msgid "Finnish"
+msgstr ""
+
+#: includes/helper.php:1081 includes/helper.php:1208
+#: includes/settings/settings.php:164
+msgid "Finnish (Finland)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:50
+msgid "for image edits or upscale"
+msgstr ""
+
+#: includes/helper.php:1274
+msgid "Freja (Female)"
+msgstr ""
+
+#: includes/helper.php:1148
+msgid "French"
+msgstr ""
+
+#: includes/helper.php:1209
+msgid "French (Canada)"
+msgstr ""
+
+#: includes/helper.php:1082 includes/helper.php:1210
+#: includes/settings/settings.php:165
+msgid "French (France)"
+msgstr ""
+
+#: includes/settings/settings.php:127
+msgid "Frequency Penalty"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:20
+msgid "Frontend"
+msgstr ""
+
+#: includes/helper.php:1111 includes/settings/settings.php:200
+msgid "Funny"
+msgstr ""
+
+#: includes/helper.php:1563
+msgid "Fátima (Female)"
+msgstr ""
+
+#: includes/helper.php:1564
+msgid "Gabriela (Female)"
+msgstr ""
+
+#: includes/helper.php:1371 includes/helper.php:1375
+msgid "Gabrielle (Female)"
+msgstr ""
+
+#: includes/helper.php:1149
+msgid "Galician"
+msgstr ""
+
+#: includes/helper.php:1211
+msgid "Galician (Spain)"
+msgstr ""
+
+#: includes/helper.php:1427
+msgid "Galih (Male)"
+msgstr ""
+
+#: includes/helper.php:1494
+msgid "Gauri (Female)"
+msgstr ""
+
+#: includes/helper.php:1474
+msgid "Gautam (Male)"
+msgstr ""
+
+#: includes/settings/settings.php:487
+msgid "GCS File (JSON) path"
+msgstr ""
+
+#: includes/settings/settings.php:493
+msgid "GCS Project Name"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:68 includes/admin/views/voiceover.php:140
+#: includes/admin/views/speech-to-text.php:22
+#: includes/admin/views/tabs/code.php:25
+#: includes/admin/views/tabs/custom.php:22
+#: includes/admin/views/tabs/product.php:90
+#: includes/admin/views/tabs/post.php:109
+#: includes/admin/views/tabs/yt-post.php:51
+#: includes/admin/views/tabs/rss-post.php:104
+#: includes/admin/views/tabs/image.php:23
+msgid "Generate"
+msgstr ""
+
+#: includes/admin/views/generators.php:4
+msgid "Generate any kind of content in seconds."
+msgstr ""
+
+#: includes/admin/views/generators.php:8
+msgid "Generate SEO-optimized blog content in a matter of seconds."
+msgstr ""
+
+#: includes/admin/views/generators.php:7
+msgid "Generate SEO-optimized product content in a matter of seconds."
+msgstr ""
+
+#: includes/admin/views/tabs/post.php:44
+msgid "Generate Thumbnail"
+msgstr ""
+
+#: includes/admin/views/generators.php:10
+msgid "Generate unique blog posts with RSS Feed."
+msgstr ""
+
+#: includes/settings/settings.php:245 includes/settings/settings.php:466
+msgid "Generated image resolution."
+msgstr ""
+
+#: includes/settings/settings.php:151
+msgid "Generator Forms Default Language"
+msgstr ""
+
+#: includes/settings/settings.php:195
+msgid "Generator Forms Default Tone"
+msgstr ""
+
+#: includes/admin/views/dashboard.php:24
+msgid "Generators"
+msgstr ""
+
+#: includes/admin/views/generators.php:5
+msgid "Genereate stunning visuals in seconds."
+msgstr ""
+
+#: includes/helper.php:1150
+msgid "German"
+msgstr ""
+
+#: includes/helper.php:1076 includes/helper.php:1212
+#: includes/settings/settings.php:159
+msgid "German (Germany)"
+msgstr ""
+
+#: includes/hooks.php:886
+msgid "Go Back to ChatBot"
+msgstr ""
+
+#: includes/admin/admin-license.php:106
+msgid "Go to"
+msgstr ""
+
+#: includes/helper.php:1127
+msgid "Good"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:19
+msgid "Google"
+msgstr ""
+
+#: includes/settings/settings.php:480
+msgid "Google (GCS)"
+msgstr ""
+
+#: includes/settings/settings.php:483
+msgid "Google Cloud Services Settings"
+msgstr ""
+
+#: includes/classes/google-search.php:147
+msgid "Google Results not found. Try again or disable the web search feature!"
+msgstr ""
+
+#: includes/helper.php:1151
+msgid "Greek"
+msgstr ""
+
+#: includes/helper.php:1077 includes/helper.php:1213
+#: includes/settings/settings.php:160
+msgid "Greek (Greece)"
+msgstr ""
+
+#: includes/helper.php:1120 includes/settings/settings.php:209
+msgid "Grumpy"
+msgstr ""
+
+#: includes/helper.php:1214
+msgid "Gujarati (India)"
+msgstr ""
+
+#: includes/helper.php:1532
+msgid "Gurpreet (Male)"
+msgstr ""
+
+#: includes/helper.php:1424
+msgid "Guðrún (Female)"
+msgstr ""
+
+#: includes/helper.php:1598
+msgid "Gül (Female)"
+msgstr ""
+
+#: includes/helper.php:1467
+msgid "Hana (Female)"
+msgstr ""
+
+#: includes/helper.php:1580
+msgid "Hanna (Female)"
+msgstr ""
+
+#: includes/helper.php:1531
+msgid "Harpreet (Female)"
+msgstr ""
+
+#: includes/helper.php:1495
+msgid "Harsh (Male)"
+msgstr ""
+
+#: includes/helper.php:1445
+msgid "Haruka (Female)"
+msgstr ""
+
+#: includes/helper.php:1152
+msgid "Hebrew"
+msgstr ""
+
+#: includes/helper.php:1083 includes/helper.php:1215
+#: includes/settings/settings.php:166
+msgid "Hebrew (Israel)"
+msgstr ""
+
+#: includes/helper.php:1153
+msgid "Hindi"
+msgstr ""
+
+#: includes/helper.php:1084 includes/helper.php:1216
+#: includes/settings/settings.php:167
+msgid "Hindi (India)"
+msgstr ""
+
+#: includes/helper.php:1268
+msgid "Ho (Male)"
+msgstr ""
+
+#: includes/helper.php:1607
+msgid "Hoa (Female)"
+msgstr ""
+
+#: includes/admin/views/chat.php:43
+msgid "How can I help you today?"
+msgstr ""
+
+#: includes/admin/views/tabs/rss-post.php:11
+msgid "https://example.com/feed"
+msgstr ""
+
+#: includes/metabox/chatbot.php:191
+msgid "https://magicaidocs-wp.liquid-themes.com"
+msgstr ""
+
+#: includes/metabox/chatbot.php:202
+msgid "https://magicaidocs-wp.liquid-themes.com/installation"
+msgstr ""
+
+#. URI of the plugin
+#. Author URI of the plugin
+msgid "https://themeforest.net/user/liquidthemes"
+msgstr ""
+
+#: includes/helper.php:1154
+msgid "Hungarian"
+msgstr ""
+
+#: includes/helper.php:1086 includes/helper.php:1217
+#: includes/settings/settings.php:169
+msgid "Hungarian (Hungary)"
+msgstr ""
+
+#: includes/helper.php:1608
+msgid "Huy (Male)"
+msgstr ""
+
+#: includes/admin/views/tabs/custom.php:11
+msgid ""
+"I can generate any kind of content in seconds. To quickly submit, press "
+"CMD+ENTER."
+msgstr ""
+
+#: includes/helper.php:1155
+msgid "Icelandic"
+msgstr ""
+
+#: includes/helper.php:1088 includes/helper.php:1218
+#: includes/settings/settings.php:171
+msgid "Icelandic (Iceland)"
+msgstr ""
+
+#: includes/helper.php:1275
+msgid "Ida (Female)"
+msgstr ""
+
+#: includes/helper.php:620 includes/admin/admin-init.php:272
+msgid "Image"
+msgstr ""
+
+#: includes/admin/views/generators.php:21 includes/admin/views/dashboard.php:58
+msgid "Image Generator"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:155
+msgid "Image Resolution"
+msgstr ""
+
+#: includes/settings/settings.php:244 includes/settings/settings.php:465
+msgid "Image size"
+msgstr ""
+
+#: includes/helper.php:1156
+msgid "Indonesian"
+msgstr ""
+
+#: includes/helper.php:1087 includes/helper.php:1219
+#: includes/settings/settings.php:170
+msgid "Indonesian (Indonesia)"
+msgstr ""
+
+#: includes/helper.php:1504
+msgid "Inger (Female)"
+msgstr ""
+
+#: includes/helper.php:1497
+msgid "Ingrid (Female)"
+msgstr ""
+
+#: includes/helper.php:1540
+msgid "Ioana (Female)"
+msgstr ""
+
+#: includes/classes/logs.php:348
+msgid "IP"
+msgstr ""
+
+#: includes/helper.php:1468
+msgid "Irfan (Male)"
+msgstr ""
+
+#: includes/helper.php:1557
+msgid "Isabel (Female)"
+msgstr ""
+
+#: includes/helper.php:1279 includes/helper.php:1318 includes/helper.php:1343
+#: includes/helper.php:1355
+msgid "Isabella (Female)"
+msgstr ""
+
+#: includes/helper.php:1475
+msgid "Isha (Female)"
+msgstr ""
+
+#: includes/helper.php:1263 includes/helper.php:1496
+msgid "Ishita (Female)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:75
+msgid "Isometric"
+msgstr ""
+
+#: includes/settings/settings.php:103
+msgid ""
+"It allows users to limit the length of the generated text to a specified "
+"number of tokens to ensure it fits within desired constraints or to manage "
+"response length."
+msgstr ""
+
+#: includes/helper.php:1157
+msgid "Italian"
+msgstr ""
+
+#: includes/helper.php:1089 includes/helper.php:1220
+#: includes/settings/settings.php:172
+msgid "Italian (Italy)"
+msgstr ""
+
+#: includes/helper.php:1549
+msgid "Ivan"
+msgstr ""
+
+#: includes/helper.php:1303
+msgid "Jack (Male)"
+msgstr ""
+
+#: includes/helper.php:1331 includes/helper.php:1345 includes/helper.php:1352
+msgid "James (Male)"
+msgstr ""
+
+#: includes/helper.php:1469
+msgid "Janna (Female)"
+msgstr ""
+
+#: includes/helper.php:1158
+msgid "Japanese"
+msgstr ""
+
+#: includes/helper.php:1090 includes/helper.php:1221
+#: includes/settings/settings.php:173
+msgid "Japanese (Japan)"
+msgstr ""
+
+#: includes/helper.php:1533
+msgid "Jasmine (Female)"
+msgstr ""
+
+#: includes/helper.php:1370
+msgid "Jean (Male)"
+msgstr ""
+
+#: includes/helper.php:1319
+msgid "Jessica (Female)"
+msgstr ""
+
+#: includes/helper.php:1457
+msgid "Ji-soo (Female)"
+msgstr ""
+
+#: includes/helper.php:1483
+msgid "Jiahao (Male)"
+msgstr ""
+
+#: includes/helper.php:1486
+msgid "Jinghao (Male)"
+msgstr ""
+
+#: includes/helper.php:1485
+msgid "Jingwen (Female)"
+msgstr ""
+
+#: includes/helper.php:1324
+msgid "John (Male)"
+msgstr ""
+
+#: includes/helper.php:1498
+msgid "Jonas (Male)"
+msgstr ""
+
+#: includes/helper.php:1409
+msgid "Jonathan (Male)"
+msgstr ""
+
+#: includes/helper.php:1524 includes/helper.php:1555 includes/helper.php:1566
+msgid "José (Male)"
+msgstr ""
+
+#: includes/helper.php:1521 includes/helper.php:1529
+msgid "João (Male)"
+msgstr ""
+
+#: includes/helper.php:1361 includes/helper.php:1365
+msgid "Juan (Male)"
+msgstr ""
+
+#: includes/helper.php:1360 includes/helper.php:1364
+msgid "Juana (Female)"
+msgstr ""
+
+#: includes/helper.php:1510 includes/helper.php:1520 includes/helper.php:1560
+msgid "Julia (Female)"
+msgstr ""
+
+#: includes/helper.php:1381
+msgid "Julie (Female)"
+msgstr ""
+
+#: includes/helper.php:1460
+msgid "Jun-ho (Male)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:115
+msgid "K_DPM_2"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:116
+msgid "K_DPM_2_ANCESTRAL"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:114
+msgid "K_DPMPP_2M"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:117
+msgid "K_EULER"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:118
+msgid "K_EULER_ANCESTRAL"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:119
+msgid "K_HEUN"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:120
+msgid "K_LMS"
+msgstr ""
+
+#: includes/helper.php:1314 includes/helper.php:1476
+msgid "Kabir (Male)"
+msgstr ""
+
+#: includes/helper.php:1509
+msgid "Kamil (Male)"
+msgstr ""
+
+#: includes/helper.php:1159
+msgid "Kannada"
+msgstr ""
+
+#: includes/helper.php:1222
+msgid "Kannada (India)"
+msgstr ""
+
+#: includes/helper.php:1272
+msgid "Karolína (Female)"
+msgstr ""
+
+#: includes/helper.php:1583
+msgid "Karthik (Male)"
+msgstr ""
+
+#: includes/helper.php:1160
+msgid "Kazakh"
+msgstr ""
+
+#: includes/helper.php:1091 includes/settings/settings.php:174
+msgid "Kazakh (Kazakhistan)"
+msgstr ""
+
+#: includes/helper.php:1450
+msgid "Keerthi (Male)"
+msgstr ""
+
+#: includes/helper.php:1444
+msgid "Kento (Male)"
+msgstr ""
+
+#: includes/helper.php:1470
+msgid "Khairul (Male)"
+msgstr ""
+
+#: includes/helper.php:1418 includes/helper.php:1428
+msgid "Kiara (Female)"
+msgstr ""
+
+#: includes/helper.php:1537
+msgid "Kiran (Female)"
+msgstr ""
+
+#: includes/helper.php:1161
+msgid "Korean"
+msgstr ""
+
+#: includes/helper.php:1092 includes/helper.php:1223
+#: includes/settings/settings.php:175
+msgid "Korean (South Korea)"
+msgstr ""
+
+#: includes/helper.php:1505
+msgid "Kristian (Male)"
+msgstr ""
+
+#: includes/helper.php:1548
+msgid "Kristina"
+msgstr ""
+
+#: includes/helper.php:1266
+msgid "Laia (Female)"
+msgstr ""
+
+#: includes/helper.php:1586
+msgid "Lakshmi (Female)"
+msgstr ""
+
+#: includes/helper.php:1609
+msgid "Lan (Female)"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:28 includes/admin/views/voiceover.php:76
+#: includes/admin/views/tabs/product.php:17
+#: includes/admin/views/tabs/post.php:25
+#: includes/admin/views/tabs/yt-post.php:32
+#: includes/admin/views/tabs/rss-post.php:31
+msgid "Language"
+msgstr ""
+
+#: includes/helper.php:477
+msgid "Last Week"
+msgstr ""
+
+#: includes/helper.php:1162
+msgid "Latvian"
+msgstr ""
+
+#: includes/helper.php:1224
+msgid "Latvian (Latvia)"
+msgstr ""
+
+#: includes/helper.php:1270
+msgid "Lau (Male)"
+msgstr ""
+
+#: includes/helper.php:1559 includes/helper.php:1569
+msgid "Laura (Female)"
+msgstr ""
+
+#: includes/helper.php:1256
+msgid "Layla (Female)"
+msgstr ""
+
+#: includes/helper.php:1299
+msgid "Liam (Male)"
+msgstr ""
+
+#: includes/admin/admin-license.php:90
+msgid "License"
+msgstr ""
+
+#: includes/helper.php:1478
+msgid "Lijun (Male)"
+msgstr ""
+
+#: includes/helper.php:1423
+msgid "Lilla (Female)"
+msgstr ""
+
+#: includes/helper.php:1333
+msgid "Lily (Female)"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:80
+msgid "Limit per seconds"
+msgstr ""
+
+#: includes/helper.php:1393
+msgid "Lina (Female)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:76
+msgid "Line Art"
+msgstr ""
+
+#: includes/helper.php:1574
+msgid "Linnea (Female)"
+msgstr ""
+
+#. Author of the plugin
+msgid "Liquid Themes"
+msgstr ""
+
+#: includes/helper.php:1163
+msgid "Lithuanian"
+msgstr ""
+
+#: includes/helper.php:1093 includes/settings/settings.php:176
+msgid "Lithuanian (Lithuania)"
+msgstr ""
+
+#: includes/admin/admin-page-logs.php:22 includes/admin/admin-page-logs.php:23
+#: includes/admin/views/dashboard.php:112
+msgid "Logs"
+msgstr ""
+
+#: includes/helper.php:1290
+msgid "Lotte (Female)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:77
+msgid "Low Poly"
+msgstr ""
+
+#: includes/helper.php:1440
+msgid "Luca (Male)"
+msgstr ""
+
+#: includes/helper.php:1280 includes/helper.php:1286 includes/helper.php:1346
+#: includes/helper.php:1358
+msgid "Lucas (Male)"
+msgstr ""
+
+#: includes/helper.php:1397
+msgid "Lukas (Male)"
+msgstr ""
+
+#: includes/helper.php:1289
+msgid "Luuk (Male)"
+msgstr ""
+
+#: includes/helper.php:1525
+msgid "Luís (Male)"
+msgstr ""
+
+#: includes/helper.php:1164
+msgid "Macedonian"
+msgstr ""
+
+#: includes/helper.php:1511
+msgid "Magdalena (Female)"
+msgstr ""
+
+#: includes/admin/admin-page-dashboard.php:22
+#: includes/admin/admin-page-dashboard.php:23
+msgid "MagicAI"
+msgstr ""
+
+#: includes/post-types/chat.php:6
+msgid "MagicAI Chat"
+msgstr ""
+
+#: includes/post-types/chat-pdf.php:6
+msgid "MagicAI Chat PDF"
+msgstr ""
+
+#: includes/post-types/chatbot.php:6
+msgid "MagicAI ChatBot"
+msgstr ""
+
+#: includes/metabox/chatbot.php:145
+msgid "MagicAI ChatBot Options"
+msgstr ""
+
+#: includes/metabox/chatbot.php:153
+msgid "MagicAI ChatBot Training"
+msgstr ""
+
+#. Name of the plugin
+msgid "MagicAI for WordPress"
+msgstr ""
+
+#: includes/admin/views/dashboard.php:92
+msgid "MagicAI SaaS!"
+msgstr ""
+
+#: includes/post-types/vision.php:6
+msgid "MagicAI Vision"
+msgstr ""
+
+#: includes/helper.php:1605
+msgid "Mai (Female)"
+msgstr ""
+
+#: includes/helper.php:1165
+msgid "Malay"
+msgstr ""
+
+#: includes/helper.php:1094 includes/helper.php:1225
+#: includes/settings/settings.php:177
+msgid "Malay (Malaysia)"
+msgstr ""
+
+#: includes/helper.php:1226
+msgid "Malayalam (India)"
+msgstr ""
+
+#: includes/settings/settings.php:263
+msgid "Manage Fine Tunes"
+msgstr ""
+
+#: includes/settings/settings.php:664
+msgid "Manage MagicAI settings."
+msgstr ""
+
+#: includes/settings/settings.php:328
+msgid ""
+"Manage prompts for generators. If certain fields are left empty, the system "
+"will automatically employ default values to ensure seamless processing."
+msgstr ""
+
+#: includes/helper.php:1227
+msgid "Mandarin Chinese"
+msgstr ""
+
+#: includes/helper.php:1228
+msgid "Mandarin Chinese (T)"
+msgstr ""
+
+#: includes/helper.php:1167
+msgid "Maori"
+msgstr ""
+
+#: includes/helper.php:1166
+msgid "Marathi"
+msgstr ""
+
+#: includes/helper.php:1229
+msgid "Marathi (India)"
+msgstr ""
+
+#: includes/helper.php:1359 includes/helper.php:1363 includes/helper.php:1519
+#: includes/helper.php:1523 includes/helper.php:1539
+msgid "Maria (Female)"
+msgstr ""
+
+#: includes/helper.php:1377
+msgid "Marie (Female)"
+msgstr ""
+
+#: includes/helper.php:1499
+msgid "Marit (Female)"
+msgstr ""
+
+#: includes/helper.php:1530
+msgid "Marta (Female)"
+msgstr ""
+
+#: includes/helper.php:1325
+msgid "Mary (Female)"
+msgstr ""
+
+#: includes/helper.php:1554
+msgid "María (Female)"
+msgstr ""
+
+#: includes/helper.php:1117 includes/settings/settings.php:206
+msgid "Masculine"
+msgstr ""
+
+#: includes/helper.php:1277
+msgid "Mathilde (Female)"
+msgstr ""
+
+#: includes/helper.php:1435
+msgid "Matteo (Male)"
+msgstr ""
+
+#: includes/helper.php:1389
+msgid "Max (Male)"
+msgstr ""
+
+#: includes/settings/settings.php:102
+msgid "Max Tokens"
+msgstr ""
+
+#: includes/admin/views/tabs/product.php:36
+#: includes/admin/views/tabs/post.php:55
+#: includes/admin/views/tabs/rss-post.php:50
+msgid "Maximum Lenght"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:110
+msgid "Medium"
+msgstr ""
+
+#: includes/helper.php:1451
+msgid "Meena (Female)"
+msgstr ""
+
+#: includes/helper.php:1599
+msgid "Mert (Male)"
+msgstr ""
+
+#: includes/classes/logs.php:303 includes/classes/logs.php:350
+msgid "Message"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:72
+msgid "Message limit"
+msgstr ""
+
+#: includes/helper.php:1399
+msgid "Mia (Female)"
+msgstr ""
+
+#: includes/helper.php:1544
+msgid "Michael"
+msgstr ""
+
+#: includes/helper.php:1337
+msgid "Michael (Male)"
+msgstr ""
+
+#: includes/helper.php:1408
+msgid "Michal (Female)"
+msgstr ""
+
+#: includes/helper.php:1528 includes/helper.php:1568
+msgid "Miguel (Male)"
+msgstr ""
+
+#: includes/helper.php:1292
+msgid "Mila (Female)"
+msgstr ""
+
+#: includes/helper.php:1455
+msgid "Min-soo (Male)"
+msgstr ""
+
+#: includes/helper.php:1479
+msgid "Minghao (Male)"
+msgstr ""
+
+#: includes/settings/settings.php:75 includes/settings/settings.php:221
+#: includes/settings/settings.php:439
+msgid "Model"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:78
+msgid "Modeling Compound"
+msgstr ""
+
+#: includes/helper.php:1254
+msgid "Mohammed (Male)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:89
+msgid "Mood"
+msgstr ""
+
+#: includes/helper.php:1552
+msgid "Mária (Female)"
+msgstr ""
+
+#: includes/helper.php:1429
+msgid "Nadia (Female)"
+msgstr ""
+
+#: includes/helper.php:1606
+msgid "Nam (Male)"
+msgstr ""
+
+#: includes/helper.php:621
+msgid "Name"
+msgstr ""
+
+#: includes/helper.php:1452
+msgid "Nandini (Male)"
+msgstr ""
+
+#: includes/helper.php:1512
+msgid "Natalia (Female)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:173
+msgid "Negative Prompt"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:79
+msgid "Neon Punk"
+msgstr ""
+
+#: includes/helper.php:1168
+msgid "Nepali"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:102
+msgid "Neutral"
+msgstr ""
+
+#. esc_html( wp_trim_words( end($data)['content'], 8 ) ),
+#: includes/hooks.php:1041 includes/admin/views/vision.php:11
+#: includes/admin/views/vision.php:34 includes/admin/views/chat-pdf.php:11
+#: includes/admin/views/chat-pdf.php:34 includes/admin/views/chat.php:11
+#: includes/admin/views/chat.php:34
+msgid "New Chat"
+msgstr ""
+
+#: includes/helper.php:1398
+msgid "Nico (Male)"
+msgstr ""
+
+#: includes/helper.php:1383
+msgid "Nicolas (Male)"
+msgstr ""
+
+#: includes/helper.php:1600
+msgid "Nilay (Female)"
+msgstr ""
+
+#: includes/admin/views/tabs/post.php:47
+msgid "No"
+msgstr ""
+
+#: includes/helper.php:1276 includes/helper.php:1335
+msgid "Noah (Male)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:66
+#: includes/admin/views/tabs/image.php:92
+#: includes/admin/views/tabs/image.php:111
+#: includes/admin/views/tabs/image.php:129
+msgid "None"
+msgstr ""
+
+#: includes/helper.php:1169
+msgid "Norwegian"
+msgstr ""
+
+#: includes/helper.php:1095 includes/helper.php:1230
+#: includes/settings/settings.php:178
+msgid "Norwegian (Norway)"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:54
+msgid "Nova (Female)"
+msgstr ""
+
+#: includes/settings/settings.php:232 includes/settings/settings.php:453
+#: includes/admin/views/tabs/product.php:44
+#: includes/admin/views/tabs/post.php:63
+#: includes/admin/views/tabs/rss-post.php:58
+msgid "Number of Results"
+msgstr ""
+
+#: includes/settings/settings.php:233 includes/settings/settings.php:454
+msgid "Number of results"
+msgstr ""
+
+#: includes/helper.php:1500
+msgid "Olav (Male)"
+msgstr ""
+
+#: includes/helper.php:481
+msgid "Older"
+msgstr ""
+
+#: includes/helper.php:1301 includes/helper.php:1336
+msgid "Oliver (Male)"
+msgstr ""
+
+#: includes/helper.php:1281 includes/helper.php:1298 includes/helper.php:1334
+msgid "Olivia (Female)"
+msgstr ""
+
+#: includes/helper.php:1258
+msgid "Omar (Male)"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:53
+msgid "Onyx (Male)"
+msgstr ""
+
+#: includes/shortcodes/shortcodes.php:321
+msgid "Open Result"
+msgstr ""
+
+#: includes/settings/settings.php:62 includes/admin/views/voiceover.php:14
+msgid "OpenAI"
+msgstr ""
+
+#: includes/settings/settings.php:270
+msgid "OpenAI Models for Generators & Chat"
+msgstr ""
+
+#: includes/settings/settings.php:65
+msgid "OpenAI Settings"
+msgstr ""
+
+#: includes/admin/admin-license.php:98 includes/admin/views/tabs/image.php:27
+#: includes/admin/views/tabs/image.php:50
+msgid "or"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:80
+msgid "Origami"
+msgstr ""
+
+#: includes/helper.php:1579
+msgid "Oskar (Male)"
+msgstr ""
+
+#: includes/admin/views/dashboard.php:64
+msgid "Others"
+msgstr ""
+
+#: includes/admin/admin-license.php:97
+msgid "our help center"
+msgstr ""
+
+#: includes/helper.php:1571
+msgid "Pablo (Male)"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:105
+msgid "Pace"
+msgstr ""
+
+#: includes/helper.php:1380 includes/helper.php:1391
+msgid "Paul (Male)"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:119
+msgid "Pause"
+msgstr ""
+
+#: includes/helper.php:1513
+msgid "Paweł (Male)"
+msgstr ""
+
+#: includes/classes/chatbot.php:571 includes/classes/chatbot.php:787
+msgid "PDF File does not exists!"
+msgstr ""
+
+#: includes/helper.php:1362 includes/helper.php:1366 includes/helper.php:1558
+#: includes/helper.php:1570
+msgid "Pedro (Male)"
+msgstr ""
+
+#: includes/helper.php:1170
+msgid "Persian"
+msgstr ""
+
+#: includes/helper.php:1326
+msgid "Peter (Male)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:81
+msgid "Photographic"
+msgstr ""
+
+#: includes/helper.php:1378
+msgid "Pierre (Male)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:82
+msgid "Pixel Art"
+msgstr ""
+
+#: includes/helper.php:1171
+msgid "Polish"
+msgstr ""
+
+#: includes/helper.php:1097 includes/helper.php:1231
+#: includes/settings/settings.php:180
+msgid "Polish (Poland)"
+msgstr ""
+
+#: includes/helper.php:1172
+msgid "Portuguese"
+msgstr ""
+
+#: includes/helper.php:1098 includes/helper.php:1232
+#: includes/settings/settings.php:181
+msgid "Portuguese (Brazil)"
+msgstr ""
+
+#: includes/helper.php:1099 includes/helper.php:1233
+#: includes/settings/settings.php:182
+msgid "Portuguese (Portugal)"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:59
+msgid "Position"
+msgstr ""
+
+#: includes/hooks.php:761 includes/hooks.php:840
+#: includes/admin/admin-init.php:230 includes/shortcodes/shortcodes.php:383
+msgid "Post"
+msgstr ""
+
+#: includes/hooks.php:269
+msgid "Post copy created."
+msgstr ""
+
+#: includes/admin/views/generators.php:36 includes/admin/views/dashboard.php:28
+msgid "Post Generator"
+msgstr ""
+
+#: includes/settings/settings.php:368
+msgid "Post Generator (Content)"
+msgstr ""
+
+#: includes/settings/settings.php:382
+msgid "Post Generator (Tag Prefix)"
+msgstr ""
+
+#: includes/settings/settings.php:375
+msgid "Post Generator (Tag)"
+msgstr ""
+
+#: includes/settings/settings.php:361
+msgid "Post Generator (Title)"
+msgstr ""
+
+#: includes/settings/settings.php:274
+msgid "Post Generator(s)"
+msgstr ""
+
+#. Description of the plugin
+msgid "Powerful WordPress AI Tool."
+msgstr ""
+
+#: includes/helper.php:1128
+msgid "Premium"
+msgstr ""
+
+#: includes/admin/views/tabs/yt-post.php:21
+msgid "Prepare a Blog Post"
+msgstr ""
+
+#: includes/admin/views/tabs/yt-post.php:25
+msgid "Prepare Pros and Cons"
+msgstr ""
+
+#: includes/settings/settings.php:139
+msgid "Presence Penalty"
+msgstr ""
+
+#: includes/admin/views/generators.php:6
+msgid "Print code like a programmer with simple definitions."
+msgstr ""
+
+#: includes/helper.php:1584
+msgid "Priya (Female)"
+msgstr ""
+
+#: includes/hooks.php:768 includes/hooks.php:841
+#: includes/admin/admin-init.php:251 includes/shortcodes/shortcodes.php:390
+msgid "Product"
+msgstr ""
+
+#: includes/admin/views/generators.php:31 includes/admin/views/dashboard.php:43
+msgid "Product Generator"
+msgstr ""
+
+#: includes/settings/settings.php:347
+msgid "Product Generator (Content)"
+msgstr ""
+
+#: includes/settings/settings.php:354
+msgid "Product Generator (Tag)"
+msgstr ""
+
+#: includes/settings/settings.php:340
+msgid "Product Generator (Title)"
+msgstr ""
+
+#: includes/helper.php:1110 includes/settings/settings.php:199
+msgid "Professional"
+msgstr ""
+
+#: includes/settings/settings.php:314 includes/settings/settings.php:324
+#: includes/settings/settings.php:327
+msgid "Prompts"
+msgstr ""
+
+#: includes/helper.php:1234
+msgid "Punjabi (India)"
+msgstr ""
+
+#: includes/classes/chatbot.php:1266
+msgid "Question"
+msgstr ""
+
+#: includes/classes/chatbot.php:1117
+msgid "Question does not exists!"
+msgstr ""
+
+#: includes/admin/views/dashboard.php:21
+msgid "Quick Links"
+msgstr ""
+
+#: includes/helper.php:1534
+msgid "Rahul (Male)"
+msgstr ""
+
+#: includes/helper.php:1461 includes/helper.php:1462
+msgid "Raivis (Male)"
+msgstr ""
+
+#: includes/helper.php:1538
+msgid "Raj (Male)"
+msgstr ""
+
+#: includes/helper.php:1585
+msgid "Ravi (Male)"
+msgstr ""
+
+#: includes/admin/views/vision.php:15 includes/admin/views/chat-pdf.php:15
+#: includes/admin/views/chat.php:15 includes/admin/views/tabs/custom.php:16
+msgid "Real-Time data"
+msgstr ""
+
+#: includes/hooks.php:303
+msgid "Result saved to Documents."
+msgstr ""
+
+#: includes/helper.php:1430
+msgid "Reza (Male)"
+msgstr ""
+
+#: includes/helper.php:1436
+msgid "Riccardo (Male)"
+msgstr ""
+
+#: includes/helper.php:1446
+msgid "Rin (Female)"
+msgstr ""
+
+#: includes/helper.php:1420
+msgid "Rishabh (Male)"
+msgstr ""
+
+#: includes/helper.php:1310 includes/helper.php:1419
+msgid "Rohan (Male)"
+msgstr ""
+
+#: includes/helper.php:622
+msgid "Role"
+msgstr ""
+
+#: includes/helper.php:1173
+msgid "Romanian"
+msgstr ""
+
+#: includes/helper.php:1100 includes/helper.php:1235
+#: includes/settings/settings.php:183
+msgid "Romanian (Romania)"
+msgstr ""
+
+#: includes/hooks.php:1336
+msgid "RSS Not Fetched! Please check your URL and validete the RSS!"
+msgstr ""
+
+#: includes/admin/admin-init.php:237 includes/admin/views/generators.php:46
+#: includes/admin/views/dashboard.php:33
+msgid "RSS to Post"
+msgstr ""
+
+#: includes/helper.php:1174
+msgid "Russian"
+msgstr ""
+
+#: includes/helper.php:1101 includes/helper.php:1236
+#: includes/settings/settings.php:184
+msgid "Russian (Russia)"
+msgstr ""
+
+#: includes/helper.php:1573
+msgid "Saga (Female)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:108
+msgid "Sampler"
+msgstr ""
+
+#: includes/helper.php:1327
+msgid "Sarah (Female)"
+msgstr ""
+
+#: includes/helper.php:1115 includes/settings/settings.php:204
+msgid "Sarcastic"
+msgstr ""
+
+#: includes/helper.php:1431
+msgid "Satria (Male)"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:95
+msgid "Save"
+msgstr ""
+
+#: includes/helper.php:1454
+msgid "Se-yeon (Female)"
+msgstr ""
+
+#: includes/admin/views/vision.php:43
+msgid ""
+"Seamlessly upload any image you want to explore or discuss and get "
+"insightful conversations."
+msgstr ""
+
+#: includes/admin/views/chat-pdf.php:43
+msgid ""
+"Seamlessly upload any PDF you want to explore or discuss and get insightful "
+"conversations."
+msgstr ""
+
+#: includes/post-types/attachments.php:7
+msgid "Search Attachments"
+msgstr ""
+
+#: includes/admin/views/vision.php:6 includes/admin/views/vision.php:29
+#: includes/admin/views/chat-pdf.php:6 includes/admin/views/chat-pdf.php:29
+#: includes/admin/views/chat.php:6 includes/admin/views/chat.php:29
+msgid "Search chat..."
+msgstr ""
+
+#: includes/post-types/documents.php:7
+msgid "Search Documents"
+msgstr ""
+
+#: includes/settings/settings.php:511
+msgid "Search Engine ID"
+msgstr ""
+
+#: includes/helper.php:1121 includes/settings/settings.php:210
+msgid "Secretive"
+msgstr ""
+
+#: includes/settings/settings.php:1052
+msgid "Section"
+msgstr ""
+
+#: includes/hooks.php:934
+msgid "Security Failed!"
+msgstr ""
+
+#: includes/admin/views/dashboard.php:115
+msgid "See All Activities"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:141
+msgid "Seed"
+msgstr ""
+
+#: includes/hooks.php:955 includes/hooks.php:1102
+msgid "Select a ChatBot Template!"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:32
+msgid "Select a template!"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:98
+msgid "Select a voice"
+msgstr ""
+
+#: includes/admin/views/speech-to-text.php:17
+msgid "Select File"
+msgstr ""
+
+#: includes/settings/settings.php:528
+msgid "Select storage type."
+msgstr ""
+
+#: includes/settings/settings.php:275
+msgid "Select the desired model for the all Post generators."
+msgstr ""
+
+#: includes/settings/settings.php:299
+msgid ""
+"Select the desired model for the Assistant (Block Editor & Classic Editor)"
+msgstr ""
+
+#: includes/settings/settings.php:287
+msgid "Select the desired model for the Chat"
+msgstr ""
+
+#: includes/settings/settings.php:293
+msgid "Select the desired model for the ChatBot"
+msgstr ""
+
+#: includes/settings/settings.php:281
+msgid "Select the desired model for the Custom Generator & Web Search"
+msgstr ""
+
+#: includes/helper.php:1601
+msgid "Selin (Female)"
+msgstr ""
+
+#: includes/helper.php:1293
+msgid "Sem (Male)"
+msgstr ""
+
+#: includes/helper.php:1175
+msgid "Serbian"
+msgstr ""
+
+#: includes/helper.php:1237
+msgid "Serbian (Cyrillic)"
+msgstr ""
+
+#: includes/settings/settings.php:539
+msgid "Serper"
+msgstr ""
+
+#: includes/settings/settings.php:543
+msgid "Serper API Key"
+msgstr ""
+
+#: includes/settings/settings.php:152
+msgid ""
+"Set the default language for forms generated by the OpenAI language model. "
+"This language will be applied as the initial language setting for new forms "
+"created through the generator."
+msgstr ""
+
+#: includes/settings/settings.php:196
+msgid ""
+"Set the default tone for forms generated by the OpenAI language model. This "
+"tone will be applied as the initial tone setting for new forms created "
+"through the generator."
+msgstr ""
+
+#: includes/admin/admin-page-settings.php:22
+#: includes/admin/admin-page-settings.php:23
+msgid "Settings"
+msgstr ""
+
+#: includes/settings/settings.php:656
+msgid "Settings Saved"
+msgstr ""
+
+#: includes/hooks.php:928
+msgid "Settings Saved Successfully! Redirecting..."
+msgstr ""
+
+#: includes/helper.php:1456
+msgid "Seung-woo (Male)"
+msgstr ""
+
+#: includes/helper.php:1481
+msgid "Shanshan (Female)"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:55
+msgid "Shimmer (Female)"
+msgstr ""
+
+#: includes/admin/admin-page-shortcodes.php:22
+#: includes/admin/admin-page-shortcodes.php:23
+msgid "Shortcodes"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:16
+msgid "Show ChatBot Ballon on"
+msgstr ""
+
+#: includes/helper.php:1447
+msgid "Shun (Male)"
+msgstr ""
+
+#: includes/helper.php:1501
+msgid "Silje (Female)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:132
+msgid "SIMPLE"
+msgstr ""
+
+#: includes/admin/views/generators.php:9
+msgid "Simply turn your Youtube videos into Blog post."
+msgstr ""
+
+#: includes/helper.php:1535
+msgid "Simran (Female)"
+msgstr ""
+
+#: includes/helper.php:1269
+msgid "Siu (Female)"
+msgstr ""
+
+#: includes/helper.php:1176
+msgid "Slovak"
+msgstr ""
+
+#: includes/helper.php:1238
+msgid "Slovak (Slovakia)"
+msgstr ""
+
+#: includes/helper.php:1177
+msgid "Slovenian"
+msgstr ""
+
+#: includes/helper.php:1102 includes/settings/settings.php:185
+msgid "Slovenian (Slovenia)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:133
+msgid "SLOW"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:109
+msgid "Slow"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:134
+msgid "SLOWER"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:135
+msgid "SLOWEST"
+msgstr ""
+
+#: includes/helper.php:1453
+msgid "So-young (Female)"
+msgstr ""
+
+#: includes/helper.php:1367
+msgid "Sofia (Female)"
+msgstr ""
+
+#: includes/helper.php:1368
+msgid "Sofianna (Female)"
+msgstr ""
+
+#: includes/helper.php:1610
+msgid "Son (Male)"
+msgstr ""
+
+#: includes/helper.php:1550
+msgid "Sophia"
+msgstr ""
+
+#: includes/helper.php:1342 includes/helper.php:1354 includes/helper.php:1390
+msgid "Sophia (Female)"
+msgstr ""
+
+#: includes/helper.php:1285 includes/helper.php:1291 includes/helper.php:1304
+#: includes/helper.php:1332 includes/helper.php:1379
+msgid "Sophie (Female)"
+msgstr ""
+
+#: includes/helper.php:1178
+msgid "Spanish"
+msgstr ""
+
+#: includes/helper.php:1079 includes/helper.php:1239
+#: includes/settings/settings.php:162
+msgid "Spanish (Spain)"
+msgstr ""
+
+#: includes/helper.php:1240
+msgid "Spanish (US)"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:62
+msgid "Speech"
+msgstr ""
+
+#: includes/hooks.php:740 includes/hooks.php:836
+#: includes/admin/admin-init.php:294 includes/shortcodes/shortcodes.php:362
+#: includes/admin/views/dashboard.php:78
+msgid "Speech to Text"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:133
+msgid "Speeches"
+msgstr ""
+
+#: includes/classes/google-tts.php:134
+msgid "Speeches are empty, Please fill and send a new request again!"
+msgstr ""
+
+#: includes/helper.php:1421
+msgid "Srishti (Female)"
+msgstr ""
+
+#: includes/settings/settings.php:426 includes/admin/views/tabs/image.php:16
+msgid "Stable Diffusion"
+msgstr ""
+
+#: includes/settings/settings.php:429
+msgid "Stable Diffusion Settings"
+msgstr ""
+
+#: includes/admin/admin-page-chatbot.php:115
+msgid "Start New Chat"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:21
+msgid "Start with a detailed description"
+msgstr ""
+
+#: includes/settings/settings.php:954 includes/classes/logs.php:302
+#: includes/classes/logs.php:349 includes/classes/chatbot.php:319
+#: includes/classes/chatbot.php:717 includes/classes/chatbot.php:980
+#: includes/classes/chatbot.php:1268
+msgid "Status"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:148
+msgid "Steps"
+msgstr ""
+
+#: includes/helper.php:1294
+msgid "Stijn (Male)"
+msgstr ""
+
+#: includes/settings/settings.php:523 includes/settings/settings.php:527
+msgid "Storage"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:63
+msgid "Style"
+msgstr ""
+
+#: includes/admin/admin-license.php:99
+msgid "submit a ticket"
+msgstr ""
+
+#: includes/admin/views/dashboard.php:15
+msgid "Support"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:21
+msgid "Suprise me"
+msgstr ""
+
+#: includes/helper.php:1587
+msgid "Suresh (Male)"
+msgstr ""
+
+#: includes/helper.php:1179
+msgid "Swahili"
+msgstr ""
+
+#: includes/helper.php:1104 includes/settings/settings.php:187
+msgid "Swahili (Kenya)"
+msgstr ""
+
+#: includes/helper.php:1180
+msgid "Swedish"
+msgstr ""
+
+#: includes/helper.php:1103 includes/helper.php:1241
+#: includes/settings/settings.php:186
+msgid "Swedish (Sweden)"
+msgstr ""
+
+#: includes/helper.php:1459
+msgid "Tae-hyun (Male)"
+msgstr ""
+
+#: includes/helper.php:1181
+msgid "Tagalog"
+msgstr ""
+
+#: includes/admin/views/tabs/post.php:17
+msgid "Tags"
+msgstr ""
+
+#: includes/classes/chatbot.php:540 includes/classes/chatbot.php:693
+#: includes/classes/chatbot.php:957 includes/classes/chatbot.php:1245
+msgid "Tained Successful!"
+msgstr ""
+
+#: includes/helper.php:1406
+msgid "Tamar (Female)"
+msgstr ""
+
+#: includes/helper.php:1182
+msgid "Tamil"
+msgstr ""
+
+#: includes/helper.php:1242
+msgid "Tamil (India)"
+msgstr ""
+
+#: includes/helper.php:1243
+msgid "Telugu (India)"
+msgstr ""
+
+#: includes/settings/settings.php:114
+msgid "Temperature"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:29
+msgid "Template"
+msgstr ""
+
+#: includes/helper.php:1271
+msgid "Tereza (Female)"
+msgstr ""
+
+#: includes/hooks.php:775 includes/hooks.php:839
+#: includes/shortcodes/shortcodes.php:397
+msgid "Text"
+msgstr ""
+
+#: includes/classes/chatbot.php:1051 includes/classes/chatbot.php:1339
+msgid "Text File does not exists!"
+msgstr ""
+
+#: includes/settings/settings.php:91
+msgid "Text to Speech Model (TTS)"
+msgstr ""
+
+#: includes/helper.php:1183
+msgid "Thai"
+msgstr ""
+
+#: includes/helper.php:1244
+msgid "Thai (Thailand)"
+msgstr ""
+
+#: includes/helper.php:1611
+msgid "Thao (Female)"
+msgstr ""
+
+#: includes/settings/settings.php:512
+msgid ""
+"The identifier of the Programmable Search Engine. Details: <a href=\"https:"
+"//cse.google.com\" target=\"_blank\">https://cse.google.com</a>"
+msgstr ""
+
+#: includes/settings/settings.php:76 includes/settings/settings.php:222
+msgid ""
+"The OpenAI API is powered by a diverse set of models with different "
+"capabilities and price points."
+msgstr ""
+
+#: includes/settings/settings.php:440
+msgid ""
+"The Stable Diffusion API is powered by a diverse set of models with "
+"different capabilities and price points."
+msgstr ""
+
+#: includes/classes/logs.php:290
+msgid "There is no log record yet."
+msgstr ""
+
+#: includes/admin/views/chatbot.php:112
+msgid "There is no template. Create template first!"
+msgstr ""
+
+#: includes/classes/chatbot.php:579
+msgid "This file is already trained before!"
+msgstr ""
+
+#: includes/settings/settings.php:501
+msgid ""
+"This option deprecated with v1.2! Use Additional APIs > Serper API instead."
+msgstr ""
+
+#: includes/settings/settings.php:140
+msgid ""
+"This parameter in OpenAI's language models that controls the model's "
+"inclination to include or avoid certain specified words or phrases in its "
+"generated output, allowing users to influence the presence or absence of "
+"specific content in the text."
+msgstr ""
+
+#: includes/settings/settings.php:128
+msgid ""
+"This parameter in OpenAI's language models that regulates the model's "
+"tendency to generate commonly used words or phrases, with higher values "
+"leading to more diverse and creative outputs by reducing the repetition of "
+"common words."
+msgstr ""
+
+#: includes/settings/settings.php:115
+msgid ""
+"This parameter used in OpenAI's language models like GPT-3.5 to control the "
+"randomness of generated text. Higher values (e.g., Premium) make the output "
+"more diverse and creative by introducing randomness, while lower values (e.g."
+", Economic) make the output more focused and deterministic by reducing "
+"randomness."
+msgstr ""
+
+#: includes/helper.php:1284 includes/helper.php:1307 includes/helper.php:1372
+#: includes/helper.php:1376
+msgid "Thomas (Male)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:83
+msgid "Tile Texture"
+msgstr ""
+
+#: includes/helper.php:1487
+msgid "Tingting (Female)"
+msgstr ""
+
+#: includes/classes/chatbot.php:978 includes/shortcodes/shortcodes.php:302
+#: includes/admin/views/tabs/product.php:9
+#: includes/admin/views/tabs/product.php:11
+#: includes/admin/views/tabs/post.php:9 includes/admin/views/tabs/post.php:11
+msgid "Title"
+msgstr ""
+
+#: includes/classes/chatbot.php:829
+msgid "Title does not exists!"
+msgstr ""
+
+#: includes/helper.php:474
+msgid "Today"
+msgstr ""
+
+#: includes/helper.php:1602
+msgid "Tolga (Male)"
+msgstr ""
+
+#: includes/helper.php:1514
+msgid "Tomasz (Male)"
+msgstr ""
+
+#: includes/admin/views/tabs/product.php:71
+#: includes/admin/views/tabs/post.php:90
+#: includes/admin/views/tabs/rss-post.php:85
+msgid "Tone"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:65
+msgid "Top Left"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:64
+msgid "Top Right"
+msgstr ""
+
+#: includes/classes/chatbot.php:750
+msgid "Total PDF File"
+msgstr ""
+
+#: includes/classes/chatbot.php:1305
+msgid "Total Q&A"
+msgstr ""
+
+#: includes/classes/chatbot.php:1017
+msgid "Total Text"
+msgstr ""
+
+#: includes/classes/logs.php:352
+msgid "Total Tokens"
+msgstr ""
+
+#: includes/classes/chatbot.php:352
+msgid "Total URL"
+msgstr ""
+
+#: includes/classes/chatbot.php:353 includes/classes/chatbot.php:751
+#: includes/classes/chatbot.php:1018 includes/classes/chatbot.php:1306
+msgid "Total Word"
+msgstr ""
+
+#: includes/classes/chatbot.php:357
+msgid "Train the ChatBot"
+msgstr ""
+
+#: includes/classes/chatbot.php:713 includes/classes/chatbot.php:975
+#: includes/classes/chatbot.php:1263
+msgid "Trained PDF Files"
+msgstr ""
+
+#: includes/helper.php:1506
+msgid "Trine (Female)"
+msgstr ""
+
+#: includes/settings/settings.php:92
+msgid ""
+"TTS is an AI model that converts text to natural sounding spoken text. We "
+"offer two different model variates, tts-1 is optimized for real time text to "
+"speech use cases and tts-1-hd is optimized for quality."
+msgstr ""
+
+#: includes/helper.php:1612
+msgid "Tuan (Male)"
+msgstr ""
+
+#: includes/helper.php:1184
+msgid "Turkish"
+msgstr ""
+
+#: includes/helper.php:1105 includes/helper.php:1245
+#: includes/settings/settings.php:188
+msgid "Turkish (Turkey)"
+msgstr ""
+
+#: includes/shortcodes/shortcodes.php:303
+msgid "Type"
+msgstr ""
+
+#: includes/admin/admin-page-chatbot.php:118 includes/admin/views/vision.php:52
+#: includes/admin/views/chat-pdf.php:52 includes/admin/views/chat.php:48
+msgid "Type and hit..."
+msgstr ""
+
+#: includes/helper.php:1185
+msgid "Ukrainian"
+msgstr ""
+
+#: includes/helper.php:1246
+msgid "Ukrainian (Ukraine)"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:112
+msgid "Ultra Fast"
+msgstr ""
+
+#: includes/helper.php:1588
+msgid "Uma (Female)"
+msgstr ""
+
+#: includes/settings/settings.php:550 includes/admin/views/tabs/post.php:48
+msgid "Unsplash"
+msgstr ""
+
+#: includes/settings/settings.php:554
+msgid "Unsplash API Key"
+msgstr ""
+
+#: includes/admin/views/speech-to-text.php:15
+msgid ""
+"Upload an Audio File (mp3, mp4, mpeg, mpga, m4a, wav, and webm)(Max: 25Mb)"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:27
+#: includes/admin/views/tabs/image.php:50
+msgid "upload an image"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:30
+msgid "upload an mask image"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:54
+msgid "upscale the image?"
+msgstr ""
+
+#: includes/helper.php:1186
+msgid "Urdu"
+msgstr ""
+
+#: includes/classes/chatbot.php:318 includes/admin/views/tabs/rss-post.php:9
+msgid "URL"
+msgstr ""
+
+#: includes/classes/chatbot.php:281
+msgid "URL already crawled!"
+msgstr ""
+
+#: includes/hooks.php:1305 includes/classes/chatbot.php:217
+#: includes/classes/chatbot.php:260 includes/classes/chatbot.php:384
+msgid "URL is invalid!"
+msgstr ""
+
+#: includes/admin/views/tabs/image.php:35
+msgid "use image as a create varitation"
+msgstr ""
+
+#: includes/classes/logs.php:301 includes/classes/logs.php:347
+msgid "User"
+msgstr ""
+
+#: includes/helper.php:1437
+msgid "Valentina (Female)"
+msgstr ""
+
+#: includes/helper.php:1432
+msgid "Vania (Female)"
+msgstr ""
+
+#: includes/helper.php:1589
+msgid "Venkatesh (Male)"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:108
+msgid "Very Slow"
+msgstr ""
+
+#: includes/helper.php:1545
+msgid "Victoria"
+msgstr ""
+
+#: includes/helper.php:1187
+msgid "Vietnamese"
+msgstr ""
+
+#: includes/helper.php:1106 includes/helper.php:1247
+#: includes/settings/settings.php:189
+msgid "Vietnamese (Vietnam)"
+msgstr ""
+
+#: includes/admin/admin-init.php:287 includes/admin/views/dashboard.php:73
+msgid "Vision"
+msgstr ""
+
+#: includes/hooks.php:365
+msgid "Visit Post"
+msgstr ""
+
+#: includes/helper.php:1438
+msgid "Vittoria (Female)"
+msgstr ""
+
+#: includes/admin/views/voiceover.php:47 includes/admin/views/voiceover.php:95
+msgid "Voice"
+msgstr ""
+
+#: includes/hooks.php:747 includes/hooks.php:837
+#: includes/admin/admin-init.php:301 includes/shortcodes/shortcodes.php:369
+#: includes/admin/views/dashboard.php:83
+msgid "Voiceover"
+msgstr ""
+
+#: includes/helper.php:1188
+msgid "Welsh"
+msgstr ""
+
+#: includes/helper.php:1516
+msgid "Wiktoria (Female)"
+msgstr ""
+
+#: includes/helper.php:1305 includes/helper.php:1340
+msgid "William (Male)"
+msgstr ""
+
+#: includes/helper.php:1267
+msgid "Wing (Female)"
+msgstr ""
+
+#: includes/helper.php:1114 includes/settings/settings.php:203
+msgid "Witty"
+msgstr ""
+
+#: includes/classes/chatbot.php:320 includes/classes/chatbot.php:718
+#: includes/classes/chatbot.php:981 includes/classes/chatbot.php:1269
+msgid "Word"
+msgstr ""
+
+#: includes/settings/settings.php:531
+msgid "WordPress"
+msgstr ""
+
+#: includes/admin/views/chatbot.php:21
+msgid "WP Dashboard"
+msgstr ""
+
+#: includes/helper.php:1477
+msgid "Xiaomei (Female)"
+msgstr ""
+
+#: includes/helper.php:1410
+msgid "Yael (Female)"
+msgstr ""
+
+#: includes/helper.php:1480
+msgid "Yingying (Female)"
+msgstr ""
+
+#: includes/helper.php:1458
+msgid "Yoon-a (Female)"
+msgstr ""
+
+#: includes/settings/settings.php:488
+msgid ""
+"You can find your API key at <a href=\"https://cloud.google.com\" "
+"target=\"_blank\">https://cloud.google.com</a>"
+msgstr ""
+
+#: includes/settings/settings.php:506
+msgid ""
+"You can find your API key at <a href=\"https://developers.google.com/custom-"
+"search/v1/overview\" target=\"_blank\">https://developers.google.com/custom-"
+"search/v1/overview</a>"
+msgstr ""
+
+#: includes/settings/settings.php:70
+msgid ""
+"You can find your API key at <a href=\"https://platform.openai."
+"com/account/api-keys\" target=\"_blank\">https://platform.openai."
+"com/account/api-keys</a>"
+msgstr ""
+
+#: includes/settings/settings.php:434
+msgid ""
+"You can find your API key at <a href=\"https://platform.stability."
+"ai/docs/getting-started/authentication\" target=\"_blank\">https://stability."
+"ai/</a>"
+msgstr ""
+
+#: includes/settings/settings.php:544
+msgid ""
+"You can find your API key at <a href=\"https://serper.dev\" "
+"target=\"_blank\">https://serper.dev</a>"
+msgstr ""
+
+#: includes/settings/settings.php:555
+msgid ""
+"You can find your API key at <a href=\"https://unsplash."
+"com/oauth/applications\" target=\"_blank\">https://unsplash."
+"com/oauth/applications</a>"
+msgstr ""
+
+#: includes/admin/admin-license.php:96
+msgid "You can now enjoy MagicAI. Looking for help? Visit"
+msgstr ""
+
+#: includes/shortcodes/shortcodes.php:119
+#: includes/shortcodes/shortcodes.php:184
+#: includes/shortcodes/shortcodes.php:216
+msgid "You must login first!"
+msgstr ""
+
+#: includes/hooks.php:1233
+msgid "You reached ChatBot message limit!"
+msgstr ""
+
+#: includes/settings/settings.php:264
+msgid ""
+"You receive an AI response supported by Google search results. By enabling "
+"this feature, you gain access to AI-powered web search capabilities, "
+"allowing you to retrieve valuable information and insights from a vast array "
+"of online sources directly through the application."
+msgstr ""
+
+#: includes/settings/settings.php:403
+msgid "Youtube - Create List"
+msgstr ""
+
+#: includes/settings/settings.php:410
+msgid "Youtube - Create TLDR"
+msgstr ""
+
+#: includes/settings/settings.php:396
+msgid "Youtube - Main Idea"
+msgstr ""
+
+#: includes/settings/settings.php:389
+msgid "Youtube - Prepare Blog Post"
+msgstr ""
+
+#: includes/settings/settings.php:417
+msgid "Youtube - Prepare Pros and Cons"
+msgstr ""
+
+#: includes/admin/views/tabs/yt-post.php:10
+msgid "YouTube Video URL"
+msgstr ""
+
+#: includes/helper.php:1490
+msgid "Yuehan (Female)"
+msgstr ""
+
+#: includes/helper.php:1484
+msgid "Yueyu (Female)"
+msgstr ""
+
+#: includes/helper.php:1488
+msgid "Yunyun (Female)"
+msgstr ""
+
+#: includes/helper.php:1448
+msgid "Yuta (Male)"
+msgstr ""
+
+#: includes/helper.php:1259
+msgid "Zahra (Female)"
+msgstr ""
+
+#: includes/helper.php:1489
+msgid "Zhenghao (Male)"
+msgstr ""
+
+#: includes/helper.php:1515
+msgid "Zofia (Female)"
+msgstr ""
+
+#: includes/helper.php:1553
+msgid "Zuzana (Female)"
+msgstr ""
+
+#: includes/helper.php:1400 includes/helper.php:1401
+msgid "Ελένη (Female)"
+msgstr ""
+
+#: includes/helper.php:1403 includes/helper.php:1405
+msgid "કિશોર (Male)"
+msgstr ""
+
+#: includes/helper.php:1402 includes/helper.php:1404
+msgid "દિવ્યા (Female)"
+msgstr ""
