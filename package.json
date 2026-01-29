@@ -40,7 +40,7 @@
 		"@alpinejs/intersect": "^3.14.8",
 		"@alpinejs/sort": "^3.14.9",
 		"@floating-ui/dom": "^1.7.3",
-		"@imacrayon/alpine-ajax": "^0.4.3",
+		"@imacrayon/alpine-ajax": "^0.12.6",
 		"@microsoft/fetch-event-source": "^2.0.1",
 		"@tiptap/core": "^3.17.1",
 		"@tiptap/extension-bubble-menu": "^3.18.0",
