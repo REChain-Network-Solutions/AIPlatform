@@ -45,9 +45,9 @@
 		"@tiptap/core": "^3.17.1",
 		"@tiptap/extension-bubble-menu": "^3.18.0",
 		"@tiptap/extension-code": "^3.17.1",
-		"@tiptap/extension-code-block-lowlight": "^3.2.0",
+		"@tiptap/extension-code-block-lowlight": "^3.18.0",
 		"@tiptap/extension-floating-menu": "^3.2.0",
-		"@tiptap/extension-image": "^3.2.0",
+		"@tiptap/extension-image": "^3.18.0",
 		"@tiptap/pm": "^3.2.0",
 		"@tiptap/starter-kit": "^3.2.0",
 		"lowlight": "^3.3.0",
@@ -55,6 +55,6 @@
 		"rampensau": "^2.3.0",
 		"rt-client": "file:./rt-client-0.4.7.tgz",
 		"sortablejs": "^1.15.6",
-		"typed.js": "^2.1.0"
+		"typed.js": "^3.0.0"
 	}
 }
