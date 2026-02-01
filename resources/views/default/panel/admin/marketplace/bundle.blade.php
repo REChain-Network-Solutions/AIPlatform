@@ -219,47 +219,59 @@
                         @endforeach
                     </div>
 
-                    <div class="mb-5">
-                        <div class="flex justify-between gap-1 border-b py-3 last:border-b-0">
+
+					@if(! $item['licensed'])
+						<div class="mb-5">
+							<div class="flex justify-between gap-1 border-b py-3 last:border-b-0">
                             <span class="opacity-60">
                                 {{ __('Price of Individual Addons') }}
                             </span>
-                            <span class="text-heading-foreground">
+								<span class="text-heading-foreground">
                                 ${{ $totalProductPrice }}
                             </span>
-                        </div>
-                        <div class="flex justify-between gap-1 border-b py-3 last:border-b-0">
+							</div>
+							<div class="flex justify-between gap-1 border-b py-3 last:border-b-0">
                             <span class="opacity-60">
                                 {{ __('Bundle Save') }}
                             </span>
-                            <span class="text-green-600">
+								<span class="text-green-600">
                                 ${{ $totalProductPrice -$item['price'] }}
                             </span>
-                        </div>
-                        <div class="flex justify-between gap-1 border-b py-3 text-[18px] font-semibold last:border-b-0">
+							</div>
+							<div class="flex justify-between gap-1 border-b py-3 text-[18px] font-semibold last:border-b-0">
                             <span class="opacity-60">
                                 {{ __('Total') }}
                             </span>
-                            <div class="font-bold text-heading-foreground">
-{{--                                @if ($item['fake_price'] ?? false)--}}
-{{--                                    <s class="text-[18px] line-through">--}}
-{{--                                        ${{ $item['fake_price'] }}--}}
-{{--                                    </s>--}}
-{{--                                @endif--}}
-                                ${{ $item['price'] }}
-                            </div>
-                        </div>
-                    </div>
+								<div class="font-bold text-heading-foreground">
+									{{--                                @if ($item['fake_price'] ?? false)--}}
+									{{--                                    <s class="text-[18px] line-through">--}}
+									{{--                                        ${{ $item['fake_price'] }}--}}
+									{{--                                    </s>--}}
+									{{--                                @endif--}}
+									${{ $item['price'] }}
+								</div>
+							</div>
+						</div>
 
-                    <x-button
-                        class="w-full shadow-xl shadow-black/10"
-                        variant="success"
-                        target="_blank"
-                        size="lg"
-                        href="{{ $item['routes']['payment'] }}"
-                    >
-                        {{ __('Purchase Bundle') }}
-                    </x-button>
+						<x-button
+							class="w-full shadow-xl shadow-black/10"
+							variant="success"
+							target="_blank"
+							size="lg"
+							href="{{ $item['routes']['payment'] }}"
+						>
+							{{ __('Purchase Bundle') }}
+						</x-button>
+					@else
+						<x-button
+							class="w-full"
+							size="lg"
+							href="{{ route('dashboard.admin.marketplace.liextension') }}"
+						>
+							{{ __('Install Now') }}
+						</x-button>
+					@endif
+
                 </div>
             </x-card>
 

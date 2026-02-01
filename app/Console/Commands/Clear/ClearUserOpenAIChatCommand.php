@@ -21,7 +21,7 @@ class ClearUserOpenAIChatCommand extends Command
             return;
         }
 
-        Log::info('Clearing user OpenAI chat data (except last 22)...');
+        // Log::info('Clearing user OpenAI chat data (except last 22)...');
 
         $idsToRetain = UserOpenaiChat::query()
             ->whereNotIn('openai_chat_category_id', [15, 18])
@@ -38,6 +38,6 @@ class ClearUserOpenAIChatCommand extends Command
 
         // File chat
 
-        Log::info('User OpenAI chat data cleared successfully (last 22 retained).');
+        // Log::info('User OpenAI chat data cleared successfully (last 22 retained).');
     }
 }

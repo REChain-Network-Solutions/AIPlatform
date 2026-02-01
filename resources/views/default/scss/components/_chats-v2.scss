@@ -312,6 +312,13 @@
 			@apply size-6 mt-0;
 		}
 
+		&:has(.social-media-agent-chat-post-card) {
+
+			.lqd-chat-bubble-canvas-trigger {
+				@apply hidden;
+			}
+		}
+
 		&.animating-words-done {
 
 			.multi-model-response-accept {

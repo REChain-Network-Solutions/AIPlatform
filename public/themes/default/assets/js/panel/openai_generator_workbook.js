@@ -77,6 +77,11 @@ const generate = async ( message_no, creativity, maximum_length, number_of_resul
 		formData.append('number_of_results', number_of_results);
 		formData.append('openai_id', openai_id);
 		formData.append('open_router_model', open_router_model);
+
+		if (document.querySelector('#chat_open_ai_agent_id')?.value) {
+			formData.append('chat_open_ai_agent_id', document.querySelector('#chat_open_ai_agent_id').value);
+		}
+
 		var receivedMessageId = false;
 		fetchEventSource('/dashboard/user/generator/generate-stream', {
 			method: 'POST',

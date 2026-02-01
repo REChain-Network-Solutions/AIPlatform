@@ -33,7 +33,7 @@
         @endforeach
     </div>
 
-    <script src="{{ custom_theme_url('/assets/libs/markdown-it.min.js') }}"></script>
+    <script src="{{ custom_theme_url('/assets/libs/markdownit/markdown-it.min.js') }}"></script>
     <script>
         const chatsMD = window.markdownit({
             highlight: function(str, lang) {

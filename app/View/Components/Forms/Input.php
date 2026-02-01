@@ -29,10 +29,11 @@ class Input extends Component
         public bool $custom = false,
         // a style for checkbox and radio
         public bool $switcher = false,
+        public bool $switcherFill = false,
         // add a 'Add New' option to the select with multiple options
         public bool $addNew = false,
         // for number input
-        public bool $stepper = false
+        public bool $stepper = false,
     ) {}
 
     /**

@@ -19,7 +19,7 @@
             'md' => 'lqd-input-md h-10',
             'lg' => 'lqd-input-lg h-11',
             'xl' => 'lqd-input-xl h-14 px-6',
-        ],
+        ]
     ];
 
     if ($type === 'textarea') {
@@ -30,6 +30,10 @@
         $input_checkbox_base_class .= ' lqd-input-switcher border-2 border-input-border [--input-rounded-multiplier:5] cursor-pointer appearance-none [background-size:1.3rem] bg-left bg-no-repeat transition-all
 			checked:bg-right checked:bg-heading-foreground checked:border-heading-foreground
 			dark:checked:bg-label dark:checked:border-label';
+
+		if ( $switcherFill ) {
+			$input_checkbox_base_class .= ' lqd-input-switcher-fill';
+		}
 
         $variations['size'] = [
             'sm' => 'lqd-input-sm w-[34px] h-[18px]',
@@ -296,12 +300,13 @@
 
 {{-- Initiate Select2 for select elements with multiple attribute --}}
 @if ($type === 'select' && $attributes->has('multiple'))
-@pushOnce('css')
-<link
-	href="{{ custom_theme_url('/assets/libs/tom-select/dist/css/tom-select.min.css') }}"
-	rel="stylesheet"
-/>
-@endPushOnce
+	@pushOnce('css')
+	<link
+		href="{{ custom_theme_url('/assets/libs/tom-select/dist/css/tom-select.min.css') }}"
+		rel="stylesheet"
+	/>
+	@endPushOnce
+
     @pushOnce('script')
         <script src="{{ custom_theme_url('/assets/libs/tom-select/dist/js/tom-select.complete.min.js') }}"></script>
 

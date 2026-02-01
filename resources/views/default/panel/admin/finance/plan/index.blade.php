@@ -1,7 +1,7 @@
 @extends('panel.layout.app', ['disable_tblr' => true])
 @section('title', __('Subscriptions and Packs'))
 @section('titlebar_actions')
-    <div class="mb-4 flex flex-wrap gap-3">
+    <div class="flex flex-wrap gap-3">
         <x-button
             href="{{ $app_is_demo ? '#' : route('dashboard.admin.finance.plan.create') }}"
             onclick="{{ $app_is_demo ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '' }}"
@@ -14,7 +14,7 @@
         >
             {{ __('Create New Token Pack') }}
         </x-button>
-	</div>
+    </div>
 @endsection
 @section('content')
     <div class="py-10">
@@ -115,15 +115,15 @@
                                 </p>
                             </td>
                             <td class="whitespace-nowrap text-end">
-								<x-button
-									class="size-9"
-									variant="ghost-shadow"
-									size="none"
-									href="{{ route($entry->type == 'subscription' ? 'dashboard.admin.finance.plan.edit' : 'dashboard.admin.finance.token-pack-plan.edit', $entry->id) }}"
-									title="{{ __('Edit') }}"
-								>
-									<x-tabler-pencil class="size-4" />
-								</x-button>
+                                <x-button
+                                    class="size-9"
+                                    variant="ghost-shadow"
+                                    size="none"
+                                    href="{{ route($entry->type == 'subscription' ? 'dashboard.admin.finance.plan.edit' : 'dashboard.admin.finance.token-pack-plan.edit', $entry->id) }}"
+                                    title="{{ __('Edit') }}"
+                                >
+                                    <x-tabler-pencil class="size-4" />
+                                </x-button>
                                 @if ($app_is_demo)
                                     <x-button
                                         class="size-9"

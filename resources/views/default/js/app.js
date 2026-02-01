@@ -10,9 +10,10 @@ import clipboard from './components/clipboard';
 import assignViewCredits from './components/assignViewCredits';
 import openaiRealtime from './components/realtime-frontend/openaiRealtime';
 import advancedImageEditor from './components/advancedImageEditor';
-import { debounce, difference, throttle, uniq } from 'lodash';
+import { debounce, difference, throttle, uniq, wrap } from 'lodash';
 import creativeSuite from './components/creative-suite/creativeSuite';
 import { lqdCustomizer, lqdCustomizerFontPicker } from './components/customizer';
+import { lqdSidedrawer } from './components/sidedrawer';
 import elevenlabsRealtime from './components/realtime-frontend/elevenlabsRealtime';
 import tiptapEditor from './tiptapEditor';
 
@@ -930,10 +931,27 @@ document.addEventListener( 'alpine:init', () => {
 				return Array.from( { length: 10 }, ( _, i ) => `<span class="lqd-number-counter-number inline-flex h-full justify-center">${ i }</span>` ).join( '' );
 			}
 
+			const getCharWidth = char => {
+				let widthClassname = '1ch';
+
+				switch (char) {
+					case '.':
+					case ',':
+						widthClassname = '0.4ch';
+						break;
+					case '%':
+						widthClassname = '1.5ch';
+						break;
+				}
+
+				return widthClassname;
+			};
+
 			const numberWrappers = value.map( ( value, index ) => {
 				const isNumber = !isNaN( value );
+				const charWidth = getCharWidth(value);
 
-				return `<span class="lqd-number-counter-numbers-wrap relative inline-flex h-full w-[1ch]" data-index="${ index }" data-value="${ value }"><span class="lqd-number-counter-numbers-col absolute start-0 top-[-0.25lh] inline-flex h-[1.5lh] w-full flex-col overflow-hidden py-[0.25lh]"><span class="lqd-number-counter-numbers-animator inline-flex w-full h-full flex-col" data-is-number="${ isNumber }" data-value="${ value }">${ isNumber ? buildNumberSpans() : value }</span></span></span>`;
+				return `<span class="lqd-number-counter-numbers-wrap relative inline-flex h-full" data-index="${ index }" data-value="${ value }" style="width: ${charWidth};"><span class="lqd-number-counter-numbers-col absolute start-0 top-[-0.25lh] inline-flex h-[1.5lh] w-full flex-col overflow-hidden py-[0.25lh]"><span class="lqd-number-counter-numbers-animator inline-flex w-full h-full flex-col" data-is-number="${ isNumber }" data-value="${ value }">${ isNumber ? buildNumberSpans() : value }</span></span></span>`;
 			} );
 
 			numberWrappers.forEach( ( wrapper, index ) => {
@@ -943,17 +961,31 @@ document.addEventListener( 'alpine:init', () => {
 
 				if ( existingEl ) {
 					const animatorEl = existingEl.querySelector( '.lqd-number-counter-numbers-animator' );
+					const charWidth = getCharWidth(val);
 
 					existingEl.setAttribute( 'data-value', val );
 
 					animatorEl.setAttribute( 'data-value', val );
 					animatorEl.setAttribute( 'data-is-number', isNumber );
+
+					existingEl.style.width = charWidth;
+
 					if ( animatorEl.getAttribute( 'data-is-number' ) === 'true' && isNumber ) {
-						if ( animatorEl.innerHTML !== buildNumberSpans() ) {
-							animatorEl.innerHTML = buildNumberSpans();
+						const numberSpans = buildNumberSpans();
+
+						if ( animatorEl.innerHTML !== numberSpans ) {
+							animatorEl.innerHTML = numberSpans;
 						}
 					} else if ( animatorEl.innerHTML !== val ) {
 						animatorEl.innerHTML = val;
+
+						animatorEl.animate( [
+							{ translate: '0 0' },
+						], {
+							duration: 250,
+							easing: 'ease',
+							fill: 'both'
+						} );
 					}
 
 					return;
@@ -978,15 +1010,16 @@ document.addEventListener( 'alpine:init', () => {
 			// Remove extra currentNumberWrappers
 			if ( currentNumberWrappers.length > value.length ) {
 				for ( let i = value.length; i < currentNumberWrappers.length; i++ ) {
-					currentNumberWrappers[ i ].animate( [
-						{ translate: '0 -0.25lh', opacity: 0 },
-					], {
-						duration: 250,
-						easing: 'ease',
-						fill: 'both'
-					} ).onfinish = () => {
-						currentNumberWrappers[ i ].remove();
-					};
+					// currentNumberWrappers[ i ].animate( [
+					// 	{ translate: '0 -0.25lh', opacity: 0 },
+					// ], {
+					// 	duration: 250,
+					// 	easing: 'ease',
+					// 	fill: 'both'
+					// } ).onfinish = () => {
+					// 	currentNumberWrappers[ i ].remove();
+					// };
+					currentNumberWrappers[ i ].remove();
 				}
 			}
 
@@ -1013,9 +1046,6 @@ document.addEventListener( 'alpine:init', () => {
 				const value = el.getAttribute( 'data-value' );
 
 				el.animate( [
-					// {
-					// 	translate: '0 0',
-					// },
 					{
 						translate: `0 ${ value * 100 * -1 }%`
 					}
@@ -1954,6 +1984,8 @@ document.addEventListener( 'alpine:init', () => {
 	// Customizer
 	Alpine.data( 'lqdCustomizer', lqdCustomizer );
 	Alpine.data( 'lqdCustomizerFontPicker', lqdCustomizerFontPicker );
+
+	Alpine.data( 'lqdSidedrawer', lqdSidedrawer );
 } );
 
 Livewire.start();

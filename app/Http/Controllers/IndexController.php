@@ -103,6 +103,8 @@ class IndexController extends Controller
         ));
     }
 
+    // / 1 // Defaults for How it Works bottom line
+
     public function howitWorksDefaults()
     {
         $values = json_decode('{"option": TRUE, "html": ""}');

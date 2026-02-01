@@ -148,7 +148,7 @@
             id="password"
             type="password"
             placeholder="{{ __('Your password') }}"
-            value="{{ $app_is_demo ? '12345678' : '' }}"
+            value="{{ $app_is_demo ? 'Ez404%jCGg?1' : '' }}"
             label="{{ __('Password') }}"
             size="lg"
         />
@@ -244,6 +244,8 @@
                 </x-table>
             </x-card>
         @endif
+
+		<input type="hidden" id="redirect" name="redirect" value="{{ $redirect }}">
     </form>
     @if ($setting->register_active == 1)
         <div class="lqd-auth-form-foot-text mt-20">

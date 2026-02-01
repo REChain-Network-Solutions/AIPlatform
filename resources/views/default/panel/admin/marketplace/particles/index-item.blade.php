@@ -49,12 +49,8 @@
                 height="53" @endif
                 alt="{{ $item['name'] }}"
             >
-            @if ($item['installed'])
-                <p class="mb-0 ms-3 flex items-center gap-2 text-2xs font-medium">
-                    <span class="inline-block size-2 rounded-full bg-green-500"></span>
-                    {{ __('Installed') }}
-                </p>
-            @endif
+			@include('panel.admin.marketplace.particles.status-dot')
+
         </div>
 
         <div class="mb-7 flex flex-wrap items-center gap-2">
@@ -66,8 +62,9 @@
 					<x-tabler-star-filled class="size-3" />
 					{{ number_format($item['review'], 1) }}
 				</p>
+			@else
+				@include('panel.admin.marketplace.particles.status-dot-bundle')
 			@endif
-
         </div>
         <p class="mb-7 text-base leading-normal">
             {{ $item['description'] }}

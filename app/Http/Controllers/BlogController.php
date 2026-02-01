@@ -14,10 +14,10 @@ class BlogController extends Controller
 
     public function post($slug)
     {
-        $post = Blog::where('slug', $slug)->first();
+        $post = Blog::where('slug', $slug)->firstOrFail();
 
         // Check post status
-        if (isset($post->status) && ! $post->status && ! Auth::user()->isAdmin()) {
+        if (isset($post->status) && ! $post->status && ! Auth::user()?->isAdmin()) {
             abort(404);
         }
 
@@ -47,11 +47,7 @@ class BlogController extends Controller
             ->take(2)
             ->get();
 
-        if ($post) {
-            return view('blog.post', compact('post', 'previousPost', 'nextPost', 'relatedPosts'));
-        } else {
-            abort(404);
-        }
+        return view('blog.post', compact('post', 'previousPost', 'nextPost', 'relatedPosts'));
     }
 
     // archive pages

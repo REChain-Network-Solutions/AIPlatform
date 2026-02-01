@@ -29,8 +29,10 @@ function LoginForm() {
 	formData.append('remember', $('#remember').is(':checked'));
 
 	let plan = $('#plan').val();
+	let redirect = $('#redirect').val();
 
 	formData.append('plan', plan);
+	formData.append('redirect', redirect);
 
 	let recaptcha = $('#recaptcha').val();
 	if (recaptcha == 1 && typeof grecaptcha !== 'undefined') {

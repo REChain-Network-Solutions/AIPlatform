@@ -21,7 +21,7 @@ class ClearUserOpenAICommand extends Command
             return;
         }
 
-        Log::info('Clearing user OpenAI data (except last 22)...');
+        // Log::info('Clearing user OpenAI data (except last 22)...');
 
         $idsToRetain = UserOpenai::query()
             ->where('is_demo', false)
@@ -38,6 +38,6 @@ class ClearUserOpenAICommand extends Command
             ->take(PHP_INT_MAX)
             ->delete();
 
-        Log::info('User OpenAI data cleared successfully (last 22 retained).');
+        // Log::info('User OpenAI data cleared successfully (last 22 retained).');
     }
 }

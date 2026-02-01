@@ -33,6 +33,7 @@ use App\Http\Controllers\Chatbot\ChatbotTrainingController;
 use App\Http\Controllers\ChatPdfController;
 use App\Http\Controllers\Common\CommonController;
 use App\Http\Controllers\Common\HealthController;
+use App\Http\Controllers\Common\Settings\FalAISettingController as CommonFalAISettingController;
 use App\Http\Controllers\Dashboard\AdminController;
 use App\Http\Controllers\Dashboard\BrandController;
 use App\Http\Controllers\Dashboard\DebugController;
@@ -667,6 +668,9 @@ Route::middleware(['auth', 'updateUserActivity'])
                     Route::get('/pixabayapi/test', [SettingsController::class, 'pixabayapiTest'])->name('pixabayapi.test');
                     Route::post('/pixabayapi-save', [SettingsController::class, 'pixabayapiSave']);
 
+                    Route::get('fal-ai', [CommonFalAISettingController::class, 'index'])->name('fal-ai');
+                    Route::post('fal-ai', [CommonFalAISettingController::class, 'update'])->name('fal-ai.update');
+
                     // thumbnail system
                     Route::get('/thumbnail', [SettingsController::class, 'thumbnail'])->name('thumbnail');
                     Route::post('/thumbnail-save', [SettingsController::class, 'thumbnailSave'])->name('thumbnail.save');
@@ -903,6 +907,7 @@ for ($i = 0; $i < count($files); $i++) {
 Route::middleware('auth')
     ->group(function () {
         Route::middleware('admin')->get('debug', DebugController::class)->name('dashboard.debug');
+        Route::middleware('admin')->post('channel-convert', [DebugController::class, 'convertChannel'])->name('dashboard.update.channel.convert');
 
         Route::get('admin-vip-button', [VipStatusController::class, 'adminVipButton'])->name('admin-vip-button');
 

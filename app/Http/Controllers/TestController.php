@@ -7,7 +7,10 @@ use Illuminate\Http\Request;
 
 class TestController extends Controller
 {
-    public function test(Request $request) {}
+    public function test(Request $request)
+    {
+        return view('test');
+    }
 
     public function stream(Request $request, string $model)
     {

@@ -459,4 +459,5 @@
 	</div>
 
 	@includeIf('multi-model::partials.plans_option')
+	@includeIf('social-media-agent::admin.plan.social-media-agent-limits')
 </div>

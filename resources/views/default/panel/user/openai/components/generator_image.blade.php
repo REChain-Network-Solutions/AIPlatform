@@ -171,10 +171,11 @@
 
             @if (\App\Helpers\Classes\ApiHelper::setFalAIKey())
                 @includeFirst(['flux-pro::flux-pro-tab', 'panel.user.openai.includes.flux-pro-tab', 'vendor.empty'])
+                @includeFirst(['flux-pro::flux-2-flex-tab', 'panel.user.openai.includes.flux-2-flex-tab', 'vendor.empty'])
                 @includeFirst(['ideogram::ideogram-tab', 'panel.user.openai.includes.ideogram-tab', 'vendor.empty'])
-				@includeIf('nano-banana::nano-banana-tab')
-				@includeIf('nano-banana::nano-banana-pro-tab')
-				@includeIf('see-dream-v4::see-dream-v4-tab')
+                @includeIf('nano-banana::nano-banana-tab')
+                @includeIf('nano-banana::nano-banana-pro-tab')
+                @includeIf('see-dream-v4::see-dream-v4-tab')
             @endif
         </div>
         <div class="max-sm:-order-1 max-sm:mb-4 max-sm:w-full md:min-w-96">
@@ -811,10 +812,11 @@
 
     @if (\App\Helpers\Classes\ApiHelper::setFalAIKey())
         @includeFirst(['flux-pro::flux-pro-tab-body', 'panel.user.openai.includes.flux-pro-tab-body', 'vendor.empty'])
+        @includeFirst(['flux-pro::flux-2-flex-tab-body', 'panel.user.openai.includes.flux-2-flex-tab-body', 'vendor.empty'])
         @includeFirst(['ideogram::ideogram-tab-body', 'panel.user.openai.includes.ideogram-tab-body', 'vendor.empty'])
-		@includeIf('nano-banana::nano-banana-tab-body')
-		@includeIf('nano-banana::nano-banana-pro-tab-body')
-		@includeIf('see-dream-v4::see-dream-v4-tab-body')
+        @includeIf('nano-banana::nano-banana-tab-body')
+        @includeIf('nano-banana::nano-banana-pro-tab-body')
+        @includeIf('see-dream-v4::see-dream-v4-tab-body')
     @endif
 
     @include('panel.user.openai_chat.components.prompt_library_modal')
@@ -1350,7 +1352,7 @@
             "use strict";
 
             const itemsPerPage = {{ $items_per_page }};
-            let offset = itemsPerPage; // Declare offset globally
+            let offset = itemsPerPage;
             let totalItems = {{ $total_items }};
             let nextCount = Math.min(totalItems - itemsPerPage, itemsPerPage);
             let loadingQueue = [];
@@ -1402,12 +1404,15 @@
 
                         images.forEach((image, index) => {
                             const imageResultTemplate = loadingQueue[index];
+
+                            if (!imageResultTemplate) return;
+
                             const delete_url = `${server}/dashboard/user/openai/documents/delete/image/${image.slug}`;
 
                             imageResultTemplate.setAttribute('data-id', image.id);
-                            imageResultTemplate.setAttribute('data-generator', image.response == "SD" ? "sd" : "de");
+                            imageResultTemplate.setAttribute('data-generator', image.response.substr(0, 2).toLowerCase());
                             imageResultTemplate.querySelector('.lqd-image-result-img').setAttribute('src', image.thumbnail);
-                            imageResultTemplate.querySelector('.lqd-image-result-type').innerHTML = image.response == "SD" ? "SD" : "DE";
+                            imageResultTemplate.querySelector('.lqd-image-result-type').innerHTML = image.response.substr(0, 2).toUpperCase();
                             imageResultTemplate.querySelector('.lqd-image-result-view').setAttribute('data-payload', JSON.stringify(image));
 
                             imageResultTemplate.querySelector('.lqd-image-result-delete').setAttribute('href', delete_url);
@@ -1422,8 +1427,8 @@
                         loadingQueue = [];
 
                         // Update the offset for the next lazy loading request
-                        offset += images.length;
-                        // Refresh lightbox, check if there are more images
+                        offset = offset + images.length + document.querySelectorAll('.lqd-image-result-in-queue').length;
+
                         refreshFsLightbox();
 
                         loadMoreTrigger.classList.remove('lqd-is-loading');
@@ -1445,8 +1450,9 @@
     </script>
     @includeIf('midjourney::midjourney-script')
     @includeFirst(['flux-pro::flux-pro-script', 'panel.user.openai.includes.flux-pro-script', 'vendor.empty'])
+    @includeFirst(['flux-pro::flux-2-flex-script', 'panel.user.openai.includes.flux-2-flex-script', 'vendor.empty'])
     @includeFirst(['ideogram::ideogram-script', 'panel.user.openai.includes.ideogram-script', 'vendor.empty'])
-	@includeIf('nano-banana::nano-banana-script')
-	@includeIf('nano-banana::nano-banana-pro-script')
-	@includeIf('see-dream-v4::see-dream-v4-script')
+    @includeIf('nano-banana::nano-banana-script')
+    @includeIf('nano-banana::nano-banana-pro-script')
+    @includeIf('see-dream-v4::see-dream-v4-script')
 @endpush

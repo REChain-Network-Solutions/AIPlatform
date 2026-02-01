@@ -139,7 +139,11 @@ export default agent_id => ( {
 							'',
 							'',
 							'elevenlabs-voice-chatbot'
-						);
+						).then(result => {
+							if (result && result.message.id) {
+								this.changeVoiceChatTitle(result.message.id);
+							}
+						});
 
 						this.lastResponseSaved = true;
 					}
@@ -163,6 +167,39 @@ export default agent_id => ( {
 				this.stop();
 			}
 		} );
+	},
+	changeVoiceChatTitle(messageId) {
+		const chat = document.querySelector(`#chat_${document.querySelector('#chat_id').value}`);
+		const chatTitleEl = chat?.querySelector('.chat-item-title');
+
+		if (!chatTitleEl) return;
+
+		$.ajax({
+			type: 'post',
+			url: '/dashboard/change-chat-title',
+			data: {
+				streamed_message_id: messageId,
+			},
+			success: function (data) {
+				if (data.changed) {
+					const newTitle = data.new_title.replaceAll(' ', '\u00a0');
+					const newTitleStringArray = newTitle.split('');
+
+					chatTitleEl.innerText = '';
+
+					const interval = setInterval(() => {
+						chatTitleEl.innerText += newTitleStringArray.shift();
+
+						if (!newTitleStringArray.length) {
+							clearInterval(interval);
+						}
+					}, 30);
+				}
+			},
+			error: function(error) {
+				console.error('Error changing chat title:', error);
+			}
+		});
 	},
 	async stop() {
 		if ( !this.lastResponseSaved && 'saveResponseAsync' in window && this.lastUserQuestion.trim() !== '' && this.lastAiResponse.trim() !== '' ) {

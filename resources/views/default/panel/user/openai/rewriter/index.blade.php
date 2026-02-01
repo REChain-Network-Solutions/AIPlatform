@@ -67,7 +67,6 @@
                                 name="tone_of_voice_custom"
                                 type="text"
                                 label="{{ __('Enter custom tone') }}"
-                                switcher
                             />
                         @endif
 
@@ -195,7 +194,7 @@
     <script src="{{ custom_theme_url('/assets/libs/beautify-html.min.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/ace/src-min-noconflict/ace.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/ace/src-min-noconflict/ext-language_tools.js') }}"></script>
-    <script src="{{ custom_theme_url('/assets/libs/markdown-it.min.js') }}"></script>
+    <script src="{{ custom_theme_url('/assets/libs/markdownit/markdown-it.min.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/turndown.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/tinymce/tinymce.min.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/js/panel/tinymce-theme-handler.js') }}"></script>

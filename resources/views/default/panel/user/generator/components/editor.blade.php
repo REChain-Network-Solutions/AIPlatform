@@ -22,15 +22,15 @@
                 },
                 onElementHover(event) {
                     const { element, rect, eventType } = event.detail;
-            
+
                     if (!element && !rect) {
                         return;
                     }
-            
+
                     const elId = element.id;
                     const existingHoveredElementIndex = this.hoveredElements.findIndex(elObj => elObj.element.id === elId);
                     const elObj = { element, rect, isHovered: eventType === 'mouseover' };
-            
+
                     if (existingHoveredElementIndex === -1) {
                         this.hoveredElements.push(elObj);
                     } else {
@@ -39,30 +39,30 @@
                 },
                 onEditorScroll(ev) {
                     const { event } = ev.detail;
-            
+
                     this.editorScrollY = event.scrollY;
                 },
                 moveCoverEl(dir = 'down') {
                     if (!tinymce?.activeEditor) {
                         return console.warn('{{ __('Could not find any active editor.') }}')
                     }
-            
+
                     const coverEl = tinymce.activeEditor.dom.get('lqd-editor-cover-el');
-            
+
                     if (!coverEl) {
                         return console.warn('{{ __('Could not find the cover element.') }}')
                     }
-            
+
                     if (dir === 'up') {
                         const prevSibling = tinymce.activeEditor.dom.getPrev(coverEl, '*');
-            
+
                         if (prevSibling) {
                             tinymce.activeEditor.dom.replace(coverEl, prevSibling);
                             tinymce.activeEditor.dom.insertAfter(prevSibling, coverEl);
                         }
                     } else if (dir === 'down') {
                         const nextSibling = tinymce.activeEditor.dom.getNext(coverEl, '*');
-            
+
                         if (nextSibling) {
                             tinymce.activeEditor.dom.insertAfter(coverEl, nextSibling);
                         }
@@ -72,13 +72,13 @@
                     if (!tinymce?.activeEditor) {
                         return console.warn('{{ __('Could not find any active editor.') }}')
                     }
-            
+
                     const coverEl = tinymce.activeEditor.dom.get('lqd-editor-cover-el');
-            
+
                     if (!coverEl) {
                         return console.warn('{{ __('Could not find the cover element.') }}')
                     }
-            
+
                     tinymce.activeEditor.dom.remove(coverEl);
                 },
             }"
@@ -271,7 +271,7 @@
     <script src="{{ custom_theme_url('/assets/libs/beautify-html.min.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/ace/src-min-noconflict/ace.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/ace/src-min-noconflict/ext-language_tools.js') }}"></script>
-    <script src="{{ custom_theme_url('/assets/libs/markdown-it.min.js') }}"></script>
+    <script src="{{ custom_theme_url('/assets/libs/markdownit/markdown-it.min.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/turndown.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/katex/katex.min.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/vscode-markdown-it-katex/index.js') }}"></script>

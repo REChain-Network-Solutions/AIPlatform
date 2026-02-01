@@ -1,0 +1,6 @@
+{
+    "name": "Azure TTS",
+    "type": "extension",
+    "version": "2.1.0",
+    "description": "Azure TTS extension for magicai"
+}

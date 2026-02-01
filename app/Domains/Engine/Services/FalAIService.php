@@ -115,6 +115,8 @@ class FalAIService
             $entityValue = $entity->value;
         } elseif ($entity === EntityEnum::NANO_BANANA_PRO) {
             $entityValue = $entity->value;
+        } elseif ($entity === EntityEnum::FLUX_2_FLEX || $entity === EntityEnum::FLUX_2_FLEX_EDIT) {
+            $entityValue = $entity->value;
         } elseif ($entity === EntityEnum::SEEDREAM_4) {
             $entityValue = 'bytedance/' . $entity->value;
         } else {
@@ -168,6 +170,10 @@ class FalAIService
 
         if ($enum === EntityEnum::FLUX_PRO_1_1 || $enum === EntityEnum::FLUX_PRO) {
             $entityValue = 'flux';
+        }
+
+        if ($enum === EntityEnum::FLUX_2_FLEX || $enum === EntityEnum::FLUX_2_FLEX_EDIT) {
+            $entityValue = 'flux-2-flex';
         }
 
         if ($entityValue === 'nano-banana/edit' || $entityValue === 'nano-banana-pro/edit' || $entityValue === 'nano-banana' || $entityValue === 'nano-banana-pro') {

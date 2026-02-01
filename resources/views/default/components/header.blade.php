@@ -92,7 +92,10 @@
 
             <div class="flex items-center gap-4 max-lg:gap-2">
                 @includeIf('marketing-bot::header.inbox-notification')
+
                 @includeIf('chatbot-agent::header.inbox-notification')
+
+                @includeIf('social-media-agent::notifications.notifications-drawer')
 
                 {{-- Dark/light switch --}}
                 @if (Theme::getSetting('dashboard.supportedColorSchemes') === 'all')

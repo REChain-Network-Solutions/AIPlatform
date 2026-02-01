@@ -228,12 +228,12 @@ function unwrapWords(node) {
 		return;
 	}
 
-	const childNodes = [...node.childNodes];
+	const childNodes = [ ...node.childNodes ];
 	childNodes.forEach(child => unwrapWords(child));
 }
 
 function generateUUID() {
-	return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+	return ([ 1e7 ] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
 		(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
 	);
 }
@@ -243,7 +243,7 @@ function generateUUID() {
  * @param {AiResponse} param0.responseObj
  * @param {boolean} param0.withoutDone
  */
-function getAiResponseString({responseObj = null, withoutDone = true}) {
+function getAiResponseString({ responseObj = null, withoutDone = true }) {
 	if (!responseObj) {
 		responseObj = aiResponses[0];
 	}
@@ -335,6 +335,49 @@ function formatString(string, options = {}) {
 		renderer.use(markdownItKatex);
 	}
 
+	if ('markdownitContainer' in window) {
+		const containers = [
+			'social-media-agent-chat-post-card',
+			'social-media-agent-chat-post-card-head',
+			'social-media-agent-chat-post-card-platform',
+			'social-media-agent-chat-post-card-info',
+			'social-media-agent-chat-post-card-images',
+			'social-media-agent-chat-post-card-content',
+			'social-media-agent-chat-post-card-foot',
+		];
+
+		containers.forEach(container => {
+			let options = {};
+
+			if ( container === 'social-media-agent-chat-post-card' ) {
+				options = {
+					render: function (tokens, idx) {
+						if (tokens[idx].nesting === 1) {
+							const token = tokens[idx];
+
+							let attributes = 'class="social-media-agent-chat-post-card" x-data="socialMediaAgentChatPostCard" @social-media-agent-post-updated.window="onPostUpdated" @social-media-agent-post-rejected.window="onPostRejected"';
+
+							if ( token.attrs && token.attrs.length ) {
+								token.attrs.forEach(([ key, val ]) => attributes += ` ${key}="${val}"`);
+							}
+
+							return '<div ' + attributes + '>\n';
+						} else {
+							// closing tag
+							return '</div>\n';
+						}
+					}
+				};
+			}
+
+			renderer.use(markdownitContainer, container, options);
+		});
+	}
+
+	if ('markdownItAttrs' in window) {
+		renderer.use(markdownItAttrs);
+	}
+
 	renderer.use(function (md) {
 		// Add data-fslightbox attribute to images
 		const defaultRender = md.renderer.rules.image;
@@ -422,7 +465,7 @@ function formatString(string, options = {}) {
 				state.tokens.forEach(function (blockToken) {
 					if (blockToken.type !== 'inline') return;
 
-					const inlineElements = ['strong', 'em', 's', 'u', 'a', 'i', 'b', 'code', 'del', 'ins', 'mark', 'sub', 'sup'];
+					const inlineElements = [ 'strong', 'em', 's', 'u', 'a', 'i', 'b', 'code', 'del', 'ins', 'mark', 'sub', 'sup' ];
 					let insideInlineElement = false;
 
 					blockToken.children.forEach(function (token) {
@@ -477,15 +520,15 @@ function formatString(string, options = {}) {
 				let fullContent = '';
 
 				blockToken.children.forEach(token => {
-					let {content, type} = token;
+					let { content, type } = token;
 
 					switch (type) {
-					case 'link_open':
-						content = `<a ${token.attrs.map(([key, value]) => `${key}="${value}"`).join(' ')}>`;
-						break;
-					case 'link_close':
-						content = '</a>';
-						break;
+						case 'link_open':
+							content = `<a ${token.attrs.map(([ key, value ]) => `${key}="${value}"`).join(' ')}>`;
+							break;
+						case 'link_close':
+							content = '</a>';
+							break;
 					}
 
 					fullContent += content;
@@ -500,7 +543,7 @@ function formatString(string, options = {}) {
 					listToken.markup = 'html';
 					listToken.type = 'html_inline';
 
-					blockToken.children = [listToken];
+					blockToken.children = [ listToken ];
 				}
 			});
 		});
@@ -509,21 +552,21 @@ function formatString(string, options = {}) {
 			state.tokens.forEach(function (blockToken) {
 				if (blockToken.type !== 'inline') return;
 				blockToken.children.forEach(function (token, idx) {
-					const {content} = token;
+					const { content } = token;
 					if (content.includes('<a ')) {
 						const linkRegex = /(.*)(<a\s+[^>]*\s+href="([^"]+)"[^>]*>([^<]*)<\/a>?)(.*)/;
 						const linkMatch = content.match(linkRegex);
 
 						if (linkMatch) {
-							const [, before, , href, text, after] = linkMatch;
+							const [ , before, , href, text, after ] = linkMatch;
 
 							const beforeToken = new state.Token('text', '', 0);
 							beforeToken.content = before;
 
 							const newToken = new state.Token('link_open', 'a', 1,);
 							newToken.attrs = [
-								['href', href],
-								['target', '_blank'],
+								[ 'href', href ],
+								[ 'target', '_blank' ],
 							];
 							const textToken = new state.Token('text', '', 0);
 							textToken.content = text;
@@ -605,7 +648,7 @@ function switchGenerateButtonsStatus(generating) {
 function setAnimatingWordY(responseObj, el) {
 	if (!el || el?.classList?.contains('done-signal')) return;
 
-	let {offsetTop} = el;
+	let { offsetTop } = el;
 
 	if (offsetTop <= responseObj.lastAnimatedElOffsetTop) return;
 
@@ -635,6 +678,11 @@ function onWordAnimationFinish(responseObj, el) {
 
 		switchGenerateButtonsStatus(aiResponses.every(res => res.responseStreaming));
 
+		if ( responseObj.bubbleEl.querySelector('.social-media-agent-chat-post-card') ) {
+			responseObj.bubbleEl.querySelector('.lqd-chat-bubble-canvas-trigger')?.remove();
+			responseObj.bubbleEl.querySelectorAll('[data-copy-options],[data-copy-type]').forEach(el => el.remove());
+		}
+
 		_.defer(() => {
 			unwrapWords(responseObj.chatContentEl);
 		});
@@ -662,7 +710,7 @@ function animateNewElements(responseObj) {
 		setTimeout(() => {
 			responseObj.bubbleEl.classList.replace('loading', 'streaming-started');
 
-			el.animate([{opacity: 1}], {
+			el.animate([ { opacity: 1 } ], {
 				duration: 500,
 				easing: 'ease',
 				fill: 'forwards',
@@ -686,7 +734,7 @@ function resetAnimationState(responseObj) {
  */
 function onAiResponse(responseObj) {
 	const contentEl = responseObj.chatContentEl;
-	const responseString = getAiResponseString({responseObj, withoutDone: false});
+	const responseString = getAiResponseString({ responseObj, withoutDone: false });
 	const formattedResponse = formatString(responseString, {
 		readyForAnimation: true
 	});
@@ -718,7 +766,7 @@ async function handleCanvasResponseStore(responseObj) {
 			},
 			body: JSON.stringify({
 				'message_id': responseObj.responseId,
-				'content': formatString(getAiResponseString({responseObj})),
+				'content': formatString(getAiResponseString({ responseObj })),
 				'type': 'output'
 			})
 		});
@@ -770,7 +818,7 @@ async function onAcceptResponseButtonClick(event) {
 	multiAiResposeWrap.remove();
 
 	const chatModelChangeEvent = new CustomEvent('chat-model-change', {
-		detail: {model}
+		detail: { model }
 	});
 	document.dispatchEvent(chatModelChangeEvent);
 }
@@ -935,6 +983,10 @@ function sendRequest(type, images, responseObj, sharedMessageUUID = null) {
 	formData.append('chatbot_front_model', responseObj.model.slug);
 	formData.append('assistant', assistant.value || '');
 
+	if (document.querySelector('#chat_open_ai_agent_id')?.value) {
+		formData.append('chat_open_ai_agent_id', document.querySelector('#chat_open_ai_agent_id').value);
+	}
+
 	if (sharedMessageUUID) {
 		formData.append('shared_message_uuid', sharedMessageUUID);
 	}
@@ -991,7 +1043,7 @@ function sendRequest(type, images, responseObj, sharedMessageUUID = null) {
 			if (isDoneSignal) {
 				messages.push({
 					role: 'assistant',
-					content: getAiResponseString({responseObj}),
+					content: getAiResponseString({ responseObj }),
 				});
 
 				if (messages.length >= 6) {
@@ -1096,7 +1148,7 @@ async function startGenerateRequest(ev) {
 		suggestions.style.display = 'none';
 	}
 
-	chatAttachments.forEach(({data, name}) => {
+	chatAttachments.forEach(({ data, name }) => {
 		const chatAttachmentBubbleTemplate = document.querySelector('#chat_user_image_bubble').content.cloneNode(true).firstElementChild;
 		const linkElement = chatAttachmentBubbleTemplate.querySelector('a');
 
@@ -1126,7 +1178,7 @@ async function startGenerateRequest(ev) {
 
 	createAiResponses();
 
-	scrollConversationArea({smooth: true});
+	scrollConversationArea({ smooth: true });
 
 	if (chatAttachments.length == 0) {
 		messages.push({
@@ -1187,7 +1239,7 @@ async function startGenerateRequest(ev) {
 	pdfPath = '';
 
 	if (chatAttachments.length) {
-		let files = [...chatAttachments];
+		let files = [ ...chatAttachments ];
 
 		chatAttachments = [];
 		updatePromptFiles();
@@ -1254,7 +1306,7 @@ function reduceOnStop() {
 				'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
 			},
 			body: JSON.stringify({
-				streamed_text: getAiResponseString({responseObj}),
+				streamed_text: getAiResponseString({ responseObj }),
 				streamed_message_id: responseObj.responseId
 			})
 		});
@@ -1405,7 +1457,7 @@ function openNewImageDlg(e) {
 
 function isAllowedFileType(data, name) {
 	const allowedFileTypes = {
-		image: ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'],
+		image: [ 'image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp' ],
 		document: [
 			'application/pdf',
 			'application/msword',
@@ -1456,7 +1508,7 @@ function updatePromptFiles() {
 	$('#chat-attachment-previews').addClass('active');
 	$('.split_line').removeClass('hidden');
 
-	chatAttachments.forEach(({data, name}, index) => {
+	chatAttachments.forEach(({ data, name }, index) => {
 
 		if (data.startsWith('data:image/')) {
 			let newImage = document.querySelector('#prompt_image').content.cloneNode(true).firstElementChild;
@@ -1495,7 +1547,7 @@ function updatePromptFiles() {
 	});
 }
 
-function addFileToChat({data, name}) {
+function addFileToChat({ data, name }) {
 	if (chatAttachments.find(attachment => attachment.data === data)) return;
 
 	if (!isAllowedFileType(data, name)) {
@@ -1503,7 +1555,7 @@ function addFileToChat({data, name}) {
 		return toastr.error('File is not supported.');
 	}
 
-	chatAttachments.push({data, name});
+	chatAttachments.push({ data, name });
 	updatePromptFiles();
 }
 
@@ -1514,13 +1566,13 @@ function initChat() {
 
 	chatAttachments = [];
 
-	$('#scrollable_content').animate({scrollTop: 1000}, 200);
+	$('#scrollable_content').animate({ scrollTop: 1000 }, 200);
 
 	// Start recording when the button is pressed
 	$('#voice_record_button').click(function () {
 		chunks = [];
 		navigator.mediaDevices
-			.getUserMedia({audio: true})
+			.getUserMedia({ audio: true })
 			.then(function (stream) {
 				stream_ = stream;
 				mediaRecorder = new MediaRecorder(stream);
@@ -1541,10 +1593,10 @@ function initChat() {
 			$('#voice_record_button').removeClass('inactive');
 			$('#voice_record_stop_button').removeClass('active');
 			mediaRecorder.onstop = function () {
-				var blob = new Blob(chunks, {type: 'audio/mp3'});
+				var blob = new Blob(chunks, { type: 'audio/mp3' });
 
 				var formData = new FormData();
-				var fileOfBlob = new File([blob], 'audio.mp3');
+				var fileOfBlob = new File([ blob ], 'audio.mp3');
 				formData.append('file', fileOfBlob);
 
 				chunks = [];
@@ -1676,7 +1728,7 @@ function initChat() {
 			let reader = new FileReader();
 
 			reader.onload = function (e) {
-				addFileToChat({data: e.target.result, name: file.name});
+				addFileToChat({ data: e.target.result, name: file.name });
 			};
 
 			reader.readAsDataURL(file);
@@ -1692,7 +1744,7 @@ function initChat() {
 			let reader = new FileReader();
 
 			reader.onload = function (e) {
-				addFileToChat({data: e.target.result, name: file.name});
+				addFileToChat({ data: e.target.result, name: file.name });
 			};
 
 			reader.readAsDataURL(file);
@@ -1704,20 +1756,28 @@ function initChat() {
 	});
 
 	document
-		.querySelectorAll('.lqd-chat-ai-bubble .chat-content')
-		.forEach(el => {
-			el.classList.remove('!whitespace-pre-wrap', 'whitespace-pre-wrap');
-			el.style.whiteSpace = 'normal';
+		.querySelectorAll('.lqd-chat-ai-bubble')
+		.forEach(aiChatBubble => {
+			const contentEl = aiChatBubble.querySelector('.chat-content');
 
-			if (el.classList.contains('is-html')) {
+			contentEl.classList.remove('!whitespace-pre-wrap', 'whitespace-pre-wrap');
+			contentEl.style.whiteSpace = 'normal';
+
+			if (contentEl.classList.contains('is-html')) {
 				const turndownService = new TurndownService();
-				const markdown = turndownService.turndown(el);
+				const markdown = turndownService.turndown(aiChatBubble);
 
-				el.innerHTML = markdown;
+				contentEl.innerHTML = markdown;
 			}
 
-			el.innerHTML = formatString(el.innerHTML);
+			contentEl.innerHTML = formatString(contentEl.innerHTML);
+
 			throttledRefreshFsLightbox();
+
+			if ( contentEl.querySelector('.social-media-agent-chat-post-card') ) {
+				aiChatBubble.querySelector('.lqd-chat-bubble-canvas-trigger')?.remove();
+				aiChatBubble.querySelectorAll('[data-copy-options],[data-copy-type]').forEach(el => el.remove());
+			}
 		});
 }
 
@@ -1801,7 +1861,7 @@ function handlePromptHistory(prompt) {
 	const promptHistory = localStorage.getItem('promptHistory');
 
 	if (!promptHistory) {
-		return localStorage.setItem('promptHistory', JSON.stringify([prompt]));
+		return localStorage.setItem('promptHistory', JSON.stringify([ prompt ]));
 	}
 
 	const promptHistoryArray = JSON.parse(promptHistory);
@@ -2096,7 +2156,7 @@ function startNewDocChat(file, type) {
 				$('.conversation-area')
 					.stop()
 					.animate(
-						{scrollTop: $('.conversation-area').outerHeight()},
+						{ scrollTop: $('.conversation-area').outerHeight() },
 						200,
 					);
 			}, 750);
@@ -2219,7 +2279,7 @@ function dropHandler(ev, id) {
 		let reader = new FileReader();
 
 		reader.onload = function (e) {
-			addFileToChat({data: e.target.result, name: file.name});
+			addFileToChat({ data: e.target.result, name: file.name });
 		};
 
 		reader.readAsDataURL(file);
@@ -2372,7 +2432,7 @@ $(document).ready(function () {
 		}
 
 		function keydownHandler(ev) {
-			const {key} = ev;
+			const { key } = ev;
 			const escapePressed = key === 'Escape';
 			const enterPressed = key === 'Enter';
 
@@ -2433,7 +2493,7 @@ $(document).ready(function () {
 		$.ajax({
 			type: 'post',
 			url: '/dashboard/user/openai/chat/pin-conversation',
-			data: JSON.stringify({pinned: !isPinned, chat_id: chatId}),
+			data: JSON.stringify({ pinned: !isPinned, chat_id: chatId }),
 			contentType: 'application/json',
 			success: function (data) {
 				toastr.success(isPinned ? magicai_localize.conversation_unpinned : magicai_localize.conversation_pinned);
@@ -2521,9 +2581,9 @@ $('body').on('click', '.chat-download', event => {
 	} else {
 		html = `
 	<html ${this.doctype === 'doc'
-			? 'xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"'
-			: ''
-		}>
+		? 'xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"'
+		: ''
+}>
 	<head>
 		<meta charset="utf-8" />
 		<title>${docName}</title>

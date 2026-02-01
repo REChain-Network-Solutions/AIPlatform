@@ -1,0 +1,19 @@
+{
+	"user_id": null,
+	"title": "AI Image Generator",
+	"description": "Create stunning images in seconds.",
+	"slug": "ai_image_generator",
+	"active": 1,
+	"questions": "[{\"name\":\"description\",\"type\":\"textarea\",\"question\":\"Describe the Image\",\"select\":\"\"},{\"name\":\"size\",\"type\":\"select\",\"question\":\"Image Resolution\",\"select\":\"<option value='256x256'>256x256</option><option value='512x512'>512x512</option><option value='1024x1024'>1024x1024</option>\"}]",
+	"image": "<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"48\" viewBox=\"0 96 960 960\" width=\"48\"><path d=\"M180 936q-24 0-42-18t-18-42V276q0-24 18-42t42-18h600q24 0 42 18t18 42v600q0 24-18 42t-42 18H180Zm56-157h489L578 583 446 754l-93-127-117 152Z\"/></svg>",
+	"premium": 0,
+	"type": "image",
+	"created_at": "2023-03-20 14:22:02",
+	"updated_at": "2024-09-20 14:23:53",
+	"prompt": null,
+	"custom_template": 0,
+	"tone_of_voice": 0,
+	"color": "#D1C5DE",
+	"filters": "development",
+	"package": null
+}

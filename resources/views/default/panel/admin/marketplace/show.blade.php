@@ -110,17 +110,19 @@
                         {{ $item['name'] }}
                     </h3>
 
-                    @if ($item['installed'] and $item['version'] == $item['db_version'])
-                        <p class="mb-0 ms-3 flex items-center gap-2 text-2xs font-medium">
-                            <span class="inline-block size-2 rounded-full bg-green-500"></span>
-                            {{ __('Installed') }}
-                        </p>
-                    @else
-                        <a class="mb-0 ms-3 flex items-center gap-2 text-2xs font-medium">
-                            <span class="inline-block size-2 rounded-full bg-green-500"></span>
-                            {{ __('Upgrade') }}
-                        </a>
-                    @endif
+					@include('panel.admin.marketplace.particles.status-dot')
+
+					{{--                    @if ($item['installed'] and $item['version'] == $item['db_version'])--}}
+{{--                        <p class="mb-0 ms-3 flex items-center gap-2 text-2xs font-medium">--}}
+{{--                            <span class="inline-block size-2 rounded-full bg-green-500"></span>--}}
+{{--                            {{ __('Installed') }}--}}
+{{--                        </p>--}}
+{{--                    @else--}}
+{{--                        <a class="mb-0 ms-3 flex items-center gap-2 text-2xs font-medium">--}}
+{{--                            <span class="inline-block size-2 rounded-full bg-green-500"></span>--}}
+{{--                            {{ __('Upgrade') }}--}}
+{{--                        </a>--}}
+{{--                    @endif--}}
                 </div>
 
                 <div class="mb-10 flex flex-wrap items-center gap-6 text-sm font-medium text-heading-foreground">

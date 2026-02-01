@@ -8,6 +8,7 @@ use App\Packages\FalAI\Contracts\TextToVideoModelInterface;
 use App\Packages\FalAI\Models\FastVeo3;
 use App\Packages\FalAI\Models\Kling;
 use App\Packages\FalAI\Models\Kling25Turbo;
+use App\Packages\FalAI\Models\Kling26Pro;
 use App\Packages\FalAI\Models\Veed;
 use App\Packages\FalAI\Models\Veo3;
 use App\Packages\FalAI\Models\Veo31;
@@ -46,6 +47,8 @@ class FalAIService
             EntityEnum::KLING_2_5_TURBO_PRO_TTV,
             EntityEnum::KLING_2_5_TURBO_STANDARD_ITV,
             EntityEnum::KLING_2_5_TURBO_PRO_ITV    => new Kling25Turbo($this->client, $model),
+            EntityEnum::KLING_2_6_PRO_TTV,
+            EntityEnum::KLING_2_6_PRO_ITV          => new Kling26Pro($this->client, $model),
             default                                => throw new InvalidArgumentException("Model {$model->value} is not supported."),
 
         };

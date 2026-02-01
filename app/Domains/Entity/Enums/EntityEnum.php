@@ -70,7 +70,7 @@ enum EntityEnum: string
     case CLAUDE_3_5_SONNET_V2 = 'claude-3-5-sonnet-20241022';
     case CLAUDE_3_5_SONNET = 'claude-3-5-sonnet-20240620';
     case CLAUDE_3_SONNET = 'claude-3-sonnet-20240229';
-
+    case CLAUDE_OPUS_4_5 = 'claude-opus-4-5-20251101';
     case CLAUDE_OPUS_4_1 = 'claude-opus-4-1-20250805';
     case CLAUDE_OPUS_4 = 'claude-opus-4-20250514';
     case CLAUDE_3_OPUS = 'claude-3-opus-20240229';
@@ -311,6 +311,10 @@ enum EntityEnum: string
 
     case FLUX_SCHNELL = 'flux/schnell';
 
+    case FLUX_2_FLEX = 'flux-2-flex';
+
+    case FLUX_2_FLEX_EDIT = 'flux-2-flex/edit';
+
     case KLING = 'kling';
 
     case KLING_2_1 = 'klingV21';
@@ -318,6 +322,9 @@ enum EntityEnum: string
     case KLING_2_5_TURBO_PRO_TTV = 'kling-2.5-turbo/pro/text-to-video';
     case KLING_2_5_TURBO_PRO_ITV = 'kling-2.5-turbo/pro/image-to-video';
     case KLING_2_5_TURBO_STANDARD_ITV = 'kling-2.5-turbo/standard/image-to-video';
+
+    case KLING_2_6_PRO_TTV = 'kling-video/v2.6/pro/text-to-video';
+    case KLING_2_6_PRO_ITV = 'kling-video/v2.6/pro/image-to-video';
 
     case KLING_IMAGE = 'klingImage';
 
@@ -489,6 +496,7 @@ enum EntityEnum: string
             self::SORA_2_PRO                  => __('Sora 2 Pro (Most advanced synced-audio video generation)'),
             // Anthropic
             self::CLAUDE_SONNET_4_5    => __('Claude Sonnet 4.5'),
+            self::CLAUDE_OPUS_4_5      => __('Claude Opus 4.5'),
             self::CLAUDE_OPUS_4_1      => __('Claude Opus 4.1'),
             self::CLAUDE_OPUS_4        => __('Claude Opus 4'),
             self::CLAUDE_SONNET_4      => __('Claude Sonnet 4'),
@@ -590,11 +598,15 @@ enum EntityEnum: string
             self::FLUX_PRO_1_1                           => __('Flux Pro 1.1'),
             self::FLUX_REALISM                           => __('Flux Realism'),
             self::FLUX_SCHNELL                           => __('Flux Schnell'),
+            self::FLUX_2_FLEX                            => __('Flux 2 Flex'),
+            self::FLUX_2_FLEX_EDIT                       => __('Flux 2 Flex Edit'),
             self::KLING                                  => __('Kling 1.0'),
             self::KLING_2_1                              => __('Kling 2.1'),
             self::KLING_2_5_TURBO_PRO_TTV                => __('Kling 2.5 Turbo Pro Text to Video'),
             self::KLING_2_5_TURBO_PRO_ITV                => __('Kling 2.5 Turbo Pro Image to Video'),
             self::KLING_2_5_TURBO_STANDARD_ITV           => __('Kling 2.5 Turbo Standard Image to Video'),
+            self::KLING_2_6_PRO_TTV                      => __('Kling Video v2.6 Pro Text to Video'),
+            self::KLING_2_6_PRO_ITV                      => __('Kling Video v2.6 Pro Image to Video'),
             self::KLING_IMAGE                            => __('Kling Image to Video'),
             self::LUMA_DREAM_MACHINE                     => __('Luma Dream Machine'),
             self::HAIPER                                 => __('Haiper'),
@@ -724,6 +736,7 @@ enum EntityEnum: string
             self::GPT_O_4_MINI => EngineEnum::OPEN_AI,
             // Anthropic
             self::CLAUDE_SONNET_4_5,
+            self::CLAUDE_OPUS_4_5,
             self::CLAUDE_OPUS_4_1,
             self::CLAUDE_SONNET_4,
             self::CLAUDE_OPUS_4,
@@ -801,7 +814,8 @@ enum EntityEnum: string
             self::VEO_3, self::VEO_3_FAST,
             self::KLING_2_5_TURBO_PRO_TTV, self::KLING_2_5_TURBO_PRO_ITV, self::KLING_2_5_TURBO_STANDARD_ITV,
             self::KLING_VIDEO, self::VIDEO_UPSCALER, self::COGVIDEOX_5B, self::ANIMATEDIFF_V2V, self::FAST_ANIMATEDIFF_TURBO, self::FLUX_PRO, self::NANO_BANANA, self::NANO_BANANA_EDIT, self::NANO_BANANA_PRO, self::NANO_BANANA_PRO_EDIT, self::SEEDREAM_4, self::SEEDREAM_4_EDIT, self::IMAGEN_4, self::FLUX_PRO_KONTEXT_MAX_MULTI, self::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE, self::FLUX_PRO_KONTEXT, self::FLUX_PRO_1_1, self::FLUX_REALISM, self::FLUX_SCHNELL, self::IDEOGRAM,
-            self::KLING, self::KLING_2_1, self::KLING_IMAGE, self::LUMA_DREAM_MACHINE, self::HAIPER, self::MINIMAX => EngineEnum::FAL_AI,
+            self::KLING, self::KLING_2_1, self::KLING_IMAGE, self::LUMA_DREAM_MACHINE, self::HAIPER, self::MINIMAX,
+            self::KLING_2_6_PRO_TTV, self::KLING_2_6_PRO_ITV, self::FLUX_2_FLEX, self::FLUX_2_FLEX_EDIT => EngineEnum::FAL_AI,
             // Creatify
             self::AD_MARKETING_VIDEO => EngineEnum::CREATIFY,
             // Topview
@@ -910,6 +924,7 @@ enum EntityEnum: string
 
             // Anthropic
             self::CLAUDE_SONNET_4_5    => Anthropic\ClaudeSonnet45Driver::class,
+            self::CLAUDE_OPUS_4_5      => Anthropic\ClaudeOpus45Driver::class,
             self::CLAUDE_OPUS_4_1      => Anthropic\ClaudeOpus41Driver::class,
             self::CLAUDE_SONNET_4      => Anthropic\ClaudeSonnet4Driver::class,
             self::CLAUDE_OPUS_4        => Anthropic\ClaudeOpus4Driver::class,
@@ -1004,11 +1019,15 @@ enum EntityEnum: string
             self::FLUX_PRO_1_1                           => FalAI\FluxPro11Driver::class,
             self::FLUX_REALISM                           => FalAI\FluxRealismDriver::class,
             self::FLUX_SCHNELL                           => FalAI\FluxSchnellDriver::class,
+            self::FLUX_2_FLEX                            => FalAI\FluxTwoFlexDriver::class,
+            self::FLUX_2_FLEX_EDIT                       => FalAI\FluxTwoFlexEditDriver::class,
             self::KLING                                  => FalAI\KlingDriver::class,
             self::KLING_2_1                              => FalAI\KlingV21Driver::class,
             self::KLING_2_5_TURBO_PRO_TTV                => FalAI\Kling25Turbo\Kling25TurboProTTVDriver::class,
             self::KLING_2_5_TURBO_PRO_ITV                => FalAI\Kling25Turbo\Kling25TurboProITVDriver::class,
             self::KLING_2_5_TURBO_STANDARD_ITV           => FalAI\Kling25Turbo\Kling25TurboStandardITVDriver::class,
+            self::KLING_2_6_PRO_TTV                      => FalAI\Kling26Pro\KlingV26ProTTVDriver::class,
+            self::KLING_2_6_PRO_ITV                      => FalAI\Kling26Pro\KlingV26ProITVDriver::class,
             self::KLING_IMAGE                            => FalAI\KlingImageDriver::class,
             self::LUMA_DREAM_MACHINE                     => FalAI\LumaDreamMachineDriver::class,
             self::HAIPER                                 => FalAI\HaiperDriver::class,
@@ -1117,7 +1136,7 @@ enum EntityEnum: string
             self::SORA_2_PRO                  => 0.50,
 
             // Anthropic
-            self::CLAUDE_SONNET_4_5, self::CLAUDE_OPUS_4_1, self::CLAUDE_OPUS_4, self::CLAUDE_SONNET_4, self::CLAUDE_3_7_SONNET, self::CLAUDE_3_5_SONNET_V2, self::CLAUDE_3_5_SONNET, self::CLAUDE_3_SONNET => 0.000015,
+            self::CLAUDE_SONNET_4_5, self::CLAUDE_OPUS_4_1, self::CLAUDE_OPUS_4_5, self::CLAUDE_OPUS_4, self::CLAUDE_SONNET_4, self::CLAUDE_3_7_SONNET, self::CLAUDE_3_5_SONNET_V2, self::CLAUDE_3_5_SONNET, self::CLAUDE_3_SONNET => 0.000015,
             self::CLAUDE_3_5_HAIKU => 0.000003,
             self::CLAUDE_3_OPUS    => 0.000015,
             self::CLAUDE_3_HAIKU   => 0.000003,
@@ -1211,11 +1230,12 @@ enum EntityEnum: string
             self::VEO_3_FAST                             => 1.2,
             self::VEO_3                                  => 3.2,
             self::KLING_VIDEO                            => 1.4,
-            self::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE, self::FLUX_PRO_KONTEXT, self::FLUX_PRO => 0.4,
+            self::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE, self::FLUX_PRO_KONTEXT, self::FLUX_PRO, self::FLUX_2_FLEX, self::FLUX_2_FLEX_EDIT => 0.4,
             self::FLUX_SCHNELL               => 0.003,
             self::FLUX_PRO_KONTEXT_MAX_MULTI => 0.8,
             self::KLING_2_5_TURBO_PRO_TTV, self::KLING_2_5_TURBO_PRO_ITV, self::KLING_2_5_TURBO_STANDARD_ITV => 0.6,
             self::KLING, self::KLING_2_1, self::KLING_IMAGE, self::LUMA_DREAM_MACHINE, self::HAIPER, self::MINIMAX => 0.5,
+            self::KLING_2_6_PRO_TTV, self::KLING_2_6_PRO_ITV => 1.4,
             self::IDEOGRAM => 0.6,
             self::VIDEO_UPSCALER, self::COGVIDEOX_5B, self::ANIMATEDIFF_V2V, self::FAST_ANIMATEDIFF_TURBO => 0.20,
 

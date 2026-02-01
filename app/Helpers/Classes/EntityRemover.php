@@ -96,6 +96,7 @@ class EntityRemover
             unset($freeCreditsUponRegistration[$savedKey][$entitySlug]);
             setting(['freeCreditsUponRegistration' => $freeCreditsUponRegistration])->save();
         }
+
     }
 
     private static function removeFromAppSettings(string $entitySlug): void

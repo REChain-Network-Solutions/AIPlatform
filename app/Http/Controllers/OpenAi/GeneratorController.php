@@ -6,6 +6,8 @@ use App\Domains\Engine\Enums\EngineEnum;
 use App\Domains\Entity\Enums\EntityEnum;
 use App\Domains\Entity\Facades\Entity as EntityFacade;
 use App\Domains\Entity\Models\Entity;
+use App\Extensions\SocialMedia\System\Models\SocialMediaPostDailyMetric;
+use App\Extensions\SocialMediaAgent\System\Models\SocialMediaAgent;
 use App\Helpers\Classes\ApiHelper;
 use App\Helpers\Classes\Helper;
 use App\Helpers\Classes\MarketplaceHelper;
@@ -29,17 +31,21 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use JsonException;
 use Random\RandomException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class GeneratorController extends Controller
 {
+    protected bool $realtimeCreditsFailed = false;
+
     protected $settings;
 
     protected $settings_two;
@@ -70,9 +76,10 @@ class GeneratorController extends Controller
     {
         $template_type = $request->get('template_type', 'chatbot');
 
+        //		 eger promta post generate etmek istiyora, bana #post-generate
         // If the template type is chat, then we will build a chat streamed output or other ai template streamed output
         return match ($template_type) {
-            'chatbot', 'vision', 'chatPro' => $this->buildChatStreamedOutput($request),
+            'chatbot', 'vision', 'chatPro', 'socialMediaAgent' => $this->buildChatStreamedOutput($request),
             default => $this->buildOtherStreamedOutput($request),
         };
     }
@@ -83,6 +90,27 @@ class GeneratorController extends Controller
     public function buildChatStreamedOutput(Request $request): ?StreamedResponse
     {
         $chatParams = $this->extractChatParameters($request);
+        if (empty($chatParams)) {
+            return response()->stream(function () {
+                echo "event: message\n";
+                echo 'data: 0' . "\n\n";
+
+                echo "event: data\n";
+                echo 'data: ' . __('Chat not found. Please refresh and try again.');
+                echo "\n\n";
+                flush();
+                echo "event: stop\n";
+                echo 'data: [DONE]';
+                echo "\n\n";
+                flush();
+            }, 200, [
+                'Cache-Control'     => 'no-cache',
+                'X-Accel-Buffering' => 'no',
+                'Connection'        => 'keep-alive',
+                'Content-Type'      => 'text/event-stream',
+            ]);
+        }
+
         $user = Auth::user();
 
         if (
@@ -98,8 +126,28 @@ class GeneratorController extends Controller
 
         $message = $this->createChatMessage($user, $chatParams);
         $history = $this->buildChatHistory($chatParams, $message->user_openai_chat_id);
-
         $isFileSearch = setting('openai_file_search', 0) && ! empty($chatParams['chat']->openai_vector_id);
+
+        if ($this->realtimeCreditsFailed) {
+            return response()->stream(function () use ($message) {
+                echo "event: message\n";
+                echo 'data: ' . $message->id . "\n\n";
+
+                echo "event: data\n";
+                echo 'data: ' . __('Insufficient credits for realtime search. Please check your credits and try again.');
+                echo "\n\n";
+                flush();
+                echo "event: stop\n";
+                echo 'data: [DONE]';
+                echo "\n\n";
+                flush();
+            }, 200, [
+                'Cache-Control'     => 'no-cache',
+                'X-Accel-Buffering' => 'no',
+                'Connection'        => 'keep-alive',
+                'Content-Type'      => 'text/event-stream',
+            ]);
+        }
 
         return $this->streamService->ChatStream(
             $chat_bot,
@@ -117,7 +165,11 @@ class GeneratorController extends Controller
     private function extractChatParameters(Request $request): array
     {
         $chat_id = $request->get('chat_id');
-        $chat = UserOpenaiChat::with('category')->findOrFail($chat_id);
+        $chat = UserOpenaiChat::with('category')->find($chat_id);
+
+        if (! $chat) {
+            return [];
+        }
 
         return [
             'prompt'              => $request->get('prompt'),
@@ -126,6 +178,7 @@ class GeneratorController extends Controller
             'brand_voice_prod'    => $request->get('brand_voice_prod'),
             'chat_id'             => $chat_id,
             'chat_type'           => $request->get('template_type'),
+            'agent_id'            => $request->integer('chat_open_ai_agent_id') ?: null,
             'images'              => $request->get('images', []),
             'pdfname'             => $request->get('pdfname', null),
             'pdfpath'             => $request->get('pdfpath', null),
@@ -237,25 +290,242 @@ class GeneratorController extends Controller
         return UserOpenaiChatMessage::create($attributes);
     }
 
-    private function buildChatHistory(array $chatParams, int $chat_id): array
+    private function buildChatHistory(array &$chatParams, int $chat_id): array
     {
         $chat = $chatParams['chat'];
         $category = $chat->category;
         $systemRole = EntityEnum::fromSlug($this->determineChatBot($chatParams['chatbot_front_model']))->isBetaEntity() ? 'system' : 'user';
 
         $history = $this->initializeHistory($category, $systemRole);
+
+        if (($chatParams['chat_type'] ?? null) === 'socialMediaAgent') {
+            $history[] = [
+                'role'    => $systemRole,
+                'content' => 'You are the AI Social Media Agent. Help with strategy, analysis, scheduling, and general questions conversationally. Only call the `generate_social_post` function when the user clearly asks you to draft, write, or generate a new social media post. For all other requests, answer normally and do not use any tool.',
+            ];
+
+            $history = $this->appendSocialMediaAgentContext($history, $chatParams, $systemRole);
+        }
         $history = $this->addFileOrInstructionsToHistory($history, $category, $chat_id, $chatParams['prompt'], $systemRole);
         $history = $this->addPreviousMessagesToHistory($history, $chat, $chatParams['assistant']);
         $history = $this->checkBrandVoice($chatParams['chat_brand_voice'], $chatParams['brand_voice_prod'], $history);
-        $history = $this->addCurrentPromptToHistory($history, $chatParams, $systemRole);
 
-        return $history;
+        return $this->addCurrentPromptToHistory($history, $chatParams, $systemRole);
+    }
+
+    private function appendSocialMediaAgentContext(array $history, array $chatParams, string $systemRole): array
+    {
+        $agent = $this->resolveChatAgent($chatParams['agent_id'] ?? null);
+
+        if (! $agent) {
+            return $history;
+        }
+
+        $platforms = $agent->platforms();
+
+        if ($profile = $this->formatSocialMediaAgentProfile($agent, $platforms)) {
+            $history[] = [
+                'role'    => $systemRole,
+                'content' => $profile,
+            ];
+        }
+
+        if ($metrics = $this->buildSocialMediaAgentMetricsSummary($agent, $platforms)) {
+            $history[] = [
+                'role'    => $systemRole,
+                'content' => $metrics,
+            ];
+        }
+
+        return $this->addCurrentPromptToHistory($history, $chatParams, $systemRole);
+    }
+
+    private function resolveChatAgent(?int $agentId): ?SocialMediaAgent
+    {
+        $userId = Auth::id();
+
+        if (! $userId) {
+            return null;
+        }
+
+        $query = SocialMediaAgent::query()
+            ->where('user_id', $userId)
+            ->orderBy('id');
+
+        if ($agentId) {
+            $agent = (clone $query)->whereKey($agentId)->first();
+            if ($agent) {
+                return $agent;
+            }
+        }
+
+        return $query->first();
+    }
+
+    private function formatSocialMediaAgentProfile(SocialMediaAgent $agent, Collection $platforms): string
+    {
+        $platformNames = $platforms
+            ->pluck('platform')
+            ->filter()
+            ->map(fn ($name) => Str::headline((string) $name))
+            ->values()
+            ->all();
+
+        $brandSummary = $agent->branding_description
+            ?: $agent->site_description
+            ?: null;
+
+        $scheduleParts = [];
+        if ($agent->daily_post_count) {
+            $scheduleParts[] = $agent->daily_post_count . ' posts/day';
+        }
+        if (! empty($agent->schedule_days)) {
+            $scheduleParts[] = 'on ' . $this->formatList($agent->schedule_days, 'set days', true);
+        }
+        if (! empty($agent->schedule_times)) {
+            $scheduleParts[] = 'around ' . $this->formatList($agent->schedule_times, 'set times');
+        }
+
+        $lines = array_filter([
+            'SOCIAL MEDIA AGENT PROFILE',
+            'Agent: ' . $agent->name,
+            $brandSummary ? ('Brand summary: ' . Str::limit(trim((string) $brandSummary), 400)) : null,
+            'Platforms: ' . (! empty($platformNames) ? implode(', ', $platformNames) : 'No connected platforms yet'),
+            'Target audiences: ' . $this->formatList($agent->target_audience ?: null),
+            'Content pillars: ' . $this->formatList($agent->categories ?: null, 'Not specified', true),
+            'Post formats: ' . $this->formatList($agent->post_types ?: null, 'Not specified', true),
+            'CTA templates: ' . $this->formatList($agent->cta_templates ?: null, 'Not provided'),
+            'Primary goals: ' . $this->formatList($agent->goals ?: null, 'Not specified'),
+            'Tone & voice: ' . ($agent->tone ? Str::headline($agent->tone) : 'Not specified'),
+            'Language: ' . ($agent->language ?: 'Not specified'),
+            'Preferred length: ' . ($agent->approximate_words ? $agent->approximate_words . ' words' : 'Flexible'),
+            'Hashtag allowance: ' . ($agent->hashtag_count ? $agent->hashtag_count . ' per post' : 'Flexible'),
+            'Asset expectations: ' . ($agent->has_image ? 'Posts should include visuals' : 'Copy-only posts are acceptable'),
+            'Posting cadence: ' . (! empty($scheduleParts) ? implode(' ', $scheduleParts) : 'No schedule defined'),
+            $agent->average_impressions ? ('Avg impressions/post: ' . $this->formatNumber($agent->average_impressions)) : null,
+            $agent->average_engagement ? ('Avg engagement actions/post: ' . $this->formatNumber($agent->average_engagement)) : null,
+        ]);
+
+        return implode("\n", $lines);
+    }
+
+    private function buildSocialMediaAgentMetricsSummary(SocialMediaAgent $agent, Collection $platforms): ?string
+    {
+        $endDate = Carbon::now()->endOfDay();
+        $startDate = $endDate->copy()->subDays(29)->startOfDay();
+
+        $records = SocialMediaPostDailyMetric::query()
+            ->where('agent_id', $agent->id)
+            ->whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->selectRaw('platform, social_media_platform_id, COUNT(DISTINCT social_media_post_id) as post_count, SUM(view_count) as views, SUM(like_count) as likes, SUM(comment_count) as comments, SUM(share_count) as shares')
+            ->groupBy('platform', 'social_media_platform_id')
+            ->orderByDesc('views')
+            ->get();
+
+        $windowLabel = sprintf('%s – %s', $startDate->toDateString(), $endDate->toDateString());
+
+        if ($records->isEmpty()) {
+            return "30-Day Performance Snapshot ({$windowLabel})\nNo performance metrics were captured for this agent over the last 30 days. If a user requests analytics, be transparent that data is not yet available and focus on actionable next steps.";
+        }
+
+        $totals = [
+            'posts'    => (int) $records->sum('post_count'),
+            'views'    => (int) $records->sum('views'),
+            'likes'    => (int) $records->sum('likes'),
+            'comments' => (int) $records->sum('comments'),
+            'shares'   => (int) $records->sum('shares'),
+        ];
+
+        $engagementActions = $totals['likes'] + $totals['comments'] + $totals['shares'];
+        $overallRate = $totals['views'] > 0
+            ? round(($engagementActions / $totals['views']) * 100, 2)
+            : 0;
+
+        $platformLookup = $platforms->keyBy('id');
+
+        $platformLines = $records->map(function ($record) use ($platformLookup) {
+            $platformName = $record->platform
+                ?? optional($platformLookup->get($record->social_media_platform_id))->platform
+                ?? ('Platform ' . ($record->social_media_platform_id ?? '?'));
+
+            $engagementCount = (int) $record->likes + (int) $record->comments + (int) $record->shares;
+            $rate = ($record->views ?? 0) > 0
+                ? round(($engagementCount / $record->views) * 100, 2)
+                : 0;
+
+            return sprintf(
+                '- %s: %d posts, %s views, %s engagements (%s likes / %s comments / %s shares), %s%% engagement rate',
+                Str::headline($platformName),
+                (int) $record->post_count,
+                $this->formatNumber((float) $record->views),
+                $this->formatNumber($engagementCount),
+                $this->formatNumber((float) $record->likes),
+                $this->formatNumber((float) $record->comments),
+                $this->formatNumber((float) $record->shares),
+                $this->formatNumber($rate, 2)
+            );
+        })->all();
+
+        $summaryLines = [
+            "30-Day Performance Snapshot ({$windowLabel})",
+            sprintf(
+                'Totals: %d posts, %s views, %s engagement actions (likes + comments + shares), %s%% overall engagement rate.',
+                $totals['posts'],
+                $this->formatNumber($totals['views']),
+                $this->formatNumber($engagementActions),
+                $this->formatNumber($overallRate, 2)
+            ),
+            'Platform breakdown:',
+            ...$platformLines,
+            'Base any performance reports on these stats. When estimating future outcomes, clearly describe the assumptions you are making.',
+        ];
+
+        return implode("\n", $summaryLines);
+    }
+
+    private function formatList($value, string $fallback = 'Not provided', bool $humanize = false): string
+    {
+        if (empty($value)) {
+            return $fallback;
+        }
+
+        $items = is_array($value) ? $value : [$value];
+
+        $formatted = array_filter(array_map(function ($item) use ($humanize) {
+            if (is_array($item)) {
+                $item = $item['label']
+                    ?? $item['value']
+                    ?? $item['name']
+                    ?? implode(' ', array_filter($item));
+            }
+
+            $item = trim((string) $item);
+
+            if ($item === '') {
+                return null;
+            }
+
+            return $humanize ? Str::headline($item) : $item;
+        }, $items));
+
+        return empty($formatted) ? $fallback : implode(', ', $formatted);
+    }
+
+    private function formatNumber(float|int|null $value, int $decimals = 0): string
+    {
+        if ($value === null) {
+            return $decimals > 0
+                ? number_format(0, $decimals, '.', ',')
+                : '0';
+        }
+
+        return number_format((float) $value, $decimals, '.', ',');
     }
 
     private function initializeHistory($category, string $systemRole): array
     {
         if ($category->chat_completions) {
-            $chat_completions = json_decode($category->chat_completions, true, 512, JSON_THROW_ON_ERROR);
+            $chat_completions = json_decode($category->chat_completions, true);
             $history = [];
             foreach ($chat_completions as $item) {
                 $history[] = [
@@ -267,7 +537,7 @@ class GeneratorController extends Controller
             return $history;
         }
 
-        return [['role' => $systemRole, 'content' => 'You are a helpful assistant.']];
+        return [['role' => $systemRole, 'content' => __('You are a helpful assistant.')]];
     }
 
     private function addFileOrInstructionsToHistory(array $history, $category, int $chat_id, string $prompt, string $systemRole): array
@@ -292,12 +562,55 @@ class GeneratorController extends Controller
                 }
             } catch (Throwable $th) {
                 // Handle error silently
+                Log::error('Error fetching similar text for chat history: ' . $th->getMessage());
             }
-        } elseif ($category && $category->instructions) {
-            $history[] = ['role' => $systemRole, 'content' => $category->instructions];
+        } else {
+            // Get instructions with user override support
+            $instructions = $this->getInstructions($category);
+
+            if ($instructions) {
+                $history[] = ['role' => $systemRole, 'content' => $instructions];
+            }
         }
 
         return $history;
+    }
+
+    /**
+     * Get instructions for current user/guest
+     * Priority: User-specific > Admin default
+     */
+    private function getInstructions($category): ?string
+    {
+        $categoryId = $category->id;
+
+        if (MarketplaceHelper::isRegistered('ai-chat-pro-memory')) {
+            if (Auth::check()) {
+                // Check for user-specific instructions first
+                $userInstructions = \App\Extensions\AIChatProMemory\System\Models\UserChatInstruction::getForUser(
+                    Auth::id(),
+                    $categoryId
+                );
+
+                if ($userInstructions) {
+                    return $category->instructions ? $category->instructions . "\n\n" . $userInstructions : $userInstructions;
+                }
+            } else {
+                // Check for guest instructions by IP
+                $ipAddress = request()?->header('CF-Connecting-IP') ?? request()?->ip();
+                $guestInstructions = \App\Extensions\AIChatProMemory\System\Models\UserChatInstruction::getForGuest(
+                    $ipAddress,
+                    $categoryId
+                );
+
+                if ($guestInstructions) {
+                    return $category->instructions ? $category->instructions . "\n\n" . $guestInstructions : $guestInstructions;
+                }
+            }
+        }
+
+        // Fall back to admin's default instructions
+        return $category->instructions;
     }
 
     private function addPreviousMessagesToHistory(array $history, $chat, $assistant): array
@@ -340,12 +653,15 @@ class GeneratorController extends Controller
         return $history;
     }
 
-    private function addCurrentPromptToHistory(array $history, array $chatParams, string $systemRole): array
+    /**
+     * @throws GuzzleException
+     * @throws JsonException
+     */
+    private function addCurrentPromptToHistory(array $history, array &$chatParams, string $systemRole): array
     {
         if (empty($chatParams['images']) && $chatParams['chat']->category->slug !== 'ai_vision') {
             if ($chatParams['realtime']) {
-                $final_prompt = $this->getRealtimeEngine($chatParams);
-                $history[] = ['role' => 'user', 'content' => $final_prompt ?? ''];
+                $history[] = ['role' => 'user', 'content' => $this->getRealtimeEngine($chatParams) ?? ''];
             } else {
                 $history[] = ['role' => 'user', 'content' => $chatParams['prompt'] ?? ''];
             }
@@ -383,17 +699,21 @@ class GeneratorController extends Controller
         return $history;
     }
 
-    private function getRealtimeEngine(array $chatParams): ?string
+    /**
+     * @throws GuzzleException
+     * @throws JsonException
+     */
+    private function getRealtimeEngine(array $chatParams): string
     {
-        if (setting('default_realtime', 'serper') == 'serper' &&
-            ! is_null($this->settings_two->serper_api_key)) {
+        if (! is_null($this->settings_two->serper_api_key) && setting('default_realtime', 'serper') === 'serper') {
             return $this->getRealtimePrompt($chatParams['prompt']);
-        } elseif (setting('default_realtime') == 'perplexity' &&
-            ! is_null(setting('perplexity_key'))) {
+        }
+
+        if (! is_null(setting('perplexity_key')) && setting('default_realtime') === 'perplexity') {
             return $this->realtimePromptPerplexity($chatParams['prompt']);
         }
 
-        return null;
+        return $chatParams['prompt'];
     }
 
     private function processMessageImages($images, $assistant): array
@@ -406,7 +726,11 @@ class GeneratorController extends Controller
                     if (Str::startsWith($image, 'http')) {
                         $imageData = file_get_contents($image);
                     } else {
-                        $imageData = file_get_contents(ltrim($image, '/'));
+                        $img = ltrim($image, '/');
+                        if (! file_exists($img)) {
+                            continue;
+                        }
+                        $imageData = file_get_contents($img);
                     }
                     $base64Image = base64_encode($imageData);
 
@@ -576,26 +900,14 @@ class GeneratorController extends Controller
         $this->streamService->reduceTokensWhenIntterruptStream($request, $type);
     }
 
-    /**
-     * @throws GuzzleException
-     * @throws JsonException
-     */
-    private function getRealtimePrompt($realtimePrompt): ?string
+    private function getRealtimePrompt($realtimePrompt): StreamedResponse|string
     {
         $driver = EntityFacade::driver(EntityEnum::SERPER);
 
         if (! $driver->hasCreditBalance()) {
-            echo PHP_EOL;
-            echo "event: data\n";
-            echo 'data: ' . __('You have no realtime search credits left. Please buy more credits to continue.');
-            echo "\n\n";
-            flush();
-            echo "event: stop\n";
-            echo 'data: [DONE]';
-            echo "\n\n";
-            flush();
+            $this->realtimeCreditsFailed = true;
 
-            return null;
+            return $realtimePrompt;
         }
 
         $client = new Client;
@@ -620,15 +932,20 @@ class GeneratorController extends Controller
         $driver->input($realtimePrompt)->calculateCredit()->decreaseCredit();
         Usage::getSingle()->updateWordCounts($driver->calculate());
 
+        $searchRes = json_encode($toGPT, JSON_THROW_ON_ERROR);
+
+        if (empty($searchRes)) {
+            return $realtimePrompt;
+        }
+
         return 'Prompt: ' . $realtimePrompt .
             '\n\nWeb search json results: '
-            . json_encode($toGPT, JSON_THROW_ON_ERROR) .
+            . $searchRes .
             '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
     }
 
-    public function realtimePromptPerplexity($realtimePrompt)
+    public function realtimePromptPerplexity($realtimePrompt): string
     {
-
         $url = 'https://api.perplexity.ai/chat/completions';
         $token = setting('perplexity_key');
 
@@ -657,17 +974,11 @@ class GeneratorController extends Controller
                     . $response .
                     '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
 
-            } else {
-                return response()->json([
-                    'status'  => 'error',
-                    'message' => $response->body(),
-                ], 500);
             }
+
+            return $realtimePrompt;
         } catch (Exception $e) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => $e->getMessage(),
-            ], 500);
+            return $realtimePrompt;
         }
     }
 

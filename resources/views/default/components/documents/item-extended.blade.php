@@ -105,7 +105,7 @@
     </div>
 
     <p
-        class="lqd-posts-item-type lqd-docs-item-type sort-file inline-block w-auto justify-self-start whitespace-nowrap rounded-md bg-primary px-1.5 py-1 text-3xs font-medium leading-tight text-primary-foreground"
+        class="lqd-posts-item-type lqd-docs-item-type sort-file inline-block w-auto justify-self-start rounded-md bg-primary px-1.5 py-1 text-3xs font-medium leading-tight text-primary-foreground group-[&[data-view-mode=grid]]:col-span-2 group-[&[data-view-mode=grid]]:max-w-[calc(100%-50px)]"
         data-generator-title="{{ trim($entry->generator->title) }}"
         @if ($entry->generator->color) style="background: {{ $entry->generator->color }}; color: black;" @endif
     >

@@ -60,6 +60,16 @@
 		{
 			$template = 'chatpro';
 		}
+		if (
+			\App\Helpers\Classes\MarketplaceHelper::isRegistered('social-media-agent') &&
+			(
+				str_starts_with($currentPath, '/dashboard/user/social-media/agent/chat') ||
+				! auth()->check()
+			)
+		)
+		{
+			$template = 'social-media-agent';
+		}
 	@endphp
     <script>
         window.addEventListener("load", (event) => {

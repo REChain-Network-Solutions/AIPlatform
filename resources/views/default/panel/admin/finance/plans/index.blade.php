@@ -1,7 +1,7 @@
 @extends('panel.layout.app', ['disable_tblr' => true])
 @section('title', __('Subscriptions and Packs'))
 @section('titlebar_actions')
-    <div class="mb-4 flex flex-wrap gap-3">
+    <div class="flex flex-wrap gap-3">
         <x-button
             href="{{ $app_is_demo ? '#' : route('dashboard.admin.finance.plans.SubscriptionNewOrEdit') }}"
             onclick="{{ $app_is_demo ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '' }}"

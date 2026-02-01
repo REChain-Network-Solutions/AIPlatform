@@ -24,6 +24,10 @@ class CreateImageService
 
     public function generateForAi(): ?string
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '-1');
+        ini_set('max_execution_time', 3600);
+
         $requestData = $this->requestData();
 
         $httpClient = Http::timeout(10000)
@@ -49,6 +53,10 @@ class CreateImageService
 
     public function generate(): array
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '-1');
+        ini_set('max_execution_time', 3600);
+
         $requestData = $this->requestData();
 
         $httpClient = Http::timeout(10000)

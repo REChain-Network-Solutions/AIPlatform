@@ -19,7 +19,7 @@ class ClearUserActivityCommand extends Command
             return;
         }
 
-        Log::info('Clearing user activity');
+        // Log::info('Clearing user activity');
 
         // Assuming you have a UserActivity model and a user_activities table
 
@@ -29,6 +29,6 @@ class ClearUserActivityCommand extends Command
 
         // Add your logic to clear user activity here;
 
-        Log::info('User activity cleared successfully');
+        // Log::info('User activity cleared successfully');
     }
 }

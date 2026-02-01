@@ -49,15 +49,25 @@
                                     <h3 class="m-0 text-xl font-semibold">
                                         {{ $item['name'] }}
                                     </h3>
-                                    <p class="flex items-center gap-2 text-2xs font-medium">
-                                        <span @class([
-                                            'size-2 inline-block rounded-full',
-                                            'bg-green-500' => $item['installed'],
-                                            'bg-foreground/10' => !$item['installed'],
-                                        ])></span>
-                                        {{ $item['installed'] ? __('Installed') . ($item['version'] != $item['db_version'] ? '  -  ' . trans('Update Available') : '') : __('Not Installed') }}
 
-                                    </p>
+									@include('panel.admin.marketplace.particles.status-dot')
+
+									@if (isset($item['db_version']) && $item['version'] != $item['db_version'] && $item['installed'])
+										<p
+											class="top-{{ $item['price'] == 0 ? '10' : '5' }} end-5 m-0 rounded bg-purple-50 px-2 py-1 text-4xs font-semibold text-center uppercase leading-tight tracking-widest text-[#242425] text-purple-700 ring-1 ring-inset ring-purple-700/10">
+											<a href="{{ route('dashboard.admin.marketplace.liextension') }}">{{ __('Update Available') }}</a>
+										</p>
+									@endif
+
+									{{--                                    <p class="flex items-center gap-2 text-2xs font-medium">--}}
+{{--                                        <span @class([--}}
+{{--                                            'size-2 inline-block rounded-full',--}}
+{{--                                            'bg-green-500' => $item['installed'],--}}
+{{--                                            'bg-foreground/10' => !$item['installed'],--}}
+{{--                                        ])></span>--}}
+{{--                                        {{ $item['installed'] ? __('Installed') . ($item['version'] != $item['db_version'] ? '  -  ' . trans('Update Available') : '') : __('Not Installed') }}--}}
+
+{{--                                    </p>--}}
                                 </div>
                                 <p class="text-base leading-normal">
                                     {{ $item['description'] }}

@@ -49,27 +49,29 @@ class SubscriptionPlanCreate extends Component
     {
         return array_merge([
             // Step 1
-            'plan.active'                        => 'required_if:step,1|boolean',
-            'plan.name'                          => 'required_if:step,1|string|max:190',
-            'plan.description'                   => 'required_if:step,1|string|max:15000',
-            'plan.features'                      => 'required_if:step,1|string|max:15000',
-            'plan.price'                         => 'required_if:step,1|numeric|min:0',
-            'plan.frequency'                     => 'required_if:step,1|string|max:190',
-            'plan.is_team_plan'                  => 'required_if:step,1|nullable|boolean',
-            'plan.price_tax_included'            => 'required_if:step,1|nullable|boolean',
-            'plan.plan_allow_seat'               => 'nullable|numeric|min:0',
-            'plan.trial_days'                    => 'required_if:step,1|numeric|min:0',
-            'plan.affiliate_status'              => 'nullable|boolean',
-            'plan.is_featured'                   => 'required_if:step,1|nullable|boolean',
-            'plan.user_api'                      => 'required_if:step,1|nullable|boolean',
-            'plan.plan_type'                     => 'required_if:step,1|in:' . implode(',', AccessType::getValues()),
-            'plan.default_ai_model'              => 'required_if:step,1|string|max:255',
-            'plan.hidden'                        => 'boolean',
-            'plan.max_subscribe'                 => 'integer|min:-1|nullable',
-            'plan.multi_model_support'           => 'nullable',
-            'plan.reset_credits_on_renewal'      => 'boolean',
-            'plan.last_date'                     => 'date|nullable',
-            'plan.hidden_url'                    => 'nullable',
+            'plan.active'                                  => 'required_if:step,1|boolean',
+            'plan.name'                                    => 'required_if:step,1|string|max:190',
+            'plan.description'                             => 'required_if:step,1|string|max:15000',
+            'plan.features'                                => 'required_if:step,1|string|max:15000',
+            'plan.price'                                   => 'required_if:step,1|numeric|min:0',
+            'plan.frequency'                               => 'required_if:step,1|string|max:190',
+            'plan.is_team_plan'                            => 'required_if:step,1|nullable|boolean',
+            'plan.price_tax_included'                      => 'required_if:step,1|nullable|boolean',
+            'plan.plan_allow_seat'                         => 'nullable|numeric|min:0',
+            'plan.trial_days'                              => 'required_if:step,1|numeric|min:0',
+            'plan.affiliate_status'                        => 'nullable|boolean',
+            'plan.is_featured'                             => 'required_if:step,1|nullable|boolean',
+            'plan.user_api'                                => 'required_if:step,1|nullable|boolean',
+            'plan.plan_type'                               => 'required_if:step,1|in:' . implode(',', AccessType::getValues()),
+            'plan.default_ai_model'                        => 'required_if:step,1|string|max:255',
+            'plan.hidden'                                  => 'boolean',
+            'plan.max_subscribe'                           => 'integer|min:-1|nullable',
+            'plan.multi_model_support'                     => 'nullable',
+            'plan.reset_credits_on_renewal'                => 'boolean',
+            'plan.last_date'                               => 'date|nullable',
+            'plan.hidden_url'                              => 'nullable',
+            'plan.social_media_agent_limits.agents'        => 'nullable|integer|min:-1',
+            'plan.social_media_agent_limits.monthly_posts' => 'nullable|integer|min:-1',
         ],
             // Step 2
             $this->rulesOfPlanAiTools(),
@@ -145,6 +147,7 @@ class SubscriptionPlanCreate extends Component
 
         $isSensitiveDataChanged = $this->isSensitiveDataChanged();
         $this->changePlanValuesWithSuppliedEntities();
+        $this->normalizeSocialMediaAgentLimits();
         $this->plan->save();
         if ($isSensitiveDataChanged) {
             PaymentProcessController::saveGatewayProducts($this->plan, $this->gatewaysToCreatePriceIds);
@@ -204,6 +207,22 @@ class SubscriptionPlanCreate extends Component
             $tmp[$keys[1]][$keys[2]][$keys[3]] = $value;
             $this->plan->ai_models = $tmp;
         }
+    }
+
+    private function normalizeSocialMediaAgentLimits(): void
+    {
+        $limits = (array) ($this->plan->social_media_agent_limits ?? []);
+        foreach (['agents', 'monthly_posts'] as $key) {
+            $value = $limits[$key] ?? null;
+            if ($value === null || $value === '') {
+                $limits[$key] = -1;
+
+                continue;
+            }
+            $limits[$key] = max(-1, (int) $value);
+        }
+
+        $this->plan->social_media_agent_limits = $limits;
     }
 
     private function isSensitiveDataChanged(): bool

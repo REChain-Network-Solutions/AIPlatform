@@ -40,7 +40,6 @@
                     const topNoticeBar = document.querySelector('.top-notice-bar');
                     const navbar = document.querySelector('.lqd-navbar');
                     const pageContentWrap = document.querySelector('.lqd-page-content-wrap');
-                    const navbarExpander = document.querySelector('.lqd-navbar-expander');
 
                     document.documentElement.style.overflow = open ? 'hidden' : '';
 
@@ -56,14 +55,7 @@
                         }
 
                         if (topNoticeBar) {
-                            topNoticeBar.style.visibility = open ? 'hidden' :
-                                '';
-                        }
-
-                        if (navbarExpander) {
-                            navbarExpander.style.visibility = open ? 'hidden' :
-                                '';
-                            navbarExpander.style.opacity = open ? 0 : 1;
+                            topNoticeBar.style.visibility = open ? 'hidden' : '';
                         }
                     }
                 }

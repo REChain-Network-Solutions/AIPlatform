@@ -9,20 +9,31 @@
 
     $premium_features = [
         'VIP Support' => 'Get instant help whenever you need it.',
-        'Access to All Current & Future Extensions <span class="font-bold text-[#6977DE]">worth $2000+</span>' => 'Always stay ahead with the latest features.' ,
-        'Access to All Current & Future Themes <span class="font-bold text-[#6977DE]">worth $670</span>'=> 'Always stay ahead with the latest designs.' ,
-		'Get the Mobile App Free in Your 4th Month! <span class="font-bold text-[#6977DE]">worth $3000+</span>' => 'Enjoy a free mobile app after your fourth month of subscription.' ,
-        '10 Hours of Custom Development Every Month' => 'Tailored improvements, at no extra cost.' ,
-        'Direct Communication with Our Development Team' => 'No middlemen, just solutions.' ,
-        'Exclusive Extensions Not Available to Others' => 'Stay ahead of competition, reserved for VIPs only.' ,
-        'Complimentary Logo Design' => 'A custom logo to elevate your brand.' ,
-        'Personalized Onboarding Assistance' => 'We’ll help you get up and running smoothly.' ,
-        'Free Setup & Configuration Services' => 'Let us handle the technical details for you.' ,
+        'Access to All Current & Future Extensions <span class="font-bold text-[#6977DE]">worth $2000+</span>' => 'Always stay ahead with the latest features.',
+        'Access to All Current & Future Themes <span class="font-bold text-[#6977DE]">worth $670</span>' => 'Always stay ahead with the latest designs.',
+        'Get the Mobile App Free in Your 4th Month! <span class="font-bold text-[#6977DE]">worth $3000+</span>' =>
+            'Enjoy a free mobile app after your fourth month of subscription.',
+        '10 Hours of Custom Development Every Month' => 'Tailored improvements, at no extra cost.',
+        'Direct Communication with Our Development Team' => 'No middlemen, just solutions.',
+        'Exclusive Extensions Not Available to Others' => 'Stay ahead of competition, reserved for VIPs only.',
+        'Complimentary Logo Design' => 'A custom logo to elevate your brand.',
+        'Personalized Onboarding Assistance' => 'We’ll help you get up and running smoothly.',
+        'Free Setup & Configuration Services' => 'Let us handle the technical details for you.',
     ];
 @endphp
 
 @extends('panel.layout.app', ['disable_tblr' => true, 'disable_titlebar' => true])
 @section('title', __('Overview'))
+
+@push('css')
+    <style>
+        #user-traffic .apexcharts-datalabels,
+        #top-countries .apexcharts-datalabels {
+            stroke: hsl(var(--secondary));
+            paint-order: stroke;
+        }
+    </style>
+@endpush
 
 @section('content')
     <div class="py-10">
@@ -89,9 +100,9 @@
                     <div class="lqd-user-menu-list">
                         <ol class="lqd-menu-list flex flex-col gap-2">
                             @foreach (cache('dashboard_widgets', []) as $widget)
-								@if($widget->name === \App\Enums\DashboardWidget::PREMIUM_ADVANTAGES)
-									@continue
-								@endif
+                                @if ($widget->name === \App\Enums\DashboardWidget::PREMIUM_ADVANTAGES)
+                                    @continue
+                                @endif
 
                                 <li
                                     class="group/item text-xs font-medium"
@@ -167,8 +178,8 @@
                         alt="{{ __('marketplace') }}"
                         width="857"
                         height="470"
-						loading="lazy"
-						decoding="async"
+                        loading="lazy"
+                        decoding="async"
                         src="{{ custom_theme_url('/assets/img/misc/dash-marketplace-announce.png') }}"
                     >
                 </figure>
@@ -188,9 +199,9 @@
                 @endphp
 
                 @foreach ($widgets as $widget)
-					@if($widget->name === \App\Enums\DashboardWidget::PREMIUM_ADVANTAGES && \App\Helpers\Classes\Helper::isUserVIP())
-						@continue
-					@endif
+                    @if ($widget->name === \App\Enums\DashboardWidget::PREMIUM_ADVANTAGES && \App\Helpers\Classes\Helper::isUserVIP())
+                        @continue
+                    @endif
 
                     @if ($widget->enabled)
                         @includeIf('panel.admin.dashboard.' . $widget?->name?->value, ['widget' => $widget])
@@ -270,8 +281,10 @@
         });
     </script>
     <script>
-        (() => {
+        (async () => {
             "use strict";
+
+            await document.fonts.ready;
 
             function mapRange(value, in_min, in_max, out_min, out_max) {
                 return ((value - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min;
@@ -284,34 +297,33 @@
                     $daily_sales = [];
                 }
 
-				if (\App\Helpers\Classes\Helper::appIsDemo()) {
-					$daily_sales = json_decode(json_encode(\App\Helpers\Classes\Helper::generateFakeDataLastMonth()));
-				}
+                if (\App\Helpers\Classes\Helper::appIsDemo()) {
+                    $daily_sales = json_decode(json_encode(\App\Helpers\Classes\Helper::generateFakeDataLastMonth()));
+                }
 
                 $top_countries = json_decode(cache('top_countries'));
                 if (empty($top_countries) || !is_array($top_countries)) {
                     $top_countries = [];
                 }
 
-				if (\App\Helpers\Classes\Helper::appIsDemo()) {
-					$top_countries = json_decode(\App\Helpers\Classes\Helper::demoDataForAdminDashboardTopCountries());
-				}
+                if (\App\Helpers\Classes\Helper::appIsDemo()) {
+                    $top_countries = json_decode(\App\Helpers\Classes\Helper::demoDataForAdminDashboardTopCountries());
+                }
 
                 $user_traffic = json_decode(cache('user_traffic'));
                 if (empty($user_traffic) || !is_array($user_traffic)) {
                     $user_traffic = [];
                 }
 
-				if (\App\Helpers\Classes\Helper::appIsDemo()) {
-					$user_traffic = json_decode(\App\Helpers\Classes\Helper::demoDataForAdminDashboardUserTraffic());
-
-				}
+                if (\App\Helpers\Classes\Helper::appIsDemo()) {
+                    $user_traffic = json_decode(\App\Helpers\Classes\Helper::demoDataForAdminDashboardUserTraffic());
+                }
 
                 $new_customers = json_decode(cache('new_customers'));
 
-				if(\App\Helpers\Classes\Helper::appIsDemo()) {
-					$new_customers = json_decode(json_encode(\App\Helpers\Classes\Helper::generateFakeDataNewCustomer()));
-				}
+                if (\App\Helpers\Classes\Helper::appIsDemo()) {
+                    $new_customers = json_decode(json_encode(\App\Helpers\Classes\Helper::generateFakeDataNewCustomer()));
+                }
             @endphp
 
             // Start Sales Chart
@@ -449,11 +461,11 @@
             }
             // End Sales Chart
 
-			@if(\App\Helpers\Classes\Helper::appIsDemo())
-				@php
-					$popular_plans_data = \App\Helpers\Classes\Helper::demoDataForAdminDashboardPopularPlans();
-				@endphp
-			@endif
+            @if (\App\Helpers\Classes\Helper::appIsDemo())
+                @php
+                    $popular_plans_data = \App\Helpers\Classes\Helper::demoDataForAdminDashboardPopularPlans();
+                @endphp
+            @endif
 
             // Start Popular Plans Chart
             const data = @json($popular_plans_data);
@@ -759,7 +771,6 @@
                         fontWeight: 500,
                         colors: ['hsl(var(--secondary-foreground))'],
                     },
-
                 },
                 xaxis: {
                     categories: [],
@@ -777,9 +788,7 @@
                     opposite: true,
                     labels: {
                         show: true,
-                        formatter: (val) => {
-                            return val
-                        },
+                        offsetY: topCountries.length <= 1 ? -9 : 0,
                         style: {
                             fontFamily: 'var(--font-heading)',
                             fontSize: '15px',
@@ -929,10 +938,10 @@
                     bar: {
                         borderRadius: 4,
                         horizontal: true,
+                        barHeight: '35px',
                         dataLabels: {
                             position: 'bottom'
-                        },
-                        barHeight: '35px'
+                        }
                     }
                 },
                 grid: {
@@ -941,9 +950,6 @@
                 stroke: {
                     show: false,
                     width: 0
-                },
-                dataLabels: {
-                    enabled: false
                 },
                 dataLabels: {
                     enabled: true,
@@ -974,9 +980,7 @@
                     opposite: true,
                     labels: {
                         show: true,
-                        formatter: (val) => {
-                            return val
-                        },
+                        offsetY: userTraffic.length <= 1 ? -9 : 0,
                         style: {
                             fontFamily: 'var(--font-heading)',
                             fontSize: '15px',

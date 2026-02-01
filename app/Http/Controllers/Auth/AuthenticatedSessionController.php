@@ -26,7 +26,8 @@ class AuthenticatedSessionController extends Controller
     public function create(): View
     {
         return view('panel.authentication.login', [
-            'plan' => request('plan'),
+            'plan'     => request('plan'),
+            'redirect' => request('redirect'),
         ]);
     }
 
@@ -100,15 +101,40 @@ class AuthenticatedSessionController extends Controller
             event(new UsersActivityEvent($user->email, $user->type, $request->ip(), $request->header('User-Agent')));
         }
 
-        if (setting('hard_redirect_to_user_dashboard', '0') === '0' && Auth::user()?->isAdmin()) {
+        if (setting('dash_theme') === 'social-media-agent-dashboard') {
             return response()->json([
-                'link' => $request->get('plan') ? '/dashboard/user/payment?plan=' . $request->get('plan') : '/dashboard/admin',
+                'link' => '/dashboard/user/social-media/agent',
             ]);
         }
 
-        return response()->json([
-            'link' => $request->get('plan') ? '/dashboard/user/payment?plan=' . $request->get('plan') : '/dashboard/user',
-        ]);
+        $redirect = $request->get('redirect');
+        $redirectUrl = $this->getRedirectUrl($redirect, $request->get('plan'));
+
+        return response()->json(['link' => $redirectUrl]);
+    }
+
+    /**
+     * Get the redirect URL based on the redirect parameter
+     */
+    private function getRedirectUrl(?string $redirect, ?string $plan): string
+    {
+        // Define your redirect mappings
+        $redirectMap = [
+            'chatPro' => '/chat',
+            // Add more redirects as needed
+        ];
+
+        // If redirect parameter exists and is mapped
+        if ($redirect && isset($redirectMap[$redirect])) {
+            return $redirectMap[$redirect];
+        }
+
+        // Default behavior (existing logic)
+        if (setting('hard_redirect_to_user_dashboard', '0') === '0' && Auth::user()?->isAdmin()) {
+            return $plan ? '/dashboard/user/payment?plan=' . $plan : '/dashboard/admin';
+        }
+
+        return $plan ? '/dashboard/user/payment?plan=' . $plan : '/dashboard/user';
     }
 
     /**

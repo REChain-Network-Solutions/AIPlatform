@@ -15,7 +15,7 @@
             <h4 class="m-0 text-[17px]">{{ __('Favorite Chatbots') }}</h4>
             <x-button
                 variant="link"
-                href="{{ \App\Helpers\Classes\MarketplaceHelper::isRegistered('chatbot') ? route('dashboard.chatbot.index') : '#' }}"
+                href="/dashboard/user/openai/chat/ai-chat-list"
             >
                 <span class="text-nowrap font-bold text-foreground"> {{ __('View All') }} </span>
                 <x-tabler-chevron-right class="size-4 rtl:rotate-180" />

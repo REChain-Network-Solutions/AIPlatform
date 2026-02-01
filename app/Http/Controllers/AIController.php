@@ -905,11 +905,13 @@ class AIController extends Controller
         $chkLmt = Helper::checkImageDailyLimit($lockKey);
 
         if ($chkLmt->getStatusCode() === 429) {
+            Cache::lock($lockKey)->forceRelease();
+
             return $chkLmt;
         }
 
         $engineCheck = match ($param['image_generator']) {
-            'flux-pro', 'ideogram', 'flux-pro-kontext', 'nano-banana', 'nano-banana-pro', 'seedream/v4/text-to-image' => EngineEnum::FAL_AI->value,
+            'flux-pro', 'flux-2-flex', 'flux-2-flex/edit', 'ideogram', 'flux-pro-kontext', 'nano-banana', 'nano-banana-pro', 'seedream/v4/text-to-image' => EngineEnum::FAL_AI->value,
             EntityEnum::MIDJOURNEY->value  => EngineEnum::PI_API->value,
             EntityEnum::GPT_IMAGE_1->value, EntityEnum::GPT_IMAGE_1_5->value => EngineEnum::OPEN_AI->value,
             default                        => EngineEnum::OPEN_AI->value,
@@ -926,6 +928,10 @@ class AIController extends Controller
                 $model = EntityEnum::NANO_BANANA_PRO;
             } elseif ($param['image_generator'] === EntityEnum::SEEDREAM_4->value) {
                 $model = EntityEnum::SEEDREAM_4;
+            } elseif ($param['image_generator'] === 'flux-2-flex') {
+                $model = EntityEnum::FLUX_2_FLEX;
+            } elseif ($param['image_generator'] === 'flux-2-flex/edit') {
+                $model = EntityEnum::FLUX_2_FLEX_EDIT;
             } else {
                 $model = $this->getDefaultModel($engine);
             }
@@ -954,7 +960,9 @@ class AIController extends Controller
 
             config(['openai.api_key' => $apiKey]);
 
-            set_time_limit(120);
+            set_time_limit(0);
+            ini_set('memory_limit', '-1');
+            ini_set('max_execution_time', 3600);
 
             $entries = [];
             for ($i = 0; $i < $number_of_images; $i++) {

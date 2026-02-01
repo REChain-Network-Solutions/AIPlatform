@@ -7,6 +7,7 @@ use App\Helpers\Classes\Helper;
 use App\Models\GatewayProducts;
 use App\Models\Gateways;
 use App\Models\Plan;
+use App\Models\Setting;
 use App\Models\User;
 use App\Models\UserOrder;
 use App\Services\Contracts\BaseGatewayService;
@@ -292,7 +293,7 @@ class RazorpayService implements BaseGatewayService, ProductInterface
                     'user_id'            => auth()->id(),
                     'payment_type'       => self::$GATEWAY_CODE,
                     'price'              => $totalAmount,
-                    'affiliate_earnings' => 0,
+                    'affiliate_earnings' => ($totalAmount * Setting::getCache()->affiliate_commission_percentage) / 100,
                     'status'             => 'WAITING',
                     'country'            => $user->country ?? 'Unknown',
                     'tax_rate'           => $taxRate,
@@ -350,7 +351,7 @@ class RazorpayService implements BaseGatewayService, ProductInterface
                     'user_id'            => $user->id,
                     'payment_type'       => self::$GATEWAY_CODE,
                     'price'              => $totalAmount,
-                    'affiliate_earnings' => 0,
+                    'affiliate_earnings' => ($totalAmount * Setting::getCache()->affiliate_commission_percentage) / 100,
                     'status'             => 'WAITING',
                     'country'            => $user->country ?? 'Unknown',
                     'tax_rate'           => $taxRate,

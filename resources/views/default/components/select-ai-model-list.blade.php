@@ -159,7 +159,7 @@
                                     ])
                                     variant="outline-shadow"
                                     @click.prevent="updateSelectedModels({ value: $el.getAttribute('data-model-value'), label: $el.getAttribute('data-model-label') })"
-                                    ::data-selected="selectedModels.findIndex(model => model.value === $el.getAttribute('data-model-value')) >= 0 && {{ $is_inactive ? 'false' : 'true' }}"
+                                    ::data-selected="selectedModels.findIndex(model => model?.value === $el.getAttribute('data-model-value')) >= 0 && {{ $is_inactive ? 'false' : 'true' }}"
                                     x-show="searchString === '' || $el.getAttribute('data-model-label').toLowerCase().includes(searchString.toLowerCase())"
                                 >
                                     <div class="w-full">
@@ -212,7 +212,7 @@
                             type="select"
                             :multiple="$isMultiModelExtensionEnabled"
                             x-ref="modelsSelectElement"
-                            x-model="selectedModels.map(model => model.value)"
+                            x-model="selectedModels.map(model => model?.value)"
                         >
                             <option
                                 data-label="{{ __('Default Model') }}"
@@ -263,8 +263,8 @@
                         const localStorageLastSelectedModels = localStorage.getItem(this.localStorageKey) ??
                             `[{ "value": "${defaultModelValue}", "label": "${defaultModelLabel}" }]`;
                         const models = JSON.parse(localStorageLastSelectedModels)
-                            .filter(model => this.fullModels.find(m => m === model.value))
-                            .filter(model => this.activeModels.find(m => m === model.value));
+                            .filter(model => this.fullModels.find(m => m === model?.value))
+                            .filter(model => this.activeModels.find(m => m === model?.value));
 
                         @if ($isMultiModelExtensionEnabled)
                             return models;
@@ -284,7 +284,7 @@
                             $canMultiSelect = $isMultiModelExtensionEnabled && (auth()?->user()?->activePlan()?->multi_model_support ?? false || auth()?->user()?->isAdmin());
                         @endphp
                         @if ($canMultiSelect)
-                            const existingIndex = this.selectedModels.findIndex(model => model.value === modelObj.value);
+                            const existingIndex = this.selectedModels.findIndex(model => model?.value === modelObj?.value);
                             if (existingIndex > -1) {
                                 if (this.selectedModels.length > 1) {
                                     this.selectedModels = this.selectedModels.filter((model, index) => index !== existingIndex);
@@ -294,8 +294,8 @@
                                 this.selectedModels = existingSelectedModels;
                             } else {
                                 this.selectedModels.push({
-                                    value: modelObj.value,
-                                    label: modelObj.label,
+                                    value: modelObj?.value,
+                                    label: modelObj?.label,
                                 });
                             }
                         @else
@@ -345,7 +345,7 @@
 
                             const modelObj = {
                                 value: model,
-                                label: Array.from(document.querySelector('#chatbot_front_model').options).find(optionEl => optionEl.value === model)
+                                label: Array.from(document.querySelector('#chatbot_front_model').options).find(optionEl => optionEl?.value === model)
                                     ?.getAttribute('data-label') ?? ''
                             };
 

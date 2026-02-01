@@ -12,18 +12,22 @@
         :class="searchbarHidden ? 'searchbar-hidden' : ''"
     >
         <x-dropdown.dropdown
+            class="marketplace-filter-dropdown"
             class:dropdown-dropdown="max-lg:end-auto max-lg:start-0 max-sm:-left-20"
             anchor="end"
             triggerType="click"
             offsetY="0px"
         >
             <x-slot:trigger
-                class="size-9"
+                class="min-h-9 min-w-9"
                 variant="none"
                 title="{{ __('Filter') }}"
             >
+                <span class="sr-only">
+                    @lang('Filter')
+                </span>
                 <svg
-                    class="flex-shrink-0 cursor-pointer"
+                    class="shrink-0 cursor-pointer"
                     width="14"
                     height="10"
                     viewBox="0 0 14 10"
@@ -162,7 +166,7 @@
 
                 @foreach ($items as $item)
                     {{-- TODO: {{ $item['is_featured'] ? 'border-red-500': '' --- If is featured true, a border gradient must be added. --}}
-                   	@include('default.panel.admin.marketplace.particles.index-item')
+                    @include('default.panel.admin.marketplace.particles.index-item')
                 @endforeach
             </div>
         </div>

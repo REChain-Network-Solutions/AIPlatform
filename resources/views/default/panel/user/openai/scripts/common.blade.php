@@ -154,7 +154,7 @@
         @if ($openai->type == 'image')
             formData.append('image_generator', imageGenerator);
 
-            if (imageGenerator === 'openai' || imageGenerator === 'gpt-image-1' || imageGenerator === 'gpt-image-1-5') {
+            if (imageGenerator === 'openai' || imageGenerator === 'gpt-image-1' || imageGenerator === 'gpt-image-1.5') {
 
 
                 formData.append('image_style', $("#image_style").val());
@@ -175,7 +175,7 @@
                     formData.append("stable_description", $("#gpt_1_description").val());
                 }
 
-				if (imageGenerator === 'gpt-image-1-5') {
+				if (imageGenerator === 'gpt-image-1.5') {
 					formData.append("stable_description", $("#gpt_1_5_description").val());
 				}
 
@@ -197,25 +197,25 @@
                         formData.append("stable_description", $("#img2img_description").val());
                         //formData.append("image_src", resizedImage);
 
-						const img2imgFile = $("#img2img_src")[0].files[0];
-						if (!img2imgFile) {
-							toastr.warning('Please select an image file');
-							hideLoadingIndicators();
-							return false;
-						}
-						formData.append("image_src", img2imgFile);
+                        const img2imgFile = $("#img2img_src")[0].files[0];
+                        if (!img2imgFile) {
+                            toastr.warning('Please select an image file');
+                            hideLoadingIndicators();
+                            return false;
+                        }
+                        formData.append("image_src", img2imgFile);
                         break;
                     case 'upscale':
                         formData.append("stable_description", "upscale");
                         //formData.append("image_src", resizedImage);
 
-						const upscaleFile = $("#upscale_src")[0].files[0];
-						if (!upscaleFile) {
-							toastr.warning('Please select an image file');
-							hideLoadingIndicators();
-							return false;
-						}
-						formData.append("image_src", upscaleFile);
+                        const upscaleFile = $("#upscale_src")[0].files[0];
+                        if (!upscaleFile) {
+                            toastr.warning('Please select an image file');
+                            hideLoadingIndicators();
+                            return false;
+                        }
+                        formData.append("image_src", upscaleFile);
                         break;
                     case 'multi-prompt':
                         $('.multi_prompts_description').each(function(idx, e) {
@@ -283,11 +283,11 @@
                             imageResultTemplate.querySelector('.image-result').classList
                                 .remove('lqd-is-loading');
                             imageResultTemplate.querySelector('.image-result').setAttribute(
-                                'data-generator', image.response == "SD" ? "sd" : "de");
+                                'data-generator', image.response.substr(0, 2).toLowerCase());
                             imageResultTemplate.querySelector('.lqd-image-result-img')
                                 .setAttribute('src', image.output);
                             imageResultTemplate.querySelector('.lqd-image-result-type')
-                                .innerHTML = image.response == "SD" ? "SD" : "DE";
+                                .innerHTML = image.response.substr(0, 2).toUpperCase();
                             imageResultTemplate.querySelector('.lqd-image-result-view')
                                 .setAttribute('data-payload', JSON.stringify(image));
 

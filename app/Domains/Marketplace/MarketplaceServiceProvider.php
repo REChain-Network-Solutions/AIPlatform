@@ -67,6 +67,7 @@ class MarketplaceServiceProvider extends ServiceProvider
         'ai-video-to-video'      => \App\Extensions\AIVideoToVideo\System\AIVideoToVideoServiceProvider::class,
         'midjourney'             => \App\Extensions\Midjourney\System\MidjourneyServiceProvider::class,
         'social-media'           => \App\Extensions\SocialMedia\System\SocialMediaServiceProvider::class,
+        'social-media-agent'     => \App\Extensions\SocialMediaAgent\System\SocialMediaAgentServiceProvider::class,
         'chatbot-agent'          => \App\Extensions\ChatbotAgent\System\ChatbotAgentServiceProvider::class,
         'xero'                   => \App\Extensions\Xero\System\XeroServiceProvider::class,
         'speechify-tts'          => \App\Extensions\SpeechifyTTS\System\SpeechifyServiceProvider::class,
@@ -99,6 +100,7 @@ class MarketplaceServiceProvider extends ServiceProvider
         'ai-music-pro'           => \App\Extensions\AiMusicPro\System\AiMusicProServiceProvider::class,
         'see-dream-v4'           => \App\Extensions\SeeDreamV4\System\SeeDreamV4ServiceProvider::class,
         'ai-presentation'        => \App\Extensions\AiPresentation\System\AiPresentationServiceProvider::class,
+        'ai-chat-pro-memory'     => \App\Extensions\AIChatProMemory\System\AIChatProMemoryServiceProvider::class,
     ];
 
     public function register(): void

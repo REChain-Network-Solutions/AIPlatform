@@ -399,7 +399,7 @@ class Helper
             }
 
             if (! Cache::lock($lockKey, 10)->get()) { // Attempt to acquire lock
-                return response()->json(['message' => 'Image generation in progress. Please try again later.'], 409);
+                return response()->json(['message' => 'Image generation in progress. Please try again later.'], 429);
             }
 
             $clientIp = self::getRequestIp();
@@ -552,7 +552,7 @@ class Helper
 
     public static function clearEmptyConversations(): void
     {
-        $chats = Auth::user()?->openaiChat()->where('is_empty', true)->get();
+        $chats = Auth::user()?->openaiChat()->where('is_empty', true)->where('created_at', '<', now()->subSeconds(30))->get();
         foreach ($chats ?? [] as $chat) {
             $chat?->messages()?->delete();
             $chat?->delete();

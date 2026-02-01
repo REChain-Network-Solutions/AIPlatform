@@ -193,7 +193,6 @@
                                 name="tone_of_voice_custom"
                                 type="text"
                                 label="{{ __('Enter custom tone') }}"
-                                switcher
                             />
                         @endif
 

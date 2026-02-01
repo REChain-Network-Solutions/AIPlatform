@@ -62,7 +62,9 @@ class CheckTemplateTypeAndPlan
             'dashboard.user.ai-music-pro.index'          => 'ext_ai_music_pro',
             'dashboard.user.ai-presentation.index'       => 'ai_presentation',
         ];
-        if (array_key_exists($request->route()?->getName(), $routesDoesNotHaveAnySlug)) {
+
+        $slugsToSkip = ['ai_realtime_voice_chat'];
+        if (! in_array($slug, $slugsToSkip, true) && array_key_exists($request->route()?->getName(), $routesDoesNotHaveAnySlug)) {
             $slug = $routesDoesNotHaveAnySlug[$request->route()?->getName()];
         }
         // get openai record if the slug exist
@@ -70,6 +72,7 @@ class CheckTemplateTypeAndPlan
             ->where('slug', $slug)
             ->where('active', 1)
             ->first();
+
         $plan = $user?->relationPlan;
         if (! $plan) {
             // if no plan then its free user, can access all templates and features with credits they have except the premium

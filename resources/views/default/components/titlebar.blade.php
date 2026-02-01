@@ -5,9 +5,9 @@
     $container_base_class = 'lqd-titlebar-container flex flex-wrap items-center justify-between gap-y-4';
     $before_base_class = 'lqd-titlebar-before w-full';
     $after_base_class = 'lqd-titlebar-after w-full';
-    $pretitle_base_class = 'lqd-titlebar-pretitle text-xs text-foreground/70 m-0';
-    $title_base_class = 'lqd-titlebar-title m-0';
-    $subtitle_base_class = 'lqd-titlebar-subtitle mt-1 text-2xs opacity-80 only:my-0 last:mb-0';
+    $pretitle_base_class = 'lqd-titlebar-pretitle m-0 text-xs text-foreground/70 transition';
+    $title_base_class = 'lqd-titlebar-title m-0 transition';
+    $subtitle_base_class = 'lqd-titlebar-subtitle mt-1 text-2xs opacity-80 transition last:mb-0 only:my-0';
     $actions_base_class = 'lqd-titlebar-actions flex flex-wrap items-center gap-2';
     $generator_link = route('dashboard.user.openai.list') === $current_url ? '#lqd-generators-filter-list' : route('dashboard.user.openai.list');
     if (!$setting->feature_ai_writer) {

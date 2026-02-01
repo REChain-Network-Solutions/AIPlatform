@@ -54,6 +54,7 @@ class Plan extends Model
         'description',
         'plan_ai_tools',
         'plan_features',
+        'social_media_agent_limits',
         'reset_credits_on_renewal',
         'default_ai_model',
         'ai_models',
@@ -90,16 +91,17 @@ class Plan extends Model
     ];
 
     protected $casts = [
-        'open_ai_items'            => 'json',
-        'plan_ai_tools'            => 'json',
-        'plan_features'            => 'json',
-        'ai_models'                => 'array',
-        'ai_models.*.credit'       => 'float',
-        'ai_models.*.isUnlimited'  => 'boolean',
-        'is_featured'              => 'boolean',
-        'is_team_plan'             => 'boolean',
-        'active'                   => 'boolean',
-        'user_api'                 => 'boolean',
+        'open_ai_items'             => 'json',
+        'plan_ai_tools'             => 'json',
+        'plan_features'             => 'json',
+        'ai_models'                 => 'array',
+        'ai_models.*.credit'        => 'float',
+        'ai_models.*.isUnlimited'   => 'boolean',
+        'is_featured'               => 'boolean',
+        'is_team_plan'              => 'boolean',
+        'active'                    => 'boolean',
+        'user_api'                  => 'boolean',
+        'social_media_agent_limits' => 'array',
     ];
 
     protected static function boot(): void
@@ -361,6 +363,10 @@ class Plan extends Model
             'description'                   => '',
             'plan_ai_tools'                 => self::parsePlanAiTools(MenuService::planAiToolsMenu()),
             'plan_features'                 => self::parsePlanFeatures(MenuService::planFeatureMenu()),
+            'social_media_agent_limits'     => [
+                'agents'        => -1,
+                'monthly_posts' => -1,
+            ],
             'default_ai_model'              => EntityEnum::GPT_4_O->slug(),
             'ai_models'                     => EngineEnum::getNestedPlanLimits(),
             'hidden_url'                    => null,

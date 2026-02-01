@@ -6,21 +6,7 @@
         '1' => 'Premium',
     ];
 
-    $voice_tones = [
-        'Professional',
-        'Funny',
-        'Casual',
-        'Excited',
-        'Witty',
-        'Sarcastic',
-        'Feminine',
-        'Masculine',
-        'Bold',
-        'Dramatic',
-        'Grumpy',
-        'Secretive',
-        'other',
-    ];
+    $voice_tones = ['Professional', 'Funny', 'Casual', 'Excited', 'Witty', 'Sarcastic', 'Feminine', 'Masculine', 'Bold', 'Dramatic', 'Grumpy', 'Secretive', 'other'];
 
     $youtube_actions = [
         'blog' => __('Prepare a Blog Post'),
@@ -135,9 +121,7 @@
         @foreach (json_decode($openai->questions, false, 512, JSON_THROW_ON_ERROR) ?? [] as $question)
             <div class="w-full">
                 @php
-                    $placeholder = !empty($question?->description)
-                        ? __($question?->description)
-                        : __($question?->question);
+                    $placeholder = !empty($question?->description) ? __($question?->description) : __($question?->question);
                 @endphp
                 @if ($question?->type == 'text')
                     <x-forms.input
@@ -316,7 +300,6 @@
                     name="tone_of_voice_custom"
                     type="text"
                     label="{{ __('Enter custom tone') }}"
-                    switcher
                 />
             @endif
         @endif

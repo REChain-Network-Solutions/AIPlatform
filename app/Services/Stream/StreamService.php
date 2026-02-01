@@ -160,6 +160,10 @@ class StreamService
             }
         }
 
+        if ($chat_type === 'socialMediaAgent' && MarketplaceHelper::isRegistered('social-media-agent')) {
+            return $this->openaiChatStream($chat_bot, $history, $main_message, $chat_type, $contain_images, tools: \App\Extensions\SocialMediaAgent\System\Services\Chat\SocialMediaAgentChatService::tools());
+        }
+
         if ($fileChat) {
             return $this->openaiFileChat($chat_bot, $history, $main_message, $chat_type, $contain_images);
         }
@@ -1120,7 +1124,7 @@ class StreamService
         }
         $this->prepareStreamEnvironment();
 
-        return response()->stream(function () use ($driver, $history, &$total_used_tokens, &$output, &$responsedText, $main_message, $contain_images, $tools) {
+        return response()->stream(function () use ($driver, $history, &$total_used_tokens, &$output, &$responsedText, $main_message, $contain_images, $tools, $chat_type) {
             $chat_id = $main_message->user_openai_chat_id;
             $chat = UserOpenaiChat::whereId($chat_id)->first();
 
@@ -1141,78 +1145,121 @@ class StreamService
             }
 
             $model = $driver->enum()->value;
-            $options = [
-                'model'             => $model,
-                'stream'            => true,
-            ];
+            $isSearchModel = in_array($model, [EntityEnum::GPT_4_O_MINI_SEARCH_PREVIEW->value, EntityEnum::GPT_4_O_SEARCH_PREVIEW->value], true);
 
-            if (! in_array($model, [EntityEnum::GPT_4_O_MINI_SEARCH_PREVIEW->value, EntityEnum::GPT_4_O_SEARCH_PREVIEW->value], true)) {
-                $options['temperature'] = 1.0;
-            }
+            if ($isSearchModel) {
+                // Use chat() endpoint for search models
+                $options = [
+                    'model'    => $model,
+                    'messages' => $history,
+                    'stream'   => true,
+                ];
 
-            if ($contain_images) {
-                $options['max_output_tokens'] = 2000;
-                $options['model'] = EntityEnum::GPT_4_O->value;
-            }
-
-            if (! empty($tools)) {
-                $options['tools'] = $tools;
-                $argumentsString = '';
-            }
-
-            $options['input'] = $history;
-            if ($driver->enum()->isReasoningModel()) {
-                $options['reasoning']['effort'] = EntityEnum::fromSlug($options['model']) === EntityEnum::GPT_5_PRO ? 'high' : setting('openai_reasoning_models_effort', 'low');
-            }
-            $stream = OpenAI::responses()->createStreamed($options);
-
-            foreach ($stream as $response) {
-                if (! isset($response->event)) {
-                    continue;
+                if ($contain_images) {
+                    $options['max_tokens'] = 2000;
+                    $options['model'] = EntityEnum::GPT_4_O->value;
                 }
 
-                if (connection_aborted()) {
-                    break;
-                }
+                $stream = OpenAI::chat()->createStreamed($options);
 
-                if (! empty($tools) && $response->event === 'response.completed' && isset($response->response->output)) {
-                    $calls = $response->response->output;
-                    foreach ($calls ?? [] as $call) {
-                        if ($call instanceof \OpenAI\Responses\Responses\Output\OutputFunctionToolCall) {
-                            $functionName = $call?->name;
-                            $argumentsString = $call?->arguments;
-                            // we can send event to display image loader
-                            // if (! empty($functionName) && ! $signalSent) {
-                            //     echo PHP_EOL;
-                            //     echo "event: function_call\n";
-                            //     echo 'data: ' . $functionName . "\n\n";
-                            //     echo "\n\n";
-                            //     $this->safeFlush();
-                            //     $signalSent = true;
-                            // }
-                            $functionResponse = \App\Extensions\AIChatPro\System\Services\AiChatProService::callFunction($functionName, $argumentsString);
-                            $output .= $functionResponse;
-                            echo PHP_EOL;
-                            echo "event: data\n";
-                            echo 'data: ' . $functionResponse;
-                            echo "\n\n";
-                            $this->safeFlush();
-                        }
+                foreach ($stream as $response) {
+                    if (connection_aborted()) {
+                        break;
+                    }
+
+                    // Handle regular content
+                    if (isset($response->choices[0]->delta->content)) {
+                        $text = $response->choices[0]->delta->content;
+                        $messageFix = str_replace(["\r\n", "\r", "\n"], '<br/>', $text);
+                        $output .= $messageFix;
+                        $responsedText .= $text;
+                        $total_used_tokens += countWords($text);
+                        echo PHP_EOL;
+                        echo "event: data\n";
+                        echo 'data: ' . $messageFix;
+                        echo "\n\n";
+                        $this->safeFlush();
                     }
                 }
-                if ((isset($response->response->delta) && $response->event === 'response.output_text.delta')) {
-                    $text = $response->response->delta;
-                    $messageFix = str_replace(["\r\n", "\r", "\n"], '<br/>', $text);
-                    $output .= $messageFix;
-                    $responsedText .= $text;
-                    $total_used_tokens += countWords($text);
-                    echo PHP_EOL;
-                    echo "event: data\n";
-                    echo 'data: ' . $messageFix;
-                    echo "\n\n";
-                    $this->safeFlush();
+            } else {
+                // Use responses() endpoint for non-search models
+                $options = [
+                    'model'  => $model,
+                    'stream' => true,
+                ];
+
+                if ($contain_images) {
+                    $options['max_output_tokens'] = 2000;
+                    $options['model'] = EntityEnum::GPT_4_O->value;
+                }
+
+                if (! empty($tools)) {
+                    $options['tools'] = $tools;
+                    $argumentsString = '';
+                }
+
+                $options['input'] = $history;
+                if ($driver->enum()->isReasoningModel()) {
+                    $options['reasoning']['effort'] = EntityEnum::fromSlug($options['model']) === EntityEnum::GPT_5_PRO ? 'high' : setting('openai_reasoning_models_effort', 'low');
+                }
+
+                $options['temperature'] = 1.0;
+                $stream = OpenAI::responses()->createStreamed($options);
+
+                foreach ($stream as $response) {
+                    if (! isset($response->event)) {
+                        continue;
+                    }
+
+                    if (connection_aborted()) {
+                        break;
+                    }
+
+                    if (! empty($tools) && $response->event === 'response.completed' && isset($response->response->output)) {
+                        $calls = $response->response->output;
+                        foreach ($calls ?? [] as $call) {
+                            if ($call instanceof \OpenAI\Responses\Responses\Output\OutputFunctionToolCall) {
+                                $functionName = $call?->name;
+                                $argumentsString = $call?->arguments;
+                                // we can send event to display image loader
+                                // if (! empty($functionName) && ! $signalSent) {
+                                //     echo PHP_EOL;
+                                //     echo "event: function_call\n";
+                                //     echo 'data: ' . $functionName . "\n\n";
+                                //     echo "\n\n";
+                                //     $this->safeFlush();
+                                //     $signalSent = true;
+                                // }
+                                if ($chat_type === 'chatPro') {
+                                    $functionResponse = \App\Extensions\AIChatPro\System\Services\AiChatProService::callFunction($functionName, $argumentsString);
+                                } elseif ($chat_type === 'socialMediaAgent') {
+                                    $functionResponse = \App\Extensions\SocialMediaAgent\System\Services\Chat\SocialMediaAgentChatService::callFunction($functionName, $argumentsString);
+                                }
+
+                                $output .= $functionResponse;
+                                echo PHP_EOL;
+                                echo "event: data\n";
+                                echo 'data: ' . $functionResponse;
+                                echo "\n\n";
+                                $this->safeFlush();
+                            }
+                        }
+                    }
+                    if ((isset($response->response->delta) && $response->event === 'response.output_text.delta')) {
+                        $text = $response->response->delta;
+                        $messageFix = str_replace(["\r\n", "\r", "\n"], '<br/>', $text);
+                        $output .= $messageFix;
+                        $responsedText .= $text;
+                        $total_used_tokens += countWords($text);
+                        echo PHP_EOL;
+                        echo "event: data\n";
+                        echo 'data: ' . $messageFix;
+                        echo "\n\n";
+                        $this->safeFlush();
+                    }
                 }
             }
+
             echo "event: stop\n";
             echo 'data: [DONE]';
             echo "\n\n";
@@ -1420,6 +1467,11 @@ class StreamService
         $this->prepareStreamEnvironment();
 
         return response()->stream(function () use ($driver, $client, $history, &$total_used_tokens, &$output, &$responsedText, $main_message, $contain_images) {
+            $chat_id = $main_message->user_openai_chat_id;
+            $chat = UserOpenaiChat::whereId($chat_id)->first();
+
+            echo "event: message\n";
+            echo 'data: ' . $main_message->id . "\n\n";
 
             if (! $driver->hasCreditBalance()) {
                 echo PHP_EOL;
@@ -1434,12 +1486,6 @@ class StreamService
 
                 return null;
             }
-
-            $chat_id = $main_message->user_openai_chat_id;
-            $chat = UserOpenaiChat::whereId($chat_id)->first();
-
-            echo "event: message\n";
-            echo 'data: ' . $main_message->id . "\n\n";
 
             if (! $contain_images) {
                 $historyMessages = array_filter($history, function ($item) {
@@ -1572,6 +1618,9 @@ class StreamService
         $this->prepareStreamEnvironment();
 
         return response()->stream(function () use ($driver, $history, &$total_used_tokens, &$output, &$responsedText, $message_id, $title, $openai_id, $prompt) {
+            echo "event: message\n";
+            echo 'data: ' . $message_id . "\n\n";
+
             if (! $driver->hasCreditBalance()) {
                 echo PHP_EOL;
                 echo "event: data\n";
@@ -1597,9 +1646,6 @@ class StreamService
                 $entry->slug = str()->random(7) . str($user?->fullName())->slug() . '-workbook';
                 $entry->openai_id = $openai_id ?? 1;
             }
-
-            echo "event: message\n";
-            echo 'data: ' . $message_id . "\n\n";
 
             $client = app(AnthropicService::class);
             $historyMessages = array_filter($history, function ($item) {

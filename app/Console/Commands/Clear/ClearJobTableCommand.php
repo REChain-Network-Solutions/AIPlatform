@@ -32,12 +32,12 @@ class ClearJobTableCommand extends Command
             return;
         }
 
-        Log::info('Clearing job table');
+        // Log::info('Clearing job table');
 
         DB::table('jobs')->truncate();
 
         DB::table('failed_jobs')->truncate();
 
-        Log::info('Job table cleared successfully');
+        // Log::info('Job table cleared successfully');
     }
 }

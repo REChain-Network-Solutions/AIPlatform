@@ -1,5 +1,6 @@
 @php
     $theme = get_theme();
+    $is_auth = Auth::check();
     $disable_floating_menu = true;
     $wide_layout_px_class = Theme::getSetting('wideLayoutPaddingX', '');
     $theme_google_fonts = Theme::getSetting('dashboard.googleFonts');
@@ -36,6 +37,8 @@
             'group/body bg-background font-body text-xs text-foreground antialiased transition-bg',
             $body_classname),
         'has-sidebar' => $has_sidebar,
+        'is-not-auth' => !$is_auth,
+        'is-auth' => $is_auth,
         'is-admin-page' =>
             Auth::check() &&
             (Route::is('dashboard.admin*') ||

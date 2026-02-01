@@ -1,0 +1,12 @@
+{
+  "extension_name": "Cloudflare R2 integration",
+  "version": "2.0",
+  "controllers": ["app/Http/Controllers/CloudflareR2Controller.php"],
+  "route": "routes/cloudflare_r2_route.php",
+  "stubs": [
+    "resources/views/default/components/navbar/extsettingnavbars/cloudflare_r2_nav.blade.php",
+    "resources/views/default/panel/admin/settings/cloudflare_r2_setting.blade.php"
+  ],
+  "migrations": {},
+  "delete_old_version_files": []
+}

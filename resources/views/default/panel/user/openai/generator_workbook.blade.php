@@ -6,21 +6,7 @@
         '1' => 'Premium',
     ];
 
-    $voice_tones = [
-        'Professional',
-        'Funny',
-        'Casual',
-        'Excited',
-        'Witty',
-        'Sarcastic',
-        'Feminine',
-        'Masculine',
-        'Bold',
-        'Dramatic',
-        'Grumpy',
-        'Secretive',
-        'other',
-    ];
+    $voice_tones = ['Professional', 'Funny', 'Casual', 'Excited', 'Witty', 'Sarcastic', 'Feminine', 'Masculine', 'Bold', 'Dramatic', 'Grumpy', 'Secretive', 'other'];
 
     $youtube_actions = [
         'blog' => __('Prepare a Blog Post'),
@@ -158,10 +144,7 @@
                         @endif
                         @foreach (json_decode($openai->questions) ?? [] as $question)
                             @php
-                                $placeholder =
-                                    isset($question->description) && !empty($question->description)
-                                        ? __($question->description)
-                                        : __($question->question);
+                                $placeholder = isset($question->description) && !empty($question->description) ? __($question->description) : __($question->question);
                             @endphp
                             <x-forms.input
                                 id="{{ $question->name }}"
@@ -290,7 +273,6 @@
                                         name="tone_of_voice_custom"
                                         type="text"
                                         label="{{ __('Enter custom tone') }}"
-                                        switcher
                                     />
                                 @endif
                             @break
@@ -325,8 +307,7 @@
                             type="submit"
                             size="lg"
                         >
-                            <span
-                                class="hidden group-[.lqd-form-submitting]:inline-flex">{{ __('Please wait...') }}</span>
+                            <span class="hidden group-[.lqd-form-submitting]:inline-flex">{{ __('Please wait...') }}</span>
                             <span class="group-[.lqd-form-submitting]:hidden">{{ __('Generate') }}</span>
                         </x-button>
 
@@ -479,7 +460,7 @@
     <script src="{{ custom_theme_url('/assets/libs/beautify-html.min.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/ace/src-min-noconflict/ace.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/ace/src-min-noconflict/ext-language_tools.js') }}"></script>
-    <script src="{{ custom_theme_url('/assets/libs/markdown-it.min.js') }}"></script>
+    <script src="{{ custom_theme_url('/assets/libs/markdownit/markdown-it.min.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/turndown.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/katex/katex.min.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/vscode-markdown-it-katex/index.js') }}"></script>

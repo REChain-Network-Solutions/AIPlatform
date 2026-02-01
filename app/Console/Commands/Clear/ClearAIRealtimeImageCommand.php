@@ -21,7 +21,7 @@ class ClearAIRealtimeImageCommand extends Command
             return;
         }
 
-        Log::info('Clearing user ai real time data');
+        // Log::info('Clearing user ai real time data');
 
         RealtimeImage::query()
             ->where('is_demo', false)

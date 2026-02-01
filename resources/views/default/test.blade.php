@@ -1,13 +1,29 @@
-@extends('panel.layout.app', ['disable_tblr' => true, 'disable_titlebar' => true])
-@section('title', __('Overview'))
+<!DOCTYPE html>
+<html lang="en">
 
-@section('content')
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <meta
+        http-equiv="X-UA-Compatible"
+        content="ie=edge"
+    >
+    <title>Document</title>
+</head>
+
+<body>
+
     <script
         defer
         src="https://magicai.test/vendor/chatbot/js/external-chatbot.js"
-        data-chatbot-uuid="f9f09630-a8c8-49b2-bf12-461bd6775912"
+        data-chatbot-uuid="df2a591d-86e6-4de5-85aa-14e0d82fa844"
         data-iframe-width="420"
         data-iframe-height="745"
         data-language="en"
     ></script>
-@endsection
+</body>
+
+</html>

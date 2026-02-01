@@ -302,6 +302,7 @@ class AIChatController extends Controller
 
         $chatView = 'panel.user.openai_chat.components.chat_area_container';
         $tempChat = false;
+
         if (in_array($website_url, ['chatpro', 'chatpro-temp']) && MarketplaceHelper::isRegistered('ai-chat-pro')) {
             $tempChat = $website_url === 'chatpro-temp';
             if ($tempChat) {
@@ -312,6 +313,10 @@ class AIChatController extends Controller
                 $generators = [];
             }
             $chatView = MarketplaceHelper::isRegistered('canvas') ? 'canvas::includes.chat_area_container' : 'ai-chat-pro::includes.chat_area_container';
+        }
+
+        if (in_array($website_url, ['social-media-agent']) && MarketplaceHelper::isRegistered('social-media-agent')) {
+            $chatView = 'social-media-agent::chat.includes.chat_area_container';
         }
 
         $html = view($chatView, compact(
@@ -379,14 +384,22 @@ class AIChatController extends Controller
         Helper::clearEmptyConversations();
 
         $user = Auth::user();
+
         $category = OpenaiGeneratorChatCategory::where('id', $request->category_id)->firstOrFail();
         $chatbot = Chatbot::query()->where('id', $category->chatbot_id)->first();
+
         if ($category->assistant !== null) {
             $service = new AssistantService;
             $thread = $service->createThread();
         }
+
         $chat = new UserOpenaiChat;
+
         $website_url = $request->website_url ?? null;
+
+        if ($website_url === 'social-media-agent') {
+            $chat->chat_type = $website_url;
+        }
 
         $chat->user_id = $user?->id;
         $chat->team_id = $user?->team_id;
@@ -459,6 +472,7 @@ class AIChatController extends Controller
 
         $chatView = 'panel.user.openai_chat.components.chat_area_container';
         $tempChat = false;
+
         if (in_array($website_url, ['chatpro', 'chatpro-temp']) && MarketplaceHelper::isRegistered('ai-chat-pro')) {
             $tempChat = $website_url === 'chatpro-temp';
             if ($tempChat) {
@@ -469,6 +483,10 @@ class AIChatController extends Controller
                 $generators = [];
             }
             $chatView = MarketplaceHelper::isRegistered('canvas') ? 'canvas::includes.chat_area_container' : 'ai-chat-pro::includes.chat_area_container';
+        }
+
+        if (in_array($website_url, ['social-media-agent']) && MarketplaceHelper::isRegistered('social-media-agent')) {
+            $chatView = 'social-media-agent::chat.includes.chat_area_container';
         }
 
         $elevenlabsAgentId = null;

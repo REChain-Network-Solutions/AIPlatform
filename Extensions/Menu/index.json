@@ -1,0 +1,8 @@
+{
+  "extension_name": "Menu Builder",
+  "version": "1.5",
+  "description": "Build and customize unique multi-level menus tailored to your specific needs.",
+  "controllers": ["app/Http/Controllers/Common/MenuController.php"],
+  "route": "routes/menu_route.php",
+  "stubs": ["resources/views/default/panel/admin/common/menu.blade.php"]
+}

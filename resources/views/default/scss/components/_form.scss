@@ -52,6 +52,12 @@ option {
 	}
 }
 
+.lqd-input-switcher-fill {
+	background-color: hsl(var(--foreground) / 15%);
+	border-color: transparent;
+	background-image: var(--switcher-ball-active);
+}
+
 button {
 	&.submitting {
 		position: relative;

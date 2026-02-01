@@ -753,38 +753,22 @@ class UserController extends Controller
         $sort = $request->sort ?? 'created_at';
         $sortAscDesc = $request->sortAscDesc ?? 'desc';
 
-        // Get all items first
-        $videos = $this->getUserVideos($folderID);
+        // Get all documents (no filter yet)
         $documents = $this->openai($request, $folderID)
             ->where('folder_id', $folderID)
-            ->orderBy($sort, $sortAscDesc)
             ->get();
 
+        // Get all videos
+        $videos = collect($this->getUserVideos($folderID));
+
+        // Merge everything first
         $allItems = $documents->merge($videos);
 
+        // Apply filter ONCE to merged collection
         $filteredItems = $this->applyFilter($allItems, $filter);
 
-        if ($sort === 'created_at') {
-            $filteredItems = $sortAscDesc === 'desc'
-                ? $filteredItems->sortByDesc('created_at')
-                : $filteredItems->sortBy('created_at');
-        } elseif ($sort === 'title') {
-            $filteredItems = $sortAscDesc === 'desc'
-                ? $filteredItems->sortByDesc('title')
-                : $filteredItems->sortBy('title');
-        } elseif ($sort === 'openai_id') {
-            $filteredItems = $sortAscDesc === 'desc'
-                ? $filteredItems->sortByDesc(function ($item) {
-                    return $item->generator->type ?? '';
-                })
-                : $filteredItems->sortBy(function ($item) {
-                    return $item->generator->type ?? '';
-                });
-        } elseif ($sort === 'credits') {
-            $filteredItems = $sortAscDesc === 'desc'
-                ? $filteredItems->sortByDesc('credits')
-                : $filteredItems->sortBy('credits');
-        }
+        // Sort
+        $filteredItems = $this->sortItems($filteredItems, $sort, $sortAscDesc);
 
         // Paginate the filtered items
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
@@ -821,43 +805,32 @@ class UserController extends Controller
         return view('panel.user.openai.documents', compact('items', 'currfolder', 'filter'));
     }
 
+    protected function sortItems($items, $sort, $sortAscDesc)
+    {
+        $direction = $sortAscDesc === 'desc' ? 'sortByDesc' : 'sortBy';
+
+        return match ($sort) {
+            'title' => $items->$direction(fn ($item) => $item->input ?? ''),
+            'created_at', 'credits' => $items->$direction($sort),
+            'openai_id' => $items->$direction(fn ($item) => $item->generator->type ?? ''),
+            default     => $items
+        };
+    }
+
     /**
      * Apply filtering logic to items collection
      */
     protected function applyFilter($items, $filter)
     {
-        switch ($filter) {
-            case 'favorites':
-                return $items->filter(function ($entry) {
-                    return $entry->isFavoriteDoc();
-                });
-
-            case 'text':
-                return $items->filter(function ($entry) {
-                    return $entry->generator && $entry->generator->type === 'text';
-                });
-
-            case 'image':
-                return $items->filter(function ($entry) {
-                    return $entry->generator && $entry->generator->type === 'image';
-                });
-
-            case 'video':
-                return $items->filter(function ($entry) {
-                    return $entry->generator && $entry->generator->type === 'video';
-                });
-
-            case 'code':
-                return $items->filter(function ($entry) {
-                    return $entry->generator && $entry->generator->type === 'code';
-                });
-
-            case 'all':
-            default:
-                return $items->filter(function ($entry) {
-                    return $entry->generator !== null;
-                });
-        }
+        return match ($filter) {
+            'favorites' => $items->filter(fn ($entry) => $entry->isFavoriteDoc()),
+            'text'      => $items->filter(fn ($entry) => $entry->generator?->type === 'text'),
+            'image'     => $items->filter(fn ($entry) => $entry->generator?->type === 'image'),
+            'video'     => $items->filter(fn ($entry) => $entry->generator?->type === 'video'),
+            'code'      => $items->filter(fn ($entry) => $entry->generator?->type === 'code'),
+            'all'       => $items,
+            default     => $items->filter(fn ($entry) => $entry->generator !== null),
+        };
     }
 
     protected function getUserVideos($folderID = null): \Illuminate\Support\Collection

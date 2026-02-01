@@ -63,7 +63,7 @@
                         offsetY="1rem"
                     >
                         <x-slot:trigger
-                            class="whitespace-nowrap px-2 py-1"
+                            class="whitespace-nowrap py-1.5"
                             variant="link"
                             size="xs"
                         >

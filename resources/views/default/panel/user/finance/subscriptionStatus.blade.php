@@ -150,7 +150,7 @@
                 } elseif ($total_words === 0) {
                     $remainingPercentage = $wordModels->totalCredits();
                 } else {
-                    $remainingPercentage = round(($wordModels->totalCredits() / $total_words) * 100, 2);
+                    $remainingPercentage = round(($wordModels->totalCredits() / max($total_words, 1)) * 100, 2);
                 }
             @endphp
 

@@ -69,12 +69,13 @@
                     <x-tabler-pin class="size-4 group-[&.pin-mode]:hidden" />
                     <x-tabler-pinned class="hidden size-4 group-[&.pin-mode]:block" />
                 </button>
+
                 <button
                     @class([
-                        'chat-item-update-title' => !$disable_actions,
+                        'chat-item-update-title' => !($disable_actions && (isset($category) && $category->slug !== 'ai_realtime_voice_chat')) ,
                         'flex size-7 items-center relative z-1 justify-center rounded-button border bg-background transition-all dark:bg-primary dark:text-primary-foreground dark:border-primary hover:scale-110 group-[&.edit-mode]:bg-emerald-500 group-[&.edit-mode]:border-emerald-500 group-[&.edit-mode]:text-white',
                     ])
-                    @if ($disable_actions) onclick="return toastr.info('{{ __('This feature is disabled in Demo version.') }}')" @endif
+                    @if ($disable_actions && (isset($category) && $category->slug !== 'ai_realtime_voice_chat')) onclick="return toastr.info('{{ __('This feature is disabled in Demo version.') }}')" @endif
                 >
                     <x-tabler-pencil class="size-4 group-[&.edit-mode]:hidden" />
                     <x-tabler-check class="hidden size-4 group-[&.edit-mode]:block" />

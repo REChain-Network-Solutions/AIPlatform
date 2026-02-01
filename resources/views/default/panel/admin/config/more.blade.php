@@ -1,9 +1,11 @@
+@php
+	use App\Domains\Entity\Enums\EntityEnum;
+@endphp
+
 @extends('panel.layout.settings')
 @section('title', __('More Settings'))
 @section('titlebar_actions', '')
-@section('additional_css')
-
-@endsection
+@section('additional_css', '')
 
 @section('settings')
     <form
@@ -75,30 +77,60 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-12">
-                <div class="mb-3">
-                    <label class="form-label">{{ __('Realtime Search Model') }}
-                        <x-badge
-                            class="ms-2 text-2xs"
-                            variant="secondary"
-                        >
-                            @lang('New')
-                        </x-badge>
-                    </label>
-                    <select
-                        class="form-select"
-                        id="default_realtime"
-                        name="default_realtime"
-                    >
-                        <option
-                            value="serper"
-                            {{ setting('default_realtime') === 'serper' ? 'selected' : '' }}
-                        >
-                            {{ __('Serper') }}</option>
-                        @includeIf('perplexity::select-option')
-                    </select>
-                </div>
-            </div>
+			<div class="col-md-12" x-data="{ realtimeModel: '{{ setting('default_realtime') }}' }">
+				<div class="mb-3">
+					<label class="form-label">{{ __('Realtime Search Model') }}
+						<x-badge
+							class="ms-2 text-2xs"
+							variant="secondary"
+						>
+							@lang('New')
+						</x-badge>
+					</label>
+					<select
+						class="form-select"
+						id="default_realtime"
+						name="default_realtime"
+						x-model="realtimeModel"
+					>
+						<option value="serper">
+							{{ __('Serper') }}
+						</option>
+						@includeIf('perplexity::select-option')
+						<option value="openai">
+							{{ __('OpenAI') }}
+						</option>
+					</select>
+
+					<!-- OpenAI Model Selection - Shows only when OpenAI is selected -->
+					<div
+						class="mt-3"
+						id="openai_realtime_model_container"
+						x-show="realtimeModel === 'openai'"
+						x-transition
+					>
+						<label class="form-label">{{ __('OpenAI Realtime Model') }}</label>
+						<select
+							class="form-select"
+							id="openai_realtime_model"
+							name="openai_realtime_model"
+						>
+							<option
+								value="{{ EntityEnum::GPT_4_O_SEARCH_PREVIEW->value }}"
+								{{ setting('openai_realtime_model') === EntityEnum::GPT_4_O_SEARCH_PREVIEW->value ? 'selected' : '' }}
+							>
+								{{ __(EntityEnum::GPT_4_O_SEARCH_PREVIEW->label()) }}
+							</option>
+							<option
+								value="{{ EntityEnum::GPT_4_O_MINI_SEARCH_PREVIEW->value }}"
+								{{ setting('openai_realtime_model') === EntityEnum::GPT_4_O_MINI_SEARCH_PREVIEW->value ? 'selected' : '' }}
+							>
+								{{ __(EntityEnum::GPT_4_O_MINI_SEARCH_PREVIEW->label())}}
+							</option>
+						</select>
+					</div>
+				</div>
+			</div>
 			<div class="col-md-12">
 				<div class="mb-3">
 					<x-forms.input
