@@ -55,6 +55,6 @@
 		"rampensau": "^2.0.3",
 		"rt-client": "file:./rt-client-0.4.7.tgz",
 		"sortablejs": "^1.15.6",
-		"typed.js": "^2.1.0"
+		"typed.js": "^3.0.0"
 	}
 }
