@@ -8,7 +8,7 @@
 		"watch": "gulp watch"
 	},
 	"devDependencies": {
-		"@angular-eslint/template-parser": "^17.2.1",
+		"@angular-eslint/template-parser": "^21.2.0",
 		"@tailwindcss/forms": "^0.5.7",
 		"@tailwindcss/typography": "^0.5.19",
 		"autoprefixer": "^10.4.24",
@@ -52,7 +52,7 @@
 		"@tiptap/starter-kit": "^3.19.0",
 		"lowlight": "^3.3.0",
 		"picmo": "^5.8.5",
-		"rampensau": "^2.0.3",
+		"rampensau": "^2.3.0",
 		"rt-client": "file:./rt-client-0.4.7.tgz",
 		"sortablejs": "^1.15.6",
 		"typed.js": "^3.0.0"
