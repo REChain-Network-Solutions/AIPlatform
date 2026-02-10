@@ -12,7 +12,7 @@
 		"@tailwindcss/forms": "^0.5.7",
 		"@tailwindcss/typography": "^0.5.19",
 		"autoprefixer": "^10.4.24",
-		"axios": "^1.13.4",
+		"axios": "^1.13.5",
 		"blade-formatter": "^1.42.2",
 		"del": "^7.0.0",
 		"eslint": "^9.39.2",
