@@ -54,7 +54,7 @@
 		"picmo": "^5.8.5",
 		"rampensau": "^2.3.0",
 		"rt-client": "file:./rt-client-0.4.7.tgz",
-		"sortablejs": "^1.15.6",
+		"sortablejs": "^1.15.7",
 		"typed.js": "^3.0.0"
 	}
 }
