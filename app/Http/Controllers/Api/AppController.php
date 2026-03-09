@@ -235,7 +235,9 @@ class AppController extends Controller
             $currency = Currency::all();
 
             return response()->json($currency);
-        } elseif ($id != null) {
+        }
+
+        if ($id != null) {
             $currency = Currency::where([['id', '=', $id]])->first();
 
             return response()->json($currency);

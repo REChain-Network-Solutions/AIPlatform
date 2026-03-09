@@ -13,10 +13,8 @@ class RequirementsChecker
 
     /**
      * Check for the server requirements.
-     *
-     * @return array
      */
-    public function check(array $requirements)
+    public function check(array $requirements): array
     {
         $results = [];
 
@@ -24,11 +22,11 @@ class RequirementsChecker
             switch ($type) {
                 // check php requirements
                 case 'php':
-                    foreach ($requirements[$type] as $requirement) {
-                        $results['requirements'][$type][$requirement] = true;
+                    foreach ($requirement as $subRequirement) {
+                        $results['requirements'][$type][$subRequirement] = true;
 
-                        if (! extension_loaded($requirement)) {
-                            $results['requirements'][$type][$requirement] = false;
+                        if (! extension_loaded($subRequirement)) {
+                            $results['requirements'][$type][$subRequirement] = false;
 
                             $results['errors'] = true;
                         }
@@ -37,13 +35,13 @@ class RequirementsChecker
                     break;
                     // check apache requirements
                 case 'apache':
-                    foreach ($requirements[$type] as $requirement) {
+                    foreach ($requirement as $subRequirement) {
                         // if function doesn't exist we can't check apache modules
                         if (function_exists('apache_get_modules')) {
-                            $results['requirements'][$type][$requirement] = true;
+                            $results['requirements'][$type][$subRequirement] = true;
 
-                            if (! in_array($requirement, apache_get_modules())) {
-                                $results['requirements'][$type][$requirement] = false;
+                            if (! in_array($subRequirement, apache_get_modules(), true)) {
+                                $results['requirements'][$type][$subRequirement] = false;
 
                                 $results['errors'] = true;
                             }
@@ -65,10 +63,10 @@ class RequirementsChecker
     public function checkPHPversion(?string $minPhpVersion = null)
     {
         $minVersionPhp = $minPhpVersion;
-        $currentPhpVersion = $this->getPhpVersionInfo();
+        $currentPhpVersion = self::getPhpVersionInfo();
         $supported = false;
 
-        if ($minPhpVersion == null) {
+        if ($minPhpVersion === null) {
             $minVersionPhp = $this->getMinPhpVersion();
         }
 
@@ -76,14 +74,12 @@ class RequirementsChecker
             $supported = true;
         }
 
-        $phpStatus = [
+        return [
             'full'      => $currentPhpVersion['full'],
             'current'   => $currentPhpVersion['version'],
             'minimum'   => $minVersionPhp,
             'supported' => $supported,
         ];
-
-        return $phpStatus;
     }
 
     /**

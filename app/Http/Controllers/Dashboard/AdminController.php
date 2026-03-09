@@ -83,14 +83,18 @@ class AdminController extends Controller
     {
         $this->service->setCache();
 
-        $vip_membership = Helper::isUserVIP();
+        if (Cache::has('vip_membership')) {
+            $vip_membership = Helper::isUserVIP();
+        } else {
+            $vip_membership = Cache::get('vip_membership') ?: false;
+        }
 
         return view('panel.admin.index', [
             'activity'              => $this->service->activity(),
             'latestOrders'   		     => $this->service->latestOrders(),
             'recentTransactions'    => $this->service->getRecentTransactions(),
             'gatewayError'          => false,
-            'vip_membership'        => $vip_membership,
+            'vip_membership'        => (bool) $vip_membership,
         ]);
     }
 
@@ -120,11 +124,12 @@ class AdminController extends Controller
     {
         $search = $request->input('search');
         $users = User::query()
+            ->select(['id', 'name', 'surname', 'email', 'type', 'country', 'status', 'created_at'])
             ->where('name', 'like', "%$search%")
             ->orWhere('surname', 'like', "%$search%")
             ->orWhere('email', 'like', "%$search%")
             ->orWhere('phone', 'like', "%$search%")
-            ->paginate(25);
+            ->paginate(10);
 
         return view('panel.admin.users.index', compact('users'));
     }
@@ -271,7 +276,12 @@ class AdminController extends Controller
     {
         $user = User::whereId($id)->firstOrFail();
         $sub = getCurrentActiveSubscription($user->id) ?? getCurrentActiveSubscriptionYokkasa($user->id);
-        $plan = Plan::where('id', $sub?->plan_id)->first();
+        $plan = Plan::getCache(
+            static function () use ($sub) {
+                return Plan::query()->find($sub?->plan_id);
+            },
+            '-' . $sub?->plan_id
+        );
 
         return view('panel.admin.users.finance', compact('user', 'sub', 'plan'));
     }
@@ -908,28 +918,28 @@ class AdminController extends Controller
             $selectedAiList = [];
 
             return view('panel.admin.finance.plans.SubscriptionNewOrEdit', compact('isActiveGateway', 'openAiList', 'selectedAiList', 'models', 'selectedModels'));
-        } else {
-            $subscription = Plan::where('id', $id)->firstOrFail();
-
-            $selectedAiList = $subscription->open_ai_items ?: [];
-
-            $openAiList = OpenAIGenerator::all();
-
-            $groupedAiList = $openAiList->groupBy('filters');
-
-            $checkedGroups = [];
-            foreach ($groupedAiList as $key => $items) {
-                $hasCheckedItems = $items->contains(static function ($item) use ($selectedAiList) {
-                    return in_array($item->slug, $selectedAiList, true);
-                });
-
-                if ($hasCheckedItems) {
-                    $checkedGroups[$key] = true;
-                }
-            }
-
-            return view('panel.admin.finance.plans.SubscriptionNewOrEdit', compact('checkedGroups', 'subscription', 'selectedAiList', 'isActiveGateway', 'generatedData', 'openAiList', 'models', 'selectedModels'));
         }
+
+        $subscription = Plan::where('id', $id)->firstOrFail();
+
+        $selectedAiList = $subscription->open_ai_items ?: [];
+
+        $openAiList = OpenAIGenerator::all();
+
+        $groupedAiList = $openAiList->groupBy('filters');
+
+        $checkedGroups = [];
+        foreach ($groupedAiList as $key => $items) {
+            $hasCheckedItems = $items->contains(static function ($item) use ($selectedAiList) {
+                return in_array($item->slug, $selectedAiList, true);
+            });
+
+            if ($hasCheckedItems) {
+                $checkedGroups[$key] = true;
+            }
+        }
+
+        return view('panel.admin.finance.plans.SubscriptionNewOrEdit', compact('checkedGroups', 'subscription', 'selectedAiList', 'isActiveGateway', 'generatedData', 'openAiList', 'models', 'selectedModels'));
     }
 
     public function paymentPlansDelete($id)
@@ -972,26 +982,26 @@ class AdminController extends Controller
             $selectedAiList = [];
 
             return view('panel.admin.finance.plans.PrepaidNewOrEdit', compact('openAiList', 'selectedAiList', 'isActiveGateway', 'models', 'selectedModels'));
-        } else {
-            $subscription = Plan::where('id', $id)->first();
-            $selectedAiList = $subscription->open_ai_items ?: [];
-
-            $openAiList = OpenAIGenerator::all();
-
-            $groupedAiList = $openAiList->groupBy('filters');
-            $checkedGroups = [];
-            foreach ($groupedAiList as $key => $items) {
-                $hasCheckedItems = $items->contains(function ($item) use ($selectedAiList) {
-                    return in_array($item->slug, $selectedAiList);
-                });
-
-                if ($hasCheckedItems) {
-                    $checkedGroups[$key] = true;
-                }
-            }
-
-            return view('panel.admin.finance.plans.PrepaidNewOrEdit', compact('checkedGroups', 'openAiList', 'selectedAiList', 'subscription', 'isActiveGateway', 'generatedData', 'models', 'selectedModels'));
         }
+
+        $subscription = Plan::where('id', $id)->first();
+        $selectedAiList = $subscription->open_ai_items ?: [];
+
+        $openAiList = OpenAIGenerator::all();
+
+        $groupedAiList = $openAiList->groupBy('filters');
+        $checkedGroups = [];
+        foreach ($groupedAiList as $key => $items) {
+            $hasCheckedItems = $items->contains(function ($item) use ($selectedAiList) {
+                return in_array($item->slug, $selectedAiList);
+            });
+
+            if ($hasCheckedItems) {
+                $checkedGroups[$key] = true;
+            }
+        }
+
+        return view('panel.admin.finance.plans.PrepaidNewOrEdit', compact('checkedGroups', 'openAiList', 'selectedAiList', 'subscription', 'isActiveGateway', 'generatedData', 'models', 'selectedModels'));
     }
 
     public function paymentPlansSave(Request $request)
@@ -1098,11 +1108,11 @@ class AdminController extends Controller
     {
         if ($id == null) {
             return view('panel.admin.testimonials.TestimonialNewOrEdit');
-        } else {
-            $testimonial = Testimonials::where('id', $id)->first();
-
-            return view('panel.admin.testimonials.TestimonialNewOrEdit', compact('testimonial'));
         }
+
+        $testimonial = Testimonials::where('id', $id)->first();
+
+        return view('panel.admin.testimonials.TestimonialNewOrEdit', compact('testimonial'));
     }
 
     public function testimonialsDelete($id)
@@ -1169,20 +1179,20 @@ class AdminController extends Controller
     public function howitWorks()
     {
         $howitWorksList = HowitWorks::all();
-        $defaults = self::howitWorksDefaults();
+        $defaults = $this->howitWorksDefaults();
 
         return view('panel.admin.howitworks.index', compact('howitWorksList', 'defaults'));
     }
 
     public function howitWorksNewOrEdit($id = null)
     {
-        if ($id == null) {
+        if ($id === null) {
             return view('panel.admin.howitworks.HowitWorksNewOrEdit');
-        } else {
-            $howitWorks = HowitWorks::where('id', $id)->first();
-
-            return view('panel.admin.howitworks.HowitWorksNewOrEdit', compact('howitWorks'));
         }
+
+        $howitWorks = HowitWorks::where('id', $id)->first();
+
+        return view('panel.admin.howitworks.HowitWorksNewOrEdit', compact('howitWorks'));
     }
 
     public function howitWorksDelete($id)
@@ -1264,11 +1274,11 @@ class AdminController extends Controller
     {
         if ($id == null) {
             return view('panel.admin.clients.ClientNewOrEdit');
-        } else {
-            $client = Clients::where('id', $id)->first();
-
-            return view('panel.admin.clients.ClientNewOrEdit', compact('client'));
         }
+
+        $client = Clients::where('id', $id)->first();
+
+        return view('panel.admin.clients.ClientNewOrEdit', compact('client'));
     }
 
     public function clientsDelete($id)
@@ -1430,11 +1440,8 @@ class AdminController extends Controller
     private function checkCouponValidity($code)
     {
         $exist = Coupon::where('is_offer', false)->where('code', $code)->first();
-        if ($exist && (! ($exist->usersUsed->count() >= $exist->limit) || $exist->limit == -1)) {
-            return true;
-        }
 
-        return false;
+        return $exist && (! ($exist->usersUsed->count() >= $exist->limit) || $exist->limit == -1);
     }
 
     public function generateUniqueCode()
@@ -1454,7 +1461,7 @@ class AdminController extends Controller
         $code = '';
 
         for ($i = 0; $i < $length; $i++) {
-            $code .= $characters[rand(0, strlen($characters) - 1)];
+            $code .= $characters[random_int(0, strlen($characters) - 1)];
         }
 
         return $code;
@@ -1475,7 +1482,6 @@ class AdminController extends Controller
             $settings->site_email = $request->site_email;
             $settings->frontend_pricing_section = $request->frontend_pricing_section;
             $settings->frontend_custom_templates_section = $request->frontend_custom_templates_section;
-            $settings->frontend_additional_url = $request->frontend_additional_url;
             $settings->frontend_custom_css = $request->frontend_custom_css;
             $settings->frontend_custom_js = $request->frontend_custom_js;
             $settings->frontend_footer_facebook = $request->frontend_footer_facebook;
@@ -1501,6 +1507,8 @@ class AdminController extends Controller
             }
 
             setting([
+                'frontend_additional_url_type' => $request->frontend_additional_url_type,
+                'frontend_additional_url'      => $request->frontend_additional_url,
                 'facebook_domain_verification' => $request->facebook_domain_verification ?: '',
                 'google_robots'                => $request->google_robots,
             ])->save();
@@ -1709,8 +1717,10 @@ class AdminController extends Controller
 
             if (setting('front_theme') === 'social-media-front') {
                 $find = \App\Models\Frontend\FrontendSetting::query()->first();
-                $find->join_the_ranks = $request->join_the_ranks;
-                $find->save();
+                if ($find) {
+                    $find->join_the_ranks = $request->join_the_ranks;
+                    $find->save();
+                }
             }
 
             if (setting('front_theme') === 'marketing-bot') {
@@ -2132,9 +2142,9 @@ class AdminController extends Controller
                     return response()->json($data, 419);
                 }
 
-                $image->move($path, $image_name);
+                $data = $image->store('images/generatorlist/', ['disk' => 'public']);
 
-                $item->image = $path . $image_name;
+                $item->image = 'uploads/' . $data;
             }
 
             $item->menu_title = $request->menu_title;
@@ -2191,7 +2201,7 @@ class AdminController extends Controller
 
     public function deletionRequest($id)
     {
-        if (Helper::appIsNotDemo() && auth()->user()->isAdmin()) {
+        if (Helper::appIsNotDemo() && auth()->user()?->isAdmin()) {
             $deletionRequest = AccountDeletionReqs::where('user_id', $id)->firstOrFail();
             CreateActivity::for($deletionRequest->user, 'Deleted', $deletionRequest->user?->fullName() . ' deleted his/her account.');
             $deletionRequest->user->delete();

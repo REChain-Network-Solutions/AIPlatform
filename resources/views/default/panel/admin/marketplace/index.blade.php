@@ -107,50 +107,72 @@
     >
         <div class="flex flex-col gap-9">
             @include('panel.admin.market.components.marketplace-filter')
-            {{-- TODO: This banner section should be made in accordance with the design. --}}
+
             @if (is_array($banners) && $banners)
                 <div
-                    class="relative flex justify-between overflow-hidden rounded-2xl bg-gradient-to-r from-gradient-via/40 to-gradient-from/40"
+                    class="lqd-marketplace-banner relative grid grid-cols-1 items-center overflow-hidden rounded-[10px] border shadow-2xl shadow-black/5 max-md:py-5 md:grid-cols-2"
                     x-data="{
                         banners: {{ json_encode($banners) }},
                         currentBanner: 0,
                     }"
                 >
-                    <div class="self-center p-9">
-                        <span
-                            class="mb-4 inline-block rounded-full bg-heading-foreground/40 px-3 py-1 text-xs/tight font-medium text-background"
-                            x-text="banners[currentBanner].banner_title"
-                        >
-                            {{ $banners[0]['banner_title'] ?? '' }}
-                        </span>
-                        <h2
-                            class="mb-0"
-                            x-html="banners[currentBanner].banner_description"
-                        >
-                            {{ $banners[0]['banner_description'] ?? '' }}
-                        </h2>
-                        <div class="relative z-10 inline-flex justify-start gap-2 pt-5">
-                            @foreach ($banners as $banner)
-                                <span
-                                    @class([
-                                        'relative size-[5px] cursor-pointer rounded-full bg-heading-foreground/10 transition-all before:absolute before:left-1/2 before:top-1/2 before:size-4 before:-translate-x-1/2 before:-translate-y-1/2 hover:bg-heading-foreground/50 [&.active]:w-2.5 [&.active]:bg-heading-foreground',
-                                        'active' => $loop->first,
-                                    ])
-                                    :class="{ 'active': currentBanner === {{ $loop->index }} }"
-                                    @click="currentBanner = {{ $loop->index }}"
-                                ></span>
-                            @endforeach
+                    <div class="w-full min-w-0 p-5 md:p-10">
+                        <div class=":w-[min(470px,100%)]">
+                            <p class="mb-4 text-xs font-medium opacity-50">
+                                {{ __('Editor Picks') }}
+                            </p>
+
+                            <h2
+                                class="mb-4 text-balance text-[30px] font-semibold [&_span]:block [&_span]:text-[0.7em] [&_span]:opacity-70"
+                                x-html="banners[currentBanner].banner_title"
+                            >
+                                {!! $banners[0]['banner_title'] ?? '' !!}
+                            </h2>
+
+                            <p
+                                class="mb-2 text-balance text-sm/[1.4em] md:mb-10 md:last:mb-0"
+                                x-html="banners[currentBanner].banner_description"
+                            >
+                                {!! $banners[0]['banner_description'] ?? '' !!}
+                            </p>
+
+                            @if (count($banners) > 1)
+                                <div class="flex items-center gap-1">
+                                    <x-button
+                                        class="relative z-3 size-8 p-0"
+                                        variant="ghost"
+                                        type="button"
+                                        title="{{ __('Prev') }}"
+                                        size="none"
+                                        @click.prevent="currentBanner = Math.max(0, currentBanner - 1)"
+                                    >
+                                        <x-tabler-chevron-left class="size-5 rtl:rotate-180" />
+                                    </x-button>
+                                    <x-button
+                                        class="relative z-3 size-8 p-0"
+                                        variant="ghost"
+                                        type="button"
+                                        title="{{ __('Next') }}"
+                                        size="none"
+                                        @click.prevent="currentBanner = Math.min(banners.length - 1, currentBanner + 1)"
+                                    >
+                                        <x-tabler-chevron-right class="size-5 rtl:rotate-180" />
+                                    </x-button>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
-                    <div class="self-center">
-                        <img
-                            class="h-32 object-cover"
-                            src="{{ $banners[0]['banner_image'] ?? '' }}"
-                            alt="{{ $banners[0]['banner_title'] ?? '' }}"
-                            :src="banners[currentBanner].banner_image"
-                            :alt="banners[currentBanner].banner_title"
-                        >
+                    <div class="p-5 max-md:order-first">
+                        <div class="w-[min(370px,100%)] md:ms-auto">
+                            <img
+                                class="h-auto w-full rounded-2xl"
+                                src="{{ $banners[0]['banner_image'] ?? '' }}"
+                                alt="{{ $banners[0]['banner_title'] ?? '' }}"
+                                :src="banners[currentBanner].banner_image"
+                                :alt="banners[currentBanner].banner_title"
+                            >
+                        </div>
                     </div>
 
                     <a

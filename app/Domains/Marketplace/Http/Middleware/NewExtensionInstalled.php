@@ -16,7 +16,10 @@ class NewExtensionInstalled
         $extensionInstaller = app(ExtensionInstallService::class);
         $cacheKey = $extensionInstaller->getExtensionInstallCache();
 
-        if (Cache::pull($cacheKey)) {
+        $value = Cache::get($cacheKey);
+
+        if ($value) {
+            Cache::forget($cacheKey);
             $this->runExtensionInstallTasks();
         }
 

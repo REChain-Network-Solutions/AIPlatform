@@ -47,7 +47,11 @@ class BlogController extends Controller
             ->take(2)
             ->get();
 
-        return view('blog.post', compact('post', 'previousPost', 'nextPost', 'relatedPosts'));
+        if ($post) {
+            return view('blog.post', compact('post', 'previousPost', 'nextPost', 'relatedPosts'));
+        }
+
+        abort(404);
     }
 
     // archive pages

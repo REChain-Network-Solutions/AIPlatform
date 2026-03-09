@@ -45,7 +45,7 @@ class FluxProQueueCheck extends Command
             ->where('request_id', $request_id)
             ->first();
 
-        $output = FalAIService::check($item->request_id);
+        $output = FalAIService::check($item?->request_id);
 
         if ($output) {
             $payload = data_get($item, 'payload');
@@ -56,10 +56,10 @@ class FluxProQueueCheck extends Command
 
             $image = data_get($output, 'image.url');
 
-            $image = static::downloadImageToStorage($image);
+            $image = static::downloadImageToStorage($image, null, (int) ($item?->user_id ?? 0));
 
-            $item->update([
-                'output'  => $image ?: $item->output,
+            $item?->update([
+                'output'  => $image ?: $item?->output,
                 'payload' => $payload,
                 'status'  => 'COMPLETED',
             ]);
@@ -85,7 +85,7 @@ class FluxProQueueCheck extends Command
 
                     $image = data_get($output, 'image.url');
 
-                    $image = static::downloadImageToStorage($image);
+                    $image = static::downloadImageToStorage($image, null, (int) $item->user_id);
 
                     $item->update([
                         'output'  => $image ?: $item->output,
@@ -96,47 +96,72 @@ class FluxProQueueCheck extends Command
             });
     }
 
-    public static function downloadImageToStorage($url = null, $filename = null)
+    public static function downloadImageToStorage($url = null, $filename = null, int $userId = 0)
     {
         if (! $url) {
             return null;
         }
-        $response = Http::get($url);
-        if ($response->successful()) {
-            $fileContent = $response->body();
-            $extension = pathinfo($url, PATHINFO_EXTENSION);
-            if (! $filename) {
-                $filename = uniqid('image_') . '.' . $extension;
-            } else {
-                $filename .= '.' . $extension;
+
+        $fileContent = null;
+        $mimeType = null;
+
+        $isDataUri = str_starts_with((string) $url, 'data:image');
+
+        if ($isDataUri) {
+            if (preg_match('/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/', $url, $matches)) {
+                $mimeType = $matches[1];
+                $fileContent = base64_decode(str_replace(' ', '+', $matches[2]), true) ?: null;
             }
+        } else {
+            $response = Http::get($url);
+            if ($response->successful()) {
+                $fileContent = $response->body();
+                $mimeType = $response->header('Content-Type');
+                if (is_string($mimeType)) {
+                    $mimeType = trim(strtok($mimeType, ';'));
+                }
+            }
+        }
+
+        if ($fileContent !== null) {
+            $extension = $isDataUri
+                ? mimeToExtension($mimeType ?: 'image/png')
+                : pathinfo((string) parse_url((string) $url, PHP_URL_PATH), PATHINFO_EXTENSION);
+
+            if (! $extension) {
+                $extension = $mimeType ? mimeToExtension($mimeType) : 'png';
+            }
+
+            $extension = $extension ?: 'png';
+            $directory = $userId > 0 ? "media/images/u-{$userId}" : 'media/images/guest';
+            $baseName = $filename ?: uniqid('image_', true);
+            $finalName = str_ends_with($baseName, ".{$extension}") ? $baseName : "{$baseName}.{$extension}";
+            $relativePath = "{$directory}/{$finalName}";
 
             $image_storage = SettingTwo::getCache()?->ai_image_storage;
 
             if ($image_storage === 'r2') {
-                Storage::disk('r2')->put($filename, $fileContent);
+                Storage::disk('r2')->put($relativePath, $fileContent);
 
-                return Storage::disk('r2')->url($filename);
-            } elseif ($image_storage === 's3') {
-
-                Storage::disk('s3')->put($filename, $fileContent);
-
-                return Storage::disk('s3')->url($filename);
+                return Storage::disk('r2')->url($relativePath);
             }
 
-            // save file on local storage or aws s3
-            Storage::disk('thumbs')->put($filename, $fileContent);
+            if ($image_storage === 's3') {
+                Storage::disk('s3')->put($relativePath, $fileContent);
 
-            $dump = Storage::disk('public')->put($filename, $fileContent);
+                return Storage::disk('s3')->url($relativePath);
+            }
 
-            if ($dump) {
-                return '/uploads/' . $filename;
+            Storage::disk('thumbs')->put($finalName, $fileContent);
+            $saved = Storage::disk('public')->put($relativePath, $fileContent);
+
+            if ($saved) {
+                return '/uploads/' . $relativePath;
             }
 
             return 'error';
         }
 
-        // return false when fail
         return null;
     }
 }

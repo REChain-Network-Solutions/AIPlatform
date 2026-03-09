@@ -6,6 +6,7 @@ use App\Helpers\Classes\MarketplaceHelper;
 use App\Models\Usage;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Spatie\Newsletter\Facades\Newsletter;
 use Throwable;
 
@@ -52,12 +53,12 @@ class UserObserver
             }
         }
 
-        cache()->forget('instance_usage');
+        Cache::forget('instance_usage');
     }
 
     public function deleted($user): void
     {
         Usage::getSingle()->updateUserCount(-1);
-        cache()->forget('instance_usage');
+        Cache::forget('instance_usage');
     }
 }

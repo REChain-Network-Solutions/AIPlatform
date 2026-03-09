@@ -197,9 +197,9 @@ class AffiliateApiController extends Controller
             CreateActivity::for($user, 'Sent', 'Affiliate Withdraw Request');
 
             return response()->json(['message' => 'Affiliate Withdrawal Requested'], 200);
-        } else {
-            return response()->json(['error' => __('Not enough earnings')], 412);
         }
+
+        return response()->json(['error' => __('Not enough earnings')], 412);
 
     }
 }

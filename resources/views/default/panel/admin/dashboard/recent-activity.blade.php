@@ -19,7 +19,7 @@
             </h4>
         </div>
     </x-slot:head>
-    @forelse (cache('recent_activity') as $activity)
+    @forelse (cache()->get('recent_activity') as $activity)
         <div class="flex justify-between gap-10">
             <div class="grid w-full grid-cols-12 items-center">
                 <div class="col-span-4 me-3 flex items-center justify-between sm:col-span-3">

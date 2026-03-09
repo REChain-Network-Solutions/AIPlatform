@@ -128,14 +128,14 @@ class SocialLoginController extends Controller
             return response()->json([
                 'access_token' => $token,
             ], 200);
-        } else {
-            Log::info('Sign in with Google - Invalid passport token');
-
-            return response()->json([
-                'status'  => false,
-                'message' => __('Invalid passport token'),
-            ], 412);
         }
+
+        Log::info('Sign in with Google - Invalid passport token');
+
+        return response()->json([
+            'status'  => false,
+            'message' => __('Invalid passport token'),
+        ], 412);
 
     }
 

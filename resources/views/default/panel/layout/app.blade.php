@@ -1,4 +1,5 @@
 @php
+    use App\Helpers\Classes\MarketplaceHelper;
     $theme = get_theme();
     $is_auth = Auth::check();
     $disable_floating_menu = true;
@@ -68,11 +69,18 @@
     <div class="lqd-page relative flex min-h-full flex-col">
 
         <div class="lqd-page-wrapper grow-1 flex">
-            @auth
+            @php
+                $showMenu = auth()->check();
+                $isImageProLanding = MarketplaceHelper::isRegistered('ai-image-pro') && request()->is('ai-image-pro*');
+                if (!$showMenu && $isImageProLanding) {
+                    $showMenu = true;
+                }
+            @endphp
+            @if ($showMenu)
                 @if (!isset($disable_navbar))
                     @include('panel.layout.navbar')
                 @endif
-            @endauth
+            @endif
             <div class="lqd-page-content-wrap flex grow flex-col overflow-hidden">
                 @if ($good_for_now)
                     @auth
@@ -170,7 +178,7 @@
                 route('dashboard.user.openai.generator.workbook', 'ai_chat_image') !== $currentUrl &&
                 route('dashboard.user.openai.generator.workbook', 'ai_pdf') !== $currentUrl;
 
-            if (\App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-chat-pro')) {
+            if (MarketplaceHelper::isRegistered('ai-chat-pro')) {
                 $shouldShowChatbot = $shouldShowChatbot && route('dashboard.user.openai.chat.pro.index') !== $currentUrl && route('chat.pro') !== $currentUrl;
             }
         @endphp

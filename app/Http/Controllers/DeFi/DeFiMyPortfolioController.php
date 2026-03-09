@@ -38,6 +38,6 @@ class DeFiMyPortfolioController extends Controller
             return view('panel.user.defi.my-portfolio', compact('data', 'token'));
         }
 
-        return to_route('dashboard.de-fi.setting', ['route' => $request->route()->getName()]);
+        return to_route('dashboard.de-fi.setting', ['route' => $request->route()?->getName()]);
     }
 }

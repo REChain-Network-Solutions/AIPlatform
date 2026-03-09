@@ -69,9 +69,9 @@ class MailController extends Controller
             Auth::login($user);
 
             return response()->json([], 200);
-        } else {
-            return response()->json([], 449);
         }
+
+        return response()->json([], 449);
 
     }
 }

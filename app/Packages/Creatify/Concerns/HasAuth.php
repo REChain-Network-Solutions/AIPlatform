@@ -30,11 +30,7 @@ trait HasAuth
      */
     public function ensureAuth(): bool
     {
-        if (empty($this->X_API_ID) || empty($this->X_API_KEY)) {
-            return false;
-        }
-
-        return true;
+        return ! (empty($this->X_API_ID) || empty($this->X_API_KEY));
     }
 
     /**

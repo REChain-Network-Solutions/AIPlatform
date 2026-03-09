@@ -9,7 +9,7 @@ use App\Domains\Entity\Enums\EntityEnum;
 use App\Enums\AccessType;
 use App\Enums\Plan\FrequencyEnum;
 use App\Enums\Plan\TypeEnum;
-use App\Models\Concerns\HasCacheFirst;
+use App\Models\Concerns\HasCache;
 use App\Services\Common\MenuService;
 use App\Services\Finance\PlanService;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,7 +22,7 @@ use Yediyuz\Helpers\ArrayHelper;
 
 class Plan extends Model
 {
-    use HasCacheFirst;
+    use HasCache;
     use HasFactory;
 
     public static int $cacheTtl = 3600 * 24;
@@ -55,6 +55,7 @@ class Plan extends Model
         'plan_ai_tools',
         'plan_features',
         'social_media_agent_limits',
+        'blogpilot_limits',
         'reset_credits_on_renewal',
         'default_ai_model',
         'ai_models',
@@ -102,6 +103,7 @@ class Plan extends Model
         'active'                    => 'boolean',
         'user_api'                  => 'boolean',
         'social_media_agent_limits' => 'array',
+        'blogpilot_limits'          => 'array',
     ];
 
     protected static function boot(): void
@@ -364,6 +366,10 @@ class Plan extends Model
             'plan_ai_tools'                 => self::parsePlanAiTools(MenuService::planAiToolsMenu()),
             'plan_features'                 => self::parsePlanFeatures(MenuService::planFeatureMenu()),
             'social_media_agent_limits'     => [
+                'agents'        => -1,
+                'monthly_posts' => -1,
+            ],
+            'blogpilot_limits'              => [
                 'agents'        => -1,
                 'monthly_posts' => -1,
             ],

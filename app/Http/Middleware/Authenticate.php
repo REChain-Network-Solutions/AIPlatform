@@ -11,55 +11,41 @@ use Illuminate\Support\Facades\Auth;
 
 class Authenticate extends Middleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  string[]  ...$guards
-     *
-     * @return mixed
-     *
-     * @throws \Illuminate\Auth\AuthenticationException
-     */
     public function handle($request, Closure $next, ...$guards)
     {
         $this->authenticate($request, $guards);
-        if (Auth::check()) {
-            if (Google2FA::isActivated() && ! session()->has('save_login_2fa')) {
-                $user = Auth::id();
 
-                Auth::logout();
+        $user = Auth::user();
 
-                session()->put('user_id', $user);
-                session()->save();
+        // Skip early if no authenticated user
+        if (! $user) {
+            return $next($request);
+        }
 
-                return redirect()->route('2fa.login');
-            }
+        // Handle 2FA check
+        if (Google2FA::isActivated() && ! session()->has('save_login_2fa')) {
+            Auth::logout();
+
+            // Store only ID, not full user object (lighter in session)
+            session()->put('user_id', $user->getAuthIdentifier());
+
+            return redirect()->route('2fa.login');
         }
 
         return $next($request);
     }
 
-    /**
-     * Get the path the user should be redirected to when they are not authenticated.
-     */
-    protected function redirectTo(Request $request): ?string
-    {
-        if ($request->expectsJson()) {
-
-            if ($request->routeIs('dashboard.user.openai.chat.*'));
-        }
-
-        return $request->expectsJson() ? null : route('login');
-    }
-
     protected function unauthenticated($request, array $guards)
     {
+        $message = $request->routeIs('dashboard.user.openai.chat.*')
+            ? 'Please log in to your account to start using Live Chat.'
+            : 'Unauthenticated.';
 
-        $text = $request->routeIs('dashboard.user.openai.chat.*') ? 'Please log in to your account to start using Live Chat.' : 'Unauthenticated.';
+        throw new AuthenticationException($message, $guards, $this->redirectTo($request));
+    }
 
-        throw new AuthenticationException(
-            $text, $guards, $this->redirectTo($request)
-        );
+    protected function redirectTo(Request $request): ?string
+    {
+        return $request->expectsJson() ? null : route('login');
     }
 }

@@ -74,16 +74,12 @@
         </span>
     @endif
 
-    @if ($badge && $app_is_demo)
+    @if (!empty($badge))
         <x-badge
-            class="rounded-md text-4xs group-[&.navbar-shrinked]/body:hidden"
+            class="rounded-md text-[0.5625rem] group-[&.navbar-shrinked]/body:hidden"
             variant="secondary"
         >
-            @if (!empty($badge))
-                {{ mb_strtoupper($badge) }}
-            @else
-                {{ __('NEW') }}
-            @endif
+            {{ mb_strtoupper($badge) }}
         </x-badge>
     @endif
 </a>

@@ -683,16 +683,16 @@ class PaddleService implements BaseGatewayService
 
                 if ((string) $status == 'active') {
                     return true;
-                } else {
-                    if ($subscription->getAttribute('created_at') < Carbon::now()->subHours(2)) {
-                        $subscription->update([
-                            'stripe_status' => 'cancelled',
-                            'ends_at'       => Carbon::now(),
-                        ]);
-                    }
-
-                    return false;
                 }
+
+                if ($subscription->getAttribute('created_at') < Carbon::now()->subHours(2)) {
+                    $subscription->update([
+                        'stripe_status' => 'cancelled',
+                        'ends_at'       => Carbon::now(),
+                    ]);
+                }
+
+                return false;
             } catch (Exception $th) {
                 if ($subscription->getAttribute('created_at') < Carbon::now()->subHours(2)) {
                     $subscription->update([

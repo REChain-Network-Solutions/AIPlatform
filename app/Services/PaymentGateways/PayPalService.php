@@ -172,7 +172,7 @@ class PayPalService
                     $history->new_price_id = $billingPlan['id'];
                     $history->status = 'check';
                     $history->save();
-                    $tmp = self::updateUserData();
+                    self::updateUserData();
                 }
                 $product->price_id = $billingPlan['id'];
             } else {
@@ -294,13 +294,47 @@ class PayPalService
             $subscription = new Subscriptions;
 
             if ($billingPlanId == 'lifetime' && $paypalSubscriptionID == 'lifetime') {
-                $subscription->stripe_id = 'PLS-' . strtoupper(Str::random(13));
+                $orderID = $request->input('orderID', null);
+                if (! $orderID) {
+                    throw new Exception('Order ID is required for lifetime plans');
+                }
+
+                // Capture PayPal order and verify payment
+                $captureResult = $provider->capturePaymentOrder($orderID);
+
+                if (! isset($captureResult['status']) || $captureResult['status'] !== 'COMPLETED') {
+                    throw new Exception('PayPal payment not completed. Status: ' . ($captureResult['status'] ?? 'unknown'));
+                }
+
+                // Verify captured amount matches expected total
+                $capturedAmount = $captureResult['purchase_units'][0]['payments']['captures'][0]['amount']['value'] ?? 0;
+                if (number_format((float) $capturedAmount, 2) !== number_format((float) $total, 2)) {
+                    throw new Exception('Payment amount mismatch. Expected: ' . $total . ', Captured: ' . $capturedAmount);
+                }
+
+                $subscription->stripe_id = $captureResult['id'] ?? ('PLS-' . strtoupper(Str::random(13)));
                 $subscription->stripe_price = $product->price_id;
-                $subscription->ends_at = $plan->frequency == FrequencyEnum::LIFETIME_MONTHLY->value ? \Carbon\Carbon::now()->addMonths(1) : \Carbon\Carbon::now()->addYears(1);
+                $subscription->ends_at = $plan->frequency == FrequencyEnum::LIFETIME_MONTHLY->value ? Carbon::now()->addMonths(1) : Carbon::now()->addYears(1);
                 $subscription->auto_renewal = 1;
                 $subscription->stripe_status = 'paypal_approved';
                 $subscription->trial_ends_at = null;
             } else {
+                // Verify PayPal subscription exists and is active
+                $subscriptionDetails = $provider->showSubscriptionDetails($paypalSubscriptionID);
+
+                if (! isset($subscriptionDetails['status'])) {
+                    throw new Exception('Failed to verify PayPal subscription');
+                }
+
+                if ($subscriptionDetails['status'] !== 'ACTIVE' && $subscriptionDetails['status'] !== 'APPROVED') {
+                    throw new Exception('PayPal subscription is not active. Status: ' . $subscriptionDetails['status']);
+                }
+
+                // Verify subscription plan matches
+                if ($subscriptionDetails['plan_id'] !== $billingPlanId) {
+                    throw new Exception('Subscription plan mismatch');
+                }
+
                 $subscription->stripe_id = $paypalSubscriptionID;
                 $subscription->stripe_price = $billingPlanId;
                 $subscription->stripe_status = 'active';
@@ -427,6 +461,20 @@ class PayPalService
             }
             $total += $taxValue;
 
+            // Capture PayPal order and verify payment before processing
+            $captureResult = $provider->capturePaymentOrder($orderID);
+
+            // Verify order status is COMPLETED
+            if (! isset($captureResult['status']) || $captureResult['status'] !== 'COMPLETED') {
+                throw new Exception('PayPal payment not completed. Status: ' . ($captureResult['status'] ?? 'unknown'));
+            }
+
+            // Verify captured amount matches expected total
+            $capturedAmount = $captureResult['purchase_units'][0]['payments']['captures'][0]['amount']['value'] ?? 0;
+            if (number_format((float) $capturedAmount, 2) !== number_format((float) $total, 2)) {
+                throw new Exception('Payment amount mismatch. Expected: ' . $total . ', Captured: ' . $capturedAmount);
+            }
+
             // new order
             $payment = new UserOrder;
             $payment->order_id = $orderID;
@@ -475,17 +523,17 @@ class PayPalService
                 self::creditDecreaseCancelPlan($user, $plan);
 
                 return true;
-            } else {
-                $response = $provider->cancelSubscription($subscription->stripe_id, 'Plan deleted by admin.');
-                if ($response == '') {
-                    $subscription->stripe_status = 'cancelled';
-                    $subscription->ends_at = \Carbon\Carbon::now();
-                    $subscription->save();
+            }
 
-                    self::creditDecreaseCancelPlan($user, $plan);
+            $response = $provider->cancelSubscription($subscription->stripe_id, 'Plan deleted by admin.');
+            if ($response == '') {
+                $subscription->stripe_status = 'cancelled';
+                $subscription->ends_at = \Carbon\Carbon::now();
+                $subscription->save();
 
-                    return true;
-                }
+                self::creditDecreaseCancelPlan($user, $plan);
+
+                return true;
             }
         }
 
@@ -500,23 +548,23 @@ class PayPalService
         if ($activeSub != null) {
             if ($activeSub->stripe_status == 'paypal_approved') {
                 return \Carbon\Carbon::createFromTimeStamp($activeSub->ends_at)->format('F jS, Y');
-            } else {
-                $subscription = $provider->showSubscriptionDetails($activeSub->stripe_id);
-                if (isset($subscription['error'])) {
-                    Log::error("PayPalService::getSubscriptionRenewDate() :\n" . json_encode($subscription));
-
-                    return back()->with(['message' => 'PayPal Gateway : ' . $subscription['error']['message'], 'type' => 'error']);
-                }
-                if ($subscription['billing_info']['next_billing_time']) {
-                    return \Carbon\Carbon::parse($subscription['billing_info']['next_billing_time'])->format('F jS, Y');
-                } else {
-                    $activeSub->stripe_status = 'cancelled';
-                    $activeSub->ends_at = \Carbon\Carbon::now();
-                    $activeSub->save();
-
-                    return \Carbon\Carbon::now()->format('F jS, Y');
-                }
             }
+
+            $subscription = $provider->showSubscriptionDetails($activeSub->stripe_id);
+            if (isset($subscription['error'])) {
+                Log::error("PayPalService::getSubscriptionRenewDate() :\n" . json_encode($subscription));
+
+                return back()->with(['message' => 'PayPal Gateway : ' . $subscription['error']['message'], 'type' => 'error']);
+            }
+            if ($subscription['billing_info']['next_billing_time']) {
+                return \Carbon\Carbon::parse($subscription['billing_info']['next_billing_time'])->format('F jS, Y');
+            }
+
+            $activeSub->stripe_status = 'cancelled';
+            $activeSub->ends_at = \Carbon\Carbon::now();
+            $activeSub->save();
+
+            return \Carbon\Carbon::now()->format('F jS, Y');
         }
 
         return null;
@@ -530,17 +578,17 @@ class PayPalService
         if ($activeSub != null) {
             if ($activeSub->stripe_status == 'paypal_approved') {
                 return false;
-            } else {
-                $subscription = $provider->showSubscriptionDetails($activeSub->stripe_id);
-                if (isset($subscription['error'])) {
-                    Log::error("PayPalService::getSubscriptionStatus() :\n" . json_encode($subscription));
+            }
 
-                    return back()->with(['message' => 'PayPal Gateway : ' . $subscription['error']['message'], 'type' => 'error']);
-                }
-                if (isset($subscription['billing_info']['cycle_executions'][0]['tenure_type'])) {
-                    if ($subscription['billing_info']['cycle_executions'][0]['tenure_type'] == 'TRIAL') {
-                        return true;
-                    }
+            $subscription = $provider->showSubscriptionDetails($activeSub->stripe_id);
+            if (isset($subscription['error'])) {
+                Log::error("PayPalService::getSubscriptionStatus() :\n" . json_encode($subscription));
+
+                return back()->with(['message' => 'PayPal Gateway : ' . $subscription['error']['message'], 'type' => 'error']);
+            }
+            if (isset($subscription['billing_info']['cycle_executions'][0]['tenure_type'])) {
+                if ($subscription['billing_info']['cycle_executions'][0]['tenure_type'] == 'TRIAL') {
+                    return true;
                 }
             }
         }
@@ -567,25 +615,25 @@ class PayPalService
                 CreateActivity::for($user, __('Cancelled'), 'Subscription plan');
 
                 return back()->with(['message' => __('Your subscription is cancelled succesfully.'), 'type' => 'success']);
-            } else {
-                $response = $provider->cancelSubscription($activeSub->stripe_id, 'Not satisfied with the service');
-                if ($response == '') {
-                    $activeSub->stripe_status = 'cancelled';
-                    $activeSub->ends_at = \Carbon\Carbon::now();
-                    $activeSub->save();
-
-                    self::creditDecreaseCancelPlan($user, $plan);
-
-                    CreateActivity::for($user, __('Cancelled'), 'Subscription plan');
-                    if ($internalUser != null) {
-                        return back()->with(['message' => __('User subscription is cancelled succesfully.'), 'type' => 'success']);
-                    }
-
-                    return back()->with(['message' => __('Your subscription is cancelled succesfully.'), 'type' => 'success']);
-                } else {
-                    return back()->with(['message' => __('Your subscription could not cancelled.'), 'type' => 'error']);
-                }
             }
+
+            $response = $provider->cancelSubscription($activeSub->stripe_id, 'Not satisfied with the service');
+            if ($response == '') {
+                $activeSub->stripe_status = 'cancelled';
+                $activeSub->ends_at = \Carbon\Carbon::now();
+                $activeSub->save();
+
+                self::creditDecreaseCancelPlan($user, $plan);
+
+                CreateActivity::for($user, __('Cancelled'), 'Subscription plan');
+                if ($internalUser != null) {
+                    return back()->with(['message' => __('User subscription is cancelled succesfully.'), 'type' => 'success']);
+                }
+
+                return back()->with(['message' => __('Your subscription is cancelled succesfully.'), 'type' => 'success']);
+            }
+
+            return back()->with(['message' => __('Your subscription could not cancelled.'), 'type' => 'error']);
         }
 
         return back()->with(['message' => __('Could not find active subscription. Nothing changed!'), 'type' => 'error']);
@@ -600,28 +648,28 @@ class PayPalService
         if ($activeSub != null) {
             if ($activeSub->stripe_status == 'paypal_approved') {
                 return Carbon::now()->diffInDays(Carbon::parse($activeSub->ends_at));
-            } else {
-                $subscription = $provider->showSubscriptionDetails($activeSub->stripe_id);
-                if (! isset($subscription['error'])) {
-                    // if user is in trial
-                    if (isset($subscription['billing_info']['cycle_executions'][0]['tenure_type'])) {
-                        if ($subscription['billing_info']['cycle_executions'][0]['tenure_type'] == 'TRIAL') {
-                            return $subscription['billing_info']['cycle_executions'][0]['cycles_remaining'];
-                        } else {
-                            if (isset($subscription['billing_info']['next_billing_time'])) {
-                                return \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($subscription['billing_info']['next_billing_time']));
-                            } else {
-                                $activeSub->stripe_status = 'cancelled';
-                                $activeSub->ends_at = \Carbon\Carbon::now();
-                                $activeSub->save();
+            }
 
-                                return \Carbon\Carbon::now()->format('F jS, Y');
-                            }
-                        }
+            $subscription = $provider->showSubscriptionDetails($activeSub->stripe_id);
+            if (! isset($subscription['error'])) {
+                // if user is in trial
+                if (isset($subscription['billing_info']['cycle_executions'][0]['tenure_type'])) {
+                    if ($subscription['billing_info']['cycle_executions'][0]['tenure_type'] == 'TRIAL') {
+                        return $subscription['billing_info']['cycle_executions'][0]['cycles_remaining'];
                     }
-                } else {
-                    Log::error("PayPalService::getSubscriptionDaysLeft() :\n" . json_encode($subscription));
+
+                    if (isset($subscription['billing_info']['next_billing_time'])) {
+                        return \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($subscription['billing_info']['next_billing_time']));
+                    }
+
+                    $activeSub->stripe_status = 'cancelled';
+                    $activeSub->ends_at = \Carbon\Carbon::now();
+                    $activeSub->save();
+
+                    return \Carbon\Carbon::now()->format('F jS, Y');
                 }
+            } else {
+                Log::error("PayPalService::getSubscriptionDaysLeft() :\n" . json_encode($subscription));
             }
         }
 
@@ -638,23 +686,23 @@ class PayPalService
             if ($activeSub->stripe_status == 'paypal_approved') {
                 // TODO: we can renew from here or from command
                 return true;
-            } else {
-                $subscription = $provider->showSubscriptionDetails($activeSub->stripe_id);
-                if (isset($subscription['error'])) {
-                    Log::error("PayPalService::getSubscriptionStatus() :\n" . json_encode($subscription));
-
-                    return back()->with(['message' => 'PayPal Gateway : ' . $subscription['error']['message'], 'type' => 'error']);
-                }
-                if ($subscription['status'] == 'ACTIVE') {
-                    return true;
-                } else {
-                    $activeSub->stripe_status = 'cancelled';
-                    $activeSub->ends_at = \Carbon\Carbon::now();
-                    $activeSub->save();
-
-                    return false;
-                }
             }
+
+            $subscription = $provider->showSubscriptionDetails($activeSub->stripe_id);
+            if (isset($subscription['error'])) {
+                Log::error("PayPalService::getSubscriptionStatus() :\n" . json_encode($subscription));
+
+                return back()->with(['message' => 'PayPal Gateway : ' . $subscription['error']['message'], 'type' => 'error']);
+            }
+            if ($subscription['status'] == 'ACTIVE') {
+                return true;
+            }
+
+            $activeSub->stripe_status = 'cancelled';
+            $activeSub->ends_at = \Carbon\Carbon::now();
+            $activeSub->save();
+
+            return false;
         }
 
         return null;
@@ -881,10 +929,10 @@ class PayPalService
             event(new PayPalWebhookEvent($payload));
 
             return response()->json(['success' => true]);
-        } else {
-            // Incoming json is NOT verified
-            abort(404);
         }
+
+        // Incoming json is NOT verified
+        abort(404);
     }
 
     public static function simulateWebhookEvent()
@@ -954,9 +1002,9 @@ class PayPalService
             $product = GatewayProducts::where(['plan_id' => $plan->id, 'gateway_code' => self::$GATEWAY_CODE])->first();
             if ($product != null) {
                 return $product->product_id;
-            } else {
-                return null;
             }
+
+            return null;
         }
 
         return null;
@@ -968,9 +1016,9 @@ class PayPalService
             $product = GatewayProducts::where(['plan_id' => $plan->id, 'gateway_code' => self::$GATEWAY_CODE])->first();
             if ($product != null) {
                 return $product->price_id;
-            } else {
-                return null;
             }
+
+            return null;
         }
 
         return null;

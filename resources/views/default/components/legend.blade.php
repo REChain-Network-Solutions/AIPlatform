@@ -6,7 +6,6 @@
     $variations = [
         'size' => [
             'sm' => 'lqd-legend-sm size-2',
-            'sm' => 'lqd-legend-sm size-2',
             'md' => 'lqd-legend-md size-2.5',
         ],
     ];

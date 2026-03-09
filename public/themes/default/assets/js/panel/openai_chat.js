@@ -12,6 +12,8 @@
  * @property {number} responseId - Id of the message coming from backend
  * @property {string[]} response - Array of response strings
  * @property {AbortController | null} abortController - Abort controller
+ * @property {HTMLElement[] | null} placeholderEls - Placeholder elements for images
+ * @property {Object | null} request - The request object
  * @property {number} animatingWordIndex - The index of animating word
  * @property {Set<HTMLElement>} animatedElements - Set of already animated elements
  * @property {number} lastAnimatedElOffsetTop - Offset top of the last animated element
@@ -344,6 +346,7 @@ function formatString(string, options = {}) {
 			'social-media-agent-chat-post-card-images',
 			'social-media-agent-chat-post-card-content',
 			'social-media-agent-chat-post-card-foot',
+			'lqd-chat-image-grid',
 		];
 
 		containers.forEach(container => {
@@ -373,6 +376,50 @@ function formatString(string, options = {}) {
 			renderer.use(markdownitContainer, container, options);
 		});
 	}
+
+	renderer.use(function (md) {
+		md.core.ruler.push('filter-lqd-chat-image-grid', function (state) {
+			let inGrid = false;
+			const toRemove = new Set();
+
+			for (let i = 0; i < state.tokens.length; i++) {
+				const token = state.tokens[i];
+
+				if (token.type === 'container_lqd-chat-image-grid_open') {
+					inGrid = true;
+					continue;
+				}
+
+				if (token.type === 'container_lqd-chat-image-grid_close') {
+					inGrid = false;
+					continue;
+				}
+
+				if (!inGrid) continue;
+
+				if (token.type === 'inline' && token.children) {
+					let insideLink = false;
+
+					token.children = token.children.filter(function (child) {
+						if (child.type === 'link_open') { insideLink = true; return true; }
+						if (child.type === 'link_close') { insideLink = false; return true; }
+						if (child.type === 'image') return true;
+						return insideLink;
+					});
+
+					if (token.children.length === 0) {
+						toRemove.add(i);
+						if (i > 0 && state.tokens[i - 1].type.endsWith('_open')) toRemove.add(i - 1);
+						if (i < state.tokens.length - 1 && state.tokens[i + 1].type.endsWith('_close')) toRemove.add(i + 1);
+					}
+				}
+			}
+
+			if (toRemove.size > 0) {
+				state.tokens = state.tokens.filter(function (_, idx) { return !toRemove.has(idx); });
+			}
+		});
+	});
 
 	if ('markdownItAttrs' in window) {
 		renderer.use(markdownItAttrs);
@@ -636,8 +683,10 @@ function switchGenerateButtonsStatus(generating) {
 	generateBtn.classList.toggle('hidden', generating);
 	generateBtn.classList.toggle('submitting', generating);
 
-	stopBtn.classList.toggle('active', generating);
-	stopBtn.disabled = !generating;
+	if (stopBtn) {
+		stopBtn.classList.toggle('active', generating);
+		stopBtn.disabled = !generating;
+	}
 }
 
 /**
@@ -971,17 +1020,17 @@ function sendRequest(type, images, responseObj, sharedMessageUUID = null) {
 	let receivedMessageId = false;
 
 	formData.append('template_type', type);
-	formData.append('prompt', promptInput.value);
+	formData.append('prompt', promptInput?.value);
 	formData.append('chat_id', chat_id);
-	formData.append('category_id', category.id);
+	formData.append('category_id', category?.id);
 	formData.append('images', images == undefined ? '' : images);
 	formData.append('pdfname', pdfName == undefined ? '' : pdfName);
 	formData.append('pdfpath', pdfPath == undefined ? '' : pdfPath);
 	formData.append('realtime', realtime?.checked ? 1 : 0);
 	formData.append('chat_brand_voice', chatBrandVoice?.value || '');
 	formData.append('brand_voice_prod', brandVoiceProd?.value || '');
-	formData.append('chatbot_front_model', responseObj.model.slug);
-	formData.append('assistant', assistant.value || '');
+	formData.append('chatbot_front_model', responseObj?.model.slug);
+	formData.append('assistant', assistant?.value || '');
 
 	if (document.querySelector('#chat_open_ai_agent_id')?.value) {
 		formData.append('chat_open_ai_agent_id', document.querySelector('#chat_open_ai_agent_id').value);
@@ -1066,6 +1115,10 @@ function sendRequest(type, images, responseObj, sharedMessageUUID = null) {
 
 					changeChatTitle(responseObj.responseId);
 				}
+
+				document.dispatchEvent(new CustomEvent('chat:response-complete', {
+					detail: { messageId: responseObj.responseId, bubbleEl: responseObj.bubbleEl }
+				}));
 
 				return;
 			}
@@ -1760,6 +1813,8 @@ function initChat() {
 		.forEach(aiChatBubble => {
 			const contentEl = aiChatBubble.querySelector('.chat-content');
 
+			if ( !contentEl ) return;
+
 			contentEl.classList.remove('!whitespace-pre-wrap', 'whitespace-pre-wrap');
 			contentEl.style.whiteSpace = 'normal';
 
@@ -1959,7 +2014,7 @@ function openChatAreaContainer(chat_id, website_url = null) {
 
 	let openChatAreaContainerUrl = $('#openChatAreaContainerUrl').val();
 
-	$.ajax({
+	return $.ajax({
 		type: 'post',
 		url: openChatAreaContainerUrl,
 		data: formData,
@@ -2014,8 +2069,6 @@ function openChatAreaContainer(chat_id, website_url = null) {
 			}
 		},
 	});
-
-	return false;
 }
 
 function startNewChat(category_id, local, website_url = null) {
@@ -2051,7 +2104,9 @@ function startNewChat(category_id, local, website_url = null) {
 			chatsWrapper.classList.add('conversation-not-started');
 
 			$('#load_chat_area_container > .lqd-card-body').html(data.html);
-			$('#chat_sidebar_container').html(data.html2);
+
+			document.dispatchEvent(new CustomEvent('chat-sidebar:refresh'));
+			document.dispatchEvent(new CustomEvent('chat-sidebar:set-active', { detail: { chatId: data.chat.id } }));
 
 			initChat();
 
@@ -2067,6 +2122,14 @@ function startNewChat(category_id, local, website_url = null) {
 			setTimeout(function () {
 				scrollConversationArea();
 			}, 750);
+
+			setTimeout(() => {
+				const promptEl = document.querySelector('#prompt');
+
+				if ( promptEl ) {
+					promptEl.value = '';
+				}
+			}, 0);
 		},
 		error: function (data) {
 			var err = data.responseJSON.errors;
@@ -2089,7 +2152,12 @@ function deleteAllConv(category_id) {
 		}
 
 		var formData = new FormData();
+		const searchInput = document.querySelector('#chat_search_word');
+		const website_url = searchInput ? searchInput.getAttribute('data-website-url') : null;
 		formData.append('category_id', category_id);
+		if (website_url != null && website_url != '') {
+			formData.append('website_url', website_url);
+		}
 		let link = '/dashboard/user/openai/chat/clear-chats';
 		$.ajax({
 			type: 'post',
@@ -2098,8 +2166,8 @@ function deleteAllConv(category_id) {
 			contentType: false,
 			processData: false,
 			success: function (data) {
-				// refresh page
-				location.reload();
+				document.dispatchEvent(new CustomEvent('chat-sidebar:refresh'));
+				toastr.success(data.message || 'All chats cleared successfully.');
 			},
 			error: function (data) {
 				var err = data.responseJSON.errors;
@@ -2142,7 +2210,9 @@ function startNewDocChat(file, type) {
 			$('#selectDocInput').val('');
 			chatid = data.chat.id;
 			$('#load_chat_area_container > .lqd-card-body').html(data.html);
-			$('#chat_sidebar_container').html(data.html2);
+
+			document.dispatchEvent(new CustomEvent('chat-sidebar:refresh'));
+			document.dispatchEvent(new CustomEvent('chat-sidebar:set-active', { detail: { chatId: data.chat.id } }));
 
 			initChat();
 			messages = [
@@ -2183,17 +2253,19 @@ function startNewDocChat(file, type) {
 function searchChatFunction() {
 	'use strict';
 
-	const categoryId = $('#chat_search_word').data('category-id');
+	const input = document.querySelector('#chat_search_word');
+	const categoryId = input.getAttribute('data-category-id');
+	const website_url = input.getAttribute('data-website-url');
+
 	const formData = new FormData();
-	formData.append(
-		'_token',
-		document.querySelector('input[name=_token]')?.value,
-	);
-	formData.append(
-		'search_word',
-		document.getElementById('chat_search_word').value,
-	);
+
+	formData.append('_token', document.querySelector('input[name=_token]')?.value);
+	formData.append('search_word', input.value);
 	formData.append('category_id', categoryId);
+
+	if ( website_url && website_url != null ) {
+		formData.append('website_url', website_url);
+	}
 
 	$.ajax({
 		type: 'POST',
@@ -2512,8 +2584,12 @@ $(document).ready(function () {
 
 	$('body').on('input', '#prompt', ev => {
 		const el = ev.target;
+		if (!el.dataset.initialHeight) {
+			el.dataset.initialHeight = el.offsetHeight;
+		}
+		const minHeight = parseInt(el.dataset.initialHeight, 10);
 		el.style.height = '5px';
-		el.style.height = el.scrollHeight + 'px';
+		el.style.height = Math.max(el.scrollHeight, minHeight) + 'px';
 		const recordTrigger = $('.lqd-chat-record-trigger');
 		const chatsWrapper = $('.chats-wrap');
 
@@ -2670,4 +2746,3 @@ function setChatsCssVars() {
 
 	window.addEventListener('resize', _.debounce(setChatsCssVars, 150));
 })();
-

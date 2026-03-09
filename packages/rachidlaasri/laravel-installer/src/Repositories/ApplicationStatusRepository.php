@@ -58,7 +58,7 @@ class ApplicationStatusRepository implements ApplicationStatusRepositoryInterfac
         $data = Storage::disk('local')->get('portal');
 
         if ($data) {
-            return unserialize(trim($data));
+            return unserialize(trim($data), ['allowed_classes' => false]);
         }
 
         return null;
@@ -149,7 +149,9 @@ class ApplicationStatusRepository implements ApplicationStatusRepositoryInterfac
                 $this->save($portal);
 
                 return response()->noContent();
-            } elseif ($liquid_license_domain_key == $request_liquid_license_domain_key) {
+            }
+
+            if ($liquid_license_domain_key == $request_liquid_license_domain_key) {
                 $portal['blocked'] = false;
 
                 $this->save($portal);

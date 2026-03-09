@@ -1,5 +1,5 @@
 @php
-    $generatedContent = cache('generated_content');
+    $generatedContent = cache()->get('generated_content');
     $all = $generatedContent->count();
     $all = $all == 0 ? 1 : $all;
 

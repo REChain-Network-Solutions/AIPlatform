@@ -17,7 +17,7 @@ trait HasCache
      */
     public function cache(string $key, $value): mixed
     {
-        return cache()->remember($key, $this->cacheTtl, $value);
+        return Cache::remember($key, $this->cacheTtl, $value);
     }
 
     /**
@@ -27,7 +27,6 @@ trait HasCache
     {
         $userId = Auth::id();
 
-        // if not logged in, just bypass user scoping
         if (! $userId) {
             return $callback();
         }

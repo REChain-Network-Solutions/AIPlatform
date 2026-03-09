@@ -125,16 +125,16 @@ class AIArticleWizardController extends Controller
         $wizard = ArticleWizard::find($wizard->id);
         $apiUrl = base64_encode('https://api.openai.com/v1/chat/completions');
         if ($this->settings_two->openai_default_stream_server == 'backend') {
-            $apikeyPart1 = base64_encode(rand(1, 100));
-            $apikeyPart2 = base64_encode(rand(1, 100));
-            $apikeyPart3 = base64_encode(rand(1, 100));
+            $apikeyPart1 = base64_encode(random_int(1, 100));
+            $apikeyPart2 = base64_encode(random_int(1, 100));
+            $apikeyPart3 = base64_encode(random_int(1, 100));
         } else {
             $apiKey = ApiHelper::setOpenAiKey();
 
             $len = strlen($apiKey);
             $len = max($len, 6);
-            $parts[] = substr($apiKey, 0, $l[] = rand(1, $len - 5));
-            $parts[] = substr($apiKey, $l[0], $l[] = rand(1, $len - $l[0] - 3));
+            $parts[] = substr($apiKey, 0, $l[] = random_int(1, $len - 5));
+            $parts[] = substr($apiKey, $l[0], $l[] = random_int(1, $len - $l[0] - 3));
             $parts[] = substr($apiKey, array_sum($l));
             $apikeyPart1 = base64_encode($parts[0]);
             $apikeyPart2 = base64_encode($parts[1]);
@@ -989,7 +989,7 @@ class AIArticleWizardController extends Controller
     public function startover()
     {
         $user = Auth::user();
-        ArticleWizard::where('user_id', $user->id)->delete();
+        ArticleWizard::where('user_id', $user?->id)->delete();
 
         return response()->json(['result' => 'success']);
     }

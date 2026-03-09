@@ -43,7 +43,6 @@ class ViewServiceProvider extends ServiceProvider
         }
 
         $this->shareSetting();
-        $this->shareAiGenerator();
         $this->shareGoodForNow();
 
         View::composer(
@@ -64,16 +63,6 @@ class ViewServiceProvider extends ServiceProvider
             && Helper::settingTwo('liquid_license_type');
 
         View::share('good_for_now', $goodForNow);
-    }
-
-    protected function shareAiGenerator(): void
-    {
-        if (! TableSchema::hasTable('openai', $this->tables)) {
-            return;
-        }
-
-        $generators = OpenAIGenerator::where('active', 1)->orderBy('title')->get();
-        View::share('aiWriters', $generators);
     }
 
     protected function shareSetting(): void
@@ -106,17 +95,17 @@ class ViewServiceProvider extends ServiceProvider
     protected function shareOpenAiList(): void
     {
         if (TableSchema::hasTable('openai', $this->tables)) {
-            View::share('openAiList', OpenAIGenerator::all());
+            View::share('openAiList', OpenAIGenerator::where('active', 1)->orderBy('title')->get());
         }
     }
 
     protected function shareSections(): void
     {
         $sectionTables = [
-            'advanced_features_section' => fn () => View::share('advanced_features_section', AdvancedFeaturesSection::all()),
-            'comparison_section_items'  => fn () => View::share('comparison_section_items', ComparisonSectionItems::all()),
+            'advanced_features_section' => fn () => $this->shareAdvancedFeaturesSection(),
+            'comparison_section_items'  => fn () => $this->shareComparisonSectionItems(),
             'features_marquees'         => fn () => $this->shareMarqueeItems(),
-            'footer_items'              => fn () => View::share('footer_items', FooterItem::pluck('item')->toArray()),
+            'footer_items'              => fn () => $this->shareFooterItem(),
             'banner_bottom_texts'       => fn () => $this->shareBannerBottomTexts(),
         ];
 
@@ -125,16 +114,46 @@ class ViewServiceProvider extends ServiceProvider
         }
     }
 
+    protected function shareAdvancedFeaturesSection(): void
+    {
+        $advancedFeatures = AdvancedFeaturesSection::getCache(
+            static fn () => AdvancedFeaturesSection::all(),
+            'all'
+        );
+
+        View::share('advanced_features_section', $advancedFeatures);
+    }
+
+    protected function shareComparisonSectionItems(): void
+    {
+        $advancedFeatures = ComparisonSectionItems::getCache(
+            static fn () => ComparisonSectionItems::all(),
+            'all'
+        );
+
+        View::share('advanced_features_section', $advancedFeatures);
+    }
+
+    protected function shareFooterItem(): void
+    {
+        $advancedFeatures = FooterItem::getCache(
+            static fn () => FooterItem::all(),
+            'all'
+        );
+
+        View::share('advanced_features_section', $advancedFeatures);
+    }
+
     protected function shareMarqueeItems(): void
     {
-        $marquees = FeaturesMarquee::getCache(fn () => FeaturesMarquee::select('title', 'position')->get());
+        $marquees = FeaturesMarquee::getCache(static fn () => FeaturesMarquee::select('title', 'position')->get());
         View::share('top_marquee_items', $marquees->where('position', 'top')->pluck('title')->toArray());
         View::share('bottom_marquee_items', $marquees->where('position', 'bottom')->pluck('title')->toArray());
     }
 
     protected function shareBannerBottomTexts(): void
     {
-        $texts = BannerBottomText::getCache(fn () => BannerBottomText::pluck('text')->toArray());
+        $texts = BannerBottomText::getCache(static fn () => BannerBottomText::pluck('text')->toArray());
         View::share('banner_bottom_texts', $texts);
     }
 

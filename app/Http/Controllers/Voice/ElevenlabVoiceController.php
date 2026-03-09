@@ -46,7 +46,7 @@ class ElevenlabVoiceController extends Controller
         ]);
 
         if ($request->hasFile('file')) {
-            $data['path'] = $request->file('file')->store('voices', ['disk' => 'local']);
+            $data['path'] = $request->file('file')?->store('voices', ['disk' => 'local']);
         }
 
         $data['user_id'] = Auth::id();

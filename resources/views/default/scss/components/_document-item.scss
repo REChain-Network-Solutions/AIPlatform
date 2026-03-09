@@ -71,8 +71,8 @@
 }
 
 .lqd-social-media-post-item {
-	grid-template-areas: 'content type date likes cost actions';
-	grid-template-columns: 3fr repeat(3, minmax(0, 1fr)) 100px 1fr;
+	grid-template-areas: 'content type date publish_type likes cost actions';
+	grid-template-columns: 3fr repeat(4, minmax(0, 1fr)) 100px 1fr;
 }
 
 .theme-dark {
@@ -96,7 +96,7 @@
 	}
 
 	.lqd-social-media-post-item {
-		grid-template-columns: 3fr repeat(3, minmax(0, 1fr)) 100px 1fr !important;
+		grid-template-columns: 3fr repeat(4, minmax(0, 1fr)) 100px 1fr !important;
 	}
 }
 

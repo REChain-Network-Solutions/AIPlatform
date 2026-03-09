@@ -155,7 +155,7 @@
 
 		--navbar-fs: theme('fontSize.xs');
 		--navbar-pt: 0px;
-		--navbar-pe: theme('spacing.14');
+		--navbar-pe: theme('spacing.2');
 		--navbar-pb: 0px;
 		--navbar-ps: theme('spacing.2');
 		--navbar-mt: 0px;
@@ -190,6 +190,8 @@
 		--switcher-ball: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23e6e7e9'/%3e%3c/svg%3e");
 		--switcher-ball-active: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23ffffff'/%3e%3c/svg%3e");
 
+		--body-padding: 0px;
+
 		--top-notice-bar-height: 2.25rem;
 
 		--button-border: var(--border);
@@ -198,6 +200,10 @@
 		--card-rounded: theme('borderRadius.xl');
 
 		--input-rounded: calc(theme('borderRadius.xl') * var(--input-rounded-multiplier, 1));
+
+		--bottom-menu-height: 4rem;
+
+		@apply max-lg:[--header-height:65px];
 
 		font-size: 16px;
 	}

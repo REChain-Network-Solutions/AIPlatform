@@ -13,8 +13,7 @@ class UserDocsFavorite extends Model
     public static function getFavoriteDocs($user_id)
     {
         $favorite_docs_ids = UserDocsFavorite::where('user_id', $user_id)->pluck('user_openai_id');
-        $favorite_docs = UserOpenai::whereIn('id', $favorite_docs_ids)->get()->take(5);
 
-        return $favorite_docs;
+        return UserOpenai::whereIn('id', $favorite_docs_ids)->get()->take(5);
     }
 }

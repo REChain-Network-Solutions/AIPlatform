@@ -27,9 +27,9 @@ class UserDashboardService
     public function setUserDocs(): static
     {
         $this->userCache('user_docs', function () {
-            $team = request()->user()->getAttribute('team');
+            $team = request()?->user()?->getAttribute('team');
 
-            $myCreatedTeam = request()->user()->getAttribute('myCreatedTeam');
+            $myCreatedTeam = request()?->user()?->getAttribute('myCreatedTeam');
 
             return UserOpenai::query()
                 ->with('generator', 'isFavoriteDocRelation')

@@ -1,5 +1,5 @@
 <div
-	class="mb-3"
+	class="mb-3 p-0"
 	x-data='{
 		initialModel: @json($currentModel) || "",
 		selectedModel: @json($currentModel) || ""

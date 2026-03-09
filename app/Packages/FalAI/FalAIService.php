@@ -6,9 +6,11 @@ use App\Domains\Entity\Enums\EntityEnum;
 use App\Packages\FalAI\API\BaseApiClient;
 use App\Packages\FalAI\Contracts\TextToVideoModelInterface;
 use App\Packages\FalAI\Models\FastVeo3;
+use App\Packages\FalAI\Models\GrokImagineVideo;
 use App\Packages\FalAI\Models\Kling;
 use App\Packages\FalAI\Models\Kling25Turbo;
 use App\Packages\FalAI\Models\Kling26Pro;
+use App\Packages\FalAI\Models\KlingV3;
 use App\Packages\FalAI\Models\Veed;
 use App\Packages\FalAI\Models\Veo3;
 use App\Packages\FalAI\Models\Veo31;
@@ -48,7 +50,15 @@ class FalAIService
             EntityEnum::KLING_2_5_TURBO_STANDARD_ITV,
             EntityEnum::KLING_2_5_TURBO_PRO_ITV    => new Kling25Turbo($this->client, $model),
             EntityEnum::KLING_2_6_PRO_TTV,
-            EntityEnum::KLING_2_6_PRO_ITV          => new Kling26Pro($this->client, $model),
+            EntityEnum::KLING_2_6_PRO_ITV,
+            EntityEnum::KLING_2_6_PRO_MOTION_CONTROL,
+            EntityEnum::KLING_2_6_STANDARD_MOTION_CONTROL => new Kling26Pro($this->client, $model),
+            EntityEnum::KLING_3_PRO_TTV,
+            EntityEnum::KLING_3_PRO_ITV,
+            EntityEnum::KLING_3_STANDARD_TTV,
+            EntityEnum::KLING_3_STANDARD_ITV       => new KlingV3($this->client, $model),
+            EntityEnum::GROK_IMAGINE_VIDEO_TTV,
+            EntityEnum::GROK_IMAGINE_VIDEO_ITV     => new GrokImagineVideo($this->client, $model),
             default                                => throw new InvalidArgumentException("Model {$model->value} is not supported."),
 
         };

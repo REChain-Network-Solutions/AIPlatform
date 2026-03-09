@@ -28,6 +28,12 @@ export default ({ assetsUrl = '' }) => {
 		aiTasksQueue: [],
 		activeTool: null,
 		activeFillTab: 'color',
+		gradientType: 'linear-gradient',
+		gradientAngle: 0,
+		gradientStops: [
+			{ color: '#000000', position: 0 },
+			{ color: '#ffffff', position: 100 },
+		],
 		editingTextNode: null,
 		editingTextarea: null,
 		container: null,
@@ -525,6 +531,65 @@ export default ({ assetsUrl = '' }) => {
 				document.body.classList.toggle('overflow-hidden', [ 'editor', 'gallery' ].includes(view));
 			});
 
+			this._fillTabFromSelection = false;
+
+			this.$watch('activeFillTab', (tab, prevTab) => {
+				if (!this.selectedNodes.length) return;
+
+				// Skip cleanup when tab change is driven by node selection
+				if (this._fillTabFromSelection) {
+					this._fillTabFromSelection = false;
+					return;
+				}
+
+				// Clean up previous fill type when leaving
+				if (prevTab === 'gradient' && tab !== 'gradient') {
+					this.removeGradient();
+				}
+
+				// Apply new fill type when entering
+				if (tab === 'gradient') {
+					this.loadGradientFromNode();
+					const node = this.selectedNodes[0];
+					if (node && ![ 'linear-gradient', 'radial-gradient' ].includes(node.fillPriority())) {
+						this.applyGradient();
+					}
+				}
+			});
+
+			this.$el.addEventListener('nodes-selected', () => {
+				if (this.selectedNodes.length >= 1) {
+					const node = this.selectedNodes[0];
+					const fillPriority = node.fillPriority();
+					const nodeType = node.getClassName();
+
+					this._fillTabFromSelection = true;
+
+					if (nodeType === 'Image') {
+						this.activeFillTab = 'image';
+					} else if (nodeType !== 'Path' && [ 'linear-gradient', 'radial-gradient' ].includes(fillPriority)) {
+						this.activeFillTab = 'gradient';
+						this.loadGradientFromNode();
+					} else if (fillPriority === 'pattern') {
+						this.activeFillTab = 'image';
+					} else {
+						this.activeFillTab = 'color';
+					}
+				}
+			});
+
+			this.$watch('gradientType', () => {
+				if (this.activeFillTab === 'gradient' && this.selectedNodes.length) {
+					this.applyGradient();
+				}
+			});
+
+			this.$watch('gradientAngle', () => {
+				if (this.activeFillTab === 'gradient' && this.selectedNodes.length) {
+					this.applyGradient();
+				}
+			});
+
 			this.initiateStage();
 		},
 
@@ -1008,20 +1073,30 @@ export default ({ assetsUrl = '' }) => {
 				this.handleTextEdit(node);
 			}
 
-			if ( options.type === 'Image' ) {
-				if ( attrs.fillSource ) {
+			if ( ![ 'linear-gradient', 'radial-gradient' ].includes(attrs.fillPriority) ) {
+				if ( options.type === 'Image' ) {
+					if ( attrs.fillSource ) {
+						if ( this.fetchedAssets.includes(attrs.fillSource) || attrs.fillSource === this.placeholderImage ) {
+							this.setNodeFillPattern({ node, url: attrs.fillSource });
+						} else {
+							this.handleUploadImage(node, attrs.fillSource);
+						}
+					} else {
+						this.setNodeFillPattern({ node, url: this.placeholderImage });
+					}
+				} else if ( attrs.fillSource ) {
+					// Non-Image shapes with a fill pattern (e.g. Rect with image fill)
 					if ( this.fetchedAssets.includes(attrs.fillSource) || attrs.fillSource === this.placeholderImage ) {
 						this.setNodeFillPattern({ node, url: attrs.fillSource });
 					} else {
 						this.handleUploadImage(node, attrs.fillSource);
 					}
-				} else {
-					this.setNodeFillPattern({ node, url: this.placeholderImage });
 				}
 			}
 
 			node.on('heightChange widthChange innerRadiusChange outerRadiusChange radiusChange radiusXChange radiusYChange', () => {
 				this.handleFillCover(node);
+				this.handleGradientResize(node);
 			});
 
 			node.on(this.historyListeners.map(l => l += 'Change').join(' '), this.addToHistory);
@@ -1696,6 +1771,39 @@ export default ({ assetsUrl = '' }) => {
 			this.applyFillCover(node);
 		},
 
+		handleGradientResize(node) {
+			const fillPriority = node.fillPriority();
+			if (![ 'linear-gradient', 'radial-gradient' ].includes(fillPriority)) return;
+
+			const bounds = this.getNodeGradientBounds(node);
+
+			if (fillPriority === 'linear-gradient') {
+				// Recover angle from existing points
+				const start = node.fillLinearGradientStartPoint();
+				const end = node.fillLinearGradientEndPoint();
+				let angleRad = 0;
+				if (start && end) {
+					angleRad = Math.atan2(end.y - start.y, end.x - start.x);
+				}
+				const diagonal = Math.sqrt(bounds.width * bounds.width + bounds.height * bounds.height) / 2;
+
+				node.fillLinearGradientStartPoint({
+					x: bounds.cx - Math.cos(angleRad) * diagonal,
+					y: bounds.cy - Math.sin(angleRad) * diagonal
+				});
+				node.fillLinearGradientEndPoint({
+					x: bounds.cx + Math.cos(angleRad) * diagonal,
+					y: bounds.cy + Math.sin(angleRad) * diagonal
+				});
+			} else {
+				const radius = Math.max(bounds.width, bounds.height) / 2;
+
+				node.fillRadialGradientStartPoint({ x: bounds.cx, y: bounds.cy });
+				node.fillRadialGradientEndPoint({ x: bounds.cx, y: bounds.cy });
+				node.fillRadialGradientEndRadius(radius);
+			}
+		},
+
 		async handleUploadImage(node, imageSource) {
 			if ( imageSource ) {
 				return fetch(imageSource)
@@ -1838,6 +1946,137 @@ export default ({ assetsUrl = '' }) => {
 			selectedNode.setAttr('fillSource', null);
 			selectedNode.setAttr('fillCover', null);
 			selectedNode.setAttr('fillAlign', null);
+		},
+
+		applyGradient() {
+			if (this.gradientStops.length < 2) return;
+
+			const stops = [ ...this.gradientStops ].sort((a, b) => a.position - b.position);
+
+			const colorStops = [];
+			stops.forEach(stop => {
+				colorStops.push(stop.position / 100);
+				colorStops.push(stop.color);
+			});
+
+			this.selectedNodes.forEach(node => {
+				// Clear pattern fill if present
+				if (node.fillPatternImage()) {
+					node.fillPatternImage(null);
+					node.setAttr('fillSource', null);
+					node.setAttr('fillImageWidth', null);
+					node.setAttr('fillImageHeight', null);
+					node.setAttr('fillCover', null);
+					node.setAttr('fillAlign', null);
+				}
+
+				const bounds = this.getNodeGradientBounds(node);
+
+				if (this.gradientType === 'linear-gradient') {
+					const angleRad = (this.gradientAngle - 90) * Math.PI / 180;
+					const diagonal = Math.sqrt(bounds.width * bounds.width + bounds.height * bounds.height) / 2;
+
+					node.fillLinearGradientStartPoint({
+						x: bounds.cx - Math.cos(angleRad) * diagonal,
+						y: bounds.cy - Math.sin(angleRad) * diagonal
+					});
+					node.fillLinearGradientEndPoint({
+						x: bounds.cx + Math.cos(angleRad) * diagonal,
+						y: bounds.cy + Math.sin(angleRad) * diagonal
+					});
+					node.fillLinearGradientColorStops(colorStops);
+					node.fillPriority('linear-gradient');
+				} else {
+					const radius = Math.max(bounds.width, bounds.height) / 2;
+
+					node.fillRadialGradientStartPoint({ x: bounds.cx, y: bounds.cy });
+					node.fillRadialGradientEndPoint({ x: bounds.cx, y: bounds.cy });
+					node.fillRadialGradientStartRadius(0);
+					node.fillRadialGradientEndRadius(radius);
+					node.fillRadialGradientColorStops(colorStops);
+					node.fillPriority('radial-gradient');
+				}
+			});
+
+			this.addToHistory();
+		},
+
+		getNodeGradientBounds(node) {
+			const nodeType = node.getClassName();
+
+			if (nodeType === 'Circle') {
+				const r = node.radius();
+				return { cx: 0, cy: 0, width: r * 2, height: r * 2 };
+			} else if (nodeType === 'Ellipse') {
+				return { cx: 0, cy: 0, width: node.radiusX() * 2, height: node.radiusY() * 2 };
+			} else if (nodeType === 'RegularPolygon' || nodeType === 'Star') {
+				const r = node.getAttr('radius') || node.getAttr('outerRadius') || 50;
+				return { cx: 0, cy: 0, width: r * 2, height: r * 2 };
+			} else if (nodeType === 'Wedge') {
+				const r = node.radius();
+				return { cx: 0, cy: 0, width: r * 2, height: r * 2 };
+			} else if ([ 'Rect', 'Image', 'Text' ].includes(nodeType)) {
+				return { cx: node.width() / 2, cy: node.height() / 2, width: node.width(), height: node.height() };
+			} else {
+				// Path and other shapes: use self rect (local coords without transforms)
+				const selfRect = node.getSelfRect();
+				return {
+					cx: selfRect.x + selfRect.width / 2,
+					cy: selfRect.y + selfRect.height / 2,
+					width: selfRect.width,
+					height: selfRect.height,
+				};
+			}
+		},
+
+		removeGradient() {
+			this.selectedNodes.forEach(node => {
+				node.fillLinearGradientColorStops([]);
+				node.fillRadialGradientColorStops([]);
+				node.fillPriority('color');
+			});
+
+			this.addToHistory();
+		},
+
+		loadGradientFromNode() {
+			const node = this.selectedNodes[0];
+			if (!node) return;
+
+			const fillPriority = node.fillPriority();
+
+			if (fillPriority === 'linear-gradient') {
+				this.gradientType = 'linear-gradient';
+				const colorStops = node.fillLinearGradientColorStops();
+				if (colorStops && colorStops.length >= 4) {
+					this.gradientStops = this.parseKonvaColorStops(colorStops);
+				}
+				const start = node.fillLinearGradientStartPoint();
+				const end = node.fillLinearGradientEndPoint();
+				if (start && end) {
+					const dx = end.x - start.x;
+					const dy = end.y - start.y;
+					const angleRad = Math.atan2(dy, dx);
+					this.gradientAngle = Math.round(((angleRad * 180 / Math.PI) + 90 + 360) % 360);
+				}
+			} else if (fillPriority === 'radial-gradient') {
+				this.gradientType = 'radial-gradient';
+				const colorStops = node.fillRadialGradientColorStops();
+				if (colorStops && colorStops.length >= 4) {
+					this.gradientStops = this.parseKonvaColorStops(colorStops);
+				}
+			}
+		},
+
+		parseKonvaColorStops(konvaStops) {
+			const stops = [];
+			for (let i = 0; i < konvaStops.length; i += 2) {
+				stops.push({
+					color: konvaStops[i + 1],
+					position: Math.round(konvaStops[i] * 100),
+				});
+			}
+			return stops;
 		},
 
 		getFillCoverProps(node) {
@@ -2136,8 +2375,10 @@ export default ({ assetsUrl = '' }) => {
 		},
 		getFitToScreenZoom() {
 			const zoomPadding = this.getZoomPadding();
-			const w = (this.container.clientWidth - zoomPadding.x) / (this.konvajsContent.clientWidth * (this.zoomLevel / 100));
-			const h = (this.container.clientHeight - zoomPadding.y) / (this.konvajsContent.clientHeight * (this.zoomLevel / 100));
+			const canvasWidth = this.stage.width();
+			const canvasHeight = this.stage.height();
+			const w = (this.container.clientWidth - zoomPadding.x) / canvasWidth;
+			const h = (this.container.clientHeight - zoomPadding.y) / canvasHeight;
 			const zoom = Math.min(w, h) * 100;
 			const fitZoom = Math.max(this.minZoom, Math.min(this.maxZoom, zoom));
 
@@ -2471,8 +2712,8 @@ export default ({ assetsUrl = '' }) => {
 				});
 
 				return {
-					vertical: vertical.flat(),
-					horizontal: horizontal.flat(),
+					vertical: vertical.flat().filter(v => !isNaN(v)),
+					horizontal: horizontal.flat().filter(v => !isNaN(v)),
 				};
 			};
 
@@ -2533,7 +2774,7 @@ export default ({ assetsUrl = '' }) => {
 					itemBounds.vertical.forEach(itemBound => {
 						var diff = Math.abs(lineGuide - itemBound.guide);
 						// if the distance between guild line and object snap point is close we can consider this for snapping
-						if (diff < this.guidelineOffset) {
+						if (!isNaN(diff) && !isNaN(itemBound.offset) && diff < this.guidelineOffset) {
 							resultV.push({
 								lineGuide: lineGuide,
 								diff: diff,
@@ -2547,7 +2788,7 @@ export default ({ assetsUrl = '' }) => {
 				lineGuideStops.horizontal.forEach(lineGuide => {
 					itemBounds.horizontal.forEach(itemBound => {
 						var diff = Math.abs(lineGuide - itemBound.guide);
-						if (diff < this.guidelineOffset) {
+						if (!isNaN(diff) && !isNaN(itemBound.offset) && diff < this.guidelineOffset) {
 							resultH.push({
 								lineGuide: lineGuide,
 								diff: diff,
@@ -2658,6 +2899,12 @@ export default ({ assetsUrl = '' }) => {
 					}
 				});
 
+				// Guard against NaN before applying snapped position
+				if (isNaN(transformerAbsPos.x) || isNaN(transformerAbsPos.y)) {
+					this.positionTooltip();
+					return;
+				}
+
 				// Update transformer position
 				this.selectionTransformer.absolutePosition(transformerAbsPos);
 
@@ -2665,10 +2912,13 @@ export default ({ assetsUrl = '' }) => {
 				this.selectedNodes.forEach(node => {
 					const offset = nodeOffsets.find(o => o.id === node.id());
 					if (offset) {
-						node.absolutePosition({
+						const newPos = {
 							x: transformerAbsPos.x + offset.xDiff,
 							y: transformerAbsPos.y + offset.yDiff
-						});
+						};
+						if (!isNaN(newPos.x) && !isNaN(newPos.y)) {
+							node.absolutePosition(newPos);
+						}
 					}
 				});
 
@@ -3332,7 +3582,7 @@ export default ({ assetsUrl = '' }) => {
 					}
 				});
 
-				this.aiTasksQueue = this.aiTasksQueue.filter(q => q === lockKey);
+				this.aiTasksQueue = this.aiTasksQueue.filter(q => q !== lockKey);
 
 				node.setAttr('aiTaskInProgress', false);
 
@@ -3380,11 +3630,9 @@ export default ({ assetsUrl = '' }) => {
 					}
 				});
 
-				this.aiTasksQueue = this.aiTasksQueue.filter(q => q === lockKey);
-
-				node.setAttr('aiTaskInProgress', false);
-
 				if (!res.ok) {
+					this.aiTasksQueue = this.aiTasksQueue.filter(q => q !== lockKey);
+					node.setAttr('aiTaskInProgress', false);
 					return res.json().then(errorData => {
 						toastr.error(errorData.message || 'An unknown error occurred');
 					});
@@ -3393,11 +3641,13 @@ export default ({ assetsUrl = '' }) => {
 				const data = await res.json();
 
 				if (data.type === 'error') {
+					this.aiTasksQueue = this.aiTasksQueue.filter(q => q !== lockKey);
+					node.setAttr('aiTaskInProgress', false);
 					toastr.error(data.message);
 					return;
 				}
 
-				if (data?.data?.status === 'CREATED' || data?.data?.status === 'IN_PROGRESS') {
+				if ([ 'CREATED', 'IN_PROGRESS', 'IN_QUEUE' ].includes(data?.data?.status)) {
 					this.getAIImageStatus(data.data, node, lockKey);
 				} else {
 					this.onAIImageProcessDone(data.data, node, lockKey);
@@ -3407,7 +3657,7 @@ export default ({ assetsUrl = '' }) => {
 		},
 
 		async getAIImageStatus(data = {}, node, lockKey) {
-			const res = await fetch('/dashboard/user/advanced-image/editor/' + data.id + '/status', {
+			const res = await fetch('/dashboard/user/creative-suite/ai/editor/' + data.id + '/status', {
 				method: 'GET',
 				headers: {
 					'Accept': 'application/json'
@@ -3415,6 +3665,8 @@ export default ({ assetsUrl = '' }) => {
 			});
 
 			if (!res.ok) {
+				this.aiTasksQueue = this.aiTasksQueue.filter(q => q !== lockKey);
+				node.setAttr('aiTaskInProgress', false);
 				return res.json().then(errorData => {
 					toastr.error(errorData.message || 'An unknown error occurred');
 				});
@@ -3423,20 +3675,42 @@ export default ({ assetsUrl = '' }) => {
 			const resData = await res.json();
 
 			if (resData.status === 'error') {
+				this.aiTasksQueue = this.aiTasksQueue.filter(q => q !== lockKey);
+				node.setAttr('aiTaskInProgress', false);
 				return toastr.error(resData.message);
 			}
 
 			if (resData.data.status === 'COMPLETED') {
 				this.onAIImageProcessDone(resData.data, node, lockKey);
+			} else if (resData.data.status === 'FAILED') {
+				this.aiTasksQueue = this.aiTasksQueue.filter(q => q !== lockKey);
+				node.setAttr('aiTaskInProgress', false);
+				toastr.error('AI image generation failed.');
 			} else {
 				setTimeout(() => {
 					this.getAIImageStatus(resData.data, node, lockKey);
-				}, 1000);
+				}, 2000);
 			}
 		},
 
-		onAIImageProcessDone(data, node, lockKey) {
-			console.log(data);
+		async onAIImageProcessDone(data, node, lockKey) {
+			if (!data?.output) {
+				toastr.error('AI processing completed but no output was returned.');
+				this.aiTasksQueue = this.aiTasksQueue.filter(q => q !== lockKey);
+				node.setAttr('aiTaskInProgress', false);
+				return;
+			}
+
+			try {
+				await this.setNodeFillPattern({ node, url: data.output, setSize: false });
+				this.addToHistory();
+			} catch (error) {
+				console.error('Failed to apply AI image:', error);
+				toastr.error('Failed to apply the generated image.');
+			} finally {
+				this.aiTasksQueue = this.aiTasksQueue.filter(q => q !== lockKey);
+				node.setAttr('aiTaskInProgress', false);
+			}
 		},
 
 		isMobile() {

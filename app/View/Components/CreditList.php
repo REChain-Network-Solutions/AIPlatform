@@ -2,14 +2,12 @@
 
 namespace App\View\Components;
 
-use App\Domains\Entity\EntityStats;
 use App\Models\Plan;
 use App\Models\Team\Team;
 use App\Models\User;
 use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\View\Component;
 
 class CreditList extends Component
@@ -18,7 +16,7 @@ class CreditList extends Component
 
     public ?Plan $plan;
 
-    public null|array|SupportCollection $categories;
+    public bool $showLegend;
 
     public string $showType;
 
@@ -38,8 +36,6 @@ class CreditList extends Component
 
     public bool $aiImage;
 
-    public bool $isJs;
-
     public ?Team $team;
 
     /**
@@ -57,6 +53,7 @@ class CreditList extends Component
     public function __construct(
         $user = null,
         ?Plan $plan = null,
+        bool $showLegend = false,
         string $showType = 'default',
         string $style = 'inline',
         string $legendSize = 'sm',
@@ -66,13 +63,12 @@ class CreditList extends Component
         string $modalTriggerPos = 'inline',
         bool $onlyButton = false,
         bool $aiImage = false,
-        bool $isJs = true,
         ?Team $team = null
     ) {
         $this->user = $user ?? auth()->user();
         $this->plan = $plan;
+        $this->showLegend = $showLegend;
         $this->showType = $showType;
-        $this->loadCredits();
         $this->style = $style;
         $this->legendSize = $legendSize;
         $this->progressHeight = $progressHeight;
@@ -81,7 +77,6 @@ class CreditList extends Component
         $this->modalTriggerPos = $modalTriggerPos;
         $this->onlyButton = $onlyButton;
         $this->aiImage = $aiImage;
-        $this->isJs = $isJs;
         $this->team = $team;
     }
 
@@ -90,13 +85,6 @@ class CreditList extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.credit-list', [
-            'categories' => $this->categories,
-        ]);
-    }
-
-    private function loadCredits(): void
-    {
-        $this->categories = EntityStats::all();
+        return view('components.credit-list');
     }
 }

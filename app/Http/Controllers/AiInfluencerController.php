@@ -9,6 +9,7 @@ use App\Models\ExportedVideo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 use Throwable;
 
 class AiInfluencerController extends Controller
@@ -73,19 +74,21 @@ class AiInfluencerController extends Controller
 
             $folderPath = public_path('uploads/ai-influencer-assets');
             if (! file_exists($folderPath)) {
-                mkdir($folderPath, 755, true);
+                if (! mkdir($folderPath, 755, true) && ! is_dir($folderPath)) {
+                    throw new RuntimeException(sprintf('Directory "%s" was not created', $folderPath));
+                }
             }
 
             foreach ($request->file('video_files') ?? [] as $file) {
                 $path = $file->store($rootDir, ['disk' => $fileDisk]);
                 $url = Storage::disk($fileDisk)->url($path);
-                array_push($uploadedFiles['video_urls'], $url);
+                $uploadedFiles['video_urls'][] = $url;
             }
 
             foreach ($request->file('image_files') ?? [] as $file) {
                 $path = $file->store($rootDir, ['disk' => $fileDisk]);
                 $url = Storage::disk($fileDisk)->url($path);
-                array_push($uploadedFiles['image_urls'], $url);
+                $uploadedFiles['image_urls'][] = $url;
             }
 
             return response()->json([

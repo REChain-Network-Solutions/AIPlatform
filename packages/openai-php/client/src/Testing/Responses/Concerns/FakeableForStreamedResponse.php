@@ -10,13 +10,13 @@ use OpenAI\Responses\StreamResponse;
 trait FakeableForStreamedResponse
 {
     /**
-     * @param  resource  $resource
+     * @param  null  $resource
      */
     public static function fake($resource = null): StreamResponse
     {
         if ($resource === null) {
             $filename = str_replace(['OpenAI\Responses', '\\'], [__DIR__ . '/../Fixtures/', '/'], static::class) . 'Fixture.txt';
-            $resource = fopen($filename, 'r');
+            $resource = fopen($filename, 'rb');
         }
 
         $stream = Psr17FactoryDiscovery::findStreamFactory()

@@ -118,7 +118,7 @@
 		}
 
 		.chats-list-container {
-			@apply lg:overflow-visible lg:grow lg:h-auto lg:border-none lg:bg-transparent lg:px-7 lg:py-6 lg:row-span-full;
+			@apply lg:min-w-0 lg:overflow-visible lg:grow lg:h-auto lg:border-none lg:bg-transparent lg:px-7 lg:py-6 lg:row-span-full;
 		}
 
 		.chat-list-item {
@@ -161,11 +161,23 @@
 		}
 
 		.chat-list-item-trigger {
-			@apply lg:py-3 lg:pe-3 lg:ps-0 lg:rounded-xl lg:transition-all;
+			@apply lg:py-3 lg:pe-3 lg:ps-0 lg:rounded-xl lg:transition-all lg:w-full;
+
+			&:has(.lqd-chat-item-thumb-wrap) {
+				align-items: center;
+			}
+		}
+
+		.lqd-chat-item-trigger-info {
+			@apply lg:w-full lg:overflow-hidden;
 		}
 
 		.chat-item-title {
-			@apply lg:text-2xs lg:font-normal lg:text-heading-foreground/70;
+			@apply lg:text-2xs lg:font-normal lg:text-heading-foreground/70 lg:truncate lg:w-full;
+
+			&[contenteditable] {
+				@apply lg:overflow-visible;
+			}
 		}
 
 		&.active {
@@ -293,8 +305,17 @@
 	}
 
 	.chat-content-container {
-		@apply max-w-none grow before:hidden static min-h-0;
+		@apply grow before:hidden static min-h-0;
 		background: transparent !important;
+
+		&:has(.lqd-chat-image-grid) {
+
+			&,
+			> div,
+			> pre {
+				@apply w-full;
+			}
+		}
 	}
 
 	.chat-content {
@@ -302,6 +323,17 @@
 
 		img {
 			@apply rounded-lg shadow-2xl shadow-black/5 last:mb-0 first:mt-0 only-of-type:my-0;
+		}
+
+		&:has(img) {
+
+			~ .lqd-chat-actions-wrap {
+
+				.lqd-reimagine-images,
+				.lqd-download-images {
+					display: inline-flex;
+				}
+			}
 		}
 	}
 
@@ -311,9 +343,19 @@
 		.lqd-chat-avatar {
 			@apply size-6 mt-0;
 		}
-
+		.chat-content {
+			
+			img {
+				max-width: 400px;
+			}
+			.lqd-chat-image-grid {
+				
+				img {
+					max-width: 100%;
+				}
+			}
+		}
 		&:has(.social-media-agent-chat-post-card) {
-
 			.lqd-chat-bubble-canvas-trigger {
 				@apply hidden;
 			}
@@ -323,6 +365,13 @@
 
 			.multi-model-response-accept {
 				@apply inline-flex;
+			}
+		}
+
+		&:last-child {
+
+			.lqd-chat-bubble-suggestions {
+				@apply flex;
 			}
 		}
 	}
@@ -337,6 +386,13 @@
 
 		.lqd-chat-sender {
 			@apply hidden gap-0;
+		}
+	}
+
+	.lqd-chat-user-bubble {
+
+		.chat-content-container {
+			@apply max-w-none;
 		}
 	}
 
@@ -373,6 +429,15 @@
 	// 		@apply mb-0;
 	// 	}
 	// }
+
+	.lqd-reimagine-images,
+	.lqd-download-images {
+		display: none;
+	}
+
+	.lqd-chat-bubble-suggestions {
+		@apply hidden;
+	}
 
 	#lqd-ext-chatbot-wrap {
 		@apply hidden;

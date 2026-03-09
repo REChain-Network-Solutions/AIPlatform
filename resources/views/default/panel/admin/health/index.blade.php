@@ -5,7 +5,7 @@
     <!-- Page body -->
     <div class="page-body">
         <div class="container-xl">
-            @if (Auth::user()->isAdmin())
+            @if (Auth::user()?->isAdmin())
                 @php
                     function backgroundColor($status)
                     {
@@ -109,7 +109,7 @@
 						@php
 							$chronJobStatus = Spatie\Health\Enums\Status::failed()->value;
 
-							if (cache('crontab_check') && now()->subMinutes(3) < cache('crontab_check')) {
+							if ( cache()->get('crontab_check') && now()->subMinutes(3) < cache()->get('crontab_check')) {
 								$chronJobStatus = Spatie\Health\Enums\Status::ok()->value;
 							}
 						@endphp
@@ -161,8 +161,8 @@
 									</dd>
 									<dt class="mt-0 text-sm font-medium text-gray-600 dark:text-gray-400">
 
-										@if(cache('crontab_check'))
-											{{  trans('Last time: ') . cache('crontab_check') }}
+										@if( cache()->get('crontab_check'))
+											{{  trans('Last time: ') .  cache()->get('crontab_check') }}
 										@else
 											Cron Jobs are disabled on your server. Click <a class="text-blue-600" href="https://docs.magicproject.ai/how-to-configure-cron-jobs-on-cpanel/ " target="_blank">here</a> to learn how to enable Cron Jobs.
 										@endif

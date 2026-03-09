@@ -21,6 +21,8 @@ trait HasCreditLimit
 {
     protected ?float $calculatedInputCredit = null;
 
+    private static ?array $aiImageProSelectedModelsCache = null;
+
     public function creditEnum(): EntityEnum
     {
         return $this->enum()->creditBy();
@@ -58,7 +60,7 @@ trait HasCreditLimit
                 $this->team = $user?->myTeam;
             }
 
-            $memberStat = $user->teamMember;
+            $memberStat = $user?->teamMember;
             if (isset($memberStat) && $memberStat->status !== 'active') {
                 // If the user is not an active member of the team, return the user's credit
                 return $user?->getCredit($this->engine()->slug(), $this->creditKey()) ?? [];
@@ -126,7 +128,8 @@ trait HasCreditLimit
         if (
             $model && ! $model->is_selected &&
             ! in_array($model->key, $engineDefaultModels, true) &&
-            ! in_array($model->id, $aiFinances, true)
+            ! in_array($model->id, $aiFinances, true) &&
+            ! $this->isInAiImageProSelectedModels($model->key->value)
         ) {
             return 0;
         }
@@ -148,12 +151,59 @@ trait HasCreditLimit
         if (
             $model && ! $model->is_selected &&
             ! in_array($model->key, $engineDefaultModels, true) &&
-            ! in_array($model->id, $aiFinances, true)
+            ! in_array($model->id, $aiFinances, true) &&
+            ! $this->isInAiImageProSelectedModels($model->key->value)
         ) {
             return false;
         }
 
         return $this->getCredit()['isUnlimited'];
+    }
+
+    /**
+     * Check if the model key is in AI Image Pro or AI Chat Pro Image Chat selected models.
+     */
+    protected function isInAiImageProSelectedModels(string $modelKey): bool
+    {
+        return in_array($modelKey, $this->getAiImageProSelectedModels(), true);
+    }
+
+    /**
+     * Get all selected models from AI Image Pro extensions (cached per request).
+     */
+    protected function getAiImageProSelectedModels(): array
+    {
+        if (self::$aiImageProSelectedModelsCache !== null) {
+            return self::$aiImageProSelectedModelsCache;
+        }
+
+        $models = [];
+
+        // Check AI Image Pro selected models (only if extension is registered)
+        if (\App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-image-pro')) {
+            $aiImageProModels = setting('ai_image_selected_models', null);
+            if (! empty($aiImageProModels)) {
+                $slugs = is_string($aiImageProModels)
+                    ? (json_decode($aiImageProModels, true) ?? explode(',', $aiImageProModels))
+                    : (array) $aiImageProModels;
+                $models = array_merge($models, $slugs);
+            }
+        }
+
+        // Check AI Chat Pro Image Chat selected models (only if extension is registered)
+        if (\App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')) {
+            $aiChatImageModels = setting('ai_chat_pro_image_chat_selected_models', null);
+            if (! empty($aiChatImageModels)) {
+                $slugs = is_string($aiChatImageModels)
+                    ? (json_decode($aiChatImageModels, true) ?? explode(',', $aiChatImageModels))
+                    : (array) $aiChatImageModels;
+                $models = array_merge($models, $slugs);
+            }
+        }
+
+        self::$aiImageProSelectedModelsCache = array_unique($models);
+
+        return self::$aiImageProSelectedModelsCache;
     }
 
     /**
@@ -319,7 +369,7 @@ trait HasCreditLimit
             return true;
         }
 
-        return $this->creditBalance() > $this->getCalculatedInputCredit();
+        return $this->creditBalance() >= $this->getCalculatedInputCredit();
     }
 
     public function setCalculatedInputCredit($value = 0.0): static

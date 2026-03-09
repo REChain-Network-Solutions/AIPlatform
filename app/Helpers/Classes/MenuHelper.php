@@ -99,7 +99,7 @@ class MenuHelper
 
         $data = $this->routesDoesNotHaveAnySlug + $this->slugsNotInOpenAiGenerator + $this->freeOpenAiItems;
 
-        if (Auth::user()->isAdmin()) {
+        if (Auth::user()?->isAdmin()) {
             return true;
         }
 

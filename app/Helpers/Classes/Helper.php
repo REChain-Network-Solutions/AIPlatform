@@ -52,7 +52,9 @@ class Helper
 
         $userId = $userId ?? Auth::id();
 
-        return once(static function () use ($userId) {
+        $cacheKey = 'current_active_subscription_user_' . $userId;
+
+        return Cache::remember($cacheKey, 3, static function () use ($userId) {
             return Subscription::query()
                 ->with('plan')
                 ->where('user_id', $userId)
@@ -88,12 +90,12 @@ class Helper
         return $extensionsCollection->isNotEmpty();
     }
 
-    public static function isUserVIP()
+    public static function isUserVIP(): bool
     {
-        return Cache::remember('vip_membership', 300, function () {
+        return (bool) Cache::remember('vip_membership', 300, function () {
             $marketSubscription = app(ExtensionRepositoryInterface::class)->subscription()->json();
 
-            return data_get($marketSubscription, 'data');
+            return data_get($marketSubscription, 'data.stripe_status') === 'active';
         });
     }
 
@@ -109,11 +111,11 @@ class Helper
             return false;
         }
 
-        if (! $user->isSuperAdmin() && ! $user->checkPermission('VIP_CHAT_WIDGET')) {
+        if (! $user?->isSuperAdmin() && ! $user?->checkPermission('VIP_CHAT_WIDGET')) {
             return false;
         }
 
-        return (bool) self::isUserVIP();
+        return self::isUserVIP();
     }
 
     public static function marketplacePaymentMessage(string $status): string
@@ -234,12 +236,7 @@ class Helper
 
     public static function multi_explode($delimiters, $string): array
     {
-
-        $ready = str_replace($delimiters, $delimiters[0], $string);
-
-        $ready = str_replace([',,'], ',', $ready);
-
-        $ready = str_replace('-', '', $ready);
+        $ready = str_replace([$delimiters, ',,', '-'], [$delimiters[0], ',', ''], $string);
 
         return explode($delimiters[0], $ready);
     }
@@ -260,7 +257,7 @@ class Helper
 
     public static function appIsDemoForChatbot(): bool
     {
-        return self::appIsDemo() && in_array(request()->getHost(), ['magicai.liquid-themes.com', 'demo.magicproject.ai']);
+        return self::appIsDemo() && in_array(request()?->getHost(), ['magicai.liquid-themes.com', 'demo.magicproject.ai']);
     }
 
     public static function appIsDemo(): bool
@@ -281,8 +278,8 @@ class Helper
             $date = now()->subDays($i)->format('Y-m-d');
             $days->put($date, [
                 'date' => $date,
-                'paid' => rand(0, 5),
-                'free' => rand(0, 3),
+                'paid' => random_int(0, 5),
+                'free' => random_int(0, 3),
             ]);
         }
 
@@ -300,7 +297,7 @@ class Helper
 
         foreach ($dateRange as $date) {
             $data[] = [
-                'sums' => rand(0, 100), // İstersen bu aralığı değiştirebilirsin
+                'sums' => random_int(0, 100),
                 'days' => $date->format('Y-m-d'),
             ];
         }
@@ -416,6 +413,26 @@ class Helper
         return response()->json([], 200);
     }
 
+    public static function checkFashionStudioDemoLimit(string $feature = 'fashion_studio', int $maxAttempts = 3): ?JsonResponse
+    {
+        if (! self::appIsDemo()) {
+            return null;
+        }
+
+        $clientIp = self::getRequestIp();
+        $rateLimiter = new RateLimiter("fashion_studio_{$feature}_rate_limit", $maxAttempts);
+
+        if (! $rateLimiter->attempt($clientIp)) {
+            return response()->json([
+                'success' => false,
+                'status'  => 'error',
+                'message' => __('You have reached the maximum number of generations allowed on the demo. Please try again tomorrow.'),
+            ], 429);
+        }
+
+        return null;
+    }
+
     public static function checkDemoSecondDailyLimit($incomingSeconds = 0, $lockKey = 'default_second_lock_key'): JsonResponse
     {
         if (! self::appIsDemo()) {
@@ -494,10 +511,10 @@ class Helper
         return response()->json([], 200);
     }
 
-    public static function sorting(array $data, $column, $direction): array|Collection
+    public static function sorting(array|Collection $data, $column, $direction): array|Collection
     {
         if ($column) {
-            $data = collect($data)->sortBy($column, SORT_REGULAR, $direction == 'asc');
+            $data = collect($data)->sortBy($column, SORT_REGULAR, $direction === 'asc');
         }
 
         return $data;
@@ -521,7 +538,7 @@ class Helper
             return $currency;
         }
 
-        return $currency->$column;
+        return $currency?->$column;
     }
 
     public static function generateNumberForDemo($default = '---')
@@ -552,7 +569,15 @@ class Helper
 
     public static function clearEmptyConversations(): void
     {
-        $chats = Auth::user()?->openaiChat()->where('is_empty', true)->where('created_at', '<', now()->subSeconds(30))->get();
+        $chats = Auth::user()?->openaiChat()
+            ->where('is_empty', true)
+            ->where('created_at', '<', now()->subSeconds(30))
+            ->where(function ($query) {
+                $query->whereNull('chat_type')
+                    ->orWhereNotIn('chat_type', ['chatpro-deep-research', 'chatpro-image', 'social-media-agent']);
+            })
+            ->get();
+
         foreach ($chats ?? [] as $chat) {
             $chat?->messages()?->delete();
             $chat?->delete();

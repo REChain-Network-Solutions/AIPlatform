@@ -1,5 +1,6 @@
+@php use App\Models\OpenAIGenerator; @endphp
 <nav
-    class="lqd-bottom-menu fixed inset-x-0 bottom-0 z-50 hidden h-16 flex-wrap border-t border-foreground/10 bg-background/10 text-2xs font-medium backdrop-blur-lg backdrop-saturate-150 max-lg:flex"
+    class="lqd-bottom-menu fixed inset-x-0 bottom-0 z-50 hidden h-[--bottom-menu-height] flex-wrap border-t border-foreground/10 bg-background/10 text-2xs font-medium backdrop-blur-lg backdrop-saturate-150 max-lg:flex"
     x-data="{
         searchShow: false,
         setSearchShow(status) {
@@ -8,7 +9,7 @@
             } else {
                 this.searchShow = status;
             }
-
+    
             if (this.searchShow) {
                 this.$nextTick(() => {
                     this.$refs.searchInput?.focus();
@@ -78,7 +79,7 @@
     :class="{ 'lqd-is-active': !$store.mobileNav.templatesCollapse }"
 >
     <ul class="relative h-full text-2xs font-medium text-heading-foreground">
-        @foreach ($aiWriters as $aiWriter)
+        @foreach ($openAiList ?? [] as $aiWriter)
             <li class="relative">
                 <a
                     class="flex items-center gap-2 border-b border-l-0 border-r-0 border-t-0 border-solid border-[--tblr-border-color] p-3 py-2 text-inherit"

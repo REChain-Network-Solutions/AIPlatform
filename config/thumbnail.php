@@ -52,7 +52,8 @@ return [
             /**
              * add default params for this preset
              */
-            'smartcrop' => '64x64',
+            'resize'  => '64x64',
+            'quality' => 82,
         ],
     ],
 

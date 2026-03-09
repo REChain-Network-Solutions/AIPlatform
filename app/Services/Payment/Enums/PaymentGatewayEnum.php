@@ -47,9 +47,7 @@ enum PaymentGatewayEnum: string implements WithStringBackedEnum
 
     public static function isRefactored($gatewayCode): bool
     {
-        return in_array($gatewayCode, [
-            self::TwoCheckout->value,
-        ], true);
+        return $gatewayCode === self::TwoCheckout->value;
     }
 
     public static function activeGateways(): array

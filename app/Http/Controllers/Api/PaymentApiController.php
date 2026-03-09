@@ -92,9 +92,9 @@ class PaymentApiController extends Controller
 
         if ($type == 'success') {
             return response()->json(['message' => $originalContent['message']], 200);
-        } else {
-            return response()->json(['message' => $originalContent['message']], 412);
         }
+
+        return response()->json(['message' => $originalContent['message']], 412);
     }
 
     /**
@@ -149,7 +149,7 @@ class PaymentApiController extends Controller
         }
 
         try {
-            return self::convertBackWithToResponseJson(GatewaySelector::selectGateway($gatewayCode)::subscribeCancel());
+            return $this->convertBackWithToResponseJson(GatewaySelector::selectGateway($gatewayCode)::subscribeCancel());
         } catch (Throwable $th) {
             return response()->json(['message' => 'Could not cancel subscription. Please try again. If this error occures again, please update and migrate.'], 404);
         }

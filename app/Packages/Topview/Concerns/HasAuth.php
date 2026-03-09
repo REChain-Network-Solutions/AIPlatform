@@ -35,11 +35,7 @@ trait HasAuth
      */
     public function ensureAuth(): bool
     {
-        if (empty($this->TOPVIEW_API_KEY) || empty($this->TOPVIEW_UID)) {
-            return false;
-        }
-
-        return true;
+        return ! (empty($this->TOPVIEW_API_KEY) || empty($this->TOPVIEW_UID));
     }
 
     /**

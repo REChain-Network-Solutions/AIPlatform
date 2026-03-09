@@ -187,14 +187,14 @@ class InstallationController extends Controller
             return "<p>magicAI Updated to the version: $version you can go home. The 1.20 update is for testing. If you want to contribute in this system please go to admin and update menu to test autoupdating system.
 <br>This is the last version for updates.
 ";
-        } else {
-            return 'Your system is at final version. This method is deprecated please update via admin panel.';
         }
+
+        return 'Your system is at final version. This method is deprecated please update via admin panel.';
     }
 
     public function updateManual(Request $request)
     {
-        $version = '10.00';
+        $version = '10.30';
 
         Artisan::call('migrate', [
             '--force' => true,
@@ -239,13 +239,13 @@ class InstallationController extends Controller
                         'message' => $data['message'],
                         'type'    => 'success',
                     ]);
-            } else {
-                return response()
-                    ->error(
-                        $data['message'],
-                        500
-                    );
             }
+
+            return response()
+                ->error(
+                    $data['message'],
+                    500
+                );
         } catch (Exception $exception) {
             return response()
                 ->error(
@@ -270,13 +270,13 @@ class InstallationController extends Controller
 
             if ($data['status']) {
                 return response()->json($data);
-            } else {
-                return response()
-                    ->error(
-                        $data['message'],
-                        500
-                    );
             }
+
+            return response()
+                ->error(
+                    $data['message'],
+                    500
+                );
         } catch (Exception $exception) {
             return response()
                 ->error(
@@ -297,13 +297,13 @@ class InstallationController extends Controller
 
             if ($data['status']) {
                 return response()->json($data);
-            } else {
-                return response()
-                    ->error(
-                        $data['message'],
-                        500
-                    );
             }
+
+            return response()
+                ->error(
+                    $data['message'],
+                    500
+                );
         } catch (Exception $exception) {
             return response()
                 ->error(

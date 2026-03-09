@@ -957,24 +957,45 @@
 
                 <div class="row mb-4">
                     <h3 class="mb-[25px] text-[20px]">{{ __('Advanced Settings') }}</h3>
-                    <div class="col-md-12">
-                        <div class="mb-3">
-                            <label class="form-label">{{ __('Custom Landing Page URL') }}</label>
-                            <input
-                                class="form-control"
-                                id="frontend_additional_url"
-                                type="text"
-                                name="frontend_additional_url"
-                                value="{{ $setting->frontend_additional_url }}"
-                            >
-                            <x-alert class="!mt-2">
-                                <p>
-                                    {{ __('Please provide full URL with http:// or https://') }}
-                                </p>
-                            </x-alert>
-                        </div>
-                    </div>
-
+					<div class="col-md-12">
+						<div class="mb-3" x-data="{ selectedType: '{{ setting('frontend_additional_url_type', 'default') }}' }">
+							<x-forms.input
+								id="frontend_additional_url_type"
+								name="frontend_additional_url_type"
+								type="select"
+								label="{{ __('Landing Page') }}"
+								tooltip="{{ __('Choose which page visitors see when they access your site') }}"
+								x-model="selectedType"
+							>
+								<option value="default" :selected="selectedType === 'default'">
+									{{ __('Default Landing Page') }}
+								</option>
+								@if(\App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-chat-pro'))
+									<option value="ai-chat-pro" :selected="selectedType === 'ai-chat-pro'">
+										{{ __('AI Chat Pro') }}
+									</option>
+								@endif
+								@if(\App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-image-pro'))
+									<option value="ai-image-pro" :selected="selectedType === 'ai-image-pro'">
+										{{ __('AI Image Pro') }}
+									</option>
+								@endif
+								<option value="custom" :selected="selectedType === 'custom'">
+									{{ __('Custom Link') }}
+								</option>
+							</x-forms.input>
+							<div x-show="selectedType === 'custom'" x-cloak x-transition class="mt-3">
+								<x-forms.input
+									id="frontend_additional_url"
+									name="frontend_additional_url"
+									type="text"
+									label="{{ __('Custom Landing Page URL') }}"
+									placeholder="https://example.com/custom-page or /custom-page"
+									value="{{ setting('frontend_additional_url') }}"
+								/>
+							</div>
+						</div>
+					</div>
                     <div class="col-md-12">
                         <div class="mb-3">
                             <label class="form-label">{{ __('Custom CSS URL') }}</label>

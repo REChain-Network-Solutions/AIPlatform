@@ -309,11 +309,8 @@ class FreeService
             $user = Auth::user();
         }
         $sub = getCurrentActiveSubscription($user->id);
-        if ($sub != null) {
-            return true;
-        }
 
-        return false;
+        return $sub !== null;
     }
 
     public static function getSubscriptionDaysLeft()
@@ -322,11 +319,11 @@ class FreeService
         $sub = getCurrentActiveSubscription($user->id);
         if ($sub) {
             return \Carbon\Carbon::now()->diffInDays($sub->ends_at);
-        } else {
-            Log::error('getSubscriptionDaysLeft()');
-
-            return 0;
         }
+
+        Log::error('getSubscriptionDaysLeft()');
+
+        return 0;
     }
 
     public static function subscribeCancel($internalUser = null)

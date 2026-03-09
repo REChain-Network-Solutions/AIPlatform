@@ -359,11 +359,8 @@ class TransferService
         $gateway = Gateways::where('code', self::$GATEWAY_CODE)->where('is_active', 1)->first() ?? abort(404);
         $currency = Currency::where('id', $gateway->currency)->first()->code;
         $sub = getCurrentActiveSubscription($user->id);
-        if ($sub != null) {
-            return true;
-        }
 
-        return false;
+        return $sub !== null;
     }
 
     public static function getSubscriptionDaysLeft()
@@ -375,11 +372,11 @@ class TransferService
         $sub = getCurrentActiveSubscription($user->id);
         if ($sub) {
             return \Carbon\Carbon::now()->diffInDays($sub->ends_at);
-        } else {
-            Log::error('getSubscriptionDaysLeft()');
-
-            return 0;
         }
+
+        Log::error('getSubscriptionDaysLeft()');
+
+        return 0;
     }
 
     public static function subscribeCancel($internalUser = null)

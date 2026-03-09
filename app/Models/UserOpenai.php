@@ -115,9 +115,9 @@ class UserOpenai extends Model
     {
         if ($this?->created_at) {
             return $this?->created_at?->format('M d, Y');
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     public function generatorWithType(): BelongsTo

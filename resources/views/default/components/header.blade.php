@@ -1,4 +1,4 @@
-<header class="lqd-header relative flex h-[--header-height] border-b border-header-border bg-header-background text-xs font-medium transition-colors max-lg:h-[65px]">
+<header class="lqd-header relative flex h-[--header-height] border-b border-header-border bg-header-background text-xs font-medium transition-colors max-lg:z-40">
     <div @class([
         'lqd-header-container flex w-full grow gap-2 px-4 max-lg:w-full max-lg:max-w-none',
         'container' => !$attributes->get('layout-wide'),
@@ -45,7 +45,7 @@
                 {{ $actions }}
             @else
                 <div class="flex items-center max-xl:gap-2 max-lg:hidden xl:gap-3">
-                    @if (Auth::user()->isAdmin())
+                    @if (Auth::user()?->isAdmin())
                         @if ($app_is_not_demo)
                             <x-update-available />
                         @endif

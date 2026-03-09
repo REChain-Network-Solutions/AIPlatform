@@ -16,7 +16,7 @@
         <x-tabler-info-circle-filled class="size-4" />
     </span>
     <span {{ $attributes->twMergeFor('content', $content_class) }}>
-        {{ $text }}
+        {!! $text !!}
 
         @if ($drivers->isNotEmpty())
             <div>

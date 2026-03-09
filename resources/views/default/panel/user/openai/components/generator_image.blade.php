@@ -72,13 +72,13 @@
         searchPromptStr: '',
         setSearchPromptStr(str) { this.searchPromptStr = str.trim().toLowerCase() },
         setPrompt(prompt) { this.prompt = prompt },
-        focusOnPrompt() { $nextTick(() => $refs.prompt.focus()) },
+        focusOnPrompt() { this.$nextTick(() => this.$refs.prompt?.focus()) },
         activeGenerator: '{{ setting('dalle_hidden', 0) == 1 ? 'stable_diffusion' : 'openai' }}',
         changeActiveGenerator(tab) {
             if (tab === this.activeGenerator) return;
-
+    
             this.$dispatch('active-generator-changed', tab);
-
+    
             if (!document.startViewTransition) {
                 return this.activeGenerator = tab;
             }
@@ -134,21 +134,21 @@
                     {{ __('GPT-IMAGE-1') }}
                 </x-button>
             @endif
-			@if (setting('enabled_gpt_image_1_5', '0') != '0')
-				<x-button
-					class="lqd-image-generator-tabs-trigger py-2 text-2xs font-bold text-heading-foreground hover:shadow-none [&.active]:bg-foreground/10"
-					data-generator-name="gpt-image-1.5"
-					tag="button"
-					type="button"
-					variant="ghost"
-					x-data="{}"
-					::class="{ 'active': activeGenerator === 'gpt_image_1_5' }"
-					x-bind:data-active="activeGenerator === 'gpt_image_1_5'"
-					@click="changeActiveGenerator('gpt_image_1_5')"
-				>
-					{{ __('GPT-IMAGE-1.5') }}
-				</x-button>
-			@endif
+            @if (setting('enabled_gpt_image_1_5', '0') != '0')
+                <x-button
+                    class="lqd-image-generator-tabs-trigger py-2 text-2xs font-bold text-heading-foreground hover:shadow-none [&.active]:bg-foreground/10"
+                    data-generator-name="gpt-image-1.5"
+                    tag="button"
+                    type="button"
+                    variant="ghost"
+                    x-data="{}"
+                    ::class="{ 'active': activeGenerator === 'gpt_image_1_5' }"
+                    x-bind:data-active="activeGenerator === 'gpt_image_1_5'"
+                    @click="changeActiveGenerator('gpt_image_1_5')"
+                >
+                    {{ __('GPT-IMAGE-1.5') }}
+                </x-button>
+            @endif
             @if (setting('stable_hidden', 0) != 1)
                 <x-button
                     class="lqd-image-generator-tabs-trigger py-2 text-2xs font-bold text-heading-foreground hover:shadow-none [&.active]:bg-foreground/10"
@@ -174,7 +174,9 @@
                 @includeFirst(['flux-pro::flux-2-flex-tab', 'panel.user.openai.includes.flux-2-flex-tab', 'vendor.empty'])
                 @includeFirst(['ideogram::ideogram-tab', 'panel.user.openai.includes.ideogram-tab', 'vendor.empty'])
                 @includeIf('nano-banana::nano-banana-tab')
+                @includeIf('panel.user.openai.includes.grok-imagine-tab')
                 @includeIf('nano-banana::nano-banana-pro-tab')
+                @includeIf('nano-banana::nano-banana-2-tab')
                 @includeIf('see-dream-v4::see-dream-v4-tab')
             @endif
         </div>
@@ -183,6 +185,7 @@
                 class:legend-image-box="bg-primary/20 dark:bg-secondary"
                 class:progressbar-image="bg-primary/20 dark:bg-secondary"
                 :aiImage="true"
+                :showLegend="true"
             />
         </div>
     </div>
@@ -386,105 +389,105 @@
         </div>
     @endif
 
-	@if (setting('enabled_gpt_image_1_5', '0') != '0')
-		<div
-			class="lqd-image-generator-tabs-content lqd-image-generator-gpt-image-1-5 hidden"
-			x-data="{}"
-			:class="{ 'hidden': activeGenerator !== 'gpt_image_1_5' }"
-		>
-			<form
-				class="lqd-image-generator-dalle-form flex flex-col items-start gap-4"
-				id="openai_generator_form"
-				onsubmit="return sendOpenaiGeneratorForm();"
-				x-data="{ advancedSettingsShow: false }"
-			>
-				<h3
-					class="flex w-full flex-wrap items-center gap-2"
-					:class="{ 'hidden': activeGenerator === 'stable_diffusion' }"
-				>
-					{{ __('Explain your idea') }}. |
-					<button
-						class="lqd-image-generator-random-prompt-trigger cursor-pointer text-green-600 hover:underline"
-						type="button"
-						x-data="{}"
-						@click="prompt = generateRandomPrompt()"
-					>
-						{{ __('Generate example prompt') }}
-					</button>
+    @if (setting('enabled_gpt_image_1_5', '0') != '0')
+        <div
+            class="lqd-image-generator-tabs-content lqd-image-generator-gpt-image-1-5 hidden"
+            x-data="{}"
+            :class="{ 'hidden': activeGenerator !== 'gpt_image_1_5' }"
+        >
+            <form
+                class="lqd-image-generator-dalle-form flex flex-col items-start gap-4"
+                id="openai_generator_form"
+                onsubmit="return sendOpenaiGeneratorForm();"
+                x-data="{ advancedSettingsShow: false }"
+            >
+                <h3
+                    class="flex w-full flex-wrap items-center gap-2"
+                    :class="{ 'hidden': activeGenerator === 'stable_diffusion' }"
+                >
+                    {{ __('Explain your idea') }}. |
+                    <button
+                        class="lqd-image-generator-random-prompt-trigger cursor-pointer text-green-600 hover:underline"
+                        type="button"
+                        x-data="{}"
+                        @click="prompt = generateRandomPrompt()"
+                    >
+                        {{ __('Generate example prompt') }}
+                    </button>
 
-					@if (setting('user_ai_image_prompt_library') === null || setting('user_ai_image_prompt_library'))
-						<button
-							class="lqd-generator-templates-trigger flex size-10 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full text-heading-foreground transition-all max-md:h-auto max-md:w-auto max-md:bg-transparent md:hover:bg-heading-background md:hover:text-heading-foreground"
-							type="button"
-							@click.prevent="togglePromptLibraryShow()"
-						>
-							<x-tabler-article
-								class="size-6"
-								stroke-width="1.5"
-							/>
-							<span class="md:hidden">{{ __('Browse prompt library') }}</span>
-						</button>
-					@endif
-				</h3>
+                    @if (setting('user_ai_image_prompt_library') === null || setting('user_ai_image_prompt_library'))
+                        <button
+                            class="lqd-generator-templates-trigger flex size-10 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full text-heading-foreground transition-all max-md:h-auto max-md:w-auto max-md:bg-transparent md:hover:bg-heading-background md:hover:text-heading-foreground"
+                            type="button"
+                            @click.prevent="togglePromptLibraryShow()"
+                        >
+                            <x-tabler-article
+                                class="size-6"
+                                stroke-width="1.5"
+                            />
+                            <span class="md:hidden">{{ __('Browse prompt library') }}</span>
+                        </button>
+                    @endif
+                </h3>
 
-				<div class="lqd-image-generator-inputs-wrap relative w-full">
-					@foreach (json_decode($openai->questions, false, 512, JSON_THROW_ON_ERROR) ?? [] as $question)
-						@if ($question->type === 'textarea')
-							<x-forms.input
-								class="lqd-image-generator-prompt h-14 resize-none overflow-hidden rounded-full bg-background px-6 py-4 text-heading-foreground shadow-sm placeholder:text-foreground/50 max-md:min-h-32 max-md:rounded-md"
-								id="gpt_1_5_{{ $question->name }}"
-								type="textarea"
-								name="gpt_1_5_{{ $question->name }}"
-								x-data="{}"
-								::value="prompt"
-								::placeholder="generateRandomPrompt()"
-							/>
-						@endif
-					@endforeach
+                <div class="lqd-image-generator-inputs-wrap relative w-full">
+                    @foreach (json_decode($openai->questions, false, 512, JSON_THROW_ON_ERROR) ?? [] as $question)
+                        @if ($question->type === 'textarea')
+                            <x-forms.input
+                                class="lqd-image-generator-prompt h-14 resize-none overflow-hidden rounded-full bg-background px-6 py-4 text-heading-foreground shadow-sm placeholder:text-foreground/50 max-md:min-h-32 max-md:rounded-md"
+                                id="gpt_1_5_{{ $question->name }}"
+                                type="textarea"
+                                name="gpt_1_5_{{ $question->name }}"
+                                x-data="{}"
+                                ::value="prompt"
+                                ::placeholder="generateRandomPrompt()"
+                            />
+                        @endif
+                    @endforeach
 
-					<x-button
-						class="absolute end-4 top-1/2 -translate-y-1/2 hover:-translate-y-1/2 hover:scale-110 max-lg:relative max-lg:right-auto max-lg:top-auto max-lg:mt-2 max-lg:w-full max-lg:translate-y-0"
-						id="gpt_openai_generator_button"
-						tag="button"
-						type="submit"
-					>
-						{{ __('Generate') }}
-						<x-tabler-arrow-right class="size-5" />
-					</x-button>
-				</div>
+                    <x-button
+                        class="absolute end-4 top-1/2 -translate-y-1/2 hover:-translate-y-1/2 hover:scale-110 max-lg:relative max-lg:right-auto max-lg:top-auto max-lg:mt-2 max-lg:w-full max-lg:translate-y-0"
+                        id="gpt_openai_generator_button"
+                        tag="button"
+                        type="submit"
+                    >
+                        {{ __('Generate') }}
+                        <x-tabler-arrow-right class="size-5" />
+                    </x-button>
+                </div>
 
-				<x-button
-					class="lqd-generator-advanced-trigger group text-3xs font-semibold text-heading-foreground"
-					::class="{ 'active': advancedSettingsShow }"
-					tag="button"
-					type="button"
-					variant="link"
-					@click="advancedSettingsShow = !advancedSettingsShow"
-				>
-					{{ __('Advanced Settings') }}
-					<span class="inline-flex size-9 items-center justify-center rounded-full bg-background shadow-sm">
+                <x-button
+                    class="lqd-generator-advanced-trigger group text-3xs font-semibold text-heading-foreground"
+                    ::class="{ 'active': advancedSettingsShow }"
+                    tag="button"
+                    type="button"
+                    variant="link"
+                    @click="advancedSettingsShow = !advancedSettingsShow"
+                >
+                    {{ __('Advanced Settings') }}
+                    <span class="inline-flex size-9 items-center justify-center rounded-full bg-background shadow-sm">
                         <x-tabler-plus
-							class="size-4"
-							::class="{ 'hidden': advancedSettingsShow }"
-						/>
+                            class="size-4"
+                            ::class="{ 'hidden': advancedSettingsShow }"
+                        />
                         <x-tabler-minus
-							class="hidden size-4"
-							::class="{ 'hidden': !advancedSettingsShow }"
-						/>
+                            class="hidden size-4"
+                            ::class="{ 'hidden': !advancedSettingsShow }"
+                        />
                     </span>
-				</x-button>
+                </x-button>
 
-				<div
-					class="hidden w-full flex-wrap justify-between gap-3"
-					x-data="{}"
-					x-show="advancedSettingsShow"
-					:class="{ 'hidden': !advancedSettingsShow, 'flex': advancedSettingsShow }"
-				>
-					@include('panel.user.openai.components.generator_image_gpt_image_1_5_options')
-				</div>
-			</form>
-		</div>
-	@endif
+                <div
+                    class="hidden w-full flex-wrap justify-between gap-3"
+                    x-data="{}"
+                    x-show="advancedSettingsShow"
+                    :class="{ 'hidden': !advancedSettingsShow, 'flex': advancedSettingsShow }"
+                >
+                    @include('panel.user.openai.components.generator_image_gpt_image_1_5_options')
+                </div>
+            </form>
+        </div>
+    @endif
 
     <div
         class="lqd-image-generator-tabs-content lqd-image-generator-stablediffusion hidden"
@@ -815,7 +818,9 @@
         @includeFirst(['flux-pro::flux-2-flex-tab-body', 'panel.user.openai.includes.flux-2-flex-tab-body', 'vendor.empty'])
         @includeFirst(['ideogram::ideogram-tab-body', 'panel.user.openai.includes.ideogram-tab-body', 'vendor.empty'])
         @includeIf('nano-banana::nano-banana-tab-body')
+        @includeIf('panel.user.openai.includes.grok-imagine-tab-body')
         @includeIf('nano-banana::nano-banana-pro-tab-body')
+        @includeIf('nano-banana::nano-banana-2-tab-body')
         @includeIf('see-dream-v4::see-dream-v4-tab-body')
     @endif
 
@@ -1231,9 +1236,9 @@
 
         function handleTabClick(type) {
             stablediffusionType = type;
-            let imageResolution = document.getElementById("image_resolution");
-            let negativePrompt = document.getElementById("negative_prompt");
-            let clipGuidancePreset = document.getElementById("clip_guidance_preset");
+            let imageResolution = document.getElementById('image_resolution');
+            let negativePrompt = document.getElementById('negative_prompt');
+            let clipGuidancePreset = document.getElementById('clip_guidance_preset');
             imageResolution.disabled = false;
             negativePrompt.disabled = false;
             clipGuidancePreset.disabled = false;
@@ -1241,13 +1246,13 @@
                 case 'text-to-image':
                     break;
                 case 'image-to-image':
-                    clipGuidancePreset.value = "";
+                    clipGuidancePreset.value = '';
                     clipGuidancePreset.disabled = true;
                     break;
                 case 'upscale':
                     imageResolution.disabled = true;
-                    clipGuidancePreset.value = "";
-                    clipGuidancePreset.disabled = true
+                    clipGuidancePreset.value = '';
+                    clipGuidancePreset.disabled = true;
                     break;
                 case 'multi-prompt':
                     negativePrompt.disabled = true;
@@ -1256,21 +1261,21 @@
         }
 
         function handleAddPrompt() {
-            const mulPromptsContainer = document.querySelector('.multi-prompts')
-            const promptTemplate = document.querySelector('#prompt-template').content.cloneNode(true)
-            const removeBtn = promptTemplate.querySelector('[data-toggle="remove-parent"]')
+            const mulPromptsContainer = document.querySelector('.multi-prompts');
+            const promptTemplate = document.querySelector('#prompt-template').content.cloneNode(true);
+            const removeBtn = promptTemplate.querySelector('[data-toggle="remove-parent"]');
             removeBtn.addEventListener('click', (e) => {
                 event.preventDefault();
                 e.currentTarget.parentElement.remove();
-            })
-            mulPromptsContainer.append(promptTemplate)
+            });
+            mulPromptsContainer.append(promptTemplate);
         }
 
         function dropHandler(ev, id) {
             // Prevent default behavior (Prevent file from being opened)
             ev.preventDefault();
             $('#' + id)[0].files = ev.dataTransfer.files;
-            $('#' + id).prev().find(".file-name").text(ev.dataTransfer.files[0].name);
+            $('#' + id).prev().find('.file-name').text(ev.dataTransfer.files[0].name);
         }
 
         function dragOverHandler(ev) {
@@ -1279,15 +1284,15 @@
         }
 
         function handleFileSelect(id) {
-            $('#' + id).prev().find(".file-name").text($('#' + id)[0].files[0].name);
+            $('#' + id).prev().find('.file-name').text($('#' + id)[0].files[0].name);
         }
 
         function resizeImage(e) {
             var file;
             if (stablediffusionType == 'image-to-image') {
-                file = $("#img2img_src")[0].files[0];
+                file = $('#img2img_src')[0].files[0];
             } else if (stablediffusionType == 'upscale') {
-                file = $("#upscale_src")[0].files[0];
+                file = $('#upscale_src')[0].files[0];
             }
             if (file == undefined) return;
             var reader = new FileReader();
@@ -1295,10 +1300,10 @@
                 var img = new Image();
                 img.onload = function() {
                     var canvas = document.createElement('canvas');
-                    var ctx = canvas.getContext("2d");
-                    const img_size = $("#image_resolution").val();
-                    let w = Number(img_size.split("x")[0]);
-                    let h = Number(img_size.split("x")[1]);
+                    var ctx = canvas.getContext('2d');
+                    const img_size = $('#image_resolution').val();
+                    let w = Number(img_size.split('x')[0]);
+                    let h = Number(img_size.split('x')[1]);
                     if (stablediffusionType == 'upscale') {
                         if (this.width % 64 != 0) {
                             w = Math.floor(this.width / 64) * 64 + 64;
@@ -1323,9 +1328,9 @@
                     }
                     canvas.width = w;
                     canvas.height = h;
-                    var ctx = canvas.getContext("2d");
+                    var ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    var dataurl = canvas.toDataURL("image/png");
+                    var dataurl = canvas.toDataURL('image/png');
                     var byteString = atob(dataurl.split(',')[1]);
                     var mimeString = dataurl.split(',')[0].split(':')[1].split(';')[0];
                     var ab = new ArrayBuffer(byteString.length);
@@ -1337,19 +1342,19 @@
                         type: mimeString
                     });
                     resizedImage = new File([blob], file.name);
-                }
+                };
                 img.src = event.target.result;
-            }
+            };
             reader.readAsDataURL(file);
         }
 
-        document.getElementById("img2img_src").addEventListener('change', resizeImage);
-        document.getElementById("upscale_src").addEventListener('change', resizeImage);
-        document.getElementById("image_resolution").addEventListener('change', resizeImage);
+        document.getElementById('img2img_src').addEventListener('change', resizeImage);
+        document.getElementById('upscale_src').addEventListener('change', resizeImage);
+        document.getElementById('image_resolution').addEventListener('change', resizeImage);
         // document.getElementById("image_model").addEventListener('change', dallEModelChange);
 
         (() => {
-            "use strict";
+            'use strict';
 
             const itemsPerPage = {{ $items_per_page }};
             let offset = itemsPerPage;
@@ -1364,7 +1369,7 @@
                 if (entry.isIntersecting) {
                     if (loadMoreTrigger.classList.contains('lqd-is-loading')) return;
                     createSkeleton(imageResultTemplate, nextCount);
-                    lazyLoadImages()
+                    lazyLoadImages();
                 }
             }, {
                 threshold: [1]
@@ -1453,6 +1458,8 @@
     @includeFirst(['flux-pro::flux-2-flex-script', 'panel.user.openai.includes.flux-2-flex-script', 'vendor.empty'])
     @includeFirst(['ideogram::ideogram-script', 'panel.user.openai.includes.ideogram-script', 'vendor.empty'])
     @includeIf('nano-banana::nano-banana-script')
+    @includeIf('panel.user.openai.includes.grok-imagine-script')
     @includeIf('nano-banana::nano-banana-pro-script')
+    @includeIf('nano-banana::nano-banana-2-script')
     @includeIf('see-dream-v4::see-dream-v4-script')
 @endpush

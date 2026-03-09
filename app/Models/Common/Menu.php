@@ -21,6 +21,7 @@ class Menu extends Model
         'is_active',
         'params',
         'type',
+        'badge',
         'extension',
         'bolt_menu',
         'bolt_background',

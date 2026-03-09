@@ -155,7 +155,7 @@ class AnnouncementController extends Controller
             return;
         }
 
-        if (cache()->has('public_announcements') && cache('public_announcements') === []) {
+        if (Cache::has('public_announcements') && Cache::get('public_announcements') === []) {
             Cache::forget('public_announcements');
         }
 

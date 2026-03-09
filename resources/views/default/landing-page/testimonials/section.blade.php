@@ -46,15 +46,27 @@
                         </div>
                     </div>
                     <div class="flex justify-center gap-20 opacity-80 max-lg:gap-12 max-sm:gap-4">
-                        @foreach ($clients as $entry)
-                            <img
-                                class="h-full w-full object-cover object-center"
-                                style="max-width: 48px; max-height: 48px;"
-                                src="{{ url('') . isset($entry->avatar) ? (str_starts_with($entry->avatar, 'asset') ? custom_theme_url($entry->avatar) : '/clientAvatar/' . $entry->avatar) : custom_theme_url('assets/img/auth/default-avatar.png') }}"
-                                alt="{{ __($entry->alt) }}"
-                                title="{{ __($entry->title) }}"
-                            >
-                        @endforeach
+						@foreach ($clients as $entry)
+							@php
+								$avatarSrc = custom_theme_url('assets/img/auth/default-avatar.png');
+
+								if (isset($entry->avatar)) {
+									if (str_starts_with($entry->avatar, 'asset')) {
+										$avatarSrc = custom_theme_url($entry->avatar);
+									} else {
+										$avatarSrc = url('') . '/clientAvatar/' . $entry->avatar;
+									}
+								}
+							@endphp
+
+							<img
+								class="h-full w-full object-cover object-center"
+								style="max-width: 48px; max-height: 48px;"
+								src="{{ $avatarSrc }}"
+								alt="{{ __($entry->alt) }}"
+								title="{{ __($entry->title) }}"
+							>
+						@endforeach
                     </div>
                 </div>
             </div>

@@ -18,9 +18,7 @@ class EntityManager extends Manager
 {
     public function getDefaultDriver(): string
     {
-        $defaultWordModel = $this->defaultWordModel();
-
-        return $defaultWordModel->value;
+        return $this->defaultWordModel()->value;
     }
 
     /**

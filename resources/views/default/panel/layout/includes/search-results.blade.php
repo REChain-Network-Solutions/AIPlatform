@@ -34,7 +34,7 @@
                         case 'ai_webchat':
                             $href = 'dashboard.user.openai.webchat.workbook';
                             break;
-                        case 'ai_webchat':
+                        case 'ai_rewriter':
                             $href = 'dashboard.user.openai.rewrite';
                             break;
                     }
@@ -126,7 +126,7 @@
     </ul>
 @endif
 
-@if (isset($result) and $result == 'null')
+@if (isset($result) && ! $result)
     <div class="p-6 text-center font-medium text-heading-foreground">
         <h3 class="mb-2">{{ __('No results.') }}</h3>
         <p class="opacity-70">{{ __('Please try with another word.') }}</p>

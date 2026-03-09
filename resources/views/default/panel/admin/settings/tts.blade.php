@@ -116,6 +116,22 @@
                                 value="{{ $app_is_demo ? '******************' : $settings_two->elevenlabs_api_key }}"
                         >
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ __(':label TTS Model', ['label' => \App\Domains\Engine\Enums\EngineEnum::ELEVENLABS->label()]) }}</label>
+                        <select
+                            class="form-control"
+                            id="tts_elevenlabs_model"
+                            name="tts_elevenlabs_model"
+                            {{ $app_is_demo ? 'disabled' : '' }}
+                        >
+                            <option value="{{ \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS->value }}" {{ setting('tts_elevenlabs_model', \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS->value) === \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS->value ? 'selected' : '' }}>
+                                {{ __('ElevenLabs Multilingual v2 (Legacy)') }}
+                            </option>
+                            <option value="{{ \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS_V3->value }}" {{ setting('tts_elevenlabs_model', \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS->value) === \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS_V3->value ? 'selected' : '' }}>
+                                {{ __('ElevenLabs v3') }}
+                            </option>
+                        </select>
+                    </div>
                 </x-card>
 
             </div>

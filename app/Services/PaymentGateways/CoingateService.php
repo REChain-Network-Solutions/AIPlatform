@@ -14,13 +14,13 @@ use App\Models\User;
 use App\Models\UserOrder;
 use App\Services\Contracts\BaseGatewayService;
 use App\Services\PaymentGateways\Contracts\CreditUpdater;
-use Arr;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -165,7 +165,7 @@ class CoingateService implements BaseGatewayService
 
         $plan = Plan::query()->where('id', $planID)->first();
 
-        $total = $plan->price;
+        $total = $plan?->price;
 
         $user = self::createSubscriber();
 
@@ -180,26 +180,26 @@ class CoingateService implements BaseGatewayService
 
         $client = self::client();
 
-        $request = $client->request('POST', 'api/v2/billing/subscriptions', [
+        $response = $client?->request('POST', 'api/v2/billing/subscriptions', [
             'subscription_id' => 'TEST-' . $user->id,
             'subscriber'      => $user->getAttribute('coingate_subscriber_id'),
             'details'         => $gatewayProduct->getAttribute('product_id'),
             'start_date'      => date('Y-m-d H:i:s'),
         ]);
 
-        $request = self::objectToArray($request);
+        $response = self::objectToArray($response);
 
-        if (array_key_exists('id', $request)) {
-            $id = $request['id'];
+        if (array_key_exists('id', $response)) {
+            $id = $response['id'];
 
             // payment activate
-            $client->request(
+            $client?->request(
                 'PATCH',
                 'api/v2/billing/subscriptions/' . $id . '/activate', [
                     'id' => $id,
                 ]);
 
-            $payment = $client->request(
+            $payment = $client?->request(
                 'GET',
                 '/api/v2/billing/subscriptions/' . $id . '/payments', [
                     'id' => $id,
@@ -346,7 +346,7 @@ class CoingateService implements BaseGatewayService
 
         $client = self::client();
 
-        $request = $client->request('POST', 'api/v2/orders', [
+        $response = $client->request('POST', 'api/v2/orders', [
             'order_id'         => $orderID,
             'price_amount'     => $plan->price,
             'price_currency'   => $plan->currency,
@@ -360,12 +360,12 @@ class CoingateService implements BaseGatewayService
             'purchaser_email'  => $user->email,
         ]);
 
-        $request = self::objectToArray($request);
+        $response = self::objectToArray($response);
 
-        $order->update(['payload' => $request]);
+        $order->update(['payload' => $response]);
 
-        if (array_key_exists('id', $request)) {
-            $id = $request['id'];
+        if (array_key_exists('id', $response)) {
+            $id = $response['id'];
 
             $order->update(['order_id' => $id]);
             \App\Models\Usage::getSingle()->updateSalesCount($plan->price);
@@ -537,16 +537,16 @@ class CoingateService implements BaseGatewayService
 
                 if ($status == 'active') {
                     return true;
-                } else {
-                    if ($subscription->getAttribute('created_at') < Carbon::now()->subHours(2)) {
-                        $subscription->update([
-                            'stripe_status' => 'cancelled',
-                            'ends_at'       => \Carbon\Carbon::now(),
-                        ]);
-                    }
-
-                    return false;
                 }
+
+                if ($subscription->getAttribute('created_at') < Carbon::now()->subHours(2)) {
+                    $subscription->update([
+                        'stripe_status' => 'cancelled',
+                        'ends_at'       => \Carbon\Carbon::now(),
+                    ]);
+                }
+
+                return false;
             } catch (Exception $th) {
                 if ($subscription->getAttribute('created_at') < Carbon::now()->subHours(2)) {
                     $subscription->update([
@@ -616,9 +616,7 @@ class CoingateService implements BaseGatewayService
             ? $gateway->getAttribute('sandbox_client_secret')
             : $gateway->getAttribute('live_client_secret');
 
-        $client = new \CoinGate\Client($secret, $mode);
-
-        return $client;
+        return new \CoinGate\Client($secret, $mode);
     }
 
     public static function geteway(): Model|Builder|null

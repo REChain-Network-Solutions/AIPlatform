@@ -5,9 +5,18 @@
         $value < 0,
     'text-green-600 bg-green-500/10' => $value > 0,
 ])>
-    <x-dynamic-component
-        class="size-3"
-        :component="$value == 0 ? 'tabler-minus' : ($value < 0 ? 'tabler-chevron-down' : 'tabler-chevron-up')"
-    />
+	@php
+		$component = 'tabler-minus';
+		if ($value < 0) {
+			$component = 'tabler-chevron-down';
+		} elseif ($value > 0) {
+			$component = 'tabler-chevron-up';
+		}
+	@endphp
+
+	<x-dynamic-component
+		class="size-3"
+		:component="$component"
+	/>
     {{ $value }}%
 </span>

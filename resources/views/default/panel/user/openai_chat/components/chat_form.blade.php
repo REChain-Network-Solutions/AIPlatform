@@ -16,7 +16,7 @@
         setSearchPromptStr(str) { this.searchPromptStr = str.trim().toLowerCase() },
         prompt: '',
         setPrompt(prompt) { this.prompt = prompt },
-        focusOnPrompt() { $nextTick(() => $refs.prompt.focus()) }
+        focusOnPrompt() { this.$nextTick(() => this.$refs.prompt?.focus()) }
     }"
 >
     {{-- using form element cause issues in webchat after analyzing a website --}}

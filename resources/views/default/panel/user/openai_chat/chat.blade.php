@@ -216,7 +216,7 @@
                 style="background-image: url('{{ !empty($chat->category->image) ? custom_theme_url($chat->category->image, true) : url(custom_theme_url('/assets/img/auth/default-avatar.png')) }}')"
             >
                 <span class="sr-only">
-                    @lang('AI Assistant'):
+                    {{ __($chat?->category?->name ?? 'AI Assistant') }}
                 </span>
             </span>
             <div
@@ -446,6 +446,9 @@
 
     <script src="{{ custom_theme_url('/assets/libs/prism/prism.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/markdownit/markdown-it.min.js') }}"></script>
+    <script src="{{ custom_theme_url('/assets/libs/markdownit/markdown-it-container.min.js') }}"></script>
+    <script src="{{ custom_theme_url('/assets/libs/markdownit/markdown-it-attrs.browser.min.js') }}"></script>
+    <script src="{{ custom_theme_url('/assets/libs/fslightbox/fslightbox.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/html2pdf/html2pdf.bundle.min.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/turndown.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/katex/katex.min.js') }}"></script>

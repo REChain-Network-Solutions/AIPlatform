@@ -3,7 +3,7 @@
 }
 
 .lqd-navbar-logo {
-	@apply lg:sticky top-0 start-0 z-40 lg:before:absolute lg:before:top-0 lg:before:-bottom-4 lg:before:-start-navbar-ps lg:before:-end-navbar-pe lg:before:backdrop-blur-2xl lg:before:[mask-image:linear-gradient(to_bottom,black,black_calc(100%-1rem),transparent_calc(100%-1rem))];
+	@apply lg:sticky top-0 start-0 z-40;
 }
 
 .chat-list-item {
@@ -138,7 +138,7 @@
 
 		&[data-theme=default] {
 
-			.lqd-navbar-item:has(.lqd-navbar-label:only-child) {
+			.lqd-navbar-item:has(.lqd-navbar-label-wrap:only-child) {
 				@apply hidden;
 			}
 		}

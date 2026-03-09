@@ -72,6 +72,8 @@ class SubscriptionPlanCreate extends Component
             'plan.hidden_url'                              => 'nullable',
             'plan.social_media_agent_limits.agents'        => 'nullable|integer|min:-1',
             'plan.social_media_agent_limits.monthly_posts' => 'nullable|integer|min:-1',
+            'plan.blogpilot_limits.agents'                 => 'nullable|integer|min:-1',
+            'plan.blogpilot_limits.monthly_posts'          => 'nullable|integer|min:-1',
         ],
             // Step 2
             $this->rulesOfPlanAiTools(),
@@ -148,6 +150,7 @@ class SubscriptionPlanCreate extends Component
         $isSensitiveDataChanged = $this->isSensitiveDataChanged();
         $this->changePlanValuesWithSuppliedEntities();
         $this->normalizeSocialMediaAgentLimits();
+        $this->normalizeBlogPilotLimits();
         $this->plan->save();
         if ($isSensitiveDataChanged) {
             PaymentProcessController::saveGatewayProducts($this->plan, $this->gatewaysToCreatePriceIds);
@@ -223,6 +226,22 @@ class SubscriptionPlanCreate extends Component
         }
 
         $this->plan->social_media_agent_limits = $limits;
+    }
+
+    private function normalizeBlogPilotLimits(): void
+    {
+        $limits = (array) ($this->plan->blogpilot_limits ?? []);
+        foreach (['agents', 'monthly_posts'] as $key) {
+            $value = $limits[$key] ?? null;
+            if ($value === null || $value === '') {
+                $limits[$key] = -1;
+
+                continue;
+            }
+            $limits[$key] = max(-1, (int) $value);
+        }
+
+        $this->plan->blogpilot_limits = $limits;
     }
 
     private function isSensitiveDataChanged(): bool

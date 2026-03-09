@@ -265,7 +265,7 @@ trait InstallExtension
     public function copyFiles(): void
     {
 
-        $zipExtractPath = $zipExtractPath ?? $this->zipExtractPath;
+        $zipExtractPath = $this->zipExtractPath;
 
         $files = data_get($this->indexJsonArray, 'stubs');
 

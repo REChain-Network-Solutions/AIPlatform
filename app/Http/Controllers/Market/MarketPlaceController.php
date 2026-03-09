@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 
 class MarketPlaceController extends Controller
@@ -174,7 +175,7 @@ class MarketPlaceController extends Controller
     public function extensionActivate(Request $request, string $token)
     {
 
-        cache()->forget('check_license_domain_' . $request->getHost());
+        Cache::forget('check_license_domain_' . $request->getHost());
 
         $data = Helper::decodePaymentToken($token);
 

@@ -90,26 +90,25 @@
 					</div>
 				</div>
 
-				@include('flux-pro::particles.enabled_flux_2_flex')
+
+				@includeIf('flux-pro::particles.enabled_flux_2_flex')
 			</x-card>
 
+			<div class="mb-3 w-full p-0 mt-3">
+				@php
+					$fluxDrivers = \App\Domains\Entity\EntityStats::image()
+						->filterByEngine(\App\Domains\Engine\Enums\EngineEnum::FAL_AI)
+						->list();
+					$current_flux_model = EntityEnum::fromSlug(setting('fal_ai_default_model', EntityEnum::FLUX_PRO->slug()))->slug();
+				@endphp
+				<x-model-select-list-with-change-alert :listLabel="'Default Flux Image Model'" :listId="'fal_ai_default_model'" currentModel="{{ $current_flux_model }}" :drivers="$fluxDrivers" />
+			</div>
 
-			<x-card
-                class="mb-3 max-md:text-center"
-                szie="lg"
-            >
-                <div class="mb-3">
-                    @php
-                        $fluxDrivers = \App\Domains\Entity\EntityStats::image()
-                            ->filterByEngine(\App\Domains\Engine\Enums\EngineEnum::FAL_AI)
-                            ->list();
-                        $current_flux_model = EntityEnum::fromSlug(setting('fal_ai_default_model', EntityEnum::FLUX_PRO->slug()))->slug();
-                    @endphp
-                    <x-model-select-list-with-change-alert :listLabel="'Default Flux Image Model'" :listId="'fal_ai_default_model'" currentModel="{{ $current_flux_model }}" :drivers="$fluxDrivers" />
-                </div>
-            </x-card>
+			@includeIf('social-media::setting.particles.ai-tools-settings')
         </div>
-        <button
+
+
+		<button
             class="btn btn-primary w-full"
             type="submit"
         >

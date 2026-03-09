@@ -9,6 +9,7 @@ use App\Models\SettingTwo;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -16,6 +17,8 @@ use RachidLaasri\LaravelInstaller\Repositories\ApplicationStatusRepository;
 
 class ExtensionRepository implements ExtensionRepositoryInterface
 {
+    private ?array $cachedAllResponse = null;
+
     public ?array $banners = [];
 
     public const APP_VERSION = 7.2;
@@ -115,26 +118,35 @@ class ExtensionRepository implements ExtensionRepositoryInterface
 
     public function all(bool $isTheme = false): array
     {
-        $appVersion = $this->appVersion();
+        // Fetch and cache full data once
+        if ($this->cachedAllResponse === null) {
+            $appVersion = $this->appVersion();
+            $response = $this->request('get', 'extension', [
+                'is_theme'    => $isTheme,
+                'is_beta'     => true,
+                'app_version' => $appVersion ?: 6.5,
+            ]);
 
-        $response = $this->request('get', 'extension', [
-            'is_theme'    => $isTheme,
-            'is_beta'     => true, // Bundle for beta versions
-            'app_version' => $appVersion ?: 6.5,
-        ]);
+            if ($response->ok()) {
+                $data = $response->json('data');
+                $this->banners = $response->json('banners') ?: [];
 
-        if ($response->ok()) {
+                // Cache full dataset
+                $this->cachedAllResponse = $data;
 
-            $data = $response->json('data');
-
-            $this->banners = $response->json('banners') ?: [];
-
-            $this->updateExtensionsTable($data);
-
-            return $this->mergedInstalled($data);
+                // Sync with DB
+                $this->updateExtensionsTable($data);
+            } else {
+                $this->cachedAllResponse = [];
+                $this->banners = [];
+            }
         }
 
-        return [];
+        // Filter cached data by type
+        return collect($this->cachedAllResponse)
+            ->where('is_theme', $isTheme)
+            ->sortBy('id')
+            ->toArray();
     }
 
     public function findId(int $id)
@@ -171,7 +183,7 @@ class ExtensionRepository implements ExtensionRepositoryInterface
 
             $data = $response->json('data');
 
-            $extension = Extension::query()->firstWhere('slug', $slug);
+            $extension = Extension::query()->where('slug', $slug)->firstOrFail();
 
             return array_merge($data, [
                 'only_show'  => Str::contains($extension['slug'], ['only-show']),
@@ -196,7 +208,7 @@ class ExtensionRepository implements ExtensionRepositoryInterface
         return Http::withHeaders([
             'Accept'         => 'application/json',
             'Content-Type'   => 'application/json',
-            'x-domain'       => request()->getHost(),
+            'x-domain'       => request()?->getHost(),
             'x-domain-key'   => $this->domainKey(),
             'x-license-type' => $this->licenseType(),
             'x-app-key'      => $this->appKey(),
@@ -212,7 +224,7 @@ class ExtensionRepository implements ExtensionRepositoryInterface
     {
         $domain = $request->getHost();
 
-        $check = cache()->remember('check_license_domain_' . $domain, 60 * 60 * 24, function () {
+        $check = Cache::remember('check_license_domain_' . $domain, 60 * 60 * 24, function () {
             return $this
                 ->request('post', 'check')
                 ->json('licensed');
@@ -225,7 +237,7 @@ class ExtensionRepository implements ExtensionRepositoryInterface
 
             SettingTwo::getCache()->update(['liquid_license_domain_key' => null]);
 
-            cache()->delete('check_license_domain_' . $domain);
+            Cache::delete('check_license_domain_' . $domain);
 
             return redirect()->route('LaravelInstaller::license')->with(['message' => 'License for this domain is invalid. Please contact support.']);
         }
@@ -235,7 +247,10 @@ class ExtensionRepository implements ExtensionRepositoryInterface
 
     public function mergedInstalled(array $data): array
     {
-        $extensions = Extension::query()->get();
+        $extensions = Extension::getCache(
+            static fn () => Extension::query()->get(),
+            '_all'
+        );
 
         return collect($data)->map(function ($extension) use ($extensions) {
             $value = $extensions->firstWhere('slug', $extension['slug']);
@@ -251,13 +266,33 @@ class ExtensionRepository implements ExtensionRepositoryInterface
 
     private function updateExtensionsTable(array $data): void
     {
+        $extensionsData = Extension::getCache(
+            static fn () => Extension::query()
+                ->get(['slug', 'is_theme'])
+                ->mapWithKeys(fn ($ext) => [$ext->slug . '|' . (int) $ext->is_theme => true])
+                ->toArray(),
+            'extensions:data'
+        );
+
+        $toInsert = [];
+
         foreach ($data as $extension) {
-            Extension::query()->firstOrCreate([
-                'slug'     => $extension['slug'],
-                'is_theme' => $extension['is_theme'],
-            ], [
-                'version' => $extension['version'],
-            ]);
+            $key = $extension['slug'] . '|' . (int) $extension['is_theme'];
+            if (! isset($extensionsData[$key])) {
+                $toInsert[] = [
+                    'slug'       => $extension['slug'],
+                    'is_theme'   => $extension['is_theme'],
+                    'version'    => $extension['version'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+                $extensionsData[$key] = true;
+            }
+        }
+
+        if (! empty($toInsert)) {
+            Extension::insert($toInsert);
+            Extension::forgetCache();
         }
     }
 
@@ -290,7 +325,7 @@ class ExtensionRepository implements ExtensionRepositoryInterface
 
     public function subscriptionPayment()
     {
-        return cache()->remember('subscription_payment', 60 * 60 * 24, function () {
+        return Cache::remember('subscription_payment', 60 * 60 * 24, function () {
 
             if ($this->subscription()->json('payment')) {
                 return $this->subscription()->json('payment');

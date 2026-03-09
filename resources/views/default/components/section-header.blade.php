@@ -13,8 +13,8 @@ if (empty($mb)) {
 }
 ?>
 
-<header class="{{ join(' ', $wrapper_classnames) }} max-xl:w-8/12 max-lg:w-10/12 max-md:w-full">
-    {{ $slot }}
-    <h2 class="lqd-section-header-title mb-[0.45em]">{{ $title }}</h2>
-    <p class="lqd-section-header-desc text-[18px] leading-[1.444em]">{{ $subtitle }}</p>
+<header class="{{ implode(' ', $wrapper_classnames) }} max-xl:w-8/12 max-lg:w-10/12 max-md:w-full">
+	{{ $slot }}
+	<h2 class="lqd-section-header-title mb-[0.45em]">{{ $title }}</h2>
+	<p class="lqd-section-header-desc text-[18px] leading-[1.444em]">{{ $subtitle }}</p>
 </header>

@@ -63,9 +63,30 @@ class CheckTemplateTypeAndPlan
             'dashboard.user.ai-presentation.index'       => 'ai_presentation',
         ];
 
+        // Wildcard route prefixes mapped to slugs
+        $wildcardRoutes = [
+            'dashboard.user.fashion-studio.' => 'ext_fashion_studio_dropdown',
+            'dashboard.user.ai-image-pro.'   => 'ai_image_pro',
+            'ai-image-pro.'                  => 'ai_image_pro',
+            'ai-chat-image.'                 => 'ai_chat_pro_image_chat',
+        ];
+
         $slugsToSkip = ['ai_realtime_voice_chat'];
-        if (! in_array($slug, $slugsToSkip, true) && array_key_exists($request->route()?->getName(), $routesDoesNotHaveAnySlug)) {
-            $slug = $routesDoesNotHaveAnySlug[$request->route()?->getName()];
+        $routeName = $request->route()?->getName();
+
+        if (! in_array($slug, $slugsToSkip, true)) {
+            if (array_key_exists($routeName, $routesDoesNotHaveAnySlug)) {
+                $slug = $routesDoesNotHaveAnySlug[$routeName];
+            } else {
+                // Check wildcard route prefixes
+                foreach ($wildcardRoutes as $prefix => $wildcardSlug) {
+                    if ($routeName && str_starts_with($routeName, $prefix)) {
+                        $slug = $wildcardSlug;
+
+                        break;
+                    }
+                }
+            }
         }
         // get openai record if the slug exist
         $openAi = OpenAIGenerator::query()
@@ -90,7 +111,7 @@ class CheckTemplateTypeAndPlan
             return ! ($isPremium === 1 || $isAccessTypePremium);
         }
         // now even if slug exist in route, openai table does not contain all slugs
-        $slugsNotInOpenAiGenerator = ['ai_chat_all', 'ai_editor', 'ai_writer', 'ai_social_media_extension', 'ext_chat_bot', 'brand_voice', 'photo_studio_extension', 'ext_ai_music_pro', 'ai_presentation'];
+        $slugsNotInOpenAiGenerator = ['ai_image_pro', 'ai_chat_pro_image_chat', 'ext_fashion_studio_dropdown', 'ai_chat_all', 'ai_editor', 'ai_writer', 'ai_social_media_extension', 'ext_chat_bot', 'brand_voice', 'photo_studio_extension', 'ext_ai_music_pro', 'ai_presentation'];
         // if openai record exist or slug is in the list of slugs that are not in openai generator
         if ($openAi || in_array($slug, $slugsNotInOpenAiGenerator, true)) {
             $setting = $this->settingSlug($slug);

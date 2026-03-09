@@ -1,10 +1,10 @@
 @php
-    $sales_prev_week = cache('sales_previous_week');
-    $sales_this_week = cache('sales_this_week');
+    $sales_prev_week =  cache()->get('sales_previous_week');
+    $sales_this_week =  cache()->get('sales_this_week');
 
-    $api_cost_distribution = cache('api_cost_distribution');
-    $popular_plans_data = cache('popular_plans_data');
-    $popular_tools_data = cache('popular_tools_data');
+    $api_cost_distribution =  cache()->get('api_cost_distribution');
+    $popular_plans_data =  cache()->get('popular_plans_data');
+    $popular_tools_data =  cache()->get('popular_tools_data');
     $currencySymbol = currency()->symbol;
 
     $premium_features = [
@@ -12,7 +12,7 @@
         'Access to All Current & Future Extensions <span class="font-bold text-[#6977DE]">worth $2000+</span>' => 'Always stay ahead with the latest features.',
         'Access to All Current & Future Themes <span class="font-bold text-[#6977DE]">worth $670</span>' => 'Always stay ahead with the latest designs.',
         'Get the Mobile App Free in Your 4th Month! <span class="font-bold text-[#6977DE]">worth $3000+</span>' =>
-            'Enjoy a free mobile app after your fourth month of subscription.',
+         'Enjoy a free mobile app after your fourth month of subscription.',
         '10 Hours of Custom Development Every Month' => 'Tailored improvements, at no extra cost.',
         'Direct Communication with Our Development Team' => 'No middlemen, just solutions.',
         'Exclusive Extensions Not Available to Others' => 'Stay ahead of competition, reserved for VIPs only.',
@@ -99,10 +99,10 @@
                 <x-slot:modal>
                     <div class="lqd-user-menu-list">
                         <ol class="lqd-menu-list flex flex-col gap-2">
-                            @foreach (cache('dashboard_widgets', []) as $widget)
-                                @if ($widget->name === \App\Enums\DashboardWidget::PREMIUM_ADVANTAGES)
-                                    @continue
-                                @endif
+                            @foreach ( cache()->get('dashboard_widgets', []) as $widget)
+								@if($widget->name === \App\Enums\DashboardWidget::PREMIUM_ADVANTAGES)
+									@continue
+								@endif
 
                                 <li
                                     class="group/item text-xs font-medium"
@@ -195,7 +195,7 @@
             {{-- begin: group-widgets --}}
             <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-11">
                 @php
-                    $widgets = cache('dashboard_widgets', []);
+                    $widgets =  cache()->get('dashboard_widgets', []);
                 @endphp
 
                 @foreach ($widgets as $widget)
@@ -291,7 +291,7 @@
             }
 
             @php
-                $daily_sales = json_decode(cache('daily_sales'));
+                $daily_sales = json_decode( cache()->get('daily_sales'));
 
                 if (empty($daily_sales) || !is_array($daily_sales)) {
                     $daily_sales = [];
@@ -301,7 +301,7 @@
                     $daily_sales = json_decode(json_encode(\App\Helpers\Classes\Helper::generateFakeDataLastMonth()));
                 }
 
-                $top_countries = json_decode(cache('top_countries'));
+                $top_countries = json_decode( cache()->get('top_countries'));
                 if (empty($top_countries) || !is_array($top_countries)) {
                     $top_countries = [];
                 }
@@ -310,7 +310,7 @@
                     $top_countries = json_decode(\App\Helpers\Classes\Helper::demoDataForAdminDashboardTopCountries());
                 }
 
-                $user_traffic = json_decode(cache('user_traffic'));
+                $user_traffic = json_decode( cache()->get('user_traffic'));
                 if (empty($user_traffic) || !is_array($user_traffic)) {
                     $user_traffic = [];
                 }
@@ -319,7 +319,7 @@
                     $user_traffic = json_decode(\App\Helpers\Classes\Helper::demoDataForAdminDashboardUserTraffic());
                 }
 
-                $new_customers = json_decode(cache('new_customers'));
+                $new_customers = json_decode( cache()->get('new_customers'));
 
                 if (\App\Helpers\Classes\Helper::appIsDemo()) {
                     $new_customers = json_decode(json_encode(\App\Helpers\Classes\Helper::generateFakeDataNewCustomer()));
@@ -1020,7 +1020,7 @@
             // End User Traffic
 
             // Start System Status
-            const availablePercentage = @json(cache('available_diskspace'));
+            const availablePercentage = @json( cache()->get('available_diskspace'));
             const systemStatusChartOptions = {
                 series: [availablePercentage, 100 - availablePercentage],
                 labels: [@json(__('Available')), @json(__('Used'))],

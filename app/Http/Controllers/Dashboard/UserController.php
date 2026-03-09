@@ -7,8 +7,9 @@ use App\Console\Commands\FluxProQueueCheck;
 use App\Domains\Engine\Enums\EngineEnum;
 use App\Domains\Entity\Models\Entity;
 use App\Domains\Marketplace\Repositories\Contracts\ExtensionRepositoryInterface;
-use App\Enums\Plan\FrequencyEnum;
-use App\Enums\Plan\TypeEnum;
+use App\Enums\AiImageStatusEnum;
+use App\Extensions\AiChatProImageChat\System\Models\AiChatProImageModel;
+use App\Extensions\AIImagePro\System\Models\AiImageProModel;
 use App\Extensions\AiVideoPro\System\Models\UserFall;
 use App\Helpers\Classes\ApiHelper;
 use App\Helpers\Classes\Helper;
@@ -19,13 +20,11 @@ use App\Jobs\SendInviteEmail;
 use App\Models\AccountDeletionReqs;
 use App\Models\Currency;
 use App\Models\Folders;
-use App\Models\Gateways;
 use App\Models\Integration\Integration;
 use App\Models\Integration\UserIntegration;
 use App\Models\OpenAIGenerator;
 use App\Models\OpenaiGeneratorChatCategory;
 use App\Models\OpenaiGeneratorFilter;
-use App\Models\Plan;
 use App\Models\Setting;
 use App\Models\SettingTwo;
 use App\Models\Team\Team;
@@ -43,6 +42,7 @@ use App\Services\GatewaySelector;
 use App\Services\Orders\OrdersExportService;
 use enshrined\svgSanitize\Sanitizer;
 use Exception;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -50,8 +50,10 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -106,24 +108,21 @@ class UserController extends Controller
 
     public function index()
     {
+        $user = Auth::user();
+        $user->load('folders');
         $this->service->setCache();
-
-        $isNotDemo = Helper::appIsNotDemo();
         $ongoingPayments = null;
         // $ongoingPayments = self::prepareOngoingPaymentsWarning();
-        // $user = Auth::user();
-        $team = null;
-        if ($isNotDemo) {
+        if (Helper::appIsNotDemo()) {
             PaymentProcessController::checkUnmatchingSubscriptions();
         }
 
-        $team = $this->getTeam(Auth::user());
-
         return view('panel.user.dashboard', [
-            'team'              => $team,
+            'user'              => $user,
+            'team'              => $this->getTeam($user),
             'ongoingPayments'   => $ongoingPayments,
             'recently_launched' => UserOpenai::query()
-                ->where('user_id', Auth::id())
+                ->where('user_id', $user->id)
                 ->orderBy('updated_at', 'desc')
                 ->limit(5)
                 ->get(),
@@ -133,15 +132,17 @@ class UserController extends Controller
     public function markTourSeen()
     {
         $user = Auth::user();
-        $user->tour_seen = true;
-        $user->save();
+        if ($user) {
+            $user->tour_seen = true;
+            $user->save();
+        }
 
         return response()->json(['status' => 'success']);
     }
 
-    public function getTeam(User $user)
+    public function getTeam(User|Authenticatable|null $user)
     {
-        if ($team = $user->myCreatedTeam) {
+        if ($team = $user?->myCreatedTeam) {
 
             if ($team->allow_seats != $user?->relationPlan?->plan_allow_seat) {
                 $team->allow_seats = $user?->relationPlan?->plan_allow_seat ?: 0;
@@ -151,7 +152,7 @@ class UserController extends Controller
             return $team;
         }
 
-        $allow_seats = $user->isAdmin() ? 100 : $user?->relationPlan?->plan_allow_seat;
+        $allow_seats = $user?->isAdmin() ? 100 : $user?->relationPlan?->plan_allow_seat;
 
         return Team::query()->firstOrCreate([
             'user_id' => auth()->id(),
@@ -297,15 +298,26 @@ class UserController extends Controller
     // docsFavorite
     public function docsFavorite(Request $request)
     {
-        $exists = isFavoritedDoc($request->id);
+        $documentId = $request->id;
+        $externalDocument = $this->parseExternalDocumentIdentifier((string) $request->id);
+
+        if ($externalDocument !== null) {
+            $documentId = $this->resolveExternalDocumentProxyId($externalDocument);
+
+            if ($documentId === null) {
+                return response()->json(['message' => __('Document not found.')], 404);
+            }
+        }
+
+        $exists = isFavoritedDoc($documentId);
         if ($exists) {
-            $favorite = UserDocsFavorite::where('user_openai_id', $request->id)->where('user_id', Auth::id())->firstOrFail();
+            $favorite = UserDocsFavorite::where('user_openai_id', $documentId)->where('user_id', Auth::id())->firstOrFail();
             $favorite->delete();
             $action = 'unfavorite';
         } else {
             $favorite = new UserDocsFavorite;
             $favorite->user_id = Auth::id();
-            $favorite->user_openai_id = $request->id;
+            $favorite->user_openai_id = $documentId;
             $favorite->save();
             $action = 'favorite';
         }
@@ -333,6 +345,10 @@ class UserController extends Controller
 
     public function openAIGenerator(Request $request, $slug)
     {
+        if (MarketplaceHelper::isRegistered('ai-image-pro') && setting('ai_image_pro_display_type', 'both_fm') === 'ai_image') {
+            return redirect()->route('dashboard.user.ai-image-pro.index');
+        }
+
         $openai = OpenAIGenerator::whereSlug($slug)->firstOrFail();
         if ($slug === 'ai_image_generator') {
             // FluxProQueueCheck::updateFluxProImages();
@@ -344,6 +360,9 @@ class UserController extends Controller
 
         $userOpenai = $this->openai($request, null)
             ->where('openai_id', $openai->id)
+            ->when($slug === 'ai_image_generator' && Schema::hasColumn('user_openai', 'is_fashion_studio'), function ($query) {
+                $query->where('is_fashion_studio', false);
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(5);
 
@@ -395,9 +414,9 @@ class UserController extends Controller
         }
 
         if ($settings2->openai_default_stream_server == 'backend') {
-            $apikeyPart1 = base64_encode(rand(1, 100));
-            $apikeyPart2 = base64_encode(rand(1, 100));
-            $apikeyPart3 = base64_encode(rand(1, 100));
+            $apikeyPart1 = base64_encode(random_int(1, 100));
+            $apikeyPart2 = base64_encode(random_int(1, 100));
+            $apikeyPart3 = base64_encode(random_int(1, 100));
         } else {
             // Fetch the Site Settings object with openai_api_secret
             $apiKey = ApiHelper::setOpenAiKey();
@@ -408,8 +427,8 @@ class UserController extends Controller
 
             $len = strlen($apiKey);
             $len = max($len, 6);
-            $parts[] = substr($apiKey, 0, $l[] = rand(1, $len - 5));
-            $parts[] = substr($apiKey, $l[0], $l[] = rand(1, $len - $l[0] - 3));
+            $parts[] = substr($apiKey, 0, $l[] = random_int(1, $len - 5));
+            $parts[] = substr($apiKey, $l[0], $l[] = random_int(1, $len - $l[0] - 3));
             $parts[] = substr($apiKey, array_sum($l));
             $apikeyPart1 = base64_encode($parts[0]);
             $apikeyPart2 = base64_encode($parts[1]);
@@ -470,7 +489,7 @@ class UserController extends Controller
                 ->whereNotIn('slug', [
                     'ai_vision', 'ai_webchat', 'ai_pdf',
                 ])
-                ->when(Auth::user()->isUser(), function ($query) {
+                ->when(Auth::user()?->isUser(), function ($query) {
                     $query->where(function ($query) {
                         $query->whereNull('user_id')->orWhere('user_id', Auth::id());
                     });
@@ -660,55 +679,11 @@ class UserController extends Controller
         return response()->json(['status' => 'success']);
     }
 
-    // Purchase
-    public function subscriptionPlans()
-    {
-
-        // check if any payment gateway enabled
-        $activeGateways = Gateways::where('is_active', 1)->get();
-        if ($activeGateways->count() > 0) {
-            $is_active_gateway = 1;
-        } else {
-            $is_active_gateway = 0;
-        }
-
-        // check if any subscription is active
-        $userId = Auth::user()->id;
-
-        $activeSub = getCurrentActiveSubscription($userId);
-        if ($activeSub != null) {
-            $activesubid = $activeSub->plan_id;
-        } else {
-            $activeSub_yokassa = getCurrentActiveSubscriptionYokkasa($userId);
-            if ($activeSub_yokassa != null) {
-                $activesubid = $activeSub_yokassa->plan_id;
-            } else {
-                $activesubid = 0;
-            }
-        }
-
-        $openAiList = OpenAIGenerator::query()->get();
-
-        $plansSubscriptionMonthly = Plan::where([['type', '=', TypeEnum::SUBSCRIPTION->value], ['frequency', '=', FrequencyEnum::MONTHLY->value], ['active', 1]])->get()->sortBy('price');
-        $plansSubscriptionLifetime = Plan::where([['type', '=', TypeEnum::SUBSCRIPTION->value], ['active', 1]])
-            ->where(function ($query) {
-                $query->where('frequency', '=', FrequencyEnum::LIFETIME_YEARLY->value)
-                    ->orWhere('frequency', '=', FrequencyEnum::LIFETIME_MONTHLY->value);
-            })
-            ->get()->sortBy('price');
-        $plansSubscriptionAnnual = Plan::where([['type', '=', TypeEnum::SUBSCRIPTION->value], ['frequency', '=', FrequencyEnum::YEARLY->value], ['active', 1]])->get()->sortBy('price');
-        $prepaidplans = Plan::where([['type', '=', TypeEnum::TOKEN_PACK->value], ['active', 1]])->get()->sortBy('price');
-
-        $view = 'panel.user.finance.subscriptionPlans';
-
-        return view($view, compact('plansSubscriptionMonthly', 'plansSubscriptionLifetime', 'plansSubscriptionAnnual', 'prepaidplans', 'openAiList', 'is_active_gateway', 'activeGateways', 'activesubid'));
-    }
-
     // Invoice - Billing
     public function invoiceList()
     {
         $user = Auth::user();
-        $list = $user->orders;
+        $list = $user?->orders;
 
         return view('panel.user.orders.index', compact('list'));
     }
@@ -756,14 +731,28 @@ class UserController extends Controller
         // Get all documents (no filter yet)
         $documents = $this->openai($request, $folderID)
             ->where('folder_id', $folderID)
+            ->where(function (Builder $query) {
+                $query->whereNull('slug')
+                    ->orWhere(function (Builder $query) {
+                        $query->where('slug', 'not like', 'ai-image-pro-%')
+                            ->where('slug', 'not like', 'ai-chat-pro-image-chat-%');
+                    });
+            })
             ->get();
 
         // Get all videos
         $videos = collect($this->getUserVideos($folderID));
 
-        // Merge everything first
-        $allItems = $documents->merge($videos);
+        // Get AI Image Pro images
+        $aiImageProImages = collect($this->getUserAiImageProImages($folderID));
+        $aiChatProImageChatImages = collect($this->getUserAiChatProImageChatImages($folderID));
 
+        // Merge everything first (use base collection concat to avoid Eloquent key-based deduplication)
+        $allItems = collect($documents)
+            ->concat($videos)
+            ->concat($aiImageProImages)
+            ->concat($aiChatProImageChatImages)
+            ->values();
         // Apply filter ONCE to merged collection
         $filteredItems = $this->applyFilter($allItems, $filter);
 
@@ -823,7 +812,13 @@ class UserController extends Controller
     protected function applyFilter($items, $filter)
     {
         return match ($filter) {
-            'favorites' => $items->filter(fn ($entry) => $entry->isFavoriteDoc()),
+            'favorites' => $items->filter(function ($entry) {
+                if (method_exists($entry, 'isFavoriteDoc')) {
+                    return $entry->isFavoriteDoc();
+                }
+
+                return (bool) ($entry->is_favorite_doc ?? false);
+            }),
             'text'      => $items->filter(fn ($entry) => $entry->generator?->type === 'text'),
             'image'     => $items->filter(fn ($entry) => $entry->generator?->type === 'image'),
             'video'     => $items->filter(fn ($entry) => $entry->generator?->type === 'video'),
@@ -872,7 +867,7 @@ class UserController extends Controller
                 $item->output_url = $item->video_url;
                 $item->url = $item->video_url;
                 $item->format_date = $item->created_at->format('M d, Y');
-                $item->model = $item->model ?? 'veo2';
+                $item->model ??= 'veo2';
                 $item->is_demo = $item->is_demo ?? 0;
                 $item->slug = Str::slug($item->title);
                 $item->generator = (object) [
@@ -891,8 +886,195 @@ class UserController extends Controller
         return $dbVideos->merge($userFallVideos)->sortByDesc('created_at');
     }
 
-    private function generateTitleFromPrompt(string $prompt): string
+    protected function getUserAiImageProImages($folderID = null): \Illuminate\Support\Collection
     {
+        if (
+            $folderID !== null || ! MarketplaceHelper::isRegistered('ai-image-pro')
+        ) {
+            return collect();
+        }
+
+        $favoriteSlugs = $this->getExternalFavoriteSlugLookup('ai-image-pro-');
+        $items = collect();
+        $records = AiImageProModel::query()
+            ->where('user_id', auth()->id())
+            ->where('status', AiImageStatusEnum::COMPLETED->value)
+            ->whereNotNull('generated_images')
+            ->latest('created_at')
+            ->get();
+
+        foreach ($records as $record) {
+            foreach (($record->generated_images ?? []) as $index => $generatedImage) {
+                if ($this->isVideoUrl($generatedImage)) {
+                    continue;
+                }
+
+                $item = clone $record;
+                $item->source = 'ai-image-pro';
+                $item->document_id = "aip-{$record->id}-{$index}";
+                $item->id = "aip-{$record->id}-{$index}";
+                $item->slug = "ai-image-pro-{$record->id}-{$index}";
+                $item->input = $record->prompt;
+                $item->output = $generatedImage;
+                $item->output_url = $generatedImage;
+                $item->credits = 1;
+                $item->is_favorite_doc = $favoriteSlugs->has($item->slug);
+                $item->generator = (object) [
+                    'id'    => null,
+                    'type'  => 'image',
+                    'title' => 'AI Image Pro',
+                    'color' => '#22c55e',
+                    'image' => 'none',
+                ];
+
+                $items->push($item);
+            }
+        }
+
+        return $items->sortByDesc('created_at')->values();
+    }
+
+    protected function getUserAiChatProImageChatImages($folderID = null): \Illuminate\Support\Collection
+    {
+        if (
+            $folderID !== null || ! MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')
+        ) {
+            return collect();
+        }
+
+        $favoriteSlugs = $this->getExternalFavoriteSlugLookup('ai-chat-pro-image-chat-');
+        $items = collect();
+        $records = AiChatProImageModel::query()
+            ->where('user_id', auth()->id())
+            ->where('status', AiImageStatusEnum::COMPLETED->value)
+            ->whereNotNull('generated_images')
+            ->latest('created_at')
+            ->get();
+
+        foreach ($records as $record) {
+            foreach (($record->generated_images ?? []) as $index => $generatedImage) {
+                if ($this->isVideoUrl($generatedImage)) {
+                    continue;
+                }
+
+                $item = clone $record;
+                $item->source = 'ai-chat-pro-image-chat';
+                $item->document_id = "aicpic-{$record->id}-{$index}";
+                $item->id = "aicpic-{$record->id}-{$index}";
+                $item->slug = "ai-chat-pro-image-chat-{$record->id}-{$index}";
+                $item->input = $record->prompt;
+                $item->output = $generatedImage;
+                $item->output_url = $generatedImage;
+                $item->credits = 1;
+                $item->is_favorite_doc = $favoriteSlugs->has($item->slug);
+                $item->generator = (object) [
+                    'id'    => null,
+                    'type'  => 'image',
+                    'title' => 'AI Chat Pro Image Chat',
+                    'color' => '#22c55e',
+                    'image' => 'none',
+                ];
+
+                $items->push($item);
+            }
+        }
+
+        return $items->sortByDesc('created_at')->values();
+    }
+
+    private function getExternalFavoriteSlugLookup(string $slugPrefix): \Illuminate\Support\Collection
+    {
+        return UserOpenai::query()
+            ->where('user_id', auth()->id())
+            ->where('slug', 'like', $slugPrefix . '%')
+            ->whereHas('isFavoriteDocRelation')
+            ->pluck('slug')
+            ->flip();
+    }
+
+    private function parseExternalDocumentIdentifier(string $documentId): ?array
+    {
+        if (! preg_match('/^(aip|aicpic)-(\d+)-(\d+)$/', $documentId, $matches)) {
+            return null;
+        }
+
+        $source = match ($matches[1]) {
+            'aip'    => 'ai-image-pro',
+            'aicpic' => 'ai-chat-pro-image-chat',
+            default  => null,
+        };
+
+        if ($source === null) {
+            return null;
+        }
+
+        return [
+            'source'       => $source,
+            'record_id'    => (int) $matches[2],
+            'image_index'  => (int) $matches[3],
+            'slug'         => $source . '-' . $matches[2] . '-' . $matches[3],
+        ];
+    }
+
+    private function resolveExternalDocumentProxyId(array $externalDocument): ?int
+    {
+        $proxy = UserOpenai::query()
+            ->where('user_id', auth()->id())
+            ->where('slug', $externalDocument['slug'])
+            ->first();
+
+        if ($proxy) {
+            return $proxy->id;
+        }
+
+        $workbook = match ($externalDocument['source']) {
+            'ai-image-pro'           => $this->resolveAiImageProWorkbookBySlug($externalDocument['slug']),
+            'ai-chat-pro-image-chat' => $this->resolveAiChatProImageChatWorkbookBySlug($externalDocument['slug']),
+            default                  => null,
+        };
+
+        if (! $workbook) {
+            return null;
+        }
+
+        $proxy = new UserOpenai;
+        $proxy->user_id = auth()->id();
+        $proxy->openai_id = $this->resolveExternalGeneratorId($externalDocument['source']);
+        $proxy->title = $workbook->title ?? $workbook->generator?->title;
+        $proxy->slug = $externalDocument['slug'];
+        $proxy->input = $workbook->input ?? '';
+        $proxy->response = $externalDocument['source'];
+        $proxy->output = $workbook->output ?? $workbook->output_url;
+        $proxy->credits = (string) ($workbook->credits ?? 1);
+        $proxy->words = '0';
+        $proxy->save();
+
+        return $proxy->id;
+    }
+
+    private function resolveExternalGeneratorId(string $source): ?int
+    {
+        $slug = $source === 'ai-chat-pro-image-chat' ? 'ai_chat_image' : 'ai_image_generator';
+
+        return OpenAIGenerator::query()
+            ->where('slug', $slug)
+            ->value('id');
+    }
+
+    private function isVideoUrl(string $url): bool
+    {
+        $videoExtensions = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'm4v'];
+        $extension = strtolower(pathinfo(parse_url($url, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+
+        return in_array($extension, $videoExtensions, true);
+    }
+
+    private function generateTitleFromPrompt(?string $prompt): string
+    {
+        if (empty($prompt)) {
+            return __('Untitled Video');
+        }
+
         $words = explode(' ', trim($prompt));
         $titleWords = array_slice($words, 0, 6); // Take first 6 words
         $title = implode(' ', $titleWords);
@@ -902,7 +1084,7 @@ class UserController extends Controller
             $title .= '...';
         }
 
-        return $title ?: 'Untitled Video';
+        return $title ?: __('Untitled Video');
     }
 
     protected function openai(Request $request, $folderID = null)
@@ -997,10 +1179,28 @@ class UserController extends Controller
         $workbook = null;
         $openai = null;
         $isUserFallVideo = false;
+        $isAiImagePro = false;
+        $isAiChatProImageChat = false;
 
-        $workbook = UserOpenai::where('slug', $slug)
-            ->where('user_id', auth()->user()->id)
-            ->first();
+        $aiImageProWorkbook = $this->resolveAiImageProWorkbookBySlug($slug);
+        if ($aiImageProWorkbook) {
+            $workbook = $aiImageProWorkbook;
+            $openai = $workbook->generator;
+            $isAiImagePro = true;
+        }
+
+        $aiChatProImageChatWorkbook = $this->resolveAiChatProImageChatWorkbookBySlug($slug);
+        if (! $workbook && $aiChatProImageChatWorkbook) {
+            $workbook = $aiChatProImageChatWorkbook;
+            $openai = $workbook->generator;
+            $isAiChatProImageChat = true;
+        }
+
+        if (! $workbook) {
+            $workbook = UserOpenai::where('slug', $slug)
+                ->where('user_id', auth()->user()->id)
+                ->first();
+        }
 
         if ($workbook) {
             $openai = $workbook->generator;
@@ -1059,7 +1259,7 @@ class UserController extends Controller
             $wordpressExist = false;
         }
 
-        $checkIntegration = Integration::query()->whereHas('hasExtension')->count();
+        $checkIntegration = ($isAiImagePro || $isAiChatProImageChat) ? 0 : Integration::query()->whereHas('hasExtension')->count();
 
         return view('panel.user.openai.documents_workbook', compact(
             'wordpressExist',
@@ -1073,6 +1273,21 @@ class UserController extends Controller
 
     public function documentsDelete($slug)
     {
+        if ($this->deleteAiImageProDocument($slug)) {
+            return redirect()->route('dashboard.user.openai.documents.all')
+                ->with([
+                    'message' => __('Document deleted successfully'),
+                    'type'    => 'success',
+                ]);
+        }
+        if ($this->deleteAiChatProImageChatDocument($slug)) {
+            return redirect()->route('dashboard.user.openai.documents.all')
+                ->with([
+                    'message' => __('Document deleted successfully'),
+                    'type'    => 'success',
+                ]);
+        }
+
         $workbook = null;
         $isUserFallVideo = false;
 
@@ -1131,6 +1346,197 @@ class UserController extends Controller
             ]);
     }
 
+    private function deleteAiImageProDocument(string $slug): bool
+    {
+        if (
+            ! str_starts_with($slug, 'ai-image-pro-')
+            || ! MarketplaceHelper::isRegistered('ai-image-pro')
+        ) {
+            return false;
+        }
+
+        if (! preg_match('/^ai-image-pro-(\d+)-(\d+)$/', $slug, $matches)) {
+            return false;
+        }
+
+        $recordId = (int) $matches[1];
+        $imageIndex = (int) $matches[2];
+
+        $record = AiImageProModel::query()
+            ->where('user_id', auth()->id())
+            ->find($recordId);
+
+        if (! $record) {
+            return false;
+        }
+
+        $images = $record->generated_images ?? [];
+
+        if (! array_key_exists($imageIndex, $images)) {
+            return false;
+        }
+
+        unset($images[$imageIndex]);
+
+        if (empty($images)) {
+            $record->delete();
+        } else {
+            $record->generated_images = $images;
+            $record->save();
+        }
+
+        UserOpenai::query()
+            ->where('user_id', auth()->id())
+            ->where('slug', $slug)
+            ->delete();
+
+        return true;
+    }
+
+    private function resolveAiImageProWorkbookBySlug(string $slug): ?AiImageProModel
+    {
+        if (
+            ! str_starts_with($slug, 'ai-image-pro-')
+            || ! MarketplaceHelper::isRegistered('ai-image-pro')
+        ) {
+            return null;
+        }
+
+        if (! preg_match('/^ai-image-pro-(\d+)-(\d+)$/', $slug, $matches)) {
+            return null;
+        }
+
+        $recordId = (int) $matches[1];
+        $imageIndex = (int) $matches[2];
+
+        $record = AiImageProModel::query()
+            ->where('user_id', auth()->id())
+            ->find($recordId);
+
+        if (! $record) {
+            return null;
+        }
+
+        $images = $record->generated_images ?? [];
+        if (! array_key_exists($imageIndex, $images)) {
+            return null;
+        }
+
+        $workbook = clone $record;
+        $workbook->source = 'ai-image-pro';
+        $workbook->id = "aip-{$record->id}-{$imageIndex}";
+        $workbook->slug = $slug;
+        $workbook->title = 'AI Image Pro';
+        $workbook->input = $record->prompt;
+        $workbook->output = $images[$imageIndex];
+        $workbook->output_url = $images[$imageIndex];
+        $workbook->credits = 1;
+        $workbook->generator = (object) [
+            'id'    => null,
+            'type'  => 'image',
+            'title' => 'AI Image Pro',
+            'color' => '#22c55e',
+            'image' => 'none',
+        ];
+
+        return $workbook;
+    }
+
+    private function deleteAiChatProImageChatDocument(string $slug): bool
+    {
+        if (
+            ! str_starts_with($slug, 'ai-chat-pro-image-chat-')
+            || ! MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')
+        ) {
+            return false;
+        }
+
+        if (! preg_match('/^ai-chat-pro-image-chat-(\d+)-(\d+)$/', $slug, $matches)) {
+            return false;
+        }
+
+        $recordId = (int) $matches[1];
+        $imageIndex = (int) $matches[2];
+
+        $record = AiChatProImageModel::query()
+            ->where('user_id', auth()->id())
+            ->find($recordId);
+
+        if (! $record) {
+            return false;
+        }
+
+        $images = $record->generated_images ?? [];
+        if (! array_key_exists($imageIndex, $images)) {
+            return false;
+        }
+
+        unset($images[$imageIndex]);
+
+        if (empty($images)) {
+            $record->delete();
+        } else {
+            $record->generated_images = $images;
+            $record->save();
+        }
+
+        UserOpenai::query()
+            ->where('user_id', auth()->id())
+            ->where('slug', $slug)
+            ->delete();
+
+        return true;
+    }
+
+    private function resolveAiChatProImageChatWorkbookBySlug(string $slug): ?AiChatProImageModel
+    {
+        if (
+            ! str_starts_with($slug, 'ai-chat-pro-image-chat-')
+            || ! MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')
+        ) {
+            return null;
+        }
+
+        if (! preg_match('/^ai-chat-pro-image-chat-(\d+)-(\d+)$/', $slug, $matches)) {
+            return null;
+        }
+
+        $recordId = (int) $matches[1];
+        $imageIndex = (int) $matches[2];
+
+        $record = AiChatProImageModel::query()
+            ->where('user_id', auth()->id())
+            ->find($recordId);
+
+        if (! $record) {
+            return null;
+        }
+
+        $images = $record->generated_images ?? [];
+        if (! array_key_exists($imageIndex, $images)) {
+            return null;
+        }
+
+        $workbook = clone $record;
+        $workbook->source = 'ai-chat-pro-image-chat';
+        $workbook->id = "aicpic-{$record->id}-{$imageIndex}";
+        $workbook->slug = $slug;
+        $workbook->title = 'AI Chat Pro Image Chat';
+        $workbook->input = $record->prompt;
+        $workbook->output = $images[$imageIndex];
+        $workbook->output_url = $images[$imageIndex];
+        $workbook->credits = 1;
+        $workbook->generator = (object) [
+            'id'    => null,
+            'type'  => 'image',
+            'title' => 'AI Chat Pro Image Chat',
+            'color' => '#22c55e',
+            'image' => 'none',
+        ];
+
+        return $workbook;
+    }
+
     public function documentsBulkDelete(Request $request)
     {
         if (Helper::appIsDemo()) {
@@ -1171,6 +1577,17 @@ class UserController extends Controller
                     }
                 }
 
+                if (MarketplaceHelper::isRegistered('ai-image-pro')) {
+                    AiImageProModel::query()
+                        ->where('user_id', $userId)
+                        ->delete();
+                }
+                if (MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')) {
+                    AiChatProImageModel::query()
+                        ->where('user_id', $userId)
+                        ->delete();
+                }
+
                 return response()->json([
                     'success' => true,
                     'message' => __('All documents deleted successfully.'),
@@ -1183,9 +1600,34 @@ class UserController extends Controller
                 return response()->json(['success' => false, 'message' => __('No documents selected.')], 400);
             }
 
+            foreach ($ids as $id) {
+                if (! is_string($id)) {
+                    continue;
+                }
+
+                $externalDocument = $this->parseExternalDocumentIdentifier($id);
+                if (! $externalDocument) {
+                    continue;
+                }
+
+                if ($externalDocument['source'] === 'ai-image-pro') {
+                    $this->deleteAiImageProDocument($externalDocument['slug']);
+                }
+
+                if ($externalDocument['source'] === 'ai-chat-pro-image-chat') {
+                    $this->deleteAiChatProImageChatDocument($externalDocument['slug']);
+                }
+            }
+
+            $numericIds = collect($ids)
+                ->filter(fn ($id) => is_numeric($id))
+                ->map(fn ($id) => (int) $id)
+                ->values()
+                ->all();
+
             // Delete UserOpenai documents
             $docs = UserOpenai::where('user_id', $userId)
-                ->whereIn('id', $ids)
+                ->whereIn('id', $numericIds)
                 ->get();
 
             foreach ($docs as $doc) {
@@ -1200,7 +1642,7 @@ class UserController extends Controller
             // Delete UserFall videos (if selected IDs match)
             if (class_exists(UserFall::class)) {
                 $videos = UserFall::where('user_id', $userId)
-                    ->whereIn('id', $ids)
+                    ->whereIn('id', $numericIds)
                     ->get();
 
                 foreach ($videos as $video) {
@@ -1540,9 +1982,9 @@ class UserController extends Controller
             $deletionRequest->save();
 
             return response()->json(['message' => __('Your account deletion request has been successfully submitted')], 200);
-        } else {
-            return response()->json(['message' => __('Password is incorrect')], 401);
         }
+
+        return response()->json(['message' => __('Password is incorrect')], 401);
     }
 
     public function exportInvoices(Request $request)
@@ -1569,18 +2011,27 @@ class UserController extends Controller
      */
     public function updateAvailable(ExtensionRepositoryInterface $extensionRepository): JsonResponse
     {
-        $versionUpdateAvailable = false;
-        $extensionUpdateAvailable = false;
-        $updateAvailableExtensions = [];
+        $cacheKey = 'system.update.status';
 
-        if (Updater::versionCheck()) {
-            $extensionItems = $extensionRepository->extensions();
-            $updateAvailableExtensions = array_filter($extensionItems, fn ($item) => $item['installed'] && $item['upgradable']);
-            $extensionUpdateAvailable = (bool) count($updateAvailableExtensions);
-        } else {
-            $versionUpdateAvailable = true;
-        }
+        $data = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($extensionRepository) {
+            $versionUpdateAvailable = false;
+            $extensionUpdateAvailable = false;
+            $updateAvailableExtensions = [];
 
-        return response()->json(compact('versionUpdateAvailable', 'extensionUpdateAvailable', 'updateAvailableExtensions'));
+            if (Updater::versionCheck()) {
+                $extensionItems = $extensionRepository->extensions();
+                $updateAvailableExtensions = array_filter(
+                    $extensionItems,
+                    static fn ($item) => ($item['installed'] ?? false) && ($item['upgradable'] ?? false)
+                );
+                $extensionUpdateAvailable = (bool) count($updateAvailableExtensions);
+            } else {
+                $versionUpdateAvailable = true;
+            }
+
+            return compact('versionUpdateAvailable', 'extensionUpdateAvailable', 'updateAvailableExtensions');
+        });
+
+        return response()->json($data);
     }
 }

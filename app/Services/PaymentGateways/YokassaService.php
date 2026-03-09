@@ -249,53 +249,53 @@ class YokassaService
             $activeSub->save();
 
             return 'success';
-        } else {
-            $client = new Client;
-            $client->setAuth($shop_id, $key);
-            $payment = $client->createPayment(
-                [
-                    'amount' => [
-                        'value'    => $total,
-                        'currency' => $currency,
-                    ],
-                    'capture'           => true,
-                    'payment_method_id' => $payment_method_id,
-                    'description'       => 'Auto payment',
-                ],
-                uniqid('', true)
-            );
-            if ($payment->paid == true) {
-                $payment = new UserOrder;
-                $payment->order_id = Str::random(12);
-                $payment->plan_id = $plan->id;
-                $payment->user_id = $user->id;
-                $payment->payment_type = 'Credit, Debit Card';
-                $payment->price = $total;
-                $payment->affiliate_earnings = ($total * $settings->affiliate_commission_percentage) / 100;
-                $payment->status = 'Success';
-                $payment->country = $user->country ?? 'Unknown';
-                $payment->tax_rate = $gateway->tax;
-                $payment->tax_value = $taxValue;
-                $payment->save();
-
-                $user = User::where('id', '=', $activeSub->user_id)->first();
-
-                self::creditIncreaseSubscribePlan($user, $plan);
-
-                \App\Models\Usage::getSingle()->updateSalesCount($total);
-
-                $activeSub->next_pay_at = Carbon::now()->addMonth();
-                $activeSub->save();
-
-                return 'success';
-            } else {
-                $activeSub->payment_method_id = '';
-                $activeSub->subscription_status = '';
-                $activeSub->save();
-
-                return 'false';
-            }
         }
+
+        $client = new Client;
+        $client->setAuth($shop_id, $key);
+        $payment = $client->createPayment(
+            [
+                'amount' => [
+                    'value'    => $total,
+                    'currency' => $currency,
+                ],
+                'capture'           => true,
+                'payment_method_id' => $payment_method_id,
+                'description'       => 'Auto payment',
+            ],
+            uniqid('', true)
+        );
+        if ($payment->paid == true) {
+            $payment = new UserOrder;
+            $payment->order_id = Str::random(12);
+            $payment->plan_id = $plan->id;
+            $payment->user_id = $user->id;
+            $payment->payment_type = 'Credit, Debit Card';
+            $payment->price = $total;
+            $payment->affiliate_earnings = ($total * $settings->affiliate_commission_percentage) / 100;
+            $payment->status = 'Success';
+            $payment->country = $user->country ?? 'Unknown';
+            $payment->tax_rate = $gateway->tax;
+            $payment->tax_value = $taxValue;
+            $payment->save();
+
+            $user = User::where('id', '=', $activeSub->user_id)->first();
+
+            self::creditIncreaseSubscribePlan($user, $plan);
+
+            \App\Models\Usage::getSingle()->updateSalesCount($total);
+
+            $activeSub->next_pay_at = Carbon::now()->addMonth();
+            $activeSub->save();
+
+            return 'success';
+        }
+
+        $activeSub->payment_method_id = '';
+        $activeSub->subscription_status = '';
+        $activeSub->save();
+
+        return 'false';
     }
 
     public static function prepaid($plan)
@@ -579,9 +579,9 @@ class YokassaService
             $ip_address = $request->ip();
             if (in_array($ip_address, $yokassa_ip_array)) {
                 return $payload;
-            } else {
-                return false;
             }
+
+            return false;
         } catch (Exception $th) {
             Log::error('(Webhooks) Yokassa::verifyIncomingJson(): ' . $th->getMessage());
         }
@@ -591,13 +591,11 @@ class YokassaService
 
     public function handleWebhook(Request $request)
     {
-
         // Log::info($request->getContent());
         // $verified = $request->getContent();
+        $verified = $this->verifyIncomingJson($request);
 
-        $verified = self::verifyIncomingJson($request);
-
-        if ($verified != null) {
+        if ($verified !== null) {
 
             // Retrieve the JSON payload
             $payload = $verified;
@@ -607,10 +605,8 @@ class YokassaService
 
             return response()->json(['success' => true]);
 
-        } else {
-            // Incoming json is NOT verified
-            abort(404);
         }
+        abort(404);
     }
 
     public static function gatewayDefinitionArray(): array

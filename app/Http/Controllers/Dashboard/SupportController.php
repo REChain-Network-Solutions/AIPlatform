@@ -15,7 +15,7 @@ class SupportController extends Controller
     {
         $user = auth()->user();
 
-        $items = $user->isAdmin() ? UserSupport::all() : $user->supportRequests;
+        $items = $user?->isAdmin() ? UserSupport::all() : $user?->supportRequests;
 
         return view('panel.support.list', compact('items'));
     }
@@ -48,11 +48,11 @@ class SupportController extends Controller
     {
         $ticket = UserSupport::where('ticket_id', $ticket_id)->firstOrFail();
 
-        if ($ticket->user_id == Auth::id() or Auth::user()->isAdmin()) {
+        if ($ticket->user_id === Auth::id() || Auth::user()?->isAdmin()) {
             return view('panel.support.view', compact('ticket'));
-        } else {
-            return back()->with(['message' => __('Unauthorized'), 'type' => 'error']);
         }
+
+        return back()->with(['message' => __('Unauthorized'), 'type' => 'error']);
     }
 
     public function viewTicketSendMessage(Request $request): void

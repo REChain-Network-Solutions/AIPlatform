@@ -2,7 +2,6 @@
     $disable_actions = $app_is_demo && (isset($category) && ($category->slug == 'ai_vision' || $category->slug == 'ai_pdf' || $category->slug == 'ai_chat_image'));
     $trap_search = isset($trap_search) ? $trap_search : 'false';
 @endphp
-
 <x-card
     class="chats-list-container flex h-[inherit] w-full shrink-0 grow-0 flex-col overflow-hidden rounded-e-none border-e-0 max-md:absolute max-md:start-0 max-md:top-0 max-md:z-50 max-md:h-full max-md:overflow-hidden max-md:border-none max-md:bg-background/95 max-md:backdrop-blur-lg max-md:backdrop-saturate-150 max-md:transition-all max-md:duration-300 md:!flex"
     class:body="flex flex-col h-full"
@@ -20,6 +19,7 @@
                     class="navbar-search-input peer ps-10"
                     id="chat_search_word"
                     data-category-id="{{ $category->id }}"
+                    data-website-url="{{ $website_url ?? null }}"
                     type="search"
                     onkeydown="return event.key != 'Enter';"
                     placeholder="{{ __('Search') }}"

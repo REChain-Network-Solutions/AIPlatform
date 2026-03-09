@@ -376,7 +376,7 @@
                             if (data.status == 'success') {
                                 if (videoIndex != -1) {
                                     this.exportedVideos[videoIndex] = data.resData;
-                                };
+                                }
                             } else {
                                 this.exportedVideos.splice(videoIndex, 1);
                                 console.error(data.message ||
@@ -462,7 +462,7 @@
                                 } else {
                                     this.exportedVideos.splice(videoIndex, 1);
                                 }
-                            };
+                            }
                         } else {
                             this.exportedVideos.splice(videoIndex, 1);
                             throw new Error(resData.message ||
@@ -570,7 +570,7 @@
                                 } else {
                                     this.exportedVideos.splice(videoIndex, 1);
                                 }
-                            };
+                            }
                         } else {
                             this.exportedVideos.splice(videoIndex, 1);
                             throw new Error(resData.message ||
@@ -675,7 +675,7 @@
                                 } else {
                                     this.exportedVideos.splice(videoIndex, 1);
                                 }
-                            };
+                            }
                         } else {
                             this.exportedVideos.splice(videoIndex, 1);
                             throw new Error(resData.message ||

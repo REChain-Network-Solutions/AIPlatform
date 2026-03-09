@@ -11,12 +11,12 @@ use App\Helpers\Classes\MenuHelper;
 use App\Helpers\Classes\PlanHelper;
 use App\Models\Common\Menu;
 use App\Models\Extension;
-use App\Models\Integration\Integration;
 use App\Models\Plan;
 use App\Models\Setting;
 use App\Models\SettingTwo;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 class MenuService
@@ -57,14 +57,16 @@ class MenuService
     {
         $this->cacheClearBlade();
 
-        cache()->forget(self::MENU_KEY);
+        Cache::forget(self::MENU_KEY);
+        Cache::forget(self::MENU_KEY . '_active');
+        Cache::forget('navbar_cache_registry');
 
         return $this->generate(false);
     }
 
     public function cacheClearBlade(): void
     {
-        cache()->forget($this->cacheKey());
+        Cache::forget($this->cacheKey());
 
         $byUserId = config('app.menu_cache_by_user_id', false);
 
@@ -74,37 +76,25 @@ class MenuService
             return;
         }
 
-        Plan::query()
-            ->where('plans.type', '=', 'subscription')
-            ->get()
-            ?->map(function ($plan) {
-                cache()->forget($this->fullCacheKey('admin', $plan->getAttribute('id')));
-                cache()->forget($this->fullCacheKey('user', $plan->getAttribute('id')));
-            });
+        Plan::getCache(
+            static function () {
+                return Plan::query()
+                    ->where('plans.type', '=', 'subscription')
+                    ->get();
+            },
+            '-all'
+        )?->map(function ($plan) {
+            Cache::forget($this->fullCacheKey('admin', $plan->getAttribute('id')));
+            Cache::forget($this->fullCacheKey('user', $plan->getAttribute('id')));
+        });
 
-        cache()->forget($this->fullCacheKey('admin'));
-        cache()->forget($this->fullCacheKey('user'));
-    }
-
-    public function boltMenu(): array
-    {
-        $data = collect($this->generate(false))->where('bolt_menu', true);
-
-        $array = [];
-
-        foreach ($data as $key => $value) {
-            $array[$key] = [
-                'background' => $value['bolt_background'],
-                'foreground' => $value['bolt_foreground'],
-            ];
-        }
-
-        return $array;
+        Cache::forget($this->fullCacheKey('admin'));
+        Cache::forget($this->fullCacheKey('user'));
     }
 
     public function generate(bool $active = true): array
     {
-        $data = cache()->rememberForever(self::MENU_KEY, function () use ($active) {
+        $data = Cache::rememberForever(self::MENU_KEY . ($active ? '_active' : ''), function () use ($active) {
             $items = Menu::query()
                 ->with('children')
                 ->withCount('children')
@@ -189,11 +179,9 @@ class MenuService
                 }
 
             } elseif ($else) {
-                $showCondition = true;
-
                 $data[$item['key']] = array_merge($item->toArray(), [
                     'active_condition' => false,
-                    'show_condition'   => $showCondition,
+                    'show_condition'   => true,
                     'extension'        => false,
                 ]);
                 if ($item->parent_id == null && $else) {
@@ -272,8 +260,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.creative-suite.index',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('creative-suite'),
-                'badge'            => 'new',
+                'show_condition' => MarketplaceHelper::isRegistered('creative-suite'),
             ],
             'ext_chat_bot' => [
                 'parent_key'       => null,
@@ -292,7 +279,6 @@ class MenuService
                     'dashboard.chatbot.*',
                 ],
                 'show_condition' => Route::has('dashboard.chatbot.index'),
-                'badge'          => 'new',
             ],
             'ext_chatbot_knowledge_base_article' => [
                 'parent_key'       => null,
@@ -346,8 +332,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.chatbot-voice.*',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('chatbot-voice'),
-                'badge'            => 'new',
+                'show_condition' => MarketplaceHelper::isRegistered('chatbot-voice'),
             ],
             'marketing_bot_dashboard' => [
                 'parent_key'       => null,
@@ -364,7 +349,6 @@ class MenuService
                 'active_condition' => ['dashboard.user.marketing-bot.dashboard'],
                 'show_condition'   => MarketplaceHelper::isRegistered('marketing-bot'),
                 'is_admin'         => false,
-                'badge'            => 'new',
             ],
             'marketing_bot_settings' => [
                 'parent_key'       => null,
@@ -412,7 +396,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.marketing-bot.inbox.*',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('marketing-bot'),
+                'show_condition' => MarketplaceHelper::isRegistered('marketing-bot'),
             ],
             'marketing_bot_campaigns' => [
                 'parent_key'       => null,
@@ -429,7 +413,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.marketing-bot.whatsapp-campaign.*', 'dashboard.user.marketing-bot.telegram-campaign.*',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('marketing-bot'),
+                'show_condition' => MarketplaceHelper::isRegistered('marketing-bot'),
             ],
             'marketing_bot_campaigns_whatsapp' => [
                 'parent_key'       => 'marketing_bot_campaigns',
@@ -478,7 +462,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.marketing-bot.telegram-group.*',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('marketing-bot'),
+                'show_condition' => MarketplaceHelper::isRegistered('marketing-bot'),
             ],
 
             'marketing_bot_telegram_group' => [
@@ -543,7 +527,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.marketing-bot.contact.index',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('marketing-bot'),
+                'show_condition' => MarketplaceHelper::isRegistered('marketing-bot'),
             ],
             'marketing_bot_whatsapp_segment' => [
                 'parent_key'       => 'marketing_bot_whatsapp',
@@ -560,7 +544,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.marketing-bot.contact.index',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('marketing-bot'),
+                'show_condition' => MarketplaceHelper::isRegistered('marketing-bot'),
             ],
             'marketing_bot_whatsapp_contact_list' => [
                 'parent_key'       => 'marketing_bot_whatsapp',
@@ -577,7 +561,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.marketing-bot.contact-list.index',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('marketing-bot'),
+                'show_condition' => MarketplaceHelper::isRegistered('marketing-bot'),
             ],
             'ext_chat_bot_agent' => [
                 'parent_key'       => null,
@@ -595,10 +579,189 @@ class MenuService
                 'active_condition' => [
                     'dashboard.chatbot-agent.*',
                 ],
-                'show_condition'   => Route::has('dashboard.chatbot-agent.index'),
-                'badge'            => 'new',
+                'show_condition' => Route::has('dashboard.chatbot-agent.index'),
             ],
-
+            'ext_fashion_studio_dropdown' => [
+                'parent_key'       => null,
+                'key'              => 'ext_fashion_studio_dropdown',
+                'route'            => 'dashboard.user.fashion-studio.index',
+                'label'            => 'AI Fashion Studio',
+                'data-name'        => Introduction::FASHION_STUDIO,
+                'icon'             => 'tabler-tie',
+                'svg'              => null,
+                'order'            => 5,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.fashion-studio.*',
+                ],
+                'show_condition'   => MarketplaceHelper::isRegistered('fashion-studio'),
+                'tooltip'          => __('Fashion Studio uses the existing credit system. All image-related actions, including model and background generation, photoshoots, and edits, consume credits from the image credits pool. Video creation and generation consume credits from the video credits pool.'),
+            ],
+            'ext_fashion_studio' => [
+                'parent_key'       => 'ext_fashion_studio_dropdown',
+                'key'              => 'ext_fashion_studio',
+                'route'            => 'dashboard.user.fashion-studio.index',
+                'label'            => 'Dashboard',
+                'data-name'        => null,
+                'icon'             => 'tabler-layout-dashboard',
+                'svg'              => null,
+                'order'            => 1,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.fashion-studio.index',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('fashion-studio'),
+            ],
+            'ext_fashion_studio_photo_shoot' => [
+                'parent_key'       => 'ext_fashion_studio_dropdown',
+                'key'              => 'ext_fashion_studio_photo_shoot',
+                'route'            => 'dashboard.user.fashion-studio.photo_shoots.index',
+                'label'            => 'PhotoShoot',
+                'data-name'        => null,
+                'icon'             => 'tabler-camera',
+                'svg'              => null,
+                'order'            => 1,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.fashion-studio.photo_shoots.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('fashion-studio'),
+            ],
+            'ext_fashion_studio_virtual_try_on' => [
+                'parent_key'       => 'ext_fashion_studio_dropdown',
+                'key'              => 'ext_fashion_studio_virtual_try_on',
+                'route'            => 'dashboard.user.fashion-studio.virtual_try_on.index',
+                'label'            => 'Virtual Try-on',
+                'data-name'        => null,
+                'icon'             => 'tabler-shirt',
+                'svg'              => null,
+                'order'            => 1,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.fashion-studio.virtual_try_on.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('fashion-studio'),
+            ],
+            'ext_fashion_studio_change_model' => [
+                'parent_key'       => 'ext_fashion_studio_dropdown',
+                'key'              => 'ext_fashion_studio_change_model',
+                'route'            => 'dashboard.user.fashion-studio.change_model.index',
+                'label'            => 'Change Model',
+                'data-name'        => null,
+                'icon'             => 'tabler-user-square-rounded',
+                'svg'              => null,
+                'order'            => 1,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.fashion-studio.change_model.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('fashion-studio'),
+            ],
+            'ext_fashion_studio_edit_image' => [
+                'parent_key'       => 'ext_fashion_studio_dropdown',
+                'key'              => 'ext_fashion_studio_edit_image',
+                'route'            => 'dashboard.user.fashion-studio.edit_image.index',
+                'label'            => 'Edit Image',
+                'data-name'        => null,
+                'icon'             => 'tabler-pencil',
+                'svg'              => null,
+                'order'            => 1,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.fashion-studio.edit_image.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('fashion-studio'),
+            ],
+            'ext_fashion_studio_create_video' => [
+                'parent_key'       => 'ext_fashion_studio_dropdown',
+                'key'              => 'ext_fashion_studio_create_video',
+                'route'            => 'dashboard.user.fashion-studio.create_video.index',
+                'label'            => 'Create Video',
+                'data-name'        => null,
+                'icon'             => 'tabler-video',
+                'svg'              => null,
+                'order'            => 1,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.fashion-studio.create_video.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('fashion-studio'),
+            ],
+            'ext_fashion_studio_photo_shoots' => [
+                'parent_key'       => 'ext_fashion_studio_dropdown',
+                'key'              => 'ext_fashion_studio_photo_shoots',
+                'route'            => 'dashboard.user.fashion-studio.photo_shoots.my',
+                'label'            => 'My Photo Shoots',
+                'data-name'        => null,
+                'icon'             => 'tabler-copy',
+                'svg'              => null,
+                'order'            => 1,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.fashion-studio.photo_shoots.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('fashion-studio'),
+            ],
+            'ext_fashion_studio_wardrobe' => [
+                'parent_key'       => 'ext_fashion_studio_dropdown',
+                'key'              => 'ext_fashion_studio_wardrobe',
+                'route'            => 'dashboard.user.fashion-studio.wardrobe.index',
+                'label'            => 'My Wardrobe',
+                'data-name'        => null,
+                'icon'             => 'tabler-hanger-2',
+                'svg'              => null,
+                'order'            => 1,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.fashion-studio.wardrobe.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('fashion-studio'),
+            ],
+            'ext_fashion_studio_user_settings' => [
+                'parent_key'       => 'ext_fashion_studio_dropdown',
+                'key'              => 'ext_fashion_studio_user_settings',
+                'route'            => 'dashboard.user.fashion-studio.user_settings.index',
+                'label'            => 'Settings',
+                'data-name'        => null,
+                'icon'             => 'tabler-settings',
+                'svg'              => null,
+                'order'            => 99,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.fashion-studio.user_settings.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('fashion-studio'),
+            ],
             'ext_social_media_dropdown' => [
                 'parent_key'       => null,
                 'key'              => 'ext_social_media_dropdown',
@@ -615,8 +778,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.social-media.*',
                 ],
-                'show_condition'   => Route::has('dashboard.user.social-media.index') && MarketplaceHelper::isRegistered('social-media'),
-                'badge'            => 'new',
+                'show_condition' => Route::has('dashboard.user.social-media.index') && MarketplaceHelper::isRegistered('social-media'),
             ],
             'ext_social_media' => [
                 'parent_key'       => 'ext_social_media_dropdown',
@@ -726,7 +888,6 @@ class MenuService
                     'dashboard.user.social-media.agent.*',
                 ],
                 'show_condition'   => Route::has('dashboard.user.social-media.agent.index') && MarketplaceHelper::isRegistered('social-media-agent'),
-                'badge'            => 'new',
             ],
             'ext_social_media_agent_dashboard' => [
                 'parent_key'       => 'ext_social_media_agent_dropdown',
@@ -744,7 +905,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.social-media.agent.index',
                 ],
-                'show_condition' => Route::has('dashboard.user.social-media.agent.index'),
+                'show_condition'   => Route::has('dashboard.user.social-media.agent.index'),
             ],
             'ext_social_media_agent_agents' => [
                 'parent_key'       => 'ext_social_media_agent_dropdown',
@@ -762,7 +923,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.social-media.agent.agents',
                 ],
-                'show_condition' => Route::has('dashboard.user.social-media.agent.agents'),
+                'show_condition'   => Route::has('dashboard.user.social-media.agent.agents'),
             ],
             'ext_social_media_agent_agents_archived_posts' => [
                 'parent_key'       => 'ext_social_media_agent_dropdown',
@@ -780,7 +941,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.social-media.agent.posts',
                 ],
-                'show_condition' => Route::has('dashboard.user.social-media.agent.posts'),
+                'show_condition'   => Route::has('dashboard.user.social-media.agent.posts'),
             ],
             'ext_social_media_agent_calendar' => [
                 'parent_key'       => 'ext_social_media_agent_dropdown',
@@ -798,7 +959,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.social-media.agent.calendar',
                 ],
-                'show_condition' => Route::has('dashboard.user.social-media.agent.calendar'),
+                'show_condition'   => Route::has('dashboard.user.social-media.agent.calendar'),
             ],
             'ext_social_media_agent_analytics' => [
                 'parent_key'       => 'ext_social_media_agent_dropdown',
@@ -816,7 +977,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.social-media.agent.analytics',
                 ],
-                'show_condition' => Route::has('dashboard.user.social-media.agent.analytics'),
+                'show_condition'   => Route::has('dashboard.user.social-media.agent.analytics'),
             ],
             'ext_social_media_agent_accounts' => [
                 'parent_key'       => 'ext_social_media_agent_dropdown',
@@ -834,7 +995,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.social-media.agent.accounts',
                 ],
-                'show_condition' => Route::has('dashboard.user.social-media.agent.accounts'),
+                'show_condition'   => Route::has('dashboard.user.social-media.agent.accounts'),
             ],
             'ext_social_media_agent_chat' => [
                 'parent_key'       => 'ext_social_media_agent_dropdown',
@@ -852,7 +1013,115 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.social-media.agent.chat.*',
                 ],
-                'show_condition' => Route::has('dashboard.user.social-media.agent.chat.index'),
+                'show_condition'   => Route::has('dashboard.user.social-media.agent.chat.index'),
+            ],
+            'ext_blogpilot_dropdown' => [
+                'parent_key'       => null,
+                'key'              => 'ext_blogpilot_dropdown',
+                'route'            => 'dashboard.user.blogpilot.agent.index',
+                'label'            => 'AI BlogPilot',
+                'data-name'        => Introduction::BLOGPILOT,
+                'icon'             => 'tabler-file-text-ai',
+                'svg'              => null,
+                'order'            => 5,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.blogpilot.agent.*',
+                ],
+                'show_condition'   => Route::has('dashboard.user.blogpilot.agent.index') && MarketplaceHelper::isRegistered('blogpilot'),
+            ],
+            'ext_blogpilot_dashboard' => [
+                'parent_key'       => 'ext_blogpilot_dropdown',
+                'key'              => 'ext_blogpilot_dashboard',
+                'route'            => 'dashboard.user.blogpilot.agent.index',
+                'label'            => 'Dashboard',
+                'data-name'        => null,
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 1,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.blogpilot.agent.index',
+                ],
+                'show_condition' => Route::has('dashboard.user.blogpilot.agent.index'),
+            ],
+            'ext_blogpilot_agents' => [
+                'parent_key'       => 'ext_blogpilot_dropdown',
+                'key'              => 'ext_blogpilot_agents',
+                'route'            => 'dashboard.user.blogpilot.agent.agents',
+                'label'            => 'Agents',
+                'data-name'        => null,
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 2,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.blogpilot.agent.agents',
+                ],
+                'show_condition' => Route::has('dashboard.user.blogpilot.agent.agents'),
+            ],
+            'ext_blogpilot_agents_archived_posts' => [
+                'parent_key'       => 'ext_blogpilot_dropdown',
+                'key'              => 'ext_blogpilot_agents_archived_posts',
+                'route'            => 'dashboard.user.blogpilot.agent.posts',
+                'label'            => 'Posts',
+                'data-name'        => null,
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 3,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.blogpilot.agent.posts',
+                ],
+                'show_condition' => Route::has('dashboard.user.blogpilot.agent.posts'),
+            ],
+            'ext_blogpilot_calendar' => [
+                'parent_key'       => 'ext_blogpilot_dropdown',
+                'key'              => 'ext_blogpilot_calendar',
+                'route'            => 'dashboard.user.blogpilot.agent.calendar',
+                'label'            => 'Calendar',
+                'data-name'        => null,
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 4,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.blogpilot.agent.calendar',
+                ],
+                'show_condition' => Route::has('dashboard.user.blogpilot.agent.calendar'),
+            ],
+            'ext_blogpilot_analytics' => [
+                'parent_key'       => 'ext_blogpilot_dropdown',
+                'key'              => 'ext_blogpilot_analytics',
+                'route'            => 'dashboard.user.blogpilot.agent.analytics',
+                'label'            => 'Analytics',
+                'data-name'        => null,
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 5,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.blogpilot.agent.analytics',
+                ],
+                'show_condition' => Route::has('dashboard.user.blogpilot.agent.analytics'),
             ],
             'ai_influencer' => [
                 'parent_key'       => null,
@@ -870,8 +1139,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.ai-influencer.index',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('url-to-video') || MarketplaceHelper::isRegistered('influencer-avatar') || MarketplaceHelper::isRegistered('ai-viral-clips'),
-                'badge'            => 'new',
+                'show_condition' => MarketplaceHelper::isRegistered('url-to-video') || MarketplaceHelper::isRegistered('influencer-avatar') || MarketplaceHelper::isRegistered('ai-viral-clips'),
             ],
             'url_to_video' => [
                 'parent_key'       => null,
@@ -889,8 +1157,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.url-to-video.index',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('url-to-video'),
-                'badge'            => 'new',
+                'show_condition' => MarketplaceHelper::isRegistered('url-to-video'),
             ],
             'viral_clips' => [
                 'parent_key'       => null,
@@ -908,8 +1175,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.viral-clips.index',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('ai-viral-clips'),
-                'badge'            => 'new',
+                'show_condition' => MarketplaceHelper::isRegistered('ai-viral-clips'),
             ],
             'influencer_avatar' => [
                 'parent_key'       => null,
@@ -927,8 +1193,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.influencer-avatar.index',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('influencer-avatar'),
-                'badge'            => 'new',
+                'show_condition' => MarketplaceHelper::isRegistered('influencer-avatar'),
             ],
             'documents' => [
                 'parent_key'       => null,
@@ -1175,7 +1440,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.openai.chat.list', 'dashboard.user.openai.chat.chat',
                 ],
-                'show_condition'   => (bool) Helper::setting('feature_ai_chat', null, $setting),
+                'show_condition' => (bool) Helper::setting('feature_ai_chat', null, $setting),
             ],
             'ai_chat_pro' => [
                 'parent_key'       => null,
@@ -1195,6 +1460,133 @@ class MenuService
                     'dashboard.user.openai.chat.pro.index',
                 ],
                 'show_condition' => MarketplaceHelper::isRegistered('ai-chat-pro') && in_array(setting('ai_chat_display_type', 'menu'), ['menu', 'both_fm']),
+            ],
+            'ai_chat_pro_image_chat' => [
+                'parent_key'       => null,
+                'key'              => 'ai_chat_pro_image_chat',
+                'route'            => 'ai-chat-image.index',
+                'route_slug'       => null,
+                'label'            => 'Image Assistant',
+                'data-name'        => Introduction::AI_CHAT_PRO_IMAGE_CHAT,
+                'icon'             => 'tabler-photo-up',
+                'svg'              => null,
+                'order'            => 13,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => null,
+                'active_condition' => [
+                    'ai-chat-image.index',
+                ],
+                'show_condition'   => MarketplaceHelper::isRegistered('ai-chat-pro-image-chat'),
+            ],
+            'ai_image_pro' => [
+                'parent_key'       => null,
+                'key'              => 'ai_image_pro',
+                'route'            => 'dashboard.user.ai-image-pro.index',
+                'route_slug'       => null,
+                'label'            => 'AI Image Pro',
+                'data-name'        => Introduction::AI_IMAGE_PRO,
+                'icon'             => 'tabler-photo-up',
+                'svg'              => null,
+                'order'            => 13,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => null,
+                'active_condition' => [
+                    'dashboard.user.ai-image-pro.index',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ai-image-pro') && in_array(setting('ai_image_pro_display_type', 'both_fm'), ['menu', 'both_fm']),
+            ],
+            'ai_image_pro_bookmark' => [
+                'parent_key'       => null,
+                'key'              => 'ai_image_pro_bookmark',
+                'route'            => 'dashboard.user.ai-image-pro.index',
+                'route_slug'       => 'slug=bookmarks',
+                'label'            => 'Bookmark',
+                'data-name'        => Introduction::AI_IMAGE_PRO,
+                'icon'             => 'tabler-bookmark',
+                'svg'              => null,
+                'order'            => 13,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => null,
+                'active_condition' => false,
+                'show_condition'   => MarketplaceHelper::isRegistered('ai-image-pro'),
+            ],
+            'ai_image_pro_real_time' => [
+                'parent_key'       => null,
+                'key'              => 'ai_image_pro_real_time',
+                'route'            => 'dashboard.user.ai-image-pro.realtime',
+                'route_slug'       => null,
+                'label'            => 'Realtime Image',
+                'data-name'        => Introduction::AI_IMAGE_PRO,
+                'icon'             => 'tabler-aperture',
+                'svg'              => null,
+                'order'            => 13,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => null,
+                'active_condition' => false,
+                'show_condition'   => MarketplaceHelper::isRegistered('ai-image-pro'),
+            ],
+            'ai_image_pro_edit' => [
+                'parent_key'       => null,
+                'key'              => 'ai_image_pro_edit',
+                'route'            => 'dashboard.user.ai-image-pro.edit',
+                'route_slug'       => null,
+                'label'            => 'Smart Edit',
+                'data-name'        => Introduction::AI_IMAGE_PRO,
+                'icon'             => 'tabler-vector-bezier',
+                'svg'              => null,
+                'order'            => 13,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => null,
+                'active_condition' => false,
+                'show_condition'   => MarketplaceHelper::isRegistered('ai-image-pro'),
+            ],
+            'ai_image_pro_get_inspired' => [
+                'parent_key'       => null,
+                'key'              => 'ai_image_pro_get_inspired',
+                'route'            => 'dashboard.user.ai-image-pro.index',
+                'route_slug'       => 'slug=inspired',
+                'label'            => 'Get Inspired',
+                'data-name'        => Introduction::AI_IMAGE_PRO,
+                'icon'             => 'tabler-wand',
+                'svg'              => null,
+                'order'            => 13,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => null,
+                'active_condition' => false,
+                'show_condition'   => MarketplaceHelper::isRegistered('ai-image-pro'),
+            ],
+            'ai_image_pro_media_library' => [
+                'parent_key'       => null,
+                'key'              => 'ai_image_pro_media_library',
+                'route'            => 'ai-image-pro.media-library',
+                'route_slug'       => null,
+                'label'            => 'Media Library',
+                'data-name'        => Introduction::AI_IMAGE_PRO_MEDIA_LIBRARY,
+                'icon'             => 'tabler-inbox',
+                'svg'              => null,
+                'order'            => 13,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => null,
+                'active_condition' => [
+                    'ai-image-pro.media-library',
+                    'ai-image-pro.media-library.*',
+                    'dashboard.user.ai-image-pro.media-library',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ai-image-pro'),
             ],
             'ai_code_generator' => [
                 'parent_key'       => null,
@@ -1370,7 +1762,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.brand.*',
                 ],
-                'show_condition'   => true,
+                'show_condition' => true,
             ],
             'advanced_image' => [
                 'parent_key'       => null,
@@ -1388,7 +1780,6 @@ class MenuService
                 'extension'        => true,
                 'active_condition' => null,
                 'show_condition'   => Route::has('dashboard.user.advanced-image.index'),
-                'badge'            => 'new',
             ],
             'ai_avatar' => [
                 'parent_key'       => null,
@@ -1474,7 +1865,6 @@ class MenuService
                 'extension'        => true,
                 'active_condition' => null,
                 'show_condition'   => MarketplaceHelper::isRegistered('ai-music-pro'),
-                'badge'            => 'new',
             ],
             'ai_product_shot' => [
                 'parent_key'       => null,
@@ -1563,7 +1953,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.user.integration.*',
                 ],
-                'show_condition' => Integration::query()->whereHas('hasExtension')->count(),
+                'show_condition' => true,
             ],
             'divider_one' => [
                 'parent_key'       => null,
@@ -1738,7 +2128,6 @@ class MenuService
                 ],
                 'show_condition' => MarketplaceHelper::isRegistered('migration'),
                 'is_admin'       => true,
-                'badge'          => 'new',
             ],
             'user_management' => [
                 'parent_key'       => null,
@@ -1756,9 +2145,9 @@ class MenuService
                 'active_condition' => [
                     'dashboard.admin.users.*',
                 ],
-                'show_condition'     => true,
-                'is_admin'           => true,
-                'admin_permission'   => 'user_management',
+                'show_condition'   => true,
+                'is_admin'         => true,
+                'admin_permission' => 'user_management',
             ],
             'user_list' => [
                 'parent_key'       => 'user_management',
@@ -1887,7 +2276,6 @@ class MenuService
                 ],
                 'show_condition' => MarketplaceHelper::isRegistered('discount-manager'),
                 'is_admin'       => true,
-                'badge'          => 'new',
             ],
             'site_promo' => [
                 'parent_key'       => null,
@@ -2003,7 +2391,7 @@ class MenuService
                 'key'              => 'chat_settings',
                 'route'            => 'dashboard.admin.openai.chat.category',
                 'label'            => 'Chat Settings',
-                'data-name'		      => Introduction::ADMIN_CHAT_SETTINGS,
+                'data-name'        => Introduction::ADMIN_CHAT_SETTINGS,
                 'icon'             => 'tabler-message-circle',
                 'svg'              => null,
                 'order'            => 41,
@@ -2089,8 +2477,8 @@ class MenuService
                 'active_condition' => [
                     'dashboard.admin.voice-chatbot.*',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('elevenlabs-voice-chat'),
-                'is_admin'         => true,
+                'show_condition' => MarketplaceHelper::isRegistered('elevenlabs-voice-chat'),
+                'is_admin'       => true,
             ],
             'ai_assistant' => [
                 'parent_key'       => 'chat_settings',
@@ -2558,7 +2946,6 @@ class MenuService
                 ],
                 'show_condition' => true,
                 'is_admin'       => true,
-                'badge'          => 'new',
             ],
             'payment_gateways' => [
                 'parent_key'       => 'finance',
@@ -2652,6 +3039,25 @@ class MenuService
                 'show_condition' => true,
                 'is_admin'       => true,
             ],
+            'ai-image-pro-publish-reqs' => [
+                'parent_key'       => null,
+                'key'              => 'ai-image-pro-publish-reqs',
+                'route'            => 'dashboard.admin.ai-image-pro.community-images.index',
+                'label'            => 'AI Image Pro Publish Requests',
+                'data-name'        => Introduction::ADMIN_AI_IMAGE_PRO_PUBLISH_REQS,
+                'icon'             => 'tabler-notification',
+                'svg'              => null,
+                'order'            => 63,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.admin..ai-image-pro.community-images.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ai-image-pro'),
+                'is_admin'       => true,
+            ],
             'affiliates_admin' => [
                 'parent_key'       => null,
                 'key'              => 'affiliates_admin',
@@ -2725,8 +3131,8 @@ class MenuService
                 'active_condition' => [
                     'dashboard.admin.onboarding-pro.*',
                 ],
-                'show_condition'   => Route::has('dashboard.admin.onboarding-pro.index'),
-                'is_admin'         => true,
+                'show_condition' => Route::has('dashboard.admin.onboarding-pro.index'),
+                'is_admin'       => true,
             ],
             'onboarding' => [
                 'parent_key'       => null,
@@ -2829,7 +3235,6 @@ class MenuService
                 'show_condition'   => MarketplaceHelper::isRegistered('azure-openai'),
                 'is_admin'         => true,
                 'onclick'          => Helper::appIsDemo() ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '',
-                'badge'            => 'new',
             ],
             'api_integration_openrouter' => [
                 'parent_key'       => 'api_integration',
@@ -2864,7 +3269,6 @@ class MenuService
                 'show_condition'   => MarketplaceHelper::isRegistered('chatbot-agent'),
                 'is_admin'         => true,
                 'onclick'          => Helper::appIsDemo() ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '',
-                'badge'            => 'new',
             ],
             'api_integration_llama' => [
                 'parent_key'       => 'api_integration',
@@ -2950,7 +3354,6 @@ class MenuService
                 'show_condition'   => true,
                 'is_admin'         => true,
                 'onclick'          => Helper::appIsDemo() ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '',
-                'badge'            => 'new',
             ],
             'api_integration_deepseek' => [
                 'parent_key'       => 'api_integration',
@@ -2968,7 +3371,6 @@ class MenuService
                 'show_condition'   => true,
                 'is_admin'         => true,
                 'onclick'          => Helper::appIsDemo() ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '',
-                'badge'            => 'new',
             ],
             'api_integration_fal_ai' => [
                 'parent_key'       => 'api_integration',
@@ -2986,7 +3388,6 @@ class MenuService
                 'show_condition'   => Route::has('dashboard.admin.settings.fal-ai'),
                 'is_admin'         => true,
                 'onclick'          => Helper::appIsDemo() ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '',
-                'badge'            => 'new',
             ],
             'api_integration_gamma_ai' => [
                 'parent_key'       => 'api_integration',
@@ -3004,7 +3405,6 @@ class MenuService
                 'show_condition'   => MarketplaceHelper::isRegistered('ai-presentation'),
                 'is_admin'         => true,
                 'onclick'          => Helper::appIsDemo() ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '',
-                'badge'            => 'new',
             ],
             'api_integration_creatify' => [
                 'parent_key'       => 'api_integration',
@@ -3022,7 +3422,6 @@ class MenuService
                 'show_condition'   => Route::has('dashboard.admin.settings.creatify'),
                 'is_admin'         => true,
                 'onclick'          => Helper::appIsDemo() ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '',
-                'badge'            => 'new',
             ],
             'api_integration_topview' => [
                 'parent_key'       => 'api_integration',
@@ -3040,7 +3439,6 @@ class MenuService
                 'show_condition'   => Route::has('dashboard.admin.settings.topview'),
                 'is_admin'         => true,
                 'onclick'          => Helper::appIsDemo() ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '',
-                'badge'            => 'new',
             ],
             'api_integration_vizard' => [
                 'parent_key'       => 'api_integration',
@@ -3058,7 +3456,6 @@ class MenuService
                 'show_condition'   => Route::has('dashboard.admin.settings.vizard'),
                 'is_admin'         => true,
                 'onclick'          => Helper::appIsDemo() ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '',
-                'badge'            => 'new',
             ],
             'api_integration_klap' => [
                 'parent_key'       => 'api_integration',
@@ -3076,7 +3473,6 @@ class MenuService
                 'show_condition'   => Route::has('dashboard.admin.settings.klap'),
                 'is_admin'         => true,
                 'onclick'          => Helper::appIsDemo() ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '',
-                'badge'            => 'new',
             ],
             'api_integration_piapi_ai' => [
                 'parent_key'       => 'api_integration',
@@ -3094,7 +3490,6 @@ class MenuService
                 'show_condition'   => Route::has('dashboard.admin.settings.piapi-ai'),
                 'is_admin'         => true,
                 'onclick'          => Helper::appIsDemo() ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '',
-                'badge'            => 'new',
             ],
             'api_integration_stablediffusion' => [
                 'parent_key'       => 'api_integration',
@@ -3417,8 +3812,8 @@ class MenuService
                 'active_condition' => [
                     'dashboard.admin.settings.advanced-image.index',
                 ],
-                'show_condition'   => MarketplaceHelper::isRegistered('advanced-image'),
-                'is_admin'         => true,
+                'show_condition' => MarketplaceHelper::isRegistered('advanced-image'),
+                'is_admin'       => true,
             ],
             'privacy' => [
                 'parent_key'       => 'settings',
@@ -3544,6 +3939,16 @@ class MenuService
         ];
 
         return $this->mergeExtensionMenu($menu);
+    }
+
+    public function showTeamFunctionality(): bool
+    {
+        $checkPlan = Plan::getCache(
+            static fn () => Plan::query()->where('is_team_plan', 1)->first(),
+            '_team'
+        );
+
+        return Helper::setting('team_functionality') && ! auth()?->user()?->getAttribute('team_id') && $checkPlan;
     }
 
     public function mergeExtensionMenu($menu)
@@ -3702,7 +4107,40 @@ class MenuService
                     'dashboard.admin.openai.chat.pro.settings',
                 ],
                 'show_condition' => Route::has('dashboard.admin.openai.chat.pro.settings'),
-                'badge'          => 'new',
+            ],
+            'ai_chat_pro_image_chat_settings_extension' => [
+                'parent_key'       => 'settings',
+                'key'              => 'ai_chat_pro_image_chat_settings_extension',
+                'route'            => 'dashboard.admin.ai-chat-pro-image-chat.settings',
+                'label'            => 'AI Chat Pro Image Chat Settings',
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 78,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.admin.ai-chat-pro-image-chat.settings',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ai-chat-pro-image-chat'),
+            ],
+            'ai_image_pro_settings_extension' => [
+                'parent_key'       => 'settings',
+                'key'              => 'ai_image_pro_settings_extension',
+                'route'            => 'dashboard.admin.ai-image-pro.settings',
+                'label'            => 'AI Image Pro Settings',
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 78,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.admin.ai-image-pro.settings',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ai-image-pro'),
             ],
             'social_media_agent_chat_settings_extension' => [
                 'parent_key'       => 'settings',
@@ -3737,7 +4175,6 @@ class MenuService
                     'migration::settings.*',
                 ],
                 'show_condition' => MarketplaceHelper::isRegistered('content-manager'),
-                'badge'          => 'new',
             ],
             'social_media_settings_extension' => [
                 'parent_key'       => 'settings',
@@ -3960,7 +4397,6 @@ class MenuService
                     'dashboard.admin.settings.freepik',
                 ],
                 'show_condition' => Route::has('dashboard.admin.settings.freepik'),
-                'badge'          => 'new',
             ],
             'x_ai' => [
                 'parent_key'       => 'api_integration',
@@ -3978,7 +4414,6 @@ class MenuService
                     'dashboard.admin.settings.x-ai',
                 ],
                 'show_condition' => true,
-                'badge'          => 'new',
             ],
             'xero_extension' => [
                 'parent_key'       => 'api_integration',
@@ -3996,7 +4431,6 @@ class MenuService
                     'dashboard.admin.settings.xero',
                 ],
                 'show_condition' => MarketplaceHelper::isRegistered('xero'),
-                'badge'          => 'new',
             ],
             'maintenance_setting' => [
                 'parent_key'       => 'settings',
@@ -4033,21 +4467,49 @@ class MenuService
                 ],
                 'show_condition' => MarketplaceHelper::isRegistered('checkout-registration'),
             ],
+            'ext_fashion_studio_settings' => [
+                'parent_key'       => 'settings',
+                'key'              => 'ext_fashion_studio_settings',
+                'route'            => 'dashboard.admin.fashion-studio.settings',
+                'label'            => 'AI Fashion Studio Settings',
+                'data-name'        => null,
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 79,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.admin.fashion-studio.settings',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('fashion-studio'),
+                'is_admin'       => true,
+            ],
         ]);
 
         return $menu;
     }
 
+    public function boltMenu(): array
+    {
+        $data = collect($this->generate(false))->where('bolt_menu', true);
+
+        $array = [];
+
+        foreach ($data as $key => $value) {
+            $array[$key] = [
+                'background' => $value['bolt_background'],
+                'foreground' => $value['bolt_foreground'],
+            ];
+        }
+
+        return $array;
+    }
+
     public function extensionCheck(string $slug): bool
     {
         return Extension::query()->where('slug', $slug)->where('installed', true)->exists();
-    }
-
-    public function showTeamFunctionality(): bool
-    {
-        $checkPlan = Plan::query()->where('is_team_plan', 1)->first();
-
-        return Helper::setting('team_functionality') && ! auth()?->user()?->getAttribute('team_id') && $checkPlan;
     }
 
     /**
@@ -4058,9 +4520,9 @@ class MenuService
         $keys = [
             'ai_product_shot', 'ai_writer', 'ai_chat_all', 'ai_image_generator', 'ai_video', 'seo_tool_extension', 'ai_voiceover',
             'ai_pdf', 'ai_vision', 'ai_speech_to_text', 'photo_studio_extension', 'ai_rewriter', 'ai_editor',
-            'ai_code_generator', 'ai_youtube', 'ai_chat_image', 'ai_rss', 'ai_voiceover_clone', 'ai_web_chat_extension', 'ai_presentation',
+            'ai_code_generator', 'ai_youtube', 'ai_chat_image', 'ai_rss', 'ai_voiceover_clone', 'ai_web_chat_extension', 'ai_presentation', 'ext_fashion_studio_dropdown',
             'ai_realtime_voice_chat', 'ai_social_media_extension', 'ai_detector_extension', 'ai_plagiarism_extension', 'ai_article_wizard', 'ai_voice_isolator', 'ext_chat_bot', 'ext_voice_chatbot', 'ext_social_media_dropdown',
-            'ext_ai_music_pro', 'ai_influencer', 'creative_suite', 'url_to_video', 'viral_clips', 'influencer_avatar', 'brand_voice', 'support',
+            'ext_ai_music_pro', 'ai_influencer', 'creative_suite', 'url_to_video', 'viral_clips', 'influencer_avatar', 'brand_voice', 'support', 'ai_chat_pro_image_chat', 'ai_image_pro',
         ];
 
         $data = (new self)->generate();

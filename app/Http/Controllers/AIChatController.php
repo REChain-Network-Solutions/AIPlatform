@@ -41,7 +41,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -54,6 +56,8 @@ use Throwable;
 
 class AIChatController extends Controller
 {
+    private const SIDEBAR_HISTORY_LIMIT_DEFAULT = 500;
+
     protected $client;
 
     protected $settings;
@@ -104,15 +108,208 @@ class AIChatController extends Controller
             });
     }
 
+    private function sidebarHistoryLimit(): int
+    {
+        $configuredLimit = (int) setting('ai_chat_sidebar_history_limit', self::SIDEBAR_HISTORY_LIMIT_DEFAULT);
+
+        return max(20, min($configuredLimit, 500));
+    }
+
+    /**
+     * Get paginated chats for the sidebar via AJAX.
+     * Supports all extensions (chatpro, chatpro-image, social-media-agent, default).
+     */
+    public function getChats(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'folder_id'   => 'nullable|integer',
+            'per_page'    => 'nullable|integer|min:1|max:100',
+            'category_id' => 'nullable|integer',
+            'search'      => 'nullable|string|max:255',
+            'website_url' => 'nullable|string|max:255',
+        ]);
+
+        $perPage = $validated['per_page'] ?? 20;
+        $search = $validated['search'] ?? null;
+        $websiteUrl = ! empty($validated['website_url']) ? $validated['website_url'] : null;
+        $categoryId = $validated['category_id'] ?? null;
+        $folderId = $validated['folder_id'] ?? null;
+
+        $isChatProContext = in_array($websiteUrl, ['chatpro', 'chatpro-temp', 'chatPro', 'chatpro-image', 'social-media-agent'], true);
+        $foldersEnabled = $isChatProContext && MarketplaceHelper::isRegistered('ai-chat-pro-folders');
+
+        $selectColumns = ['id', 'title', 'created_at', 'is_pinned', 'updated_at', 'reference_url', 'doc_name', 'website_url'];
+
+        if ($foldersEnabled) {
+            $selectColumns[] = 'folder_id';
+        }
+
+        $query = UserOpenaiChat::query()
+            ->where('user_id', Auth::id())
+            ->where('is_chatbot', 0)
+            ->select($selectColumns)
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('updated_at');
+
+        $this->applyWebsiteChatTypeScope($query, $websiteUrl);
+
+        if ($categoryId !== null) {
+            $query->where('openai_chat_category_id', $categoryId);
+        }
+
+        if ($foldersEnabled && ($search === null || $search === '')) {
+            if ($folderId === null) {
+                $query->whereNull('folder_id');
+            } else {
+                $query->where('folder_id', $folderId);
+            }
+        }
+
+        if ($search !== null && $search !== '') {
+            $query->where('title', 'like', "%{$search}%");
+        }
+
+        $chats = $query->paginate($perPage);
+
+        $thumbnails = [];
+        $isChatProImage = $websiteUrl === 'chatpro-image'
+            && MarketplaceHelper::isRegistered('ai-chat-pro-image-chat');
+
+        if ($isChatProImage) {
+            $chatIds = collect($chats->items())->pluck('id')->filter()->values();
+
+            if ($chatIds->isNotEmpty()) {
+                $thumbnails = $this->buildChatImageThumbnails($chatIds);
+            }
+        }
+
+        $chatsData = collect($chats->items())->map(function ($chat) use ($thumbnails, $foldersEnabled) {
+            $data = [
+                'id'            => $chat->id,
+                'title'         => $chat->title,
+                'created_at'    => $chat->created_at?->toIso8601String(),
+                'updated_at'    => $chat->updated_at?->toIso8601String(),
+                'is_pinned'     => (bool) $chat->is_pinned,
+                'reference_url' => $chat->reference_url,
+                'doc_name'      => $chat->doc_name,
+                'website_url'   => $chat->website_url,
+                'folder_id'     => $foldersEnabled ? $chat->folder_id : null,
+            ];
+
+            if (isset($thumbnails[$chat->id])) {
+                $data['thumbnail_url'] = $thumbnails[$chat->id];
+            }
+
+            return $data;
+        })->values();
+
+        return response()->json([
+            'success'    => true,
+            'chats'      => $chatsData,
+            'pagination' => [
+                'current_page' => $chats->currentPage(),
+                'last_page'    => $chats->lastPage(),
+                'per_page'     => $chats->perPage(),
+                'total'        => $chats->total(),
+                'has_more'     => $chats->hasMorePages(),
+            ],
+        ]);
+    }
+
+    /**
+     * Build thumbnail URLs for image-pro chat items.
+     *
+     * @param  \Illuminate\Support\Collection<int, int>  $chatIds
+     *
+     * @return array<int, string>
+     */
+    private function buildChatImageThumbnails($chatIds): array
+    {
+        $latestImageIdsByChat = DB::table('ai_chat_pro_image as ai')
+            ->join('user_openai_chat_messages as msg', 'msg.id', '=', 'ai.message_id')
+            ->whereIn('msg.user_openai_chat_id', $chatIds)
+            ->where('ai.status', \App\Enums\AiImageStatusEnum::COMPLETED->value)
+            ->whereNotNull('ai.generated_images')
+            ->selectRaw('msg.user_openai_chat_id as chat_id, MAX(ai.id) as latest_ai_id')
+            ->groupBy('msg.user_openai_chat_id');
+
+        $latestRecords = DB::table('ai_chat_pro_image as ai')
+            ->joinSub($latestImageIdsByChat, 'latest_ai', function ($join) {
+                $join->on('ai.id', '=', 'latest_ai.latest_ai_id');
+            })
+            ->select('latest_ai.chat_id', 'ai.generated_images')
+            ->get();
+
+        $thumbnails = [];
+
+        foreach ($latestRecords as $record) {
+            $chatId = (int) ($record->chat_id ?? 0);
+
+            if ($chatId <= 0) {
+                continue;
+            }
+
+            $images = json_decode((string) ($record->generated_images ?? '[]'), true);
+
+            if (! is_array($images)) {
+                continue;
+            }
+
+            $firstImage = reset($images);
+
+            if (! is_string($firstImage) || trim($firstImage) === '') {
+                continue;
+            }
+
+            $firstImage = trim($firstImage);
+
+            if (str_starts_with($firstImage, '//')) {
+                $firstImage = request()->getScheme() . ':' . $firstImage;
+            } elseif (
+                ! str_starts_with($firstImage, 'http://') &&
+                ! str_starts_with($firstImage, 'https://') &&
+                ! str_starts_with($firstImage, 'data:') &&
+                ! str_starts_with($firstImage, 'blob:')
+            ) {
+                $thumbnailSource = '/' . ltrim($firstImage, '/');
+                $firstImage = ThumbImage($thumbnailSource, 160, 160);
+
+                if (
+                    ! str_starts_with($firstImage, 'http://') &&
+                    ! str_starts_with($firstImage, 'https://') &&
+                    ! str_starts_with($firstImage, '//') &&
+                    ! str_starts_with($firstImage, 'data:') &&
+                    ! str_starts_with($firstImage, 'blob:')
+                ) {
+                    $firstImage = url(ltrim($firstImage, '/'));
+                }
+            }
+
+            $thumbnails[$chatId] = $firstImage;
+        }
+
+        return $thumbnails;
+    }
+
     public function search(Request $request): JsonResponse
     {
         $categoryId = $request->category_id;
         $search = $request->search_word;
+        $website_url = $request->website_url ?? null;
 
-        $list = UserOpenaiChat::where('user_id', Auth::id())->where('openai_chat_category_id', $categoryId)->where('is_chatbot', 0)->orderBy('updated_at', 'desc')->where('title', 'like', "%$search%");
+        $list = UserOpenaiChat::query()
+            ->where('user_id', Auth::id())
+            ->where('openai_chat_category_id', $categoryId)
+            ->where('is_chatbot', 0)
+            ->where('title', 'like', "%$search%")
+            ->orderBy('updated_at', 'desc')
+            ->limit($this->sidebarHistoryLimit());
+
+        $this->applyWebsiteChatTypeScope($list, $website_url);
 
         $list = $list->get();
-        $html = view('panel.user.openai_chat.components.chat_sidebar_list', compact('list'))->render();
+        $is_search = $search !== null && $search !== '';
+        $html = view('panel.user.openai_chat.components.chat_sidebar_list', compact('list', 'website_url', 'is_search'))->render();
 
         return response()->json(compact('html'));
     }
@@ -167,7 +364,8 @@ class AIChatController extends Controller
             ->where('openai_chat_category_id', $category->id)
             ->where('is_chatbot', 0)
             ->orderBy('is_pinned', 'desc')
-            ->orderBy('updated_at', 'desc');
+            ->orderBy('updated_at', 'desc')
+            ->limit($this->sidebarHistoryLimit());
         $list = $list->get();
         $chat = $list->first();
         $aiList = OpenaiGeneratorChatCategory::where('slug', '<>', 'ai_vision')->where('slug', '<>', 'ai_pdf')->get();
@@ -209,7 +407,7 @@ class AIChatController extends Controller
             ->whereNotIn('slug', [
                 'ai_vision', 'ai_webchat', 'ai_pdf',
             ])
-            ->when(Auth::user()->isUser(), function ($query) {
+            ->when(Auth::user()?->isUser(), function ($query) {
                 $query->where(function ($query) {
                     $query->whereNull('user_id')->orWhere('user_id', Auth::id());
                 });
@@ -218,7 +416,7 @@ class AIChatController extends Controller
 
         $elevenlabsAgentId = null;
         if ($slug === 'ai_realtime_voice_chat' && MarketplaceHelper::isRegistered('elevenlabs-voice-chat')) {
-            $elevenlabsAgentId = app(ElevenLabsVoiceChatService::class)?->fetchVoiceChatbot()?->agent_id;
+            $elevenlabsAgentId = app(ElevenLabsVoiceChatService::class)?->fetchVoiceChatbot()?->agent_id ?? null;
         }
 
         return view('panel.user.openai_chat.chat', compact(
@@ -270,14 +468,23 @@ class AIChatController extends Controller
             ->whereNotIn('slug', [
                 'ai_vision', 'ai_webchat', 'ai_pdf',
             ])
-            ->when(Auth::user()->isUser(), function ($query) {
+            ->when(Auth::user()?->isUser(), function ($query) {
                 $query->where(function ($query) {
                     $query->whereNull('user_id')->orWhere('user_id', Auth::id());
                 });
             })
             ->get();
-        $chat = UserOpenaiChat::where('id', $request->chat_id)->first();
         $website_url = $request->website_url ?? null;
+        $chatQuery = UserOpenaiChat::query()->where('id', $request->chat_id);
+        $this->applyWebsiteChatTypeScope($chatQuery, $website_url);
+        $chat = $chatQuery->first();
+
+        if (! $chat) {
+            return response()->json([
+                'message' => __('Chat not found for this chat type.'),
+            ], 404);
+        }
+
         $category = $chat->category;
         if (setting('realtime_voice_chat', 0)) {
             $apiKey = $this->getOpenAiApiKey(Auth::user());
@@ -297,7 +504,7 @@ class AIChatController extends Controller
 
         $elevenlabsAgentId = null;
         if (setting('default_voice_chat_engine', 'openai') == 'elevenlabs' && MarketplaceHelper::isRegistered('elevenlabs-voice-chat')) {
-            $elevenlabsAgentId = app(ElevenLabsVoiceChatService::class)?->fetchVoiceChatbot()?->agent_id;
+            $elevenlabsAgentId = app(ElevenLabsVoiceChatService::class)?->fetchVoiceChatbot()?->agent_id ?? null;
         }
 
         $chatView = 'panel.user.openai_chat.components.chat_area_container';
@@ -313,6 +520,15 @@ class AIChatController extends Controller
                 $generators = [];
             }
             $chatView = MarketplaceHelper::isRegistered('canvas') ? 'canvas::includes.chat_area_container' : 'ai-chat-pro::includes.chat_area_container';
+        }
+
+        if ($website_url === 'chatpro-image' && MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')) {
+            $tempChat = false;
+
+            if (! auth()->check()) {
+                $generators = [];
+            }
+            $chatView = 'ai-chat-pro-image-chat::includes.chat_area_container';
         }
 
         if (in_array($website_url, ['social-media-agent']) && MarketplaceHelper::isRegistered('social-media-agent')) {
@@ -344,7 +560,7 @@ class AIChatController extends Controller
             ->whereNotIn('slug', [
                 'ai_vision', 'ai_webchat', 'ai_pdf',
             ])
-            ->when(Auth::user()->isUser(), function ($query) {
+            ->when(Auth::user()?->isUser(), function ($query) {
                 $query->where(function ($query) {
                     $query->whereNull('user_id')->orWhere('user_id', Auth::id());
                 });
@@ -384,20 +600,16 @@ class AIChatController extends Controller
         Helper::clearEmptyConversations();
 
         $user = Auth::user();
-
         $category = OpenaiGeneratorChatCategory::where('id', $request->category_id)->firstOrFail();
         $chatbot = Chatbot::query()->where('id', $category->chatbot_id)->first();
-
         if ($category->assistant !== null) {
             $service = new AssistantService;
             $thread = $service->createThread();
         }
-
         $chat = new UserOpenaiChat;
-
         $website_url = $request->website_url ?? null;
 
-        if ($website_url === 'social-media-agent') {
+        if (in_array($website_url, ['social-media-agent', 'chatpro-image'], true)) {
             $chat->chat_type = $website_url;
         }
 
@@ -468,11 +680,18 @@ class AIChatController extends Controller
                 });
             })
             ->get();
-        $list = UserOpenaiChat::where('user_id', $user?->id)->where('openai_chat_category_id', $category->id)->where('is_chatbot', 0)->orderBy('updated_at', 'desc')->get();
+        $list = UserOpenaiChat::query()
+            ->where('user_id', $user?->id)
+            ->where('openai_chat_category_id', $category->id)
+            ->where('is_chatbot', 0)
+            ->orderBy('updated_at', 'desc')
+            ->limit($this->sidebarHistoryLimit());
+
+        $this->applyWebsiteChatTypeScope($list, $website_url);
+        $list = $list->get();
 
         $chatView = 'panel.user.openai_chat.components.chat_area_container';
         $tempChat = false;
-
         if (in_array($website_url, ['chatpro', 'chatpro-temp']) && MarketplaceHelper::isRegistered('ai-chat-pro')) {
             $tempChat = $website_url === 'chatpro-temp';
             if ($tempChat) {
@@ -483,6 +702,15 @@ class AIChatController extends Controller
                 $generators = [];
             }
             $chatView = MarketplaceHelper::isRegistered('canvas') ? 'canvas::includes.chat_area_container' : 'ai-chat-pro::includes.chat_area_container';
+        }
+
+        if ($website_url === 'chatpro-image' && MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')) {
+            $tempChat = false;
+
+            if (! auth()->check()) {
+                $generators = [];
+            }
+            $chatView = 'ai-chat-pro-image-chat::includes.chat_area_container';
         }
 
         if (in_array($website_url, ['social-media-agent']) && MarketplaceHelper::isRegistered('social-media-agent')) {
@@ -541,7 +769,7 @@ class AIChatController extends Controller
             $filePath = $this->uploadDoc($request, $chat->id, $request->type);
 
             $chat->reference_url = $filePath;
-            $chat->doc_name = $request->file('doc')->getClientOriginalName();
+            $chat->doc_name = $request->file('doc')?->getClientOriginalName();
             $chat->save();
 
             $message = new UserOpenaiChatMessage;
@@ -579,12 +807,17 @@ class AIChatController extends Controller
                 $apikeyPart3 = base64_encode(random_int(1, 100));
             }
 
-            $list = UserOpenaiChat::where('user_id', Auth::id())->where('openai_chat_category_id', $category->id)->where('is_chatbot', 0)->orderBy('updated_at', 'desc')->get();
+            $list = UserOpenaiChat::where('user_id', Auth::id())
+                ->where('openai_chat_category_id', $category->id)
+                ->where('is_chatbot', 0)
+                ->orderBy('updated_at', 'desc')
+                ->limit($this->sidebarHistoryLimit())
+                ->get();
             $generators = OpenaiGeneratorChatCategory::query()
                 ->whereNotIn('slug', [
                     'ai_vision', 'ai_webchat', 'ai_pdf',
                 ])
-                ->when(Auth::user()->isUser(), function ($query) {
+                ->when(Auth::user()?->isUser(), function ($query) {
                     $query->where(function ($query) {
                         $query->whereNull('user_id')->orWhere('user_id', Auth::id());
                     });
@@ -614,8 +847,8 @@ class AIChatController extends Controller
         $user = Auth::user();
         $category = OpenaiGeneratorChatCategory::where('id', $request->category_id)->firstOrFail();
         $chat = new UserOpenaiChat;
-        $chat->user_id = $user->id;
-        $chat->team_id = $user->team_id;
+        $chat->user_id = $user?->id;
+        $chat->team_id = $user?->team_id;
         $chat->openai_chat_category_id = $category->id;
         $chat->title = $category->name . ' Chat';
         $chat->total_credits = 0;
@@ -675,12 +908,17 @@ class AIChatController extends Controller
                 $apikeyPart3 = base64_encode(random_int(1, 100));
             }
 
-            $list = UserOpenaiChat::where('user_id', Auth::id())->where('openai_chat_category_id', $category->id)->where('is_chatbot', 0)->orderBy('updated_at', 'desc')->get();
+            $list = UserOpenaiChat::where('user_id', Auth::id())
+                ->where('openai_chat_category_id', $category->id)
+                ->where('is_chatbot', 0)
+                ->orderBy('updated_at', 'desc')
+                ->limit($this->sidebarHistoryLimit())
+                ->get();
             $generators = OpenaiGeneratorChatCategory::query()
                 ->whereNotIn('slug', [
                     'ai_vision', 'ai_webchat', 'ai_pdf',
                 ])
-                ->when(Auth::user()->isUser(), function ($query) {
+                ->when(Auth::user()?->isUser(), function ($query) {
                     $query->where(function ($query) {
                         $query->whereNull('user_id')->orWhere('user_id', Auth::id());
                     });
@@ -793,7 +1031,7 @@ class AIChatController extends Controller
 
         $chatbot_history = new ChatBotHistory;
         $chatbot_history->user_id = Auth::id();
-        $chatbot_history->ip = isset($_SERVER['HTTP_CF_CONNECTING_IP']) ? $_SERVER['HTTP_CF_CONNECTING_IP'] : request()->ip();
+        $chatbot_history->ip = isset($_SERVER['HTTP_CF_CONNECTING_IP']) ? $_SERVER['HTTP_CF_CONNECTING_IP'] : request()?->ip();
         $chatbot_history->user_openai_chat_id = $chat->id;
         $chatbot_history->openai_chat_category_id = $category->id;
         $chatbot_history->save();
@@ -801,6 +1039,37 @@ class AIChatController extends Controller
         $html = view('panel.user.openai_chat.components.chat_area', compact('chat', 'category'))->render();
 
         return response()->json(compact('html', 'chat'));
+    }
+
+    private function applyWebsiteChatTypeScope(Builder $query, ?string $websiteUrl): Builder
+    {
+        if ($websiteUrl === 'chatpro-image') {
+            return $query->where('chat_type', 'chatpro-image');
+        }
+
+        if (in_array($websiteUrl, ['chatpro', 'chatpro-temp', 'chatPro'], true)) {
+            $query->where(function ($q) {
+                $q->whereNull('chat_type')
+                    ->orWhereIn('chat_type', ['chatpro', 'chatpro-temp', 'chatPro']);
+            });
+
+            if (MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')) {
+                $query->whereNotExists(function ($subQuery) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('user_openai_chat_messages as msg')
+                        ->join('ai_chat_pro_image as ai', 'ai.message_id', '=', 'msg.id')
+                        ->whereColumn('msg.user_openai_chat_id', 'user_openai_chat.id');
+                });
+            }
+
+            return $query;
+        }
+
+        if ($websiteUrl === 'social-media-agent') {
+            return $query->where('chat_type', 'social-media-agent');
+        }
+
+        return $query;
     }
 
     /**
@@ -821,7 +1090,7 @@ class AIChatController extends Controller
             $realtime = $request->get('realtime');
             $total_used_tokens = 0;
             $entry = new UserOpenaiChatMessage;
-            $entry->user_id = $user->id;
+            $entry->user_id = $user?->id;
             $entry->user_openai_chat_id = $chat->id;
             $entry->input = $prompt;
             $entry->response = null;
@@ -1155,7 +1424,7 @@ class AIChatController extends Controller
             }
         }
 
-        return self::openaiChatStream($request, $openaiApiKey, $chat_bot, $history, $message_id, null, [], $category);
+        return $this->openaiChatStream($request, $openaiApiKey, $chat_bot, $history, $message_id, null, [], $category);
     }
 
     /**
@@ -1493,7 +1762,7 @@ class AIChatController extends Controller
         return $this->openaiChatStream($request, $openaiApiKey, $chat_bot, $history, $message_id, 2000, $images);
     }
 
-    private function openaiChatStream($request, $openaiApiKey, string $chat_bot, $history, $message_id, $ai_max_tokens = null, $images = [], $category = null): StreamedResponse
+    private function openaiChatStream($request, $openaiApiKey, string|EntityEnum $chat_bot, $history, $message_id, $ai_max_tokens = null, $images = [], $category = null): StreamedResponse
     {
         $driver = EntityFacade::driver(EntityEnum::fromSlug($chat_bot));
 
@@ -2028,7 +2297,7 @@ class AIChatController extends Controller
                                                     if (Str::startsWith($item, 'http')) {
                                                         $imageData = file_get_contents($item);
                                                     } else {
-                                                        $imageData = file_get_contents(substr($item, 1, strlen($item) - 1));
+                                                        $imageData = file_get_contents(substr($item, 1));
                                                     }
                                                     $base64Image = base64_encode($imageData ?? '');
 
@@ -2065,9 +2334,9 @@ class AIChatController extends Controller
                     $responsedText = '';
 
                     foreach (explode("\n", $response->getBody()->getContents()) as $chunk) {
-                        if (strlen($chunk) > 5 && $chunk !== 'data: [DONE]' && isset(json_decode(substr($chunk, 6, strlen($chunk) - 6), false, 512, JSON_THROW_ON_ERROR)->choices[0]->delta->content)) {
+                        if (strlen($chunk) > 5 && $chunk !== 'data: [DONE]' && isset(json_decode(substr($chunk, 6), false, 512, JSON_THROW_ON_ERROR)->choices[0]->delta->content)) {
 
-                            $message = json_decode(substr($chunk, 6, strlen($chunk) - 6))->choices[0]->delta->content;
+                            $message = json_decode(substr($chunk, 6))->choices[0]->delta->content;
 
                             $messageFix = str_replace(["\r\n", "\r", "\n"], '<br/>', $message ?? '');
                             $output .= $messageFix;
@@ -2115,7 +2384,7 @@ class AIChatController extends Controller
             ]);
         }
 
-        $ipAddress = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? request()->ip();
+        $ipAddress = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? request()?->ip();
         $db_ip_address = RateLimit::where('ip_address', $ipAddress)->where('type', 'chatbot')->first();
         if ($db_ip_address) {
             if (now()->diffInDays(Carbon::parse($db_ip_address->last_attempt_at)->format('Y-m-d')) > 0) {
@@ -2203,11 +2472,17 @@ class AIChatController extends Controller
         return response()->json($text);
     }
 
-    public function deleteChat(Request $request): void
+    public function deleteChat(Request $request): JsonResponse
     {
         $chat_id = explode('_', $request->chat_id)[1];
         $chat = UserOpenaiChat::where('id', $chat_id)->first();
         $chat->delete();
+
+        return response()->json([
+            'success' => true,
+            'chat'    => ['id' => $chat->id, 'title' => $chat->title],
+            'message' => __('Chat deleted successfully'),
+        ]);
     }
 
     public function clearChats(Request $request): JsonResponse
@@ -2216,7 +2491,15 @@ class AIChatController extends Controller
         if (Helper::appIsNotDemo()) {
             $user = Auth::user();
             $category_id = $request->category_id;
-            $chats = UserOpenaiChat::where('user_id', $user->id)->where('openai_chat_category_id', $category_id)->get();
+            $website_url = $request->website_url ?? null;
+
+            $chatsQuery = UserOpenaiChat::query()
+                ->where('user_id', $user?->id)
+                ->where('openai_chat_category_id', $category_id);
+
+            $this->applyWebsiteChatTypeScope($chatsQuery, $website_url);
+            $chats = $chatsQuery->get();
+
             if ($chats) {
                 foreach ($chats as $chat) {
                     $chat->delete();
@@ -2227,7 +2510,7 @@ class AIChatController extends Controller
         return response()->json(['error' => __('This action is disabled in the demo.')]);
     }
 
-    public function renameChat(Request $request): void
+    public function renameChat(Request $request): JsonResponse
     {
         $chat_id = explode('_', $request->chat_id)[1];
         $chat = UserOpenaiChat::where('id', $chat_id)->first();
@@ -2235,9 +2518,15 @@ class AIChatController extends Controller
             $chat->title = $request->title;
             $chat->save();
         }
+
+        return response()->json([
+            'success' => true,
+            'chat'    => ['id' => $chat->id, 'title' => $chat->title],
+            'message' => __('Chat renamed successfully'),
+        ]);
     }
 
-    public function pinConversation(Request $request): void
+    public function pinConversation(Request $request): JsonResponse
     {
         $chat_id = explode('_', $request->chat_id)[1];
         $chat = UserOpenaiChat::where('id', $chat_id)->first();
@@ -2245,6 +2534,12 @@ class AIChatController extends Controller
             $chat->is_pinned = $request->pinned;
             $chat->save();
         }
+
+        return response()->json([
+            'success' => true,
+            'chat'    => ['id' => $chat->id, 'is_pinned' => $chat->is_pinned],
+            'message' => __('Chat pin changed successfully'),
+        ]);
     }
 
     // Low

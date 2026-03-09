@@ -25,7 +25,6 @@ trait HasModel
     {
         $ttl = Helper::appIsNotDemo() ? 10 : 600;
 
-        // If fresh is true, bypass the cache and fetch directly from the database
         if ($fresh) {
             $validEngines = collect(EntityEnum::cases())->pluck('value');
             Entity::whereNotIn('key', $validEngines)->delete();
@@ -33,7 +32,6 @@ trait HasModel
             return Entity::whereIn('key', $validEngines)->get();
         }
 
-        // Otherwise, use the cache to store/retrieve the entities
         return Cache::remember('entities', $ttl, static function () {
             $validEngines = collect(EntityEnum::cases())->pluck('value');
             Entity::whereNotIn('key', $validEngines)->delete();

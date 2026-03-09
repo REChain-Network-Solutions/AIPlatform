@@ -75,6 +75,41 @@ class FileSearchService
     }
 
     /**
+     * Poll until all files in the vector store are ready (status completed) or timeout.
+     * Per OpenAI docs, file search requires files to be completed before use.
+     *
+     * @param  int  $maxAttempts  Max poll attempts
+     * @param  int  $sleepSeconds  Seconds between attempts
+     */
+    public function waitForVectorStoreFilesReady(string $vectorStoreId, int $maxAttempts = 30, int $sleepSeconds = 2): bool
+    {
+        for ($i = 0; $i < $maxAttempts; $i++) {
+            try {
+                $list = OpenAI::vectorStores()->files()->list($vectorStoreId);
+                $allCompleted = true;
+                foreach ($list->data as $file) {
+                    if ($file->status === 'failed') {
+                        return false;
+                    }
+                    if ($file->status !== 'completed') {
+                        $allCompleted = false;
+
+                        break;
+                    }
+                }
+                if ($allCompleted && $list->data !== []) {
+                    return true;
+                }
+            } catch (Exception $e) {
+                return false;
+            }
+            sleep($sleepSeconds);
+        }
+
+        return false;
+    }
+
+    /**
      * Perform a file search using OpenAI's API.
      * This function replaced with the responses() endpoint that added after we updated the openai-php client
      * Its not in use right now, but we keep it for backup purpose

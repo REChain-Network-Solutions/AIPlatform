@@ -64,7 +64,7 @@ class MediaManagerModal extends Component
 
     public int $loadedVideosCount = 0;
 
-    public int $loadPerBatch = 30; // Load 30 items at a time
+    public int $loadPerBatch = 12;
 
     public bool $hasMoreImages = true;
 
@@ -325,7 +325,11 @@ class MediaManagerModal extends Component
                 $extension = strtolower($file->guessExtension());
                 $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']);
                 $isVideo = in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm']);
-                $fileType = $isImage ? 'images' : ($isVideo ? 'videos' : 'other');
+                $fileType = match (true) {
+                    $isImage => 'images',
+                    $isVideo => 'videos',
+                    default  => 'other',
+                };
 
                 // Create user-specific folder
                 $userFolder = 'media/' . $fileType . '/u-' . auth()->id() . '/';
@@ -428,7 +432,7 @@ class MediaManagerModal extends Component
         if ($this->activeFilter === 'Images') {
             $this->loadedImagesCount = $this->loadPerBatch;
         } elseif ($this->activeFilter === 'Videos') {
-            $this->loadedVideosCount = $this->loadPerBatch - 25;
+            $this->loadedVideosCount = max(6, (int) floor($this->loadPerBatch / 2));
         } elseif ($this->activeFilter === 'Other Files') {
             $this->loadedOtherFilesCount = $this->loadPerBatch;
         }
@@ -458,7 +462,6 @@ class MediaManagerModal extends Component
         $this->allowedTypes = $allowedTypes;
         $this->showModal = true;
         $this->allowMultipleSelection = $isMultiple;
-        // Load initial batch when opening modal
         $this->loadInitialBatch();
     }
 
@@ -471,6 +474,11 @@ class MediaManagerModal extends Component
         $this->uploadedFiles = [];
         $this->isProcessingFiles = false;
         $this->processingMessage = '';
+        $this->selectedImages = [];
+        $this->selectedVideos = [];
+        $this->selectedOtherFiles = [];
+        $this->selectedStockImages = [];
+        $this->selectedStockVideos = [];
     }
 
     // Updated getStockVideos method with better video file selection
@@ -661,11 +669,10 @@ class MediaManagerModal extends Component
         };
 
         $id = (string) $id;
-        if (in_array($id, $this->$selectedProperty, true)) {
-            $this->$selectedProperty = collect($this->$selectedProperty)
-                ->reject(fn ($selectedId) => $selectedId === $id)
-                ->values()
-                ->toArray();
+        $index = array_search($id, $this->$selectedProperty, true);
+        if ($index !== false) {
+            unset($this->{$selectedProperty}[$index]);
+            $this->{$selectedProperty} = array_values($this->{$selectedProperty});
         } else {
             $this->{$selectedProperty}[] = $id;
         }
@@ -835,20 +842,21 @@ class MediaManagerModal extends Component
         }
 
         $userUploadedMediaFolder = 'media/other/u-' . auth()->id() . '/';
+        $disk = Storage::disk('public');
 
-        // Create the folder if it doesn't exist
-        if (! Storage::disk('public')->exists($userUploadedMediaFolder)) {
-            Storage::disk('public')->makeDirectory($userUploadedMediaFolder);
+        if (! $disk->exists($userUploadedMediaFolder)) {
+            return collect();
         }
-        $files = Storage::disk('public')->files($userUploadedMediaFolder);
+
+        $files = $disk->files($userUploadedMediaFolder);
 
         return collect($files)
-            ->map(function ($file) {
+            ->map(function ($file) use ($disk) {
                 $filename = basename($file);
                 $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
 
                 try {
-                    $lastModified = Storage::disk('public')->lastModified($file);
+                    $lastModified = $disk->lastModified($file);
                     $createdAt = \Carbon\Carbon::createFromTimestamp($lastModified);
                 } catch (Exception $e) {
                     $createdAt = \Carbon\Carbon::now();
@@ -868,7 +876,7 @@ class MediaManagerModal extends Component
                     'format_date' => $createdAt->format('M d, Y'),
                     'source'      => 'uploaded',
                     'file_path'   => $file,
-                    'file_size'   => Storage::disk('public')->size($file),
+                    'file_size'   => $disk->size($file),
                 ];
             })
             ->values();
@@ -884,10 +892,11 @@ class MediaManagerModal extends Component
 
         // Filter by search term if provided
         $searchTerm = trim($this->searchTerm);
+        $searchTermLower = strtolower($searchTerm);
         if (! empty($searchTerm)) {
-            $uploadedOtherFiles = $uploadedOtherFiles->filter(function ($item) use ($searchTerm) {
-                return Str::contains(strtolower($item->title), strtolower($searchTerm)) ||
-                    Str::contains(strtolower($item->filename), strtolower($searchTerm));
+            $uploadedOtherFiles = $uploadedOtherFiles->filter(function ($item) use ($searchTermLower) {
+                return Str::contains(strtolower($item->title), $searchTermLower) ||
+                    Str::contains(strtolower($item->filename), $searchTermLower);
             });
         }
 
@@ -924,6 +933,55 @@ class MediaManagerModal extends Component
         $this->dispatch('searchUpdated');
     }
 
+    /**
+     * @param  array<int, mixed>  $selectedItems
+     *
+     * @return array<int, string>
+     */
+    private function sanitizeSelectedItems(array $selectedItems): array
+    {
+        $sanitized = collect($selectedItems)
+            ->map(static fn ($id) => trim((string) $id))
+            ->filter(static fn ($id) => $id !== '')
+            ->unique()
+            ->values()
+            ->toArray();
+
+        if (! $this->allowMultipleSelection && count($sanitized) > 1) {
+            return [reset($sanitized)];
+        }
+
+        return $sanitized;
+    }
+
+    /**
+     * Handle insert triggered from Alpine local selection without server roundtrips on each toggle.
+     *
+     * @param  array<int, mixed>  $selectedItems
+     */
+    public function insertSelectedFromClient(string $type, array $selectedItems): void
+    {
+        $this->insertSelectedInternal($type, $this->sanitizeSelectedItems($selectedItems));
+    }
+
+    /**
+     * @param  array<int, mixed>  $selectedItems
+     */
+    public function downloadAndInsertStockImagesFromClient(array $selectedItems): void
+    {
+        $this->selectedStockImages = $this->sanitizeSelectedItems($selectedItems);
+        $this->downloadAndInsertStockImages();
+    }
+
+    /**
+     * @param  array<int, mixed>  $selectedItems
+     */
+    public function downloadAndInsertStockVideosFromClient(array $selectedItems): void
+    {
+        $this->selectedStockVideos = $this->sanitizeSelectedItems($selectedItems);
+        $this->downloadAndInsertStockVideos();
+    }
+
     public function insertSelected(string $type): void
     {
         $selectedItems = match ($type) {
@@ -935,16 +993,18 @@ class MediaManagerModal extends Component
             default      => []
         };
 
+        $this->insertSelectedInternal($type, $this->sanitizeSelectedItems($selectedItems));
+    }
+
+    /**
+     * @param  array<int, string>  $selectedItems
+     */
+    private function insertSelectedInternal(string $type, array $selectedItems): void
+    {
         if (empty($selectedItems)) {
             return;
         }
 
-        // If single selection is enforced, only pick the first item
-        if (! $this->allowMultipleSelection) {
-            $selectedItems = [reset($selectedItems)];
-        }
-
-        // Get the actual media items based on selected IDs
         $mediaItems = match ($type) {
             'image'      => $this->getImages(true),
             'video'      => $this->getVideos(true),
@@ -953,6 +1013,7 @@ class MediaManagerModal extends Component
             'stockVideo' => $this->getStockVideos(true),
             default      => collect()
         };
+
         $selectedMediaItems = $mediaItems->whereIn('id', $selectedItems);
 
         // Format the data for frontend consumption
@@ -997,15 +1058,15 @@ class MediaManagerModal extends Component
         }
 
         $userUploadedMediaFolder = 'media/' . ($type === 'image' ? 'images' : 'videos') . '/u-' . auth()->id() . '/';
+        $disk = Storage::disk('public');
 
-        // Create the folder if it doesn't exist
-        if (! Storage::disk('public')->exists($userUploadedMediaFolder)) {
-            Storage::disk('public')->makeDirectory($userUploadedMediaFolder);
+        if (! $disk->exists($userUploadedMediaFolder)) {
+            return collect();
         }
 
         // Get allowed extensions from settings
         $allowedTypesFromSettings = explode(',', setting('media_allowed_types', 'jpg,png,gif,webp,svg,mp4,avi,mov,wmv,flv,webm,mp3,wav,m4a,pdf,doc,docx,xls,xlsx'));
-        $allowedTypesFromSettings = array_map('trim', $allowedTypesFromSettings);
+        $allowedTypesFromSettings = array_map(static fn ($value) => strtolower(trim($value)), $allowedTypesFromSettings);
 
         // Filter by type (image or video)
         if ($type === 'image') {
@@ -1016,7 +1077,7 @@ class MediaManagerModal extends Component
             $allowedExtensions = array_intersect($allowedTypesFromSettings, $videoExtensions);
         }
 
-        $files = Storage::disk('public')->files($userUploadedMediaFolder);
+        $files = $disk->files($userUploadedMediaFolder);
 
         return collect($files)
             ->filter(function ($file) use ($allowedExtensions) {
@@ -1024,11 +1085,11 @@ class MediaManagerModal extends Component
 
                 return in_array($extension, $allowedExtensions);
             })
-            ->map(function ($file) {
+            ->map(function ($file) use ($disk) {
                 $filename = basename($file);
 
                 try {
-                    $lastModified = Storage::disk('public')->lastModified($file);
+                    $lastModified = $disk->lastModified($file);
                     $createdAt = \Carbon\Carbon::createFromTimestamp($lastModified);
                 } catch (Exception $e) {
                     // Fallback to current time if we can't get the file timestamp
@@ -1048,7 +1109,6 @@ class MediaManagerModal extends Component
                     'format_date' => $createdAt->format('M d, Y'),
                     'source'      => 'uploaded',
                     'file_path'   => $file,
-                    'file_size'   => Storage::disk('public')->size($file),
                 ];
             })
             ->values();
@@ -1059,9 +1119,11 @@ class MediaManagerModal extends Component
      */
     protected function getImages(bool $getAllForSelection = false): Collection
     {
+        $userId = auth()->id();
         // Get database images
         $query = UserOpenai::query()
-            ->where('user_id', auth()->id())
+            ->select(['id', 'user_id', 'openai_id', 'title', 'input', 'output', 'storage', 'created_at'])
+            ->where('user_id', $userId)
             ->whereNotNull('output')
             ->where('output', '!=', '')
             ->whereHas('generator', function ($q) {
@@ -1073,6 +1135,7 @@ class MediaManagerModal extends Component
 
         // Apply search filter at database level
         $searchTerm = trim($this->searchTerm);
+        $searchTermLower = strtolower($searchTerm);
         if (! empty($searchTerm)) {
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('title', 'like', "%{$searchTerm}%")
@@ -1091,9 +1154,9 @@ class MediaManagerModal extends Component
 
         // Filter uploaded files by search term if provided
         if (! empty($searchTerm)) {
-            $uploadedImages = $uploadedImages->filter(function ($item) use ($searchTerm) {
-                return Str::contains(strtolower($item->title), strtolower($searchTerm)) ||
-                    Str::contains(strtolower($item->filename), strtolower($searchTerm));
+            $uploadedImages = $uploadedImages->filter(function ($item) use ($searchTermLower) {
+                return Str::contains(strtolower($item->title), $searchTermLower) ||
+                    Str::contains(strtolower($item->filename), $searchTermLower);
             });
         }
 
@@ -1164,13 +1227,16 @@ class MediaManagerModal extends Component
             return collect();
         }
 
+        $userId = auth()->id();
         $searchTerm = trim($this->searchTerm);
+        $searchTermLower = strtolower($searchTerm);
         $allVideos = collect();
 
         try {
             // Get database videos
             $query = UserOpenai::query()
-                ->where('user_id', auth()->id())
+                ->select(['id', 'user_id', 'openai_id', 'title', 'input', 'output', 'storage', 'created_at'])
+                ->where('user_id', $userId)
                 ->where('status', 'COMPLETED')
                 ->whereNotNull('output')
                 ->where('output', '!=', '')
@@ -1201,10 +1267,11 @@ class MediaManagerModal extends Component
             if (class_exists('App\Extensions\AiVideoPro\System\Models\UserFall')) {
                 try {
                     $userFallQuery = UserFall::query()
-                        ->where('user_id', auth()->id())
+                        ->where('user_id', $userId)
                         ->where('status', 'complete')
                         ->whereNotNull('video_url')
-                        ->where('video_url', '!=', '');
+                        ->where('video_url', '!=', '')
+                        ->select(['id', 'user_id', 'status', 'video_url', 'prompt', 'created_at', 'model', 'request_id', 'is_demo']);
 
                     // Apply search filter for UserFall videos
                     if (! empty($searchTerm)) {
@@ -1242,10 +1309,11 @@ class MediaManagerModal extends Component
             // Get ExportedVideos (with error handling)
             try {
                 $exportedVideosQuery = ExportedVideo::query()
-                    ->where('user_id', auth()->id())
+                    ->where('user_id', $userId)
                     ->where('status', 'completed')
                     ->whereNotNull('video_url')
-                    ->where('video_url', '!=', '');
+                    ->where('video_url', '!=', '')
+                    ->select(['id', 'user_id', 'status', 'video_url', 'title', 'created_at']);
 
                 // Apply search filter for ExportedVideos
                 if (! empty($searchTerm)) {
@@ -1281,9 +1349,9 @@ class MediaManagerModal extends Component
 
             // Filter uploaded files by search term if provided
             if (! empty($searchTerm)) {
-                $uploadedVideos = $uploadedVideos->filter(function ($item) use ($searchTerm) {
-                    return Str::contains(strtolower($item->title ?? ''), strtolower($searchTerm)) ||
-                        Str::contains(strtolower($item->filename ?? ''), strtolower($searchTerm));
+                $uploadedVideos = $uploadedVideos->filter(function ($item) use ($searchTermLower) {
+                    return Str::contains(strtolower($item->title ?? ''), $searchTermLower) ||
+                        Str::contains(strtolower($item->filename ?? ''), $searchTermLower);
                 });
             }
 
@@ -1338,16 +1406,18 @@ class MediaManagerModal extends Component
         $stockImages = collect();
         $stockVideos = collect();
 
-        if ($this->activeFilter === 'Images') {
-            $images = $this->getImages();
-        } elseif ($this->activeFilter === 'Videos') {
-            $videos = $this->getVideos();
-        } elseif ($this->activeFilter === 'Other Files') {
-            $otherFiles = $this->getOtherFiles();
-        } elseif ($this->activeFilter === 'Stock Images') {
-            $stockImages = $this->getStockImages();
-        } elseif ($this->activeFilter === 'Stock Videos') {
-            $stockVideos = $this->getStockVideos();
+        if ($this->showModal) {
+            if ($this->activeFilter === 'Images') {
+                $images = $this->getImages();
+            } elseif ($this->activeFilter === 'Videos') {
+                $videos = $this->getVideos();
+            } elseif ($this->activeFilter === 'Other Files') {
+                $otherFiles = $this->getOtherFiles();
+            } elseif ($this->activeFilter === 'Stock Images') {
+                $stockImages = $this->getStockImages();
+            } elseif ($this->activeFilter === 'Stock Videos') {
+                $stockVideos = $this->getStockVideos();
+            }
         }
 
         return view('livewire.media-manager-modal', [
@@ -1362,8 +1432,9 @@ class MediaManagerModal extends Component
     /**
      * Generate a title from a prompt by taking the first few words
      */
-    private function generateTitleFromPrompt(string $prompt): string
+    private function generateTitleFromPrompt(?string $prompt): string
     {
+        $prompt = $prompt ?? '';
         $words = explode(' ', trim($prompt));
         $titleWords = array_slice($words, 0, 6); // Take first 6 words
         $title = implode(' ', $titleWords);

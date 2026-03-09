@@ -50,7 +50,7 @@ class CreateImageVariationService
             ['name' => 'response_format', 'contents' => 'b64_json'],
             [
                 'name'     => 'image',
-                'contents' => fopen(public_path($this->getImage()), 'r'),
+                'contents' => fopen(public_path($this->getImage()), 'rb'),
                 'filename' => basename($this->getImage()),
             ],
         ];

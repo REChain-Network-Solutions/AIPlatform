@@ -123,7 +123,7 @@ class ChatbotController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('logo')) {
-            $data['image'] = $request->file('logo')->store('chatbot');
+            $data['image'] = $request->file('logo')?->store('chatbot');
         }
 
         Chatbot::query()->create($data);
@@ -170,7 +170,7 @@ class ChatbotController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('logo')) {
-            $data['image'] = $request->file('logo')->store('chatbot');
+            $data['image'] = $request->file('logo')?->store('chatbot');
         }
 
         $chatbot->update($data);

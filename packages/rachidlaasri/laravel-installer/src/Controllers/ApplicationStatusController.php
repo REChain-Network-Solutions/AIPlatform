@@ -11,6 +11,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Cache;
 use RachidLaasri\LaravelInstaller\Repositories\ApplicationStatusRepositoryInterface;
 use RachidLaasri\LaravelInstaller\Requests\LicenseKeyRequest;
 
@@ -20,7 +21,7 @@ class ApplicationStatusController extends Controller
 
     public function activate(Request $request): RedirectResponse
     {
-        cache()->forget('check_license_domain_' . $request->getHost());
+        Cache::forget('check_license_domain_' . $request->getHost());
 
         $repository = app(ApplicationStatusRepositoryInterface::class);
 
@@ -47,7 +48,7 @@ class ApplicationStatusController extends Controller
 
     public function license(Request $request, $regenerate = null)
     {
-        cache()->forget('check_license_domain_' . $request->getHost());
+        Cache::forget('check_license_domain_' . $request->getHost());
 
         $this->licenseRepository->generate($request);
 
@@ -82,7 +83,7 @@ class ApplicationStatusController extends Controller
 
     public function upgrade(Request $request): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        cache()->forget('check_license_domain_' . $request->getHost());
+        Cache::forget('check_license_domain_' . $request->getHost());
 
         $this->licenseRepository->generate($request);
 
@@ -94,7 +95,7 @@ class ApplicationStatusController extends Controller
 
     public function licenseCheck(LicenseKeyRequest $request): RedirectResponse
     {
-        cache()->forget('check_license_domain_' . $request->getHost());
+        Cache::forget('check_license_domain_' . $request->getHost());
 
         $this->licenseRepository->setLicense();
 
@@ -103,7 +104,7 @@ class ApplicationStatusController extends Controller
 
     public function webhook(Request $request)
     {
-        cache()->forget('check_license_domain_' . $request->getHost());
+        Cache::forget('check_license_domain_' . $request->getHost());
 
         $this->licenseRepository->webhook($request);
 

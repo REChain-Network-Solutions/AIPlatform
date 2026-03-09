@@ -4,11 +4,22 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Concerns\HasCache;
 use Illuminate\Database\Eloquent\Model;
 
 class Gateways extends Model
 {
+    use HasCache;
+
+    public static int $cacheTtl = 3600 * 24;
+
+    public static string $cacheKey = 'cache_gateways_result';
+
     protected $guarded = [];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 
     protected $fillable = [
         'code',
@@ -38,6 +49,14 @@ class Gateways extends Model
         'bank_account_other',
         'country_tax_enabled',
     ];
+
+    protected static function booted(): void
+    {
+        parent::boot();
+
+        static::saved(static fn () => static::forgetCache());
+        static::deleted(static fn () => static::forgetCache());
+    }
 
     public function isSandbox(): bool
     {

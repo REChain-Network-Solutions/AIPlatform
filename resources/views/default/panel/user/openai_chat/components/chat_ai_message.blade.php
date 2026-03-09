@@ -1,8 +1,44 @@
 @php
+    $theme = setting('dash_theme', 'default');
     $model_label = '';
     try {
         $model_label = \App\Domains\Entity\Enums\EntityEnum::fromSlug($message->model_slug ?? '')->label();
     } catch (RuntimeException | Exception $exception) {
+    }
+
+    // Parse reference images from the images field (comma-separated) or from params
+    $referenceImages = [];
+    if (!empty($message->images)) {
+        $referenceImages = array_filter(array_map('trim', explode(',', $message->images)));
+    }
+
+    $is_chat_pro =
+        \App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-chat-pro') &&
+        (route('dashboard.user.openai.chat.pro.index') === $currentUrl ||
+            route('chat.pro') === $currentUrl ||
+            route('dashboard.user.openai.chat.pro.index') === $previousUrl ||
+            route('chat.pro') === $previousUrl);
+    $is_chat_pro_image = isset($website_url) && $website_url === 'chatpro-image' && \App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-chat-pro-image-chat');
+
+    $suggestion_style = setting('ai_chat_pro_suggestion_style', 'pill');
+
+    // Get AI-generated images from linked AiChatProImage records (only if extension is installed)
+    $aiGeneratedImages = [];
+    if ($is_chat_pro_image) {
+        if ($message->relationLoaded('aiChatProImages')) {
+            foreach ($message->aiChatProImages as $imageRecord) {
+                if ($imageRecord->isCompleted() && !empty($imageRecord->generated_images)) {
+                    $aiGeneratedImages = array_merge($aiGeneratedImages, $imageRecord->generated_images);
+                }
+            }
+        } else {
+            $imageRecords = $message->aiChatProImages()->where('status', \App\Enums\AiImageStatusEnum::COMPLETED)->get();
+            foreach ($imageRecords as $imageRecord) {
+                if (!empty($imageRecord->generated_images)) {
+                    $aiGeneratedImages = array_merge($aiGeneratedImages, $imageRecord->generated_images);
+                }
+            }
+        }
     }
 @endphp
 
@@ -16,14 +52,14 @@
         'w-auto' => !$is_multi_model_message,
     ])
 >
-    @if ($message->output != null)
+    @if ($message->output != null || count($aiGeneratedImages) > 0)
         <div class="lqd-chat-sender flex items-center gap-2.5">
             <span
                 class="lqd-chat-avatar mt-0.5 inline-block size-6 shrink-0 rounded-full bg-cover bg-center"
                 style="background-image: url('{{ !empty($chat->category?->image) ? custom_theme_url($chat->category?->image, true) : url(custom_theme_url('/assets/img/auth/default-avatar.png')) }}')"
             ></span>
             <span class="lqd-chat-sender-name sr-only">
-                @lang('AI Assistant')
+                {{ __($chat?->category?->name ?? 'AI Assistant') }}
             </span>
         </div>
         <div class="chat-content-container group relative max-w-[calc(100%-64px)] rounded-[2em] bg-clay text-heading-foreground dark:bg-white/[2%]">
@@ -75,18 +111,30 @@
                     </span>
 
                     {{-- <div class="multi-model-response-actions contents shrink-0">
-                        <x-button
-                            class="multi-model-response-regenerate size-8 shrink-0 rounded-full p-0"
+						<x-button
+							class="multi-model-response-regenerate size-8 shrink-0 rounded-full p-0"
 							data-message-id="{{ $message->id }}"
 							data-model="{{ $message->model_slug ?? '' }}"
-                            size="none"
-                            variant="outline"
-                        >
-                            <x-tabler-rotate class="size-4" />
-                        </x-button>
-                    </div> --}}
+							size="none"
+							variant="outline"
+						>
+							<x-tabler-rotate class="size-4" />
+						</x-button>
+					</div> --}}
                 </div>
             @endif
+
+            @php
+                // For AI Chat Pro Image: add image markdown to output if we have generated images but no markdown in output
+                if ($is_chat_pro_image && count($aiGeneratedImages) > 0) {
+                    $hasImageMarkdown = preg_match('/!\[.*?\]\(.*?\)/', $output);
+                    if (!$hasImageMarkdown) {
+                        $imageMarkdown =
+                            "::: lqd-chat-image-grid \n" . implode('', array_map(fn($imagePath) => "![Generated Image]({$imagePath})", $aiGeneratedImages)) . "\n::: \n";
+                        $output = $imageMarkdown . $output;
+                    }
+                }
+            @endphp
 
             <pre @class([
                 'chat-content prose relative w-full max-w-none !whitespace-pre-wrap px-6 py-3.5 indent-0 font-[inherit] text-xs font-normal text-current [word-break:break-word] empty:hidden [&_*]:text-current',
@@ -95,6 +143,44 @@
 
             <div
                 class="lqd-chat-actions-wrap pointer-events-auto invisible absolute -end-5 bottom-0 flex flex-col gap-2 opacity-0 transition-all group-hover:!visible group-hover:!opacity-100">
+                @if ($is_chat_pro_image)
+                    <button
+                        class="lqd-reimagine-images group/btn relative inline-flex size-10 items-center justify-center rounded-full border-none bg-white p-0 text-[12px] text-black shadow-lg transition-all hover:-translate-y-[2px] hover:scale-110"
+                        title="{{ __('Reimagine') }}"
+                        @click.prevent="$store.chatsV2.reimagineImages($event, $el)"
+                    >
+                        <span
+                            class="pointer-events-none absolute end-full top-1/2 me-1 inline-block -translate-y-1/2 translate-x-1 whitespace-nowrap rounded-full bg-white px-3 py-1 font-medium leading-5 opacity-0 shadow-lg transition-all group-hover/btn:translate-x-0 group-hover/btn:opacity-100"
+                        >
+                            {{ __('Reimagine') }}
+                        </span>
+                        <x-tabler-rotate class="size-4" />
+                    </button>
+
+                    <button
+                        class="lqd-download-images group/btn relative inline-flex size-10 items-center justify-center rounded-full border-none bg-white p-0 text-[12px] text-black shadow-lg transition-all hover:-translate-y-[2px] hover:scale-110"
+                        title="{{ __('Download images') }}"
+                        x-data="{ downloading: false }"
+                        @click.prevent="$store.chatsV2.downloadBubbleImages($event, $el)"
+                        :disabled="downloading"
+                    >
+                        <span
+                            class="pointer-events-none absolute end-full top-1/2 me-1 inline-block -translate-y-1/2 translate-x-1 whitespace-nowrap rounded-full bg-white px-3 py-1 font-medium leading-5 opacity-0 shadow-lg transition-all group-hover/btn:translate-x-0 group-hover/btn:opacity-100"
+                        >
+                            {{ __('Download images') }}
+                        </span>
+                        <x-tabler-download
+                            class="size-4"
+                            x-show="!downloading"
+                        />
+                        <x-tabler-loader-2
+                            class="size-4 animate-spin"
+                            x-show="downloading"
+                            x-cloak
+                        />
+                    </button>
+                @endif
+
                 <div class="lqd-clipboard-copy-wrap group/copy-wrap flex flex-col gap-2 transition-all">
                     <button
                         class="lqd-clipboard-copy group/btn relative inline-flex size-10 items-center justify-center rounded-full border-none bg-white p-0 text-[12px] text-black shadow-lg transition-all hover:-translate-y-[2px] hover:scale-110"
@@ -142,20 +228,87 @@
             @endif
         </div>
     @endif
+    @php
+        $showSuggestions = ($is_chat_pro || $is_chat_pro_image) && ($isLastMessage ?? false);
+        $suggestionsResponse = $showSuggestions && $message ? $message->suggestions_response : null;
+        $suggestionsData = is_array($suggestionsResponse) && isset($suggestionsResponse['suggestions']) ? $suggestionsResponse['suggestions'] : [];
+    @endphp
+    @if (!empty($suggestionsData) && is_array($suggestionsData) && $showSuggestions)
+        <div @class(['lqd-chat-bubble-foot', 'mt-2' => $is_chat_pro])>
+            <div
+                @class([
+                    'lqd-chat-bubble-suggestions empty:hidden',
+                    'flex flex-wrap gap-2' =>
+                        $is_chat_pro_image || $suggestion_style === 'pill',
+                    'flex flex-col gap-1 items-start' =>
+                        $is_chat_pro && $suggestion_style === 'inline',
+                ])
+                x-data='{ suggestions: @json($suggestionsData) }'
+            >
+                <template
+                    x-for="(suggestion, index) in suggestions"
+                    x-key="index"
+                >
+                    <x-button
+                        @class([
+                            'text-3xs font-semibold text-primary hover:bg-primary hover:text-primary-foreground' =>
+                                $is_chat_pro_image || $suggestion_style === 'pill',
+                            'bg-primary/5' => $is_chat_pro_image || $suggestion_style === 'pill',
+                            'border bg-transparent hover:border-primary' =>
+                                $is_chat_pro && $suggestion_style === 'pill',
+                            'dark:text-accent dark:hover:text-primary-foreground' =>
+                                $theme === 'social-media-dashboard' && $suggestion_style === 'pill',
+                            'px-0 py-1.5 text-start justify-start [font-weight:inherit]' =>
+                                $is_chat_pro && $suggestion_style === 'inline',
+                            'hover:text-primary' => $suggestion_style === 'inline',
+                        ])
+                        variant="none"
+                        type="button"
+                        ::data-prompt="suggestion"
+                        @click.prevent="$store.chatsV2.onSuggestionClick($event)"
+                    >
+                        @if ($is_chat_pro && $suggestion_style === 'inline')
+                            <span class="-scale-x-100">↵</span>
+                        @endif
+                        <span x-text="suggestion"></span>
+                    </x-button>
+                </template>
+            </div>
+        </div>
+    @endif
 </div>
 
+@if (count($referenceImages) > 0)
+    <div class="lqd-chat-image-bubble mb-2 flex !w-fit max-w-[50%] !flex-row content-end gap-2 !px-3 !py-2.5 last:mb-0 lg:ms-auto lg:justify-self-end">
+        @foreach ($referenceImages as $refImage)
+            <a
+                class="inline-flex w-40 shrink-0 items-center gap-1.5"
+                data-fslightbox="gallery"
+                data-type="image"
+                href="{{ $refImage }}"
+            >
+                <img
+                    class="img-content w-full"
+                    loading="lazy"
+                    src="{{ $refImage }}"
+                />
+            </a>
+        @endforeach
+    </div>
+@endif
+
 @if ($message->outputImage != null && $message->outputImage != '')
-    <div class="lqd-chat-image-bubble mb-2 flex !w-auto max-w-[50%] flex-row-reverse content-end gap-2 !px-3 !py-2.5 last:mb-0 lg:ms-auto lg:justify-self-end">
+    <div class="lqd-chat-image-bubble mb-2 flex !w-fit max-w-[50%] !flex-row content-end gap-2 !px-3 !py-2.5 last:mb-0 lg:ms-auto lg:justify-self-end">
         <a
-            class="flex items-center gap-1.5 underline underline-offset-2"
+            class="inline-flex w-40 shrink-0 items-center gap-1.5"
             data-fslightbox="gallery"
             data-type="image"
             href="{{ $message->outputImage }}"
         >
             <img
-                class="img-content rounded-3xl"
+                class="img-content w-full"
                 loading="lazy"
-                src={{ $message->outputImage }}
+                src="{{ $message->outputImage }}"
             />
         </a>
     </div>

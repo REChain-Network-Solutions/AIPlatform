@@ -141,7 +141,7 @@ final class Payload
     /**
      * Creates a new Psr 7 Request instance.
      */
-    public function toRequest(BaseUri $baseUri, Headers $headers, QueryParams $queryParams): RequestInterface
+    public function toRequest(BaseUri $baseUri, Headers $headers, array|QueryParams $queryParams): RequestInterface
     {
         $psr17Factory = new Psr17Factory;
 

@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Billable;
 use Laravel\Cashier\Subscription as Subscriptions;
@@ -211,51 +210,47 @@ class User extends Authenticatable
 
     public function activePlan()
     {
-        // $activeSub = $this->subscriptions()->where('stripe_status', 'active')->orWhere('stripe_status', 'trialing')->first();
-        // $userId=Auth::user()->id;
-        $userId = $this->id;
-        // Get current active subscription
-        $activeSub = getCurrentActiveSubscription($userId);
-        if ($activeSub != null) {
-            $plan = Plan::where('id', $activeSub->plan_id)->first();
-            if (is_null($plan)) {
-                return null;
-            }
-            $difference = $activeSub->updated_at->diffInDays(Carbon::now());
-            if ($plan->frequency === FrequencyEnum::MONTHLY->value) {
-                if ($difference < 31) {
-                    return $plan;
-                }
-            } elseif ($plan->frequency === FrequencyEnum::YEARLY->value) {
-                if ($difference < 365) {
-                    return $plan;
-                }
-            } else {
-                return $plan;
-            }
-        } else {
-            $activeSub = getCurrentActiveSubscriptionYokkasa($userId);
-            if ($activeSub != null) {
-                $plan = Plan::where('id', $activeSub->plan_id)->first();
-                if (is_null($plan)) {
-                    return null;
-                }
-                $difference = $activeSub->updated_at->diffInDays(Carbon::now());
-                if ($plan->frequency == FrequencyEnum::MONTHLY->value || $plan->frequency == FrequencyEnum::LIFETIME_MONTHLY->value) {
-                    if ($difference < 31) {
-                        return $plan;
-                    }
-                } elseif ($plan->frequency == FrequencyEnum::YEARLY->value || $plan->frequency == FrequencyEnum::LIFETIME_YEARLY->value) {
-                    if ($difference < 365) {
-                        return $plan;
-                    }
-                } else {
-                    return $plan;
-                }
-            } else {
-                return null;
-            }
+        $activeSub = getCurrentActiveSubscription($this->id)
+            ?? getCurrentActiveSubscriptionYokkasa($this->id);
+
+        if (empty($activeSub)) {
+            return null;
         }
+
+        // Retrieve plan with caching
+        $plan = Plan::getCache(
+            static fn () => Plan::find($activeSub->plan_id),
+            '-' . $activeSub->plan_id
+        );
+
+        if (is_null($plan)) {
+            return null;
+        }
+
+        // Check if plan is still valid based on frequency
+        if ($this->isPlanValid($plan, $activeSub->updated_at)) {
+            return $plan;
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if a plan is still valid based on its frequency and last update
+     */
+    private function isPlanValid(Plan $plan, Carbon $updatedAt): bool
+    {
+        $daysSinceUpdate = $updatedAt->diffInDays(Carbon::now());
+
+        return match ($plan->frequency) {
+            FrequencyEnum::MONTHLY->value,
+            FrequencyEnum::LIFETIME_MONTHLY->value => $daysSinceUpdate < 31,
+
+            FrequencyEnum::YEARLY->value,
+            FrequencyEnum::LIFETIME_YEARLY->value => $daysSinceUpdate < 365,
+
+            default => true,
+        };
     }
 
     // Support Requests
@@ -297,14 +292,14 @@ class User extends Authenticatable
     {
         if ($this->avatar == null) {
             return '<span class="avatar">' . Str::upper(substr($this->name, 0, 1)) . Str::upper(substr($this->surname, 0, 1)) . '</span>';
-        } else {
-            $avatar = $this->avatar;
-            if (strpos($avatar, 'http') === false || strpos($avatar, 'https') === false) {
-                $avatar = '/' . $avatar;
-            }
-
-            return ' <span class="avatar" style="background-image: url(' . custom_theme_url($avatar) . ')"></span>';
         }
+
+        $avatar = $this->avatar;
+        if (strpos($avatar, 'http') === false || strpos($avatar, 'https') === false) {
+            $avatar = '/' . $avatar;
+        }
+
+        return ' <span class="avatar" style="background-image: url(' . custom_theme_url($avatar) . ')"></span>';
     }
 
     public function couponsUsed()

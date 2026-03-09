@@ -85,7 +85,8 @@
 						@foreach ($generators ?? [] as $generator)
 							<div
 								class="relative flex items-center gap-3 rounded-xl border px-5 py-3 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-black/5"
-								x-show='searchString === "" || "{{ $generator->name }}".toLowerCase().includes(searchString.toLowerCase()) || "{{ $generator->description }}".toLowerCase().includes(searchString.toLowerCase())'
+								data-search-text="{{ e($generator->name . ' ' . ($generator->description ?? '')) }}"
+								x-show="searchString === '' || $el.getAttribute('data-search-text').toLowerCase().includes(searchString.toLowerCase())"
 							>
 								<div
 									class="lqd-chat-item-avatar inline-flex size-11 shrink-0 items-center justify-center overflow-hidden overflow-ellipsis whitespace-nowrap rounded-full border border-solid border-white/90 text-lg font-semibold text-black/65 shadow-[0_1px_2px_rgba(0,0,0,0.07)] transition-shadow group-hover:shadow-xl dark:border-current"

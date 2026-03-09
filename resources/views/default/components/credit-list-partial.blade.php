@@ -11,7 +11,7 @@
 				if (isset($plan) && $plan->exists) {
 					$drivers = $model->forPlan($plan)->list();
 				} else {
-					$drivers = $model->forUser(auth()->user())->list();
+					$drivers = $model->forUser($user ?? auth()->user())->list();
 				}
 
 				$groupName = $drivers->isNotEmpty() ? $drivers->first()->enum()->subLabel() : '';

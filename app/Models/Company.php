@@ -26,8 +26,6 @@ class Company extends Model
 
     public static function getMyCompanies()
     {
-        $companies = Company::where('user_id', auth()->user()->id)->get();
-
-        return $companies;
+        return Company::where('user_id', auth()->user()->id)->get();
     }
 }

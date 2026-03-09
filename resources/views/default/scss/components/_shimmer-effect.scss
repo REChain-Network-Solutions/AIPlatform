@@ -1,0 +1,21 @@
+.lqd-shimmer-effect {
+
+	&:before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to right, transparent, hsl(var(--foreground) / 5%), transparent);
+		background-size: 150% 100%;
+		animation: liquidShimmerEffect 1.5s infinite linear;
+	}
+}
+
+@keyframes liquidShimmerEffect {
+	0% {
+		background-position-x: 150%;
+	}
+
+	100% {
+		background-position-x: -150%;
+	}
+}

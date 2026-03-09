@@ -27,8 +27,8 @@
         </x-button>
     </x-slot:head>
     @php
-        $mobileCount = \App\Helpers\Classes\Helper::appIsDemo() ? 44 : cache('user_behavior_data')[0]['value'];
-        $desktopCount = \App\Helpers\Classes\Helper::appIsDemo() ? 63 : cache('user_behavior_data')[1]['value'];
+        $mobileCount = \App\Helpers\Classes\Helper::appIsDemo() ? 44 : cache()->get('user_behavior_data')[0]['value'];
+        $desktopCount = \App\Helpers\Classes\Helper::appIsDemo() ? 63 : cache()->get('user_behavior_data')[1]['value'];
 
         $all = $mobileCount + $desktopCount;
         if ($all == 0) {

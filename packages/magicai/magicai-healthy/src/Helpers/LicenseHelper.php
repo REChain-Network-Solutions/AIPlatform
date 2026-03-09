@@ -19,7 +19,7 @@ class LicenseHelper
             Storage::disk('local')->get("{$this->managerFolder}/{$hashedKey}.lic")
         );
 
-        return unserialize($content);
+        return unserialize($content, ['allowed_classes' => false]);
     }
 
     public function validateLicenseContent(array $content): bool

@@ -40,12 +40,14 @@ class ViewSharedMiddleware
                 $totalTextDocuments = (clone $documents)->where('credits', '!=', 1)->count();
                 $totalImageDocuments = (clone $documents)->where('credits', 1)->count();
 
-                Cache::putMany([
+                foreach ([
                     $cacheKeys['total_words']           => $totalWords,
                     $cacheKeys['total_documents']       => $totalDocuments,
                     $cacheKeys['total_text_documents']  => $totalTextDocuments,
                     $cacheKeys['total_image_documents'] => $totalImageDocuments,
-                ], now()->addMinutes(360));
+                ] as $key => $value) {
+                    Cache::put($key, $value, now()->addMinutes(360));
+                }
             }
 
             foreach ($cacheKeys as $varName => $cacheKey) {

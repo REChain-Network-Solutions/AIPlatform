@@ -3,7 +3,7 @@
 @section('titlebar_actions', '')
 
 @section('settings')
-    @if (Auth::user()->isAdmin())
+    @if (Auth::user()?->isAdmin())
         @if ($app_is_not_demo)
             <div class="">
                 <label

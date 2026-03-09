@@ -426,7 +426,6 @@
                     newInputsWrapper.querySelector('.input_name').focus();
                     clearTimeout(timeout);
                 }, 100);
-                return;
             });
 
             $("body").on("click", ".remove-inputs-group", function() {

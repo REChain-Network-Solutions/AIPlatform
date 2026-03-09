@@ -194,10 +194,9 @@ Route::middleware('auth:api')->group(function () {
 
         // / Extension Routes for API
         $files = glob(base_path('routes/extapiroutes/*.php'));
-        for ($i = 0; $i < count($files); $i++) {
+        foreach ($files as $i => $iValue) {
             include $files[$i];
         }
-
     });
 
     Route::prefix('brandvoice')->group(function () {

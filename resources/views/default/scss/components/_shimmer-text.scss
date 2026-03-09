@@ -1,0 +1,14 @@
+.lqd-shimmer-text {
+	background-size: 150% 100%;
+	animation: liquidShimmerText 1.5s infinite linear;
+}
+
+@keyframes liquidShimmerText {
+	0% {
+		background-position-x: 150%;
+	}
+
+	100% {
+		background-position-x: -150%;
+	}
+}

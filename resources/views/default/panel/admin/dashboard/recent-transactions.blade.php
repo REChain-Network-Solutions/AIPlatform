@@ -1,4 +1,4 @@
-@if (cache('recent_transactions_enabled', false))
+@if (cache()->get('recent_transactions_enabled', false))
     <x-card
         class="flex flex-col"
         class:body="flex flex-col justify-center grow px-0"

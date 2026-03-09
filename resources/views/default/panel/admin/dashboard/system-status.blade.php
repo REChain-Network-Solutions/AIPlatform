@@ -35,7 +35,7 @@
     <div class="absolute inset-0 flex h-full flex-col justify-center">
         <h1
             class="text-center text-3xl font-bold leading-10 text-foreground/90 max-sm:mt-6 sm:text-[52px] sm:leading-[78px] md:max-lg:mt-6 md:max-lg:text-[40px] md:max-lg:leading-10">
-            {{ cache('available_diskspace') }}%</h1>
+            {{ cache()->get('available_diskspace') }}%</h1>
         <span class="text-center text-[15px] text-foreground/50">{{ __('Available Disk Space') }}</span>
     </div>
 </x-card>

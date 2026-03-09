@@ -2,6 +2,12 @@
     $base_class .= ' grid gap-4 px-4 py-3 text-2xs font-medium';
     $isImage = $entry->generator->type === 'image';
     $isVideo = $entry->generator->type === 'video';
+    $isAiImagePro = ($entry->source ?? null) === 'ai-image-pro';
+    $isAiChatProImageChat = ($entry->source ?? null) === 'ai-chat-pro-image-chat';
+    $isExternalImageDoc = $isAiImagePro || $isAiChatProImageChat;
+    $documentId = $entry->document_id ?? $entry->id;
+    $isFavoriteDoc = method_exists($entry, 'isFavoriteDoc') ? $entry->isFavoriteDoc() : (bool) ($entry->is_favorite_doc ?? false);
+    $documentViewUrl = route('dashboard.user.openai.documents.single', $entry->slug);
 @endphp
 
 <div
@@ -10,7 +16,7 @@
 >
     <a
         class="lqd-posts-item-overlay-link lqd-docs-item-overlay-link absolute left-0 top-0 z-[2] h-full w-full"
-        href="{{ route('dashboard.user.openai.documents.single', $entry->slug) }}"
+        href="{{ $documentViewUrl }}"
         title="{{ __('View and edit') }}"
     ></a>
 
@@ -19,16 +25,16 @@
         @if (request()->route()->getName() !== 'dashboard.user.index')
             <label
                 class="document-checkbox-label relative z-10 inline-grid size-[18px] cursor-pointer select-none place-items-center rounded bg-foreground/5 text-primary before:absolute before:left-1/2 before:top-1/2 before:size-8 before:-translate-x-1/2 before:-translate-y-1/2"
-                for="doc-{{ $entry->id }}"
+                for="doc-{{ $documentId }}"
             >
                 <input
                     class="document-checkbox peer invisible absolute z-10 size-0"
-                    id="doc-{{ $entry->id }}"
-                    data-id="{{ $entry->id }}"
+                    id="doc-{{ $documentId }}"
+                    data-id="{{ $documentId }}"
                     type="checkbox"
-                    value="{{ $entry->id }}"
+                    value="{{ $documentId }}"
                     x-init=""
-                    :checked="$store.documentsSelection.isSelected('{{ $entry->id }}')"
+                    :checked="$store.documentsSelection.isSelected('{{ $documentId }}')"
                     @change.default="Alpine.store('documentsSelection').updateSelectedItems({ checkboxEl: $el })"
                 />
                 <span class="col-start-1 col-end-1 row-start-1 row-end-1 inline-block size-full rounded bg-primary/5 opacity-0 transition peer-checked:opacity-100"></span>
@@ -39,9 +45,12 @@
             </label>
         @endif
         @if ($isImage)
+            @php
+                $imageSource = $isExternalImageDoc ? ($entry->output_url ?? $entry->output) : ThumbImage(custom_theme_url($entry->output));
+            @endphp
             <img
                 class="lqd-posts-item-img lqd-docs-item-img size-9 rounded-full object-cover object-center group-[&[data-view-mode=grid]]:mb-2 group-[&[data-view-mode=grid]]:aspect-video group-[&[data-view-mode=grid]]:h-auto group-[&[data-view-mode=grid]]:w-full group-[&[data-view-mode=grid]]:rounded-md"
-                src="{{ ThumbImage(custom_theme_url($entry->output)) }}"
+                src="{{ $imageSource }}"
                 alt="{{ __($entry->generator->title) }}"
                 loading="lazy"
                 decoding="async"
@@ -93,8 +102,10 @@
                 @php
                     $title = $entry->title ? $entry->title . ' : ' . $entry->output : $entry->output;
                 @endphp
-                @if (in_array($entry->generator->type, ['text', 'youtube', 'rss', 'code', 'image', 'video']))
-                    {{ str()->limit(strip_tags($entry->generator->type === 'image' ? $entry->input : $title), $trim) }}
+                @if (in_array($entry->generator->type, ['text', 'youtube', 'rss', 'code']))
+                    {{ str()->limit(strip_tags($title), $trim) }}
+                @elseif (in_array($entry->generator->type, ['image', 'video']))
+                    {{ str()->limit(strip_tags($entry->input ?? $entry->title), $trim) }}
                 @elseif($entry->generator->type == 'audio')
                     {!! str()->limit($title, $trim) !!}
                 @elseif ($entry->generator->type == 'voiceover' || $entry->generator->type == 'isolator')
@@ -134,8 +145,8 @@
         @if (!$hideFav)
             <x-favorite-button
                 class="group-[&[data-view-mode=grid]]:absolute group-[&[data-view-mode=grid]]:end-3 group-[&[data-view-mode=grid]]:top-3 group-[&[data-view-mode=grid]]:h-8 group-[&[data-view-mode=grid]]:w-8"
-                id="{{ $entry->id }}"
-                is-favorite="{{ $entry->isFavoriteDoc() }}"
+                id="{{ $documentId }}"
+                is-favorite="{{ $isFavoriteDoc }}"
                 update-url="/dashboard/user/openai/documents/favorite"
             />
         @endif
@@ -168,26 +179,28 @@
             <x-slot:dropdown
                 class="overflow-hidden whitespace-nowrap py-1 text-2xs font-medium group-[&[data-view-mode=grid]]:-me-3"
             >
-                <x-modal
-                    title="{{ __('Move Document') }}"
-                    disable-modal="{{ $app_is_demo }}"
-                    disable-modal-message="{{ __('This feature is disabled in Demo version.') }}"
-                >
-                    <x-slot:trigger
-                        class="w-full justify-start rounded-none px-3 py-2 text-2xs hover:translate-y-0 hover:bg-foreground/5 hover:shadow-none focus-visible:bg-foreground/5"
-                        variant="ghost"
+                @if (! $isExternalImageDoc)
+                    <x-modal
+                        title="{{ __('Move Document') }}"
+                        disable-modal="{{ $app_is_demo }}"
+                        disable-modal-message="{{ __('This feature is disabled in Demo version.') }}"
                     >
-                        <x-tabler-file-export class="size-5" />
-                        {{ __('Move to folder') }}
-                    </x-slot:trigger>
+                        <x-slot:trigger
+                            class="w-full justify-start rounded-none px-3 py-2 text-2xs hover:translate-y-0 hover:bg-foreground/5 hover:shadow-none focus-visible:bg-foreground/5"
+                            variant="ghost"
+                        >
+                            <x-tabler-file-export class="size-5" />
+                            {{ __('Move to folder') }}
+                        </x-slot:trigger>
 
-                    <x-slot:modal>
-                        @includeIf('panel.user.openai.components.modals.move-to-folder', [
-                            'file_slug' => $entry->slug,
-                            'folders' => $folders,
-                        ])
-                    </x-slot:modal>
-                </x-modal>
+                        <x-slot:modal>
+                            @includeIf('panel.user.openai.components.modals.move-to-folder', [
+                                'file_slug' => $entry->slug,
+                                'folders' => $folders,
+                            ])
+                        </x-slot:modal>
+                    </x-modal>
+                @endif
 
                 <x-button
                     class="hidden w-full justify-start rounded-none px-3 py-2 text-2xs shadow-none hover:translate-y-0 hover:bg-foreground/5 hover:text-inherit hover:shadow-none focus-visible:bg-foreground/5 focus-visible:text-inherit group-[&[data-view-mode=grid]]:flex"

@@ -1,7 +1,7 @@
 @php
 	$userId = auth()->id();
 
-	$docs = cache("user:{$userId}:user_docs");
+	$docs = cache()->get("user:{$userId}:user_docs");
 	$docsCount = count($docs);
 	$hoursSaved = $docsCount * 3;
 
@@ -12,7 +12,7 @@
 
 	$sum = $textDocsCount + $imageDocsCount + $audioDocsCount;
 
-	$chatbots = cache("user:{$userId}:user_chatbots");
+	$chatbots = cache()->get("user:{$userId}:user_chatbots");
 	$chatbotCount = count($chatbots);
 @endphp
 

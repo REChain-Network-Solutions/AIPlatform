@@ -20,22 +20,6 @@
             <th>
                 <button
                     class="table-sort"
-                    data-sort="sort-remaining-words"
-                >
-                    {{ __('Words Left') }}
-                </button>
-            </th>
-            <th>
-                <button
-                    class="table-sort"
-                    data-sort="sort-remaining-images"
-                >
-                    {{ __('Images Left') }}
-                </button>
-            </th>
-            <th>
-                <button
-                    class="table-sort"
                     data-sort="sort-country"
                 >
                     {{ __('Country') }}
@@ -76,17 +60,6 @@
                     <td class="sort-group">
                         {{ $user->type->label() }}
                     </td>
-                    @php
-                        $userWordModel = \App\Domains\Entity\EntityStats::word()->forUser($user);
-                        $userImageModel = \App\Domains\Entity\EntityStats::image()->forUser($user);
-                    @endphp
-                    <td class="sort-remaining-words">
-
-                        {{ $userWordModel->checkIfThereUnlimitedForGroup() ? __('Unlimited') : $userWordModel->totalCreditsForGroup() }}
-                    </td>
-                    <td class="sort-remaining-images">
-                        {{ $userImageModel->checkIfThereUnlimitedForGroup() ? __('Unlimited') : $userImageModel->totalCreditsForGroup() }}
-                    </td>
                     <td class="sort-country">
                         {{ $user->country ?? __('Unknown') }}
                     </td>
@@ -105,6 +78,13 @@
                         </p>
                     </td>
                     <td class="whitespace-nowrap text-end">
+						<div class="inline-block align-top">
+						<x-credit-list
+							class:modal-trigger="size-9"
+							modal-trigger-variant="ghost-shadow"
+							:user="$user"
+						/>
+						</div>
                         <x-button
                             class="size-9"
                             href="{{  (route('dashboard.user.orders.list', $user)) }}"

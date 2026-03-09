@@ -20,6 +20,7 @@ use App\Models\UserOrder;
 use App\Services\PaymentGateways\Contracts\CreditUpdater;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -403,13 +404,13 @@ class PaystackService
 
                 return redirect()->route('dashboard.' . $user->type->value . '.index')->with(['message' => __('Thank you for your purchase. Enjoy your remaining words and images.'), 'type' => 'success']);
 
-            } else {
-                DB::rollBack();
-                $msg = 'PaystackController::subscribePay(): Could not find required payment order!';
-                Log::error($msg);
-
-                return redirect()->route('dashboard.' . $user->type->value . '.index')->with(['message' => $msg, 'type' => 'error']);
             }
+
+            DB::rollBack();
+            $msg = 'PaystackController::subscribePay(): Could not find required payment order!';
+            Log::error($msg);
+
+            return redirect()->route('dashboard.' . $user->type->value . '.index')->with(['message' => $msg, 'type' => 'error']);
 
         } catch (Exception $th) {
             DB::rollBack();
@@ -598,16 +599,16 @@ class PaystackService
                 }
                 if (isset($reqs['data']['next_payment_date'])) {
                     return \Carbon\Carbon::parse($reqs['data']['next_payment_date'])->format('F jS, Y');
-                } else {
-                    $activeSub->stripe_status = 'cancelled';
-                    $activeSub->ends_at = \Carbon\Carbon::now();
-                    $activeSub->save();
-
-                    return \Carbon\Carbon::now()->format('F jS, Y');
                 }
-            } else {
-                return \Carbon\Carbon::createFromTimeStamp($activeSub->ends_at)->format('F jS, Y');
+
+                $activeSub->stripe_status = 'cancelled';
+                $activeSub->ends_at = \Carbon\Carbon::now();
+                $activeSub->save();
+
+                return \Carbon\Carbon::now()->format('F jS, Y');
             }
+
+            return \Carbon\Carbon::createFromTimeStamp($activeSub->ends_at)->format('F jS, Y');
         }
 
         return null;
@@ -637,16 +638,16 @@ class PaystackService
                 }
                 if ($reqs['data']['status'] == 'active') {
                     return true;
-                } else {
-                    $activeSub->stripe_status = 'cancelled';
-                    $activeSub->ends_at = \Carbon\Carbon::now();
-                    $activeSub->save();
-
-                    return false;
                 }
-            } else {
-                return true;
+
+                $activeSub->stripe_status = 'cancelled';
+                $activeSub->ends_at = \Carbon\Carbon::now();
+                $activeSub->save();
+
+                return false;
             }
+
+            return true;
         }
 
         return null;
@@ -738,22 +739,22 @@ class PaystackService
                     CreateActivity::for($user, 'Cancelled', 'Subscription plan');
 
                     return back()->with(['message' => __('Your subscription is cancelled succesfully.'), 'type' => 'success']);
-                } else {
-                    Log::error('PaystackController::disableOldSubscriptionAndReturnNew(): ' . $request['message']);
-
-                    return back()->with(['message' => __('Your subscription could not cancelled.'), 'type' => 'error']);
                 }
-            } else {
-                $activeSub->stripe_status = 'cancelled';
-                $activeSub->ends_at = \Carbon\Carbon::now();
-                $activeSub->save();
 
-                self::creditDecreaseCancelPlan($user, $plan);
+                Log::error('PaystackController::disableOldSubscriptionAndReturnNew(): ' . $request['message']);
 
-                CreateActivity::for($user, 'Cancelled', 'Subscription plan');
-
-                return back()->with(['message' => __('Your subscription is cancelled succesfully.'), 'type' => 'success']);
+                return back()->with(['message' => __('Your subscription could not cancelled.'), 'type' => 'error']);
             }
+
+            $activeSub->stripe_status = 'cancelled';
+            $activeSub->ends_at = \Carbon\Carbon::now();
+            $activeSub->save();
+
+            self::creditDecreaseCancelPlan($user, $plan);
+
+            CreateActivity::for($user, 'Cancelled', 'Subscription plan');
+
+            return back()->with(['message' => __('Your subscription is cancelled succesfully.'), 'type' => 'success']);
         }
 
         return back()->with(['message' => __('Could not find active subscription. Nothing changed!'), 'type' => 'error']);
@@ -812,9 +813,9 @@ class PaystackService
             }
 
             return $result;
-        } else {
-            abort(400, $result);
         }
+
+        abort(400);
     }
 
     // tested
@@ -866,9 +867,9 @@ class PaystackService
             $product = GatewayProducts::where(['plan_id' => $planId, 'gateway_code' => 'paystack'])->first();
             if ($product != null) {
                 return $product->price_id;
-            } else {
-                return null;
             }
+
+            return null;
         }
 
         return null;
@@ -887,9 +888,9 @@ class PaystackService
             $product = GatewayProducts::where(['plan_id' => $planId, 'gateway_code' => 'paystack'])->first();
             if ($product != null) {
                 return $product->product_id;
-            } else {
-                return null;
             }
+
+            return null;
         }
 
         return null;
@@ -983,11 +984,11 @@ class PaystackService
             }
 
             return $req['data']['subscription_code'];
-        } else {
-            Log::error('PaystackService::disableOldSubscriptionAndReturnNew(): ' . $request['message']);
-
-            return false;
         }
+
+        Log::error('PaystackService::disableOldSubscriptionAndReturnNew(): ' . $request['message']);
+
+        return false;
     }
 
     // tested

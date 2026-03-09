@@ -272,6 +272,8 @@
     <script src="{{ custom_theme_url('/assets/libs/ace/src-min-noconflict/ace.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/ace/src-min-noconflict/ext-language_tools.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/markdownit/markdown-it.min.js') }}"></script>
+    <script src="{{ custom_theme_url('/assets/libs/markdownit/markdown-it-container.min.js') }}"></script>
+    <script src="{{ custom_theme_url('/assets/libs/markdownit/markdown-it-attrs.browser.min.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/turndown.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/katex/katex.min.js') }}"></script>
     <script src="{{ custom_theme_url('/assets/libs/vscode-markdown-it-katex/index.js') }}"></script>

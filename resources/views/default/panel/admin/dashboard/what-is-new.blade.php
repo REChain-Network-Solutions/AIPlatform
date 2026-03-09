@@ -15,7 +15,7 @@
             class:body="flex flex-col gap-6"
             size="sm"
         >
-            <h2 class="sm:text-[30px]">{{ cache('tickets') ?? 0 }}</h2>
+            <h2 class="sm:text-[30px]">{{ cache()->get('tickets') ?? 0 }}</h2>
             <div class="flex flex-col gap-3">
                 <x-tabler-lifebuoy class="size-6"></x-tabler-lifebuoy>
                 <p class="text-lg font-medium">@lang('Tickets')</p>
@@ -30,7 +30,7 @@
             class:body="flex flex-col gap-6"
             size="sm"
         >
-            <h2 class="sm:text-[30px]">{{ cache('transactions') ?? 0 }}</h2>
+            <h2 class="sm:text-[30px]">{{ cache()->get('transactions') ?? 0 }}</h2>
             <div class="flex flex-col gap-3">
                 <x-tabler-coins class="size-6"></x-tabler-coins>
                 <p class="text-lg font-medium">@lang('Transactions')</p>
@@ -45,7 +45,7 @@
             class:body="flex flex-col gap-6"
             size="sm"
         >
-            <h2 class="sm:text-[30px]">{{ cache('documents') ?? 0 }}</h2>
+            <h2 class="sm:text-[30px]">{{ cache()->get('documents') ?? 0 }}</h2>
             <div class="flex flex-col gap-3">
                 <x-tabler-clipboard-text class="size-6"></x-tabler-clipboard-text>
                 <p class="text-lg font-medium">@lang('Documents')</p>

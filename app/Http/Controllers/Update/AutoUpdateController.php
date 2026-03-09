@@ -328,7 +328,9 @@ class AutoUpdateController extends Controller
                             $newFilePath = $folderFullPath . '_backup_' . time();
                             rename($folderFullPath, $newFilePath);
                         }
-                        mkdir($folderFullPath, 0755, true);
+                        if (! mkdir($folderFullPath, 0755, true) && ! is_dir($folderFullPath)) {
+                            throw new RuntimeException(sprintf('Directory "%s" was not created', $folderFullPath));
+                        }
                         $this->log(self::DIRECTORY_CREATED, $dirname, 'info');
                     }
 
@@ -520,9 +522,9 @@ class AutoUpdateController extends Controller
                 Artisan::call('up'); // Maintenance mode OFF
 
                 throw new RuntimeException('Backup folder not found.');
-            } else {
-                $this->log(self::BACKUP_FOUND, '<small>' . $this->tmpBackupDir . '</small>');
             }
+
+            $this->log(self::BACKUP_FOUND, '<small>' . $this->tmpBackupDir . '</small>');
         }
         $backupDir = $this->tmpBackupDir;
 

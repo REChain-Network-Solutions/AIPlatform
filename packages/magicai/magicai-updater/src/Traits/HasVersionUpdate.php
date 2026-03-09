@@ -7,6 +7,7 @@ use App\Helpers\Classes\InstallationHelper;
 use App\Models\Setting;
 use Exception;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -37,7 +38,7 @@ trait HasVersionUpdate
         try {
             $downloadFile = $this->download($downloadUrl, 'new-version' . $version . '.zip');
 
-            cache()->remember($this->downloadFileCacheKey, now()->addMinutes(30), function () use ($downloadFile, $version) {
+            Cache::remember($this->downloadFileCacheKey, now()->addMinutes(30), function () use ($downloadFile, $version) {
                 return [
                     'file'    => $downloadFile,
                     'version' => $version,
@@ -56,7 +57,7 @@ trait HasVersionUpdate
 
     public function getDownloadVersion(): ?string
     {
-        $array = cache($this->downloadFileCacheKey) ?: [];
+        $array = Cache::get($this->downloadFileCacheKey) ?: [];
 
         return data_get($array, 'version');
     }

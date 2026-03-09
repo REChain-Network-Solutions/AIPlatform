@@ -1,11 +1,11 @@
 @if ($item['show_condition'])
 	@php
-		$href =
-			$item['route_slug'] && \App\Helpers\Classes\Helper::hasRoute($item['route'])
-				? route($item['route'], $item['route_slug'])
-				: (\App\Helpers\Classes\Helper::hasRoute($item['route'])
-					? route($item['route'])
-					: '');
+		$href = '';
+		if ($item['route_slug'] && \App\Helpers\Classes\Helper::hasRoute($item['route'])) {
+			$href = route($item['route'], $item['route_slug']);
+		} elseif (\App\Helpers\Classes\Helper::hasRoute($item['route'])) {
+			$href = route($item['route']);
+		}
 		$is_active = $href === url()->current() || activeRoute(...$item['active_condition'] ?: []);
 	@endphp
 

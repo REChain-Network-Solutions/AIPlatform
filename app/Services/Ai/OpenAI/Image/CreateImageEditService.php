@@ -27,6 +27,8 @@ class CreateImageEditService
      */
     private string $quality = 'auto';
 
+    private string $background = 'auto';
+
     private ?string $mask = null;
 
     private array $images = [];
@@ -111,10 +113,10 @@ class CreateImageEditService
 
         if (count($images) > 1) {
             foreach ($this->getImages() as $image) {
-                $dataImage[] = fopen(public_path($image), 'r');
+                $dataImage[] = $this->resolveImage($image);
             }
         } else {
-            $dataImage = fopen(public_path(Arr::first($images)), 'r');
+            $dataImage = $this->resolveImage(Arr::first($images));
         }
 
         $form = [
@@ -123,13 +125,80 @@ class CreateImageEditService
             'prompt'          => $this->getPrompt(),
             'n'               => 1,
             'size'            => $this->getSize(),
+            'quality'         => $this->getQuality(),
+            'background'      => $this->getBackground(),
         ];
 
-        if ($this->mask && file_exists(public_path($this->mask))) {
-            $form['mask'] = fopen(public_path($this->mask), 'r');
+        $mask = $this->resolveMask();
+        if ($mask) {
+            $form['mask'] = $mask;
         }
 
         return $form;
+    }
+
+    /**
+     * @return resource File handle for the image
+     */
+    private function resolveImage(string $image): mixed
+    {
+        if (filter_var($image, FILTER_VALIDATE_URL)) {
+            return $this->downloadToTemp($image);
+        }
+
+        if (str_starts_with($image, '/uploads') || str_starts_with($image, 'uploads')) {
+            $localPath = public_path($image);
+            if (file_exists($localPath)) {
+                return fopen($localPath, 'r');
+            }
+
+            return $this->downloadToTemp(url($image));
+        }
+
+        return fopen(public_path($image), 'r');
+    }
+
+    /**
+     * @return resource|null File handle for the mask, or null
+     */
+    private function resolveMask(): mixed
+    {
+        if (! $this->mask) {
+            return null;
+        }
+
+        if (filter_var($this->mask, FILTER_VALIDATE_URL)) {
+            return $this->downloadToTemp($this->mask);
+        }
+
+        if (str_starts_with($this->mask, '/uploads') || str_starts_with($this->mask, 'uploads')) {
+            $localPath = public_path($this->mask);
+            if (file_exists($localPath)) {
+                return fopen($localPath, 'r');
+            }
+
+            return $this->downloadToTemp(url($this->mask));
+        }
+
+        $localPath = public_path($this->mask);
+
+        return file_exists($localPath) ? fopen($localPath, 'r') : null;
+    }
+
+    /**
+     * Download a remote image to a temporary file and return a file handle.
+     *
+     * @return resource
+     */
+    private function downloadToTemp(string $url): mixed
+    {
+        $extension = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'png';
+        $tempFile = sys_get_temp_dir() . '/' . uniqid('img_') . '.' . $extension;
+
+        $contents = file_get_contents($url);
+        file_put_contents($tempFile, $contents);
+
+        return fopen($tempFile, 'r');
     }
 
     public function setModel(string $model): self
@@ -137,6 +206,18 @@ class CreateImageEditService
         $this->model = $model;
 
         return $this;
+    }
+
+    public function setBackground(string $background): CreateImageEditService
+    {
+        $this->background = $background;
+
+        return $this;
+    }
+
+    public function getBackground(): string
+    {
+        return $this->background;
     }
 
     public function getModel(): string

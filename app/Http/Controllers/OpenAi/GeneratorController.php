@@ -6,6 +6,7 @@ use App\Domains\Engine\Enums\EngineEnum;
 use App\Domains\Entity\Enums\EntityEnum;
 use App\Domains\Entity\Facades\Entity as EntityFacade;
 use App\Domains\Entity\Models\Entity;
+use App\Extensions\AiChatProImageChat\System\Services\AIChatImageService;
 use App\Extensions\SocialMedia\System\Models\SocialMediaPostDailyMetric;
 use App\Extensions\SocialMediaAgent\System\Models\SocialMediaAgent;
 use App\Helpers\Classes\ApiHelper;
@@ -38,6 +39,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use JsonException;
 use Random\RandomException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
@@ -76,11 +78,10 @@ class GeneratorController extends Controller
     {
         $template_type = $request->get('template_type', 'chatbot');
 
-        //		 eger promta post generate etmek istiyora, bana #post-generate
         // If the template type is chat, then we will build a chat streamed output or other ai template streamed output
         return match ($template_type) {
-            'chatbot', 'vision', 'chatPro', 'socialMediaAgent' => $this->buildChatStreamedOutput($request),
-            default => $this->buildOtherStreamedOutput($request),
+            'chatbot', 'vision', 'chatPro', 'chatPro-image', 'socialMediaAgent' => $this->buildChatStreamedOutput($request),
+            default         => $this->buildOtherStreamedOutput($request),
         };
     }
 
@@ -153,11 +154,8 @@ class GeneratorController extends Controller
             $chat_bot,
             $history,
             $message,
-            $chatParams['chat_type'],
-            $chatParams['contain_images'],
+            $chatParams,
             $default_ai_engine,
-            assistant: $chatParams['assistant'],
-            openRouter: $chatParams['openRouter'],
             fileChat: $isFileSearch
         );
     }
@@ -171,7 +169,7 @@ class GeneratorController extends Controller
             return [];
         }
 
-        return [
+        $data = [
             'prompt'              => $request->get('prompt'),
             'realtime'            => $request->get('realtime', false),
             'chat_brand_voice'    => $request->get('chat_brand_voice'),
@@ -179,7 +177,7 @@ class GeneratorController extends Controller
             'chat_id'             => $chat_id,
             'chat_type'           => $request->get('template_type'),
             'agent_id'            => $request->integer('chat_open_ai_agent_id') ?: null,
-            'images'              => $request->get('images', []),
+            'images'              => $request->get('images', null),
             'pdfname'             => $request->get('pdfname', null),
             'pdfpath'             => $request->get('pdfpath', null),
             'assistant'           => $request->get('assistant', null),
@@ -188,6 +186,28 @@ class GeneratorController extends Controller
             'openRouter'          => $this->determineOpenRouter($request->get('chatbot_front_model', null)),
             'contain_images'      => false, // Will be determined later
         ];
+
+        if ($request->get('template_type') === 'chatPro-image' && MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')) {
+            $imageParams = AIChatImageService::extractImageChatParameters($request);
+            $data += $imageParams;
+
+            // Build contextual prompt for image editing when edit_tab is present
+            if (! empty($imageParams['edit_tab'])) {
+                $data['prompt'] = AIChatImageService::buildEditPrompt(
+                    (string) ($data['prompt'] ?? ''),
+                    $imageParams['edit_tab'],
+                    $imageParams['edit_mode'] ?? 'text',
+                    $imageParams['edit_has_highlights'] ?? false,
+                );
+            }
+
+            // For reimagine: if main prompt is empty but reimagine_prompt is set, use reimagine_prompt
+            if (empty($data['prompt']) && ! empty($imageParams['reimagine_prompt'])) {
+                $data['prompt'] = $imageParams['reimagine_prompt'];
+            }
+        }
+
+        return $data;
     }
 
     private function determineChatBot(?string $chatbot_front_model): string
@@ -277,7 +297,7 @@ class GeneratorController extends Controller
             'hash'                => Str::random(256),
             'credits'             => 0,
             'words'               => 0,
-            'images'              => $chatParams['images'],
+            'images'              => is_array($chatParams['images']) ? implode(',', $chatParams['images']) : $chatParams['images'],
             'pdfName'             => $chatParams['pdfname'],
             'pdfPath'             => $chatParams['pdfpath'],
         ];
@@ -709,7 +729,7 @@ class GeneratorController extends Controller
             return $this->getRealtimePrompt($chatParams['prompt']);
         }
 
-        if (! is_null(setting('perplexity_key')) && setting('default_realtime') === 'perplexity') {
+        if (setting('default_realtime') == 'perplexity' && ! is_null(setting('perplexity_key'))) {
             return $this->realtimePromptPerplexity($chatParams['prompt']);
         }
 
@@ -759,7 +779,7 @@ class GeneratorController extends Controller
                 if (Str::startsWith($item, 'http')) {
                     $imageData = file_get_contents($item);
                 } else {
-                    $imageData = file_get_contents(substr($item, 1, strlen($item) - 1));
+                    $imageData = file_get_contents(substr($item, 1));
                 }
                 $base64Image = base64_encode($imageData);
 
@@ -1051,15 +1071,15 @@ class GeneratorController extends Controller
         $apiUrl = base64_encode('https://api.openai.com/v1/chat/completions');
         $settings_two = SettingTwo::getCache();
         if ($settings_two->openai_default_stream_server === 'backend') {
-            $apikeyPart1 = base64_encode(rand(1, 100));
-            $apikeyPart2 = base64_encode(rand(1, 100));
-            $apikeyPart3 = base64_encode(rand(1, 100));
+            $apikeyPart1 = base64_encode(random_int(1, 100));
+            $apikeyPart2 = base64_encode(random_int(1, 100));
+            $apikeyPart3 = base64_encode(random_int(1, 100));
         } else {
             $apiKey = ApiHelper::setOpenAiKey();
             $len = strlen($apiKey);
             $len = max($len, 6);
-            $parts[] = substr($apiKey, 0, $l[] = rand(1, $len - 5));
-            $parts[] = substr($apiKey, $l[0], $l[] = rand(1, $len - $l[0] - 3));
+            $parts[] = substr($apiKey, 0, $l[] = random_int(1, $len - 5));
+            $parts[] = substr($apiKey, $l[0], $l[] = random_int(1, $len - $l[0] - 3));
             $parts[] = substr($apiKey, array_sum($l));
             $apikeyPart1 = base64_encode($parts[0]);
             $apikeyPart2 = base64_encode($parts[1]);

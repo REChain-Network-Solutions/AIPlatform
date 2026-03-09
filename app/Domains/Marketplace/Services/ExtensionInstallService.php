@@ -3,6 +3,7 @@
 namespace App\Domains\Marketplace\Services;
 
 use App\Domains\Marketplace\Repositories\Contracts\ExtensionRepositoryInterface;
+use App\Helpers\Classes\MarketplaceHelper;
 use App\Helpers\Classes\VersionComparator;
 use App\Models\Gateways;
 use App\Services\Extension\ExtensionService;
@@ -42,6 +43,15 @@ class ExtensionInstallService
         }
 
         $responseExtension = $this->repository->findSupport($extension->getAttribute('slug'));
+
+        if (isset($responseExtension['parent']) && $parent = $responseExtension['parent']) {
+            if (! MarketplaceHelper::isRegistered($parent['registration_key'])) {
+                return [
+                    'status'  => false,
+                    'message' => 'To install this extension, you must first install the parent extension: ' . $parent['name'] . '.',
+                ];
+            }
+        }
 
         $appVersion = $this->repository->appVersion();
 

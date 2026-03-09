@@ -35,12 +35,18 @@ use Spatie\Health\Checks\Checks\DatabaseCheck;
 use Spatie\Health\Checks\Checks\DebugModeCheck;
 use Spatie\Health\Checks\Checks\EnvironmentCheck;
 use Spatie\Health\Facades\Health;
+use Throwable;
 
 class AppServiceProvider extends ServiceProvider
 {
     public array $tables = [];
 
-    public function register(): void {}
+    public function register(): void
+    {
+        if (class_exists(\SmartCache\Providers\SmartCacheServiceProvider::class)) {
+            $this->app->register(\SmartCache\Providers\SmartCacheServiceProvider::class);
+        }
+    }
 
     public function boot(): void
     {
@@ -63,9 +69,34 @@ class AppServiceProvider extends ServiceProvider
         $this->bootObservers();
     }
 
+    public function forceSchemeHttps(): void
+    {
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
+    }
+
+    protected function initializeTables(): void
+    {
+        $this->app->singleton('magicai_tables', fn () => (new TableSchema)->allTables());
+
+        $this->tables = app('magicai_tables');
+
+        $this->app->singleton('ai_chat_model_plan', function () {
+            if (Helper::appIsDemo()) {
+                return [];
+            }
+
+            return AiChatModelPlan::query()
+                ->pluck('entity_id')
+                ->toArray();
+        });
+
+    }
+
     protected function configSet(): void
     {
-        if (TableSchema::hasTable('settings', $this->tables) && DB::table('settings')->exists()) {
+        if (TableSchema::hasTable('settings', $this->tables)) {
             $setting = Setting::getCache();
             $this->setPusherConfig();
             $this->setRecaptchaConfig($setting);
@@ -101,19 +132,20 @@ class AppServiceProvider extends ServiceProvider
         $this->app['config']->set('mail.from.name', $setting->smtp_sender_name ?? config('mail.from.name'));
     }
 
-    protected function initializeTables(): void
+    public function jobRuns(): void
     {
-        $this->app->singleton('magicai_tables', fn () => (new TableSchema)->allTables());
-
-        $this->tables = app('magicai_tables');
-
-        $this->app->singleton('ai_chat_model_plan', function () {
-            if (Helper::appIsNotDemo() && Schema::hasColumn('ai_chat_model_plans', 'entity_id')) {
-                return AiChatModelPlan::query()->select('entity_id')->pluck('entity_id')->toArray();
+        try {
+            if (! DB::table('jobs')->exists()) {
+                return;
             }
 
-            return [];
-        });
+            DB::table('jobs')
+                ->where('queue', '<>', 'default')
+                ->update(['queue' => 'default']);
+
+            Artisan::call('queue:work --once');
+        } catch (Throwable $e) {
+        }
     }
 
     protected function getLocale(string $default): string
@@ -146,29 +178,6 @@ class AppServiceProvider extends ServiceProvider
         OpenAIGenerator::observe(OpenAIGeneratorObserver::class);
         Ad::observe(AdObserver::class);
         User::observe(UserObserver::class);
-    }
-
-    public function jobRuns(): void
-    {
-        if (Schema::hasTable('jobs')) {
-            $wordlist = DB::table('jobs')->where('id', '>', 0)->get();
-
-            if (count($wordlist) > 0) {
-                // change each job not default to default
-                DB::table('jobs')
-                    ->where('queue', '<>', 'default')
-                    ->update(['queue' => 'default']);
-
-                Artisan::call('queue:work --once');
-            }
-        }
-    }
-
-    public function forceSchemeHttps(): void
-    {
-        if ($this->app->environment('production')) {
-            URL::forceScheme('https');
-        }
     }
 
     private function bootBladeDirectives(): void

@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class CrontabCheckCommand extends Command
 {
@@ -15,9 +15,6 @@ class CrontabCheckCommand extends Command
     {
 
         $currentTime = now()->toDateTimeString();
-
-        // Log::info("Cron job is running at: {$currentTime}");
-
-        cache()->put('crontab_check', now());
+        Cache::put('crontab_check', now());
     }
 }

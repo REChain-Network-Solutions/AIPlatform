@@ -506,8 +506,8 @@
 @section('scripts')
     <script type="text/javascript">
         function checkEnvironment(val) {
-            var element=document.getElementById('environment_text_input');
-            if(val=='other') {
+			const element = document.getElementById('environment_text_input');
+			if(val==='other') {
                 element.style.display='block';
             } else {
                 element.style.display='none';

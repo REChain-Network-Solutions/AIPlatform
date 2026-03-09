@@ -11,19 +11,19 @@ use Exception;
 
 trait CreditUpdater
 {
-    public static function creditIncreaseSubscribePlan(?User $user, Plan $plan): void
+    public static function creditIncreaseSubscribePlan(?User $user, ?Plan $plan): void
     {
         $team = null;
-        $isTeamPlan = $plan->getAttribute('is_team_plan') ?? false;
+        $isTeamPlan = $plan?->getAttribute('is_team_plan') ?? false;
         if ($isTeamPlan) {
             $team = app(TeamController::class)->getTeam($user);
         }
 
-        $modelsCredit = $plan->getAttribute('ai_models');
+        $modelsCredit = $plan?->getAttribute('ai_models');
         foreach ($modelsCredit as $modelsGroup) {
             foreach ($modelsGroup as $model => $credit) {
                 $driver = $isTeamPlan ? Entity::driver(EntityEnum::fromSlug($model))->forTeam($team) : Entity::driver(EntityEnum::fromSlug($model))->forUser($user);
-                if ($plan->getAttribute('reset_credits_on_renewal')) {
+                if ($plan?->getAttribute('reset_credits_on_renewal')) {
                     $driver->setCredit($credit['credit']);
                 } else {
                     $driver->increaseCredit($credit['credit']);

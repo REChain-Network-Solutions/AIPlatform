@@ -26,13 +26,10 @@ class ExtensionModelCommand extends Command
 
         $basePath = base_path("app/Extensions/{$extension}/System/Models");
 
-        // Klasör yoksa oluştur
-        if (! is_dir($basePath)) {
-            if (! mkdir($basePath, 0755, true)) {
-                $this->error("Failed to create directory: {$basePath}");
+        if (! mkdir($basePath, 0755, true) && ! is_dir($basePath)) {
+            $this->error("Failed to create directory: {$basePath}");
 
-                return;
-            }
+            return;
         }
 
         $modelPath = "{$basePath}/{$modelName}.php";

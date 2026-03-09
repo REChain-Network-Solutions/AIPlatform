@@ -6,6 +6,7 @@ namespace App\Actions;
 
 use App\Jobs\SendConfirmationEmail;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 
 final class EmailConfirmation
 {
@@ -45,7 +46,7 @@ final class EmailConfirmation
 
     private function unlock(): void
     {
-        cache()->forget($this->lockKey());
+        Cache::forget($this->lockKey());
     }
 
     private function dispatch(): void
@@ -61,7 +62,7 @@ final class EmailConfirmation
             return false;
         }
 
-        return cache()->remember($key, now()->addHour(), function () {
+        return Cache::remember($key, now()->addHour(), function () {
             return true;
         });
     }

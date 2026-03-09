@@ -1,32 +1,40 @@
 @php
-    $items = app(\App\Services\Common\MenuService::class)->generate();
+	$items = app(\App\Services\Common\MenuService::class)->generate();
 
-    $isAdmin = \Auth::user()?->isAdmin();
-
-	$user = \Auth::user();
+	$user = auth()->user();
+	$isAdmin = $user?->isAdmin();
 
 @endphp
 
 @foreach ($items as $key => $item)
-    @if (\App\Helpers\Classes\PlanHelper::planMenuCheck($userPlan, $key))
-        @if (data_get($item, 'is_admin'))
-            @if ($isAdmin && $user->checkPermission($key))
-                @if (data_get($item, 'show_condition', true) && data_get($item, 'is_active'))
-                    @if ($item['children_count'])
-                        @includeIf('default.components.navbar.partials.types.item-dropdown')
-                    @else
-                        @includeIf('default.components.navbar.partials.types.' . $item['type'])
-                    @endif
-                @endif
-            @endif
-        @else
-            @if (data_get($item, 'show_condition', true) && data_get($item, 'is_active'))
-                @if ($item['children_count'])
-                    @includeIf('default.components.navbar.partials.types.item-dropdown')
-                @else
-                    @includeIf('default.components.navbar.partials.types.' . $item['type'])
-                @endif
-            @endif
-        @endif
-    @endif
+	@php
+		// Cache values once
+		$isActive       = data_get($item, 'is_active', false);
+		$showCondition  = data_get($item, 'show_condition', true);
+		$isAdminOnly    = data_get($item, 'is_admin', false);
+		$childrenCount  = data_get($item, 'children_count', 0);
+		$type           = data_get($item, 'type');
+
+		// Skip early if plan doesn’t allow it
+		if (!\App\Helpers\Classes\PlanHelper::planMenuCheck($userPlan, $key)) {
+			continue;
+		}
+
+		// Skip if inactive or condition fails
+		if (!$isActive || !$showCondition) {
+			continue;
+		}
+
+		// Skip if admin-only and user not allowed
+		if ($isAdminOnly && (!$isAdmin || !$user->checkPermission($key))) {
+			continue;
+		}
+	@endphp
+
+	{{-- Render item --}}
+	@if ($childrenCount)
+		@includeIf('default.components.navbar.partials.types.item-dropdown')
+	@else
+		@includeIf('default.components.navbar.partials.types.' . $type)
+	@endif
 @endforeach

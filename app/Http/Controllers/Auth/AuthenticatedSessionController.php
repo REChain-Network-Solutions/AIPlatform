@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Actions\EmailConfirmation;
 use App\Events\UsersActivityEvent;
+use App\Helpers\Classes\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Mail\OtpEmail;
@@ -12,6 +13,7 @@ use App\Models\User;
 use Exception;
 use Google2FA;
 use GuzzleHttp\Client;
+use Igaster\LaravelTheme\Facades\Theme;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +27,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
+        if (setting('dash_theme') === 'social-media-agent-dashboard') {
+            Theme::set('social-media-agent-dashboard');
+        }
+
         return view('panel.authentication.login', [
             'plan'     => request('plan'),
             'redirect' => request('redirect'),
@@ -73,7 +79,7 @@ class AuthenticatedSessionController extends Controller
                 return response()->json(['errors' => [trans('auth.failed')]], 401);
             }
 
-            $otp = mt_rand(1000, 9999);
+            $otp = random_int(1000, 9999);
             $user->update(['otp' => $otp]); // One DB write instead of save()
 
             try {
@@ -101,7 +107,7 @@ class AuthenticatedSessionController extends Controller
             event(new UsersActivityEvent($user->email, $user->type, $request->ip(), $request->header('User-Agent')));
         }
 
-        if (setting('dash_theme') === 'social-media-agent-dashboard') {
+        if ((setting('frontend_additional_url_type') !== 'ai-image-pro') && (setting('dash_theme') === 'social-media-agent-dashboard')) {
             return response()->json([
                 'link' => '/dashboard/user/social-media/agent',
             ]);
@@ -120,13 +126,20 @@ class AuthenticatedSessionController extends Controller
     {
         // Define your redirect mappings
         $redirectMap = [
-            'chatPro' => '/chat',
+            'chatPro'      => '/chat',
+            'chatProImage' => '/ai-chat-image/chat',
+            'aiImagePro'   => '/dashboard/user/ai-image-pro',
             // Add more redirects as needed
         ];
 
         // If redirect parameter exists and is mapped
         if ($redirect && isset($redirectMap[$redirect])) {
-            return $redirectMap[$redirect];
+            if ($redirect === 'aiImagePro' && ! Helper::appIsDemo()) {
+                // Non-demo environments should follow the normal dashboard flow.
+                $redirect = null;
+            } else {
+                return $redirectMap[$redirect];
+            }
         }
 
         // Default behavior (existing logic)

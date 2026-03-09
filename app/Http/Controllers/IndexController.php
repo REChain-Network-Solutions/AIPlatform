@@ -16,10 +16,10 @@ use App\Models\FrontendTools;
 use App\Models\HowitWorks;
 use App\Models\OpenAIGenerator;
 use App\Models\OpenaiGeneratorFilter;
-use App\Models\Setting;
 use App\Models\Testimonials;
 use App\Services\Finance\PlanService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redirect;
 
 class IndexController extends Controller
@@ -28,7 +28,7 @@ class IndexController extends Controller
 
     public function __invoke()
     {
-        $maintenance = cache()->get('maintenance');
+        $maintenance = Cache::get('maintenance');
 
         $maintenanceMode = data_get($maintenance, 'maintenance_mode', false);
 
@@ -54,17 +54,22 @@ class IndexController extends Controller
         $futures = FrontendFuture::all();
         $testimonials = Testimonials::all();
         $howitWorks = HowitWorks::orderBy('order', 'ASC')->limit(3)->get();
-        $howitWorksDefaults = self::howitWorksDefaults();
+        $howitWorksDefaults = $this->howitWorksDefaults();
         $clients = Clients::all();
         $who_is_for = FrontendForWho::all();
         $generatorsList = FrontendGenerators::orderBy('created_at', 'desc')->get();
 
         $posts = Blog::where('status', 1)->orderBy('id', 'desc')->paginate(FrontendSectionsStatus::first()->blog_posts_per_page ?? 3);
 
-        $setting = Setting::getCache();
+        $type = setting('frontend_additional_url_type', 'default');
+        if ($type !== 'default') {
+            $url = match ($type) {
+                'ai-chat-pro'  => '/chat',
+                'ai-image-pro' => '/ai-image-pro',
+                default        => setting('frontend_additional_url', '/'),
+            };
 
-        if ($setting->frontend_additional_url != null) {
-            return Redirect::to($setting->frontend_additional_url);
+            return Redirect::to($url);
         }
 
         $currency = currency()->symbol;

@@ -18,7 +18,7 @@
                         wire:model="plan.plan_ai_tools.{{ $tool['key'] }}"
                         value="{{ $tool['key'] }}"
                         label="{{ $tool['label'] }}"
-                        tooltip="{{ $tool['label'] }}"
+                        tooltip="{{ $tool['tooltip'] ?? $tool['label'] }}"
                     />
                 </x-form.group>
             @endforeach

@@ -192,9 +192,7 @@ class LinkCrawler
         $html = preg_replace('/<[^>]+class="[^"]*\bscreen-reader-text\b[^"]*"[^>]*>.*?<\/[^>]+>/is', '', $html);
         $html = preg_replace('/<[^>]+class="[^"]*\bscreen-reader-shortcut\b[^"]*"[^>]*>.*?<\/[^>]+>/is', '', $html);
 
-        $text = Helper::strip_all_tags($html, true);
-
-        return $text;
+        return Helper::strip_all_tags($html, true);
     }
 
     /**

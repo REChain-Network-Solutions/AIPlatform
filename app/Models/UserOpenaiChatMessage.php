@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Extensions\Canvas\System\Http\Models\UserTiptapContent;
+use App\Helpers\Classes\MarketplaceHelper;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Facades\Schema;
 
@@ -30,6 +32,11 @@ class UserOpenaiChatMessage extends Model
         'outputImage',
         'realtime',
         'is_chatbot',
+        'suggestions_response',
+    ];
+
+    protected $casts = [
+        'suggestions_response' => 'array',
     ];
 
     public function __construct(array $attributes = [])
@@ -65,6 +72,44 @@ class UserOpenaiChatMessage extends Model
     public function chat()
     {
         return $this->belongsTo(UserOpenaiChat::class, 'user_openai_chat_id', 'id');
+    }
+
+    /**
+     * Get the AI-generated images for this message (only if extension is installed).
+     */
+    public function aiChatProImages(): HasMany
+    {
+        if (! MarketplaceHelper::isRegistered('ai-chat-pro-image-chat') || ! $this->tableExists('ai_chat_pro_image')) {
+            return $this->hasMany(self::class, 'id', 'id')->whereRaw('1 = 0');
+        }
+
+        $modelClass = 'App\\Extensions\\AiChatProImageChat\\System\\Models\\AiChatProImageModel';
+
+        return $this->hasMany($modelClass, 'message_id');
+    }
+
+    /**
+     * Get the suggestions response from linked AI image records.
+     */
+    public function getSuggestionsResponseAttribute(): ?array
+    {
+        // Check direct column value first (text chat suggestions)
+        $directValue = $this->attributes['suggestions_response'] ?? null;
+        if ($directValue) {
+            return is_array($directValue) ? $directValue : json_decode($directValue, true);
+        }
+
+        // Fall back to image chat suggestions
+        if (! MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')) {
+            return null;
+        }
+
+        $imageRecord = $this->aiChatProImages()
+            ->whereNotNull('suggestions_response')
+            ->latest()
+            ->first();
+
+        return $imageRecord?->suggestions_response;
     }
 
     // tiptap edit result

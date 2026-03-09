@@ -92,9 +92,9 @@ class PageController extends Controller
 
         if ($settings) {
             return view('page.index', compact('page'));
-        } else {
-            abort(404);
         }
+
+        abort(404);
     }
 
     public function pageTerms()
@@ -124,8 +124,8 @@ class PageController extends Controller
 
         if ($settings) {
             return view('page.index', compact('page'));
-        } else {
-            abort(404);
         }
+
+        abort(404);
     }
 }

@@ -4,13 +4,14 @@ import ajax from '~nodeModules/@imacrayon/alpine-ajax';
 import sort from '~nodeModules/@alpinejs/sort';
 import intersect from '~nodeModules/@alpinejs/intersect';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
+import { computePosition, autoUpdate, flip, shift, offset, size } from '@floating-ui/dom';
 import { Sortable, MultiDrag } from 'sortablejs';
 import modal from './components/modal';
 import clipboard from './components/clipboard';
 import assignViewCredits from './components/assignViewCredits';
 import openaiRealtime from './components/realtime-frontend/openaiRealtime';
 import advancedImageEditor from './components/advancedImageEditor';
-import { debounce, difference, throttle, uniq, wrap } from 'lodash';
+import { debounce, throttle, defer } from 'lodash';
 import creativeSuite from './components/creative-suite/creativeSuite';
 import { lqdCustomizer, lqdCustomizerFontPicker } from './components/customizer';
 import { lqdSidedrawer } from './components/sidedrawer';
@@ -34,11 +35,14 @@ window.collectCreditsToFormData = function ( formData ) {
 	} );
 };
 
-window.Alpine = Alpine;
+const alpine = window.Alpine || Alpine;
+window.Alpine = alpine;
+const livewire = window.Livewire || Livewire;
+window.Livewire = livewire;
 
-Alpine.plugin( ajax );
-Alpine.plugin( sort );
-Alpine.plugin( intersect );
+alpine.plugin( ajax );
+alpine.plugin( sort );
+alpine.plugin( intersect );
 
 Sortable.mount( new MultiDrag() );
 
@@ -708,30 +712,106 @@ document.addEventListener( 'alpine:init', () => {
 		preferredAnchor: preferredAnchor || 'start',
 		offsetY: offsetY.trim() || '0px',
 		teleport: teleport ?? true,
-		parentRect: {
-			top: 0,
-			left: 0,
-			width: 0,
-			height: 0
+		cleanupAutoUpdate: null,
+		boundResizeHandler: null,
+		triggerVisibilityObserver: null,
+		init() {
+			let resizeTimer;
+			this.boundResizeHandler = () => {
+				clearTimeout( resizeTimer );
+				resizeTimer = setTimeout( () => this.updatePosition(), 100 );
+			};
+			window.addEventListener( 'resize', this.boundResizeHandler );
+			this.setupTriggerVisibilityObserver();
 		},
-		dropdownRect: {
-			top: 0,
-			left: 0,
-			width: 0,
-			height: 0
+		setupTriggerVisibilityObserver() {
+			if ( typeof IntersectionObserver === 'undefined' ) return;
+
+			const parent = this.$refs.parent;
+			if ( !parent ) return;
+
+			this.triggerVisibilityObserver = new IntersectionObserver( ( [ entry ] ) => {
+				if ( !this.open || entry.isIntersecting ) return;
+				this.toggle( 'collapse' );
+			}, { threshold: 0 } );
+
+			this.triggerVisibilityObserver.observe( parent );
 		},
 		toggle( state ) {
 			this.open = state ? ( state === 'collapse' ? false : true ) : !this.open;
 			this.$refs.parent.classList.toggle( 'lqd-is-active', this.open );
+
+			if ( this.open ) {
+				this.startAutoUpdate();
+			} else {
+				this.stopAutoUpdate();
+			}
+		},
+		startAutoUpdate() {
+			if ( !this.teleport ) return;
+
+			this.stopAutoUpdate();
+
+			const parent = this.$refs.parent;
+			const dropdown = this.$refs.dropdown;
+			if ( !parent || !dropdown ) return;
+
+			this.cleanupAutoUpdate = autoUpdate( parent, dropdown, () => {
+				this.updatePosition();
+			} );
+		},
+		stopAutoUpdate() {
+			if ( this.cleanupAutoUpdate ) {
+				this.cleanupAutoUpdate();
+				this.cleanupAutoUpdate = null;
+			}
+		},
+		async updatePosition() {
+			if ( !this.teleport ) return;
+
+			const parent = this.$refs.parent;
+			const dropdown = this.$refs.dropdown;
+			if ( !parent || !dropdown ) return;
+
+			const placement = this.preferredAnchor === 'end' ? 'bottom-end' : 'bottom-start';
+			const offsetValue = parseInt( this.offsetY, 10 ) || 0;
+			const padding = 8;
+
+			const { x, y, placement: finalPlacement } = await computePosition( parent, dropdown, {
+				placement,
+				strategy: 'fixed',
+				middleware: [
+					offset( offsetValue ),
+					flip( { padding } ),
+					shift( { padding, crossAxis: true } ),
+					size( {
+						padding,
+						apply( { availableWidth, availableHeight, elements } ) {
+							Object.assign( elements.floating.style, {
+								maxWidth: `${Math.max( 0, availableWidth )}px`,
+								maxHeight: `${Math.max( 0, availableHeight )}px`,
+							} );
+						},
+					} ),
+				],
+			} );
+
+			Object.assign( dropdown.style, {
+				position: 'fixed',
+				left: `${x}px`,
+				top: `${y}px`,
+				right: 'auto',
+				bottom: 'auto',
+			} );
+
+			dropdown.classList.toggle( 'dropdown-anchor-bottom', finalPlacement.startsWith( 'top' ) );
 		},
 		parent: {
 			[ '@mouseenter' ]() {
-				this.parentRect = this.$refs.parent.getBoundingClientRect();
-				this.dropdownRect = this.$el.getBoundingClientRect();
-
-				this.$el.classList.toggle('dropdown-anchor-bottom', this.parentRect.bottom + this.dropdownRect.height > window.innerHeight && this.parentRect.top - this.dropdownRect.height > 0);
+				this.updatePosition();
 
 				if ( this.triggerType === 'hover' ) {
+					this.lastHoverOpenTime = Date.now();
 					this.toggle( 'expand' );
 				}
 			},
@@ -754,9 +834,15 @@ document.addEventListener( 'alpine:init', () => {
 			},
 		},
 		trigger: {
-			[ '@click.prevent' ]() {
+			// .stop to prevent bubbling event when the dropdown is inside another trigger. for example in chat pro folders
+			[ '@click.prevent.stop' ]() {
 				// we need to be able to toggle dropdown when focus/enter key is pressed
 				// if (this.triggerType !== 'click') return;
+
+				// On touch devices, mouseenter fires before click. Skip toggle if hover just opened it.
+				if ( this.triggerType === 'hover' && this.open && Date.now() - this.lastHoverOpenTime < 300 ) {
+					return;
+				}
 				this.toggle();
 			},
 		},
@@ -765,45 +851,18 @@ document.addEventListener( 'alpine:init', () => {
 				if ( triggerType !== 'hover' ) return;
 				this.toggle( 'collapse' );
 			},
-			[':style']() {
-				if ( !this.teleport ) return;
-
-				const { top, bottom, left, right } = this.parentRect;
-				const { width: dropWidth, height: dropHeight } = this.dropdownRect;
-				const { innerWidth: vw, innerHeight: vh, scrollY } = window;
-				const isRTL = document.dir === 'rtl' || document.documentElement.dir === 'rtl';
-
-				// Vertical: default below parent, adjust if overflows
-				let blockValue = bottom + scrollY;
-
-				// If overflows bottom, try shifting up
-				if (bottom + dropHeight > vh) {
-					const shifted = vh - dropHeight + scrollY;
-					blockValue = Math.max(scrollY, shifted);
-				}
-
-				// Horizontal positioning with preferredAnchor and overflow handling
-				const anchorAtEnd = this.preferredAnchor === 'end';
-				const inlineStart = isRTL ? vw - right : left;
-				const inlineEnd = isRTL ? vw - left : right;
-
-				const overflowsEnd = (anchorAtEnd ? inlineEnd : inlineStart) + dropWidth > vw;
-				const overflowsStart = (anchorAtEnd ? inlineEnd : inlineStart) - dropWidth < 0;
-				const shouldFlip = anchorAtEnd ? overflowsStart : overflowsEnd;
-
-				const inlineAnchor = shouldFlip !== anchorAtEnd ? 'inset-inline-end' : 'inset-inline-start';
-				const inlineValue = shouldFlip !== anchorAtEnd
-					? Math.max(0, Math.min(vw - dropWidth, vw - inlineEnd))
-					: Math.max(0, Math.min(vw - dropWidth, inlineStart));
-
-				return {
-					'inset-inline-start': inlineAnchor === 'inset-inline-start' ? `${inlineValue}px` : 'auto',
-					'inset-inline-end': inlineAnchor === 'inset-inline-end' ? `${inlineValue}px` : 'auto',
-					top: `calc(${blockValue}px + ${this.offsetY})`,
-					bottom: 'auto',
-				};
+		},
+		destroy() {
+			this.stopAutoUpdate();
+			if ( this.boundResizeHandler ) {
+				window.removeEventListener( 'resize', this.boundResizeHandler );
+				this.boundResizeHandler = null;
 			}
-		}
+			if ( this.triggerVisibilityObserver ) {
+				this.triggerVisibilityObserver.disconnect();
+				this.triggerVisibilityObserver = null;
+			}
+		},
 	} ) );
 
 	// Notifications
@@ -838,7 +897,10 @@ document.addEventListener( 'alpine:init', () => {
 				},
 				complete: () => {
 					this.markAsRead( index );
-					window.location = notification.link;
+					var href = (notification && typeof notification.link === 'string') ? notification.link : '#';
+					if ( href !== '#' ) {
+						window.location = href;
+					}
 					this.loading = false;
 				}
 			} );
@@ -1107,8 +1169,8 @@ document.addEventListener( 'alpine:init', () => {
 
 	// Marquee
 	Alpine.data( 'marquee', ( options = {} ) => ( {
-		maxWidth: 0,
 		position: 0,
+		contentWidth: 0,
 		options: {
 			direction: -1,
 			speed: 0.5,
@@ -1117,41 +1179,84 @@ document.addEventListener( 'alpine:init', () => {
 		},
 		async init() {
 			this.direction = this.options.direction;
-			this.cellWidths = [];
-			this.cellHeights = [];
 			this.viewportEl = this.$el.querySelector( '.lqd-marquee-viewport' );
 			this.sliderEl = this.$el.querySelector( '.lqd-marquee-slider' );
-			this.cells = this.sliderEl.querySelectorAll( '.lqd-marquee-cell' );
+			this.cells = Array.from( this.sliderEl.querySelectorAll( '.lqd-marquee-cell' ) );
 			this.sliderElStyles = window.getComputedStyle( this.sliderEl );
-			this.maxWidth = 0;
-			this.maxHeight = 0;
+			this.originalCellCount = this.cells.length;
 
 			this.onResize = debounce( this.onResize.bind( this ), 450 );
+			window.addEventListener( 'resize', this.onResize );
 
 			await document.fonts.ready;
 
+			this.fillAndClone();
 			this.sizing();
+
+			if ( this.direction === 1 ) {
+				this.position = -this.contentWidth;
+			}
 
 			this.startAnimation();
 		},
-		sizing() {
-			for ( let i = 0; i < this.cells.length; i++ ) {
-				this.cellHeights.push( this.cells[ i ].offsetHeight );
-				this.cellWidths.push( this.cells[ i ].offsetWidth );
+		cloneSet() {
+			let firstClone = null;
+
+			for ( let i = 0; i < this.originalCellCount; i++ ) {
+				const clone = this.cells[ i ].cloneNode( true );
+				clone.setAttribute( 'aria-hidden', 'true' );
+				this.sliderEl.appendChild( clone );
+
+				if ( i === 0 ) {
+					firstClone = clone;
+				}
 			}
 
-			this.maxHeight = Math.max( ...this.cellHeights );
-			this.maxWidth = this.cellWidths.reduce( ( acc, width ) => acc + width, 0 );
+			return firstClone;
+		},
+		fillAndClone() {
+			this.sliderEl.classList.add( 'absolute', 'top-0', 'left-0' );
+			this.sliderEl.classList.remove( 'w-full' );
+			this.sliderEl.style.width = 'max-content';
 
-			this.maxWidth += parseInt( this.sliderElStyles.paddingLeft ) + parseInt( this.sliderElStyles.paddingRight );
-			// this.maxWidth += parseInt(this.sliderElStyles.marginLeft) + parseInt(this.sliderElStyles.marginRight);
-			// this.maxWidth += parseInt(this.sliderElStyles.borderLeftWidth) + parseInt(this.sliderElStyles.borderRightWidth);
-			this.maxWidth += parseInt( this.sliderElStyles.gap ) * ( this.cells.length - 1 );
+			void this.sliderEl.offsetWidth;
 
-			this.viewportEl.style.height = `${ this.maxHeight + parseInt( this.sliderElStyles.paddingTop ) + parseInt( this.sliderElStyles.paddingBottom ) }px`;
-			this.sliderEl.classList.add( 'absolute', 'top-0', 'left-0', 'w-full', 'h-full' );
+			const viewportWidth = this.viewportEl.offsetWidth;
+			const gap = parseInt( this.sliderElStyles.gap ) || 0;
 
-			this.maxWidth -= this.viewportEl.offsetWidth;
+			let originalWidth = 0;
+			for ( let i = 0; i < this.originalCellCount; i++ ) {
+				originalWidth += this.cells[ i ].getBoundingClientRect().width;
+			}
+			originalWidth += gap * ( this.originalCellCount - 1 );
+
+			const setWidthWithGap = originalWidth + gap;
+			const clonesNeeded = Math.ceil( viewportWidth / setWidthWithGap ) + 1;
+
+			this.firstLoopCloneEl = null;
+
+			for ( let c = 0; c < clonesNeeded; c++ ) {
+				const firstClone = this.cloneSet();
+
+				if ( c === 0 ) {
+					this.firstLoopCloneEl = firstClone;
+				}
+			}
+		},
+		sizing() {
+			void this.sliderEl.offsetWidth;
+
+			const firstCellRect = this.cells[ 0 ].getBoundingClientRect();
+			const firstCloneRect = this.firstLoopCloneEl.getBoundingClientRect();
+			this.contentWidth = Math.abs( firstCloneRect.left - firstCellRect.left );
+
+			const cellHeights = [];
+			for ( let i = 0; i < this.originalCellCount; i++ ) {
+				cellHeights.push( this.cells[ i ].offsetHeight );
+			}
+
+			const maxHeight = Math.max( ...cellHeights );
+			this.viewportEl.style.height = `${ maxHeight + parseInt( this.sliderElStyles.paddingTop ) + parseInt( this.sliderElStyles.paddingBottom ) }px`;
 		},
 		startAnimation() {
 			this.isAnimating = true;
@@ -1170,10 +1275,10 @@ document.addEventListener( 'alpine:init', () => {
 				if ( this.isAnimating ) {
 					this.position += this.options.speed * this.direction;
 
-					if ( this.position <= -this.maxWidth ) {
-						this.direction = 1;
+					if ( this.position <= -this.contentWidth ) {
+						this.position += this.contentWidth;
 					} else if ( this.position >= 0 ) {
-						this.direction = -1;
+						this.position -= this.contentWidth;
 					}
 
 					this.sliderEl.style.transform = `translateX(${ this.position }px)`;
@@ -1186,6 +1291,9 @@ document.addEventListener( 'alpine:init', () => {
 		},
 		onResize() {
 			this.sizing();
+		},
+		destroy() {
+			window.removeEventListener( 'resize', this.onResize );
 		}
 	} ) );
 
@@ -1986,6 +2094,105 @@ document.addEventListener( 'alpine:init', () => {
 	Alpine.data( 'lqdCustomizerFontPicker', lqdCustomizerFontPicker );
 
 	Alpine.data( 'lqdSidedrawer', lqdSidedrawer );
+
+	Alpine.directive( 'masonry', ( el, { expression }, { evaluate, cleanup } ) => {
+		const config = expression ? evaluate( expression ) : {};
+		let iso = null;
+
+		const options = {
+			itemSelector: '.masonry-grid-item',
+			bypassCheck: true,
+			...config
+		};
+
+		function init() {
+			if ( typeof Isotope === 'undefined' || !el.querySelectorAll( options.itemSelector ).length ) {
+				return;
+			}
+
+			iso = new Isotope( el, options );
+
+			el.classList.add('masonry-grid-initialized');
+		}
+
+		function destroy() {
+			if ( !iso ) return;
+
+			iso.destroy();
+			iso = null;
+		}
+
+		function layout() {
+			if (!iso) return;
+
+			iso.layout();
+		}
+
+		function reloadItems() {
+			if (!iso) return;
+
+			// const filteredItems = [ ...iso.filteredItems ];
+
+			// filteredItems.forEach(item => {
+				// const existingItemsWithSameIdIndex = filteredItems.findIndex(it => it.id === item.id);
+
+				// if ( existingItemsWithSameIdIndex === -1 ) return;
+
+				// const existingItem = filteredItems.at(existingItemsWithSameIdIndex);
+
+				// if ( existingItem && existingItem.size?.width === 0 && existingItem.size?.height === 0 ) {
+				// 	filteredItems.splice(existingItemsWithSameIdIndex, 1);
+				// }
+			// });
+
+			// iso.filteredItems = filteredItems;
+
+			iso.filteredItems = iso.filteredItems.filter(item => item.size.width > 0 && item.size.height > 0)
+
+			defer(() => {
+				iso.reloadItems();
+				iso.layout();
+			});
+		}
+
+		function appended(event) {
+			if ( !iso ) return;
+
+			iso.appended(event.detail.item);
+
+			debouncedReload();
+		}
+
+		function remove(event) {
+			if ( !iso ) return;
+
+			iso.remove(event.detail.item);
+			debouncedReload();
+		}
+
+		const debouncedReload = debounce( () => {
+			reloadItems();
+		}, 100, { leading: false, trailing: true } );
+
+		const resizeObserver = new ResizeObserver( debounce( () => {
+			layout();
+		}, 100, { leading: false, trailing: true } ) );
+
+		resizeObserver.observe( el );
+
+		el.addEventListener( 'masonry:init', init );
+		el.addEventListener( 'masonry:layout', layout );
+		el.addEventListener( 'masonry:reload', debouncedReload );
+		el.addEventListener( 'masonry:appended', appended );
+		el.addEventListener( 'masonry:remove', remove );
+
+		cleanup( () => {
+			destroy();
+		} );
+	} );
 } );
 
-Livewire.start();
+if ( !window.__livewireStarted ) {
+	window.__livewireStarted = true;
+	livewire.start();
+}

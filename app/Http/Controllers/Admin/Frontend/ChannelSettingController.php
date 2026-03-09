@@ -32,7 +32,7 @@ class ChannelSettingController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $data = '/uploads/' . $request->file('image')->store('frontend', 'uploads');
+            $data = '/uploads/' . $request->file('image')?->store('frontend', 'uploads');
         }
 
         $channelSetting->update($data);

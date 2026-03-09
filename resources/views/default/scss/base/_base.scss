@@ -35,6 +35,6 @@ hr {
 body:has(.lqd-bottom-menu) {
 
 	.lqd-page {
-		@apply max-lg:pb-16;
+		@apply max-lg:pb-[--bottom-menu-height];
 	}
 }

@@ -151,7 +151,7 @@ class TTSController extends Controller
     {
         return match ($platform) {
             EngineEnum::GOOGLE->slug()     => EntityEnum::GOOGLE,
-            EngineEnum::ELEVENLABS->slug() => EntityEnum::ELEVENLABS,
+            EngineEnum::ELEVENLABS->slug() => $this->resolveElevenLabsEntity(),
             EngineEnum::AZURE->slug()      => EntityEnum::AZURE,
             EngineEnum::Speechify->slug()  => EntityEnum::Speechify,
             EngineEnum::OPEN_AI->slug()    => EntityEnum::fromSlug($pace),
@@ -280,6 +280,7 @@ class TTSController extends Controller
     {
         $apiKey = $this->settingsTwo->elevenlabs_api_key;
         $client = new Client;
+        $modelEntity = $this->resolveElevenLabsEntity();
 
         $response = $client->request('POST', 'https://api.elevenlabs.io/v1/text-to-speech/' . $speech['voice'], [
             'headers' => [
@@ -288,17 +289,44 @@ class TTSController extends Controller
             ],
             'json' => [
                 'text'           => $speech['content'],
-                'model_id'       => 'eleven_multilingual_v2',
-                'voice_settings' => [
-                    'similarity_boost'  => 0.75,
-                    'stability'         => 0.95,
-                    'style'             => $speech['pace'] / 100,
-                    'use_speaker_boost' => true,
-                ],
+                'model_id'       => $this->resolveElevenLabsModelId($modelEntity),
+                'voice_settings' => $this->resolveElevenLabsVoiceSettings($speech, $modelEntity),
             ],
         ]);
 
         return $response->getBody();
+    }
+
+    private function resolveElevenLabsEntity(): EntityEnum
+    {
+        $selectedModel = setting('tts_elevenlabs_model', EntityEnum::ELEVENLABS->value);
+
+        return match ($selectedModel) {
+            EntityEnum::ELEVENLABS_V3->value => EntityEnum::ELEVENLABS_V3,
+            default                          => EntityEnum::ELEVENLABS,
+        };
+    }
+
+    private function resolveElevenLabsModelId(?EntityEnum $modelEntity = null): string
+    {
+        $modelEntity ??= $this->resolveElevenLabsEntity();
+
+        return match ($modelEntity) {
+            EntityEnum::ELEVENLABS_V3 => EntityEnum::ELEVENLABS_V3->value,
+            default                   => 'eleven_multilingual_v2',
+        };
+    }
+
+    private function resolveElevenLabsVoiceSettings(array $speech, ?EntityEnum $modelEntity = null): array
+    {
+        $modelEntity ??= $this->resolveElevenLabsEntity();
+
+        return [
+            'similarity_boost'  => 0.75,
+            'stability'         => $modelEntity === EntityEnum::ELEVENLABS_V3 ? 0.5 : 0.95,
+            'style'             => (float) $speech['pace'] / 100,
+            'use_speaker_boost' => true,
+        ];
     }
 
     /**

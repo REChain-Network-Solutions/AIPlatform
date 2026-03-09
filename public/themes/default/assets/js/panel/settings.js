@@ -23,12 +23,14 @@ function frontendSettingsSave() {
 	formData.append('frontend_pricing_section', $("#frontend_pricing_section").val());
 	formData.append('frontend_custom_templates_section', $("#frontend_custom_templates_section").val());
 	formData.append('frontend_business_partners_section', $("#frontend_business_partners_section").val());
-	formData.append('frontend_additional_url', $("#frontend_additional_url").val());
 	formData.append('frontend_custom_css', $("#frontend_custom_css").val());
 	formData.append('frontend_custom_js', $("#frontend_custom_js").val());
 	formData.append('frontend_footer_facebook', $("#frontend_footer_facebook").val());
 	formData.append('frontend_footer_twitter', $("#frontend_footer_twitter").val());
 	formData.append('frontend_footer_instagram', $("#frontend_footer_instagram").val());
+
+	formData.append('frontend_additional_url_type', $("#frontend_additional_url_type").val());
+	formData.append('frontend_additional_url', $("#frontend_additional_url").val());
 
 	formData.append('preheader_active', $("#preheader_active").val());
 	formData.append('header_title', $("#header_title").val());
@@ -1056,6 +1058,7 @@ function ttsSettingsSave() {
     formData.append('feature_tts_openai', $("#feature_tts_openai").is(":checked") ? 1 : 0);
     formData.append('feature_tts_elevenlabs', $("#feature_tts_elevenlabs").is(":checked") ? 1 : 0);
     formData.append('elevenlabs_api_key', $("#elevenlabs_api_key").val());
+    formData.append('tts_elevenlabs_model', $("#tts_elevenlabs_model").val());
 
     if ($("#azure_api_key")) {
         formData.append('feature_tts_azure', $("#feature_tts_azure").is(":checked") ? 1 : 0);

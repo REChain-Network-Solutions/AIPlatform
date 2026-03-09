@@ -12,6 +12,7 @@ class Label extends Component
      * Create a new component instance.
      */
     public function __construct(
+        public ?string $badge = null,
     ) {}
 
     /**

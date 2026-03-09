@@ -9,6 +9,7 @@ use App\Domains\Entity\BaseDriver;
 use App\Domains\Entity\Enums\EntityEnum;
 use App\Domains\Entity\Facades\Entity;
 use App\Enums\BedrockEngine;
+use App\Extensions\AiChatProImageChat\System\Services\AIChatImageService;
 use App\Extensions\OpenRouter\System\Services\RouterAiService;
 use App\Helpers\Classes\ApiHelper;
 use App\Helpers\Classes\Helper;
@@ -58,7 +59,7 @@ class StreamService
         };
     }
 
-    private function prepareStreamEnvironment(): void
+    public function prepareStreamEnvironment(): void
     {
         if (function_exists('ini_set')) {
             @ini_set('output_buffering', 'off');
@@ -77,7 +78,7 @@ class StreamService
         }
     }
 
-    private function safeFlush(): void
+    public function safeFlush(): void
     {
         if (function_exists('ob_flush')) {
             @ob_flush();
@@ -87,7 +88,7 @@ class StreamService
         }
     }
 
-    private function createDriver(EntityEnum $model): ?BaseDriver
+    public function createDriver(EntityEnum $model): ?BaseDriver
     {
         if ($this->guest) {
             return Entity::driverForGuest($model);
@@ -100,8 +101,13 @@ class StreamService
      * @throws Exception
      * @throws GuzzleException
      */
-    public function ChatStream(string $chat_bot, $history, $main_message, $chat_type, $contain_images, $ai_engine = null, $assistant = null, $openRouter = null, $fileChat = false, $tempChatActive = false): ?StreamedResponse
+    public function ChatStream(string $chat_bot, $history, $main_message, $chatParams, $ai_engine = null, $fileChat = false, $tempChatActive = false): ?StreamedResponse
     {
+        $chat_type = $chatParams['chat_type'];
+        $contain_images = $chatParams['contain_images'];
+        $assistant = $chatParams['assistant'];
+        $openRouter = $chatParams['openRouter'];
+
         $this->tempChatActive = $tempChatActive;
 
         // If temp chat is active, merge with session history
@@ -158,6 +164,10 @@ class StreamService
             if (! $pass && $ai_engine === EngineEnum::OPEN_AI->value && setting('ai_chat_pro_image_generation_feature', '0')) {
                 return $this->openaiChatStream($chat_bot, $history, $main_message, $chat_type, $contain_images, tools: \App\Extensions\AIChatPro\System\Services\AiChatProService::tools());
             }
+        }
+
+        if ($chat_type === 'chatPro-image' && MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')) {
+            return AIChatImageService::chatImageStream($chat_bot, $history, $main_message, $chatParams);
         }
 
         if ($chat_type === 'socialMediaAgent' && MarketplaceHelper::isRegistered('social-media-agent')) {
@@ -1325,14 +1335,29 @@ class StreamService
                 $options['max_output_tokens'] = 2000;
                 $options['model'] = EntityEnum::GPT_4_O->value;
             } else {
+                $vectorId = $chat?->openai_vector_id ?? '';
+                if ($vectorId === '') {
+                    echo PHP_EOL;
+                    echo "event: data\n";
+                    echo 'data: ' . __('File search is not ready. Please try attaching the document again.');
+                    echo "\n\n";
+                    $this->safeFlush();
+                    echo "event: stop\n";
+                    echo 'data: [DONE]';
+                    echo "\n\n";
+                    $this->safeFlush();
+
+                    return null;
+                }
                 $options['tools'] = [
                     [
                         'type'             => 'file_search',
-                        'vector_store_ids' => [$chat?->openai_vector_id ?? ''],
+                        'vector_store_ids' => [$vectorId],
                         'max_num_results'  => 1,
                     ],
                 ];
             }
+            ApiHelper::setOpenAiKey();
             $stream = OpenAI::responses()->createStreamed($options);
             foreach ($stream as $response) {
                 if (($response->event === 'response.output_text.delta') && isset($response->response->delta)) {
@@ -1997,7 +2022,7 @@ class StreamService
         ];
     }
 
-    private function saveStreamResponse($main_message, $chat, $responsedText, $output, $total_used_tokens, $driver): void
+    public function saveStreamResponse($main_message, $chat, $responsedText, $output, $total_used_tokens, $driver): void
     {
         if ($this->tempChatActive) {
             // Add the assistant response to temp history
@@ -2026,8 +2051,8 @@ class StreamService
             $chat->save();
         }
 
-        $driver->input($responsedText)->calculateCredit()->decreaseCredit();
-        Usage::getSingle()->updateWordCounts($driver->calculate());
+        $driver?->input($responsedText)->calculateCredit()->decreaseCredit();
+        Usage::getSingle()->updateWordCounts($driver?->calculate());
     }
 
     private function saveOtherStreamResponse($entry, $title, $responsedText, $output, $total_used_tokens, $driver): void

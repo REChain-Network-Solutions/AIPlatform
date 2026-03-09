@@ -1,6 +1,6 @@
 @php
 	$userId = auth()->id();
-	$favoriteChabots = cache("user:{$userId}:favorite_chatbots");
+	$favoriteChabots = cache()->get("user:{$userId}:favorite_chatbots");
 @endphp
 
 <x-card

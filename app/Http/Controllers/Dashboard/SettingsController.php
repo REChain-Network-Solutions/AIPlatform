@@ -955,6 +955,15 @@ class SettingsController extends Controller
             $settings_two->feature_tts_google = $request->feature_tts_google;
             $settings_two->feature_tts_openai = $request->feature_tts_openai;
             $settings_two->feature_tts_elevenlabs = $request->feature_tts_elevenlabs;
+            $ttsElevenLabsModel = in_array(
+                $request->tts_elevenlabs_model,
+                [EntityEnum::ELEVENLABS->value, EntityEnum::ELEVENLABS_V3->value],
+                true
+            ) ? $request->tts_elevenlabs_model : EntityEnum::ELEVENLABS->value;
+
+            setting([
+                'tts_elevenlabs_model' => $ttsElevenLabsModel,
+            ])->save();
 
             if ($request->hasAny(['feature_tts_azure', 'azure_api_key', 'azure_region'])) {
                 setting([

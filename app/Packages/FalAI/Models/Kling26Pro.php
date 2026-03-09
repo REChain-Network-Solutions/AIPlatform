@@ -59,8 +59,11 @@ class Kling26Pro implements TextToVideoModelInterface
     protected function getEndpoint(EntityEnum $model): string
     {
         return match ($model) {
-            EntityEnum::KLING_2_6_PRO_ITV => 'fal-ai/kling-video/v2.6/pro/image-to-video',
-            default                       => 'fal-ai/kling-video/v2.6/pro/text-to-video', // default to text-to-video
+            EntityEnum::KLING_2_6_PRO_TTV                 => 'fal-ai/kling-video/v2.6/pro/text-to-video',
+            EntityEnum::KLING_2_6_PRO_ITV                 => 'fal-ai/kling-video/v2.6/pro/image-to-video',
+            EntityEnum::KLING_2_6_PRO_MOTION_CONTROL      => 'fal-ai/kling-video/v2.6/pro/motion-control',
+            EntityEnum::KLING_2_6_STANDARD_MOTION_CONTROL => 'fal-ai/kling-video/v2.6/standard/motion-control',
+            default                                       => 'fal-ai/kling-video/v2.6/pro/text-to-video',
         };
     }
 }

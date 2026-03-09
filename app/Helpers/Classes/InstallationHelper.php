@@ -715,7 +715,7 @@ class InstallationHelper
                                     ])->first();
 
                                 Models\Common\Menu::query()->where('key', 'photo_studio_setting')->update([
-                                    'parent_id' => $apiIntegration->id,
+                                    'parent_id' => $apiIntegration?->id,
                                 ]);
 
                                 Models\Common\Menu::query()->where('key', 'admin_finance_plan')->update([
@@ -728,7 +728,7 @@ class InstallationHelper
                                     ])->first();
 
                                 Models\Common\Menu::query()->where('key', 'ai_chat_models')->update([
-                                    'parent_id' => $setting->id,
+                                    'parent_id' => $setting?->id,
                                     'label'     => 'AI Models',
                                 ]);
 
@@ -1084,6 +1084,17 @@ class InstallationHelper
                                 app(MenuService::class)->regenerate();
                             } catch (Exception $exception) {
                             }
+                        },
+                    ],
+                ],
+            ],
+            [
+                'table' => 'menus',
+                'sql'   => [
+                    [
+                        'condition' => true,
+                        'callback'  => function () {
+                            Models\Common\Menu::query()->where('key', 'ai_image_pro_real_time')->update(['icon' => 'tabler-aperture']);
                         },
                     ],
                 ],

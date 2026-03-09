@@ -150,4 +150,12 @@ trait HasApiKeys
 
         return config('deepseek.api_key');
     }
+
+    public static function setStableDiffusionKey($settingTwo = null): string
+    {
+        $settingTwo = $settingTwo ?? SettingTwo::getCache();
+        $stableDiffusionKeys = explode(',', $settingTwo->stable_diffusion_api_key);
+
+        return $stableDiffusionKeys[array_rand($stableDiffusionKeys)];
+    }
 }

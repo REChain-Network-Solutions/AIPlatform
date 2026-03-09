@@ -11,6 +11,10 @@ function isHTML(string) {
 
 const generate = async ( message_no, creativity, maximum_length, number_of_results, prompt, openai_id, open_router_model) => {
 	'use strict';
+	if (typeof open_router_model === 'undefined') {
+		open_router_model = $("#open_router_model").val();
+	}
+
 	const submitBtn = document.getElementById( 'openai_generator_button' );
 	const typingEl = document.querySelector( '.tox-edit-area > .lqd-typing' );
 	const markdownRenderer = window.markdownit();

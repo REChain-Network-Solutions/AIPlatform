@@ -40,7 +40,7 @@
                         <td>
                             <img
                                 class="size-20 rounded-lg object-cover object-center"
-                                src="{{ custom_theme_url($entry->image) }}"
+								src="{{ custom_theme_url(str_starts_with($entry->image, 'upload') ? '/' . $entry->image : $entry->image) }}"
                                 alt="{{ $entry->title }}"
                             >
                         </td>

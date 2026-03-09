@@ -56,7 +56,7 @@ class DashboardService
 
     public function cache($key, $value)
     {
-        return cache()->remember($key, $this->cacheTtl, $value);
+        return Cache::remember($key, $this->cacheTtl, $value);
     }
 
     public function setCache(): void
@@ -256,9 +256,8 @@ class DashboardService
     // cost management
     public function setCostManagement(): static
     {
-        // Get cached values safely
-        $totalEarn = cache('total_sales') ?? 0;
-        $totalUser = cache('total_users') ?? 0;
+        $totalEarn = Cache::get('total_sales') ?? 0;
+        $totalUser = Cache::get('total_users') ?? 0;
         $totalSpend = setting('total_spend', 0);
 
         // Convert possible formatted numbers ("1,006.63") to float
@@ -271,14 +270,12 @@ class DashboardService
             return $totalUser == 0 ? 0 : round($totalSpend / $totalUser, 1);
         });
 
-        // Cache income per user
         $this->cache('income_per_user', function () use ($totalEarn, $totalUser) {
             return $totalUser == 0 ? 0 : round($totalEarn / $totalUser, 1);
         });
 
-        // Cache net profit
         $this->cache('net_profit', function () {
-            return cache('income_per_user') - cache('cost_per_user');
+            return Cache::get('income_per_user') - Cache::get('cost_per_user');
         });
 
         return $this;
@@ -327,7 +324,7 @@ class DashboardService
             return (bool) $setting?->bank_transfer_active;
         });
 
-        if (cache('recent_transactions_enabled', false)) {
+        if (Cache::get('recent_transactions_enabled', false)) {
             return $this->cache('recent_transactions', function () {
                 return UserOrder::where('payment_type', 'banktransfer')->orderByRaw("CASE WHEN status = 'Waiting' THEN 0 ELSE 1 END")->orderBy('created_at', 'desc')->get();
             });
@@ -469,14 +466,14 @@ class DashboardService
         });
 
         $this->cache('free_user', function () {
-            return cache('total_user', 0) - cache('paid_user', 0);
+            return Cache::get('total_user', 0) - Cache::get('paid_user', 0);
         });
 
         $this->cache('trial_user', function () {
             return Subscription::whereNotNull('trial_ends_at')->count();
         });
 
-        cache()->remember('online_user', 120, function () {
+        Cache::remember('online_user', 120, function () {
             return User::query()->where('last_activity_at', '>=', now()->subMinutes(2))->count();
         });
 
@@ -568,7 +565,7 @@ class DashboardService
             return Usage::getSingle();
         });
 
-        Cache::putMany([
+        foreach ([
             'sales_this_week'      => $usage->this_week_sales,
             'sales_previous_week'  => $usage->last_week_sales,
             'words_this_week'      => $usage->this_week_word_count,
@@ -582,7 +579,9 @@ class DashboardService
             'total_sales'          => $usage->total_sales,
             'total_usage'          => $usage->total_word_count + $usage->total_image_count,
             'total_users'          => $usage->total_user_count,
-        ], $this->cacheTtl);
+        ] as $key => $value) {
+            Cache::put($key, $value, $this->cacheTtl);
+        }
 
         return $this;
     }

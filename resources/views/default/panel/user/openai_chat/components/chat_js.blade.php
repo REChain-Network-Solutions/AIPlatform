@@ -1,5 +1,3 @@
-<script src="{{ custom_theme_url('/assets/libs/fslightbox/fslightbox.js') }}"></script>
-
 <script>
     var chatid = @json($list)[0]?.id;
     $(`#chat_${chatid}`).addClass('active').siblings().removeClass('active');
@@ -45,39 +43,30 @@
 <script src="{{ custom_theme_url('/assets/js/panel/openai_chat.js?v=' . time()) }}"></script>
 
 @if (count($list) == 0 && $category->slug != 'ai_pdf')
-	@php
-		$template = null;
-		$currentUrl = url()->current();
-		$currentPath = trim(parse_url($currentUrl, PHP_URL_PATH) ?: '');
-		if (
-			\App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-chat-pro') &&
-			(
-				str_starts_with($currentPath, '/chat') ||
-				str_starts_with($currentPath, '/dashboard/user/openai/chat/pro/') ||
-				! auth()->check()
-			)
-		)
-		{
-			$template = 'chatpro';
-		}
-		if (
-			\App\Helpers\Classes\MarketplaceHelper::isRegistered('social-media-agent') &&
-			(
-				str_starts_with($currentPath, '/dashboard/user/social-media/agent/chat') ||
-				! auth()->check()
-			)
-		)
-		{
-			$template = 'social-media-agent';
-		}
-	@endphp
+    @php
+        $template = null;
+        $currentUrl = url()->current();
+        $currentPath = trim(parse_url($currentUrl, PHP_URL_PATH) ?: '');
+        if (
+            \App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-chat-pro') &&
+            (str_starts_with($currentPath, '/chat') || str_starts_with($currentPath, '/dashboard/user/openai/chat/pro/') || !auth()->check())
+        ) {
+            $template = 'chatpro';
+        }
+        if (
+            \App\Helpers\Classes\MarketplaceHelper::isRegistered('social-media-agent') &&
+            (str_starts_with($currentPath, '/dashboard/user/social-media/agent/chat') || !auth()->check())
+        ) {
+            $template = 'social-media-agent';
+        }
+    @endphp
     <script>
         window.addEventListener("load", (event) => {
             return startNewChat(
-				{{ $category->id }},
-				'{{ LaravelLocalization::getCurrentLocale() }}',
-				'{{ $template }}'
-			);
+                {{ $category->id }},
+                '{{ LaravelLocalization::getCurrentLocale() }}',
+                '{{ $template }}'
+            );
         });
     </script>
 @endif

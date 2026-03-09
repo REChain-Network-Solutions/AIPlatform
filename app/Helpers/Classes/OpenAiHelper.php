@@ -42,18 +42,18 @@ class OpenAiHelper
             for ($i = 0; $i < $countWords; $i++) {
                 if (500 * $i + 1000 > strlen($page)) {
                     try {
-                        $subtxt = substr($page, 500 * $i, strlen($page) - 500 * $i);
+                        $subtxt = substr($page, 500 * $i);
                         $subtxt = mb_convert_encoding($subtxt, 'UTF-8', 'UTF-8');
                         $subtxt = iconv('UTF-8', 'UTF-8//IGNORE', $subtxt);
 
                         $response = self::textVector($subtxt);
 
-                        if (strlen(substr($page, 500 * $i, strlen($page) - 500 * $i)) > 10) {
+                        if (strlen(substr($page, 500 * $i)) > 10) {
 
                             ChatbotDataVector::query()->create([
                                 'chatbot_id'      => $chatbotId,
                                 'chatbot_data_id' => $chatbotDataId,
-                                'content'         => substr($page, 500 * $i, strlen($page) - 500 * $i),
+                                'content'         => substr($page, 500 * $i),
                                 'embedding'       => $response,
                             ]);
 

@@ -254,6 +254,7 @@ Route::middleware(['auth', 'updateUserActivity'])
                             Route::post('/start-new-doc-chat', [AIChatController::class, 'startNewDocChat']);
                             Route::post('/start-new-chatbot', [AIChatController::class, 'startNewChatBot']);
                             Route::post('/search', [AIChatController::class, 'search']);
+                            Route::get('/get-chats', [AIChatController::class, 'getChats'])->name('get-chats');
                             Route::post('/delete-chat', [AIChatController::class, 'deleteChat']);
                             Route::post('/clear-chats', [AIChatController::class, 'clearChats']);
                             Route::post('/rename-chat', [AIChatController::class, 'renameChat']);
@@ -900,7 +901,7 @@ Route::post('pdf/getContent', [ChatPdfController::class, 'getSimiliarContent'])-
 Route::post('rss/fetch', [CommonController::class, 'rssFetch'])->name('rss.fetch');
 
 $files = glob(base_path('routes/extroutes/*.php'));
-for ($i = 0; $i < count($files); $i++) {
+foreach ($files as $i => $iValue) {
     include $files[$i];
 }
 

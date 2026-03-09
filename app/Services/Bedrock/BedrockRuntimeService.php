@@ -54,24 +54,22 @@ class BedrockRuntimeService
             $response['completion'] = $message;
 
             return $response;
-        } else {
-
-            $formattedPrompt = "\n\nHuman: " . $prompt . "\n\nAssistant:";
-
-            $result = $this->client->invokeModel([
-                'modelId'     => $modelId,
-                'contentType' => 'application/json',
-                'body'        => json_encode([
-                    'prompt'               => $formattedPrompt,
-                    'max_tokens_to_sample' => (int) setting('anthropic_max_output_length', 200),
-                    'temperature'          => 0.5,
-                    'stop_sequences'       => ["\n\nHuman:"],
-                ]),
-            ]);
-
-            return json_decode($result['body'], true);
-
         }
+
+        $formattedPrompt = "\n\nHuman: " . $prompt . "\n\nAssistant:";
+
+        $result = $this->client->invokeModel([
+            'modelId'     => $modelId,
+            'contentType' => 'application/json',
+            'body'        => json_encode([
+                'prompt'               => $formattedPrompt,
+                'max_tokens_to_sample' => (int) setting('anthropic_max_output_length', 200),
+                'temperature'          => 0.5,
+                'stop_sequences'       => ["\n\nHuman:"],
+            ]),
+        ]);
+
+        return json_decode($result['body'], true);
     }
 
     public function invokeStableDiffusion($prompt, $seed, $width, $height, $style_preset = null)

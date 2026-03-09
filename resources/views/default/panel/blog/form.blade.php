@@ -181,12 +181,19 @@
             const tinymceOptions = {
                 selector: '#content',
                 height: '610',
-                plugins: 'quickbars advlist link image lists',
-                //toolbar:'advlist link image lists'
-                toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright alignjustify | lists | indent outdent | image',
-                quickbars_insert_toolbar: false,
-                statusbar: false,
+                menubar: false,
+				statusbar: false,
+				relative_urls: false,
+				convert_urls: false,
+				remove_script_host: false,
+				plugins: [
+					'advlist', 'link', 'autolink', 'lists', 'supercode', 'code'
+				],
+				contextmenu: 'customwrite |  rewrite summarize makeitlonger makeitshorter improvewriting translateto simplify changestyle changetone fixgrammaticalmistakes | copy paste',
+				toolbar: 'styles | magicIconRewrite | magicAIButton | image | link | forecolor backcolor emoticons | bold italic underline  | bullist numlist | alignleft aligncenter alignright | code supercode',
                 content_css: `${window.liquid.assetsPath}/css/tinymce-theme.css`,
+				directionality: document.documentElement.dir === 'rtl' ? 'rtl' : 'ltr',
+				forced_root_block: 'div',
                 setup: function(editor) {
                     liquidTinyMCEThemeHandlerInit(editor);
                 }

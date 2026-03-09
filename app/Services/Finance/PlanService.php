@@ -14,21 +14,25 @@ class PlanService
 
     public const CREDIT_LIST_PLAN_TRACKED_KEYS = 'credit-list-plan-tracked-keys';
 
-    private Collection $plans;
+    private ?Collection $plans = null;
 
-    public function __construct()
+    private function getPlans(): Collection
     {
-        $this->plans = Cache::rememberForever(self::ACTIVE_PLANS_CACHE_KEY, static function () {
-            return Plan::where('active', true)
-                ->where('hidden', false)
-                ->orderBy('price')
-                ->get();
-        });
+        if ($this->plans === null) {
+            $this->plans = Cache::rememberForever(self::ACTIVE_PLANS_CACHE_KEY, static function () {
+                return Plan::where('active', true)
+                    ->where('hidden', false)
+                    ->orderBy('price')
+                    ->get();
+            });
+        }
+
+        return $this->plans;
     }
 
     public function getSubscriptionPlans(): Collection
     {
-        return $this->plans->where('type', TypeEnum::SUBSCRIPTION->value);
+        return $this->getPlans()->where('type', TypeEnum::SUBSCRIPTION->value);
     }
 
     public function getMonthlySubscriptions(): Collection
@@ -54,10 +58,9 @@ class PlanService
 
     public function getPrepaidPlans(): Collection
     {
-        return $this->plans->where('type', TypeEnum::TOKEN_PACK->value);
+        return $this->getPlans()->where('type', TypeEnum::TOKEN_PACK->value);
     }
 
-    // Method to clear the cache
     public static function clearCache(): void
     {
         Cache::forget(self::ACTIVE_PLANS_CACHE_KEY);

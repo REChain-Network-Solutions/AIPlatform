@@ -1,5 +1,5 @@
 @php
-    $online_user_percentage = round((cache('online_user', 0) / cache('total_user', 1)) * 100, 0);
+    $online_user_percentage = round((cache()->get('online_user', 0) / cache()->get('total_user', 1)) * 100, 0);
 @endphp
 <x-card
     class="flex flex-col"
@@ -32,7 +32,7 @@
     <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-4">
             <div class="flex justify-between">
-                <span class="text-base font-medium"><strong class="me-2 text-xl font-bold">{{ \App\Helpers\Classes\Helper::appIsDemo() ? 23 : cache('online_user') }}</strong>Online
+                <span class="text-base font-medium"><strong class="me-2 text-xl font-bold">{{ \App\Helpers\Classes\Helper::appIsDemo() ? 23 : cache()->get('online_user') }}</strong>Online
                     Users</span>
                 <span class="text-xs font-bold">{{ $online_user_percentage }}%</span>
             </div>
@@ -51,28 +51,28 @@
                     <span class="size-2.5 rounded-sm bg-[#818B99]"></span>
                     <p class="mb-0 text-base font-medium">{{ __('Total Users') }}</p>
                 </div>
-                <x-money-with-unit :value="cache('total_user', 0)" />
+                <x-money-with-unit :value="cache()->get('total_user', 0)" />
             </li>
             <li class="flex items-center justify-between border-b border-card-border py-2.5">
                 <div class="flex items-center gap-2.5">
                     <span class="size-2.5 rounded-sm bg-[#20C69F]"></span>
                     <p class="mb-0 text-base font-medium">{{ __('Free Users') }}</p>
                 </div>
-                <x-money-with-unit :value="cache('free_user', 0)" />
+                <x-money-with-unit :value="cache()->get('free_user', 0)" />
             </li>
             <li class="flex items-center justify-between border-b border-card-border py-2.5">
                 <div class="flex items-center gap-2.5">
                     <span class="size-2.5 rounded-sm bg-primary"></span>
                     <p class="mb-0 text-base font-medium">{{ __('Paid Users') }}</p>
                 </div>
-                <x-money-with-unit :value="cache('paid_user', 0)" />
+                <x-money-with-unit :value="cache()->get('paid_user', 0)" />
             </li>
             <li class="flex items-center justify-between py-2.5">
                 <div class="flex items-center gap-2.5">
                     <span class="size-2.5 rounded-sm bg-[#93C5FD]"></span>
                     <p class="mb-0 text-base font-medium">{{ __('Trial Users') }}</p>
                 </div>
-                <x-money-with-unit :value="cache('trial_user', 0)" />
+                <x-money-with-unit :value="cache()->get('trial_user', 0)" />
             </li>
         </ul>
     </div>

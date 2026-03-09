@@ -50,6 +50,7 @@
                 class="{{ $trigger->attributes['class'] }}"
                 :attributes="$trigger->attributes"
                 href="{{ $trigger->attributes['href'] }}"
+                type="{{ $trigger->attributes['type'] }}"
                 variant="{{ $trigger->attributes['variant'] }}"
                 size="{{ $trigger->attributes['size'] }}"
                 @click.prevent="toggleModal()"
@@ -69,7 +70,6 @@
             x-transition
             @keyup.escape="modalOpen = false"
             :class="{ 'hidden': !modalOpen }"
-            @if (!$disableFocus) x-trap="modalOpen" @endif
         >
             <div {{ $attributes->twMergeFor('modal-backdrop', $modal_backdrop_base_class) }}></div>
 
@@ -83,7 +83,7 @@
                 @if ($type !== 'inline')
                     <div {{ $attributes->twMergeFor('modal-head', $modal_head_base_class) }}>
                         @if (!empty($title))
-                            <h4 class="my-0">{{ $title }}</h4>
+                            <h4 {{ $attributes->twMergeFor('modal-title', 'm-0') }}>{{ $title }}</h4>
                         @endif
                         @if (!empty($headContent))
                             {{ $headContent }}
@@ -101,7 +101,10 @@
             </div>
     @endif
 
-    <div {{ $attributes->twMergeFor('modal-body', $modal_body_base_class) }}>
+    <div
+        {{ $attributes->twMergeFor('modal-body', $modal_body_base_class) }}
+        @if (!$disableFocus) x-trap="modalOpen" @endif
+    >
         <div {{ $attributes->twMergeFor('modal-container', 'container p-0') }}>
             {{ $modal }}
         </div>

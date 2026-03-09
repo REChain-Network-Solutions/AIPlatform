@@ -12,7 +12,6 @@ class BladeCache
     {
         $key = app(MenuService::class)->cacheKey();
 
-        // Bunu silmeyelim iyilesdirme yapildiginde yeniden kullaniriz.
         return self::getCache($function, $key, 3600 * 24);
     }
 

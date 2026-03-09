@@ -101,10 +101,10 @@ class TranslateController extends Controller
             file_put_contents($targetJsonFilePath, $newJson);
 
             return back()->with(['message' => __('Translations have been updated successfully.'), 'type' => 'success']);
-        } else {
-            // All keys have been translated
-            return back()->with(['message' => __('All translations have been completed.'), 'type' => 'info']);
         }
+
+        // All keys have been translated
+        return back()->with(['message' => __('All translations have been completed.'), 'type' => 'info']);
 
     }
 }

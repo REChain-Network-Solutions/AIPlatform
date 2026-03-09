@@ -313,9 +313,9 @@ class AIRealTimeChatController extends Controller
             $chat->delete();
 
             return response()->json(['message' => 'Delete successful'], 200);
-        } else {
-            return response()->json(['error' => __('Chat not found')], 404);
         }
+
+        return response()->json(['error' => __('Chat not found')], 404);
     }
 
     /**
@@ -383,9 +383,9 @@ class AIRealTimeChatController extends Controller
             $chat->save();
 
             return response()->json(['message' => 'Rename successful'], 200);
-        } else {
-            return response()->json(['error' => __('Chat not found')], 404);
         }
+
+        return response()->json(['error' => __('Chat not found')], 404);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace MagicAI\Updater;
 
 use App\Helpers\Classes\VersionComparator;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use MagicAI\Updater\Traits\HasBackup;
@@ -29,7 +30,7 @@ class Updater
 
     public function versionCheck(): bool|int
     {
-        $magicAIVersion = cache()->remember('magicai_next_version_cache', 60 * 10, function () {
+        $magicAIVersion = Cache::remember('magicai_next_version_cache', 60 * 10, function () {
             return $this->nextVersion;
         });
 
@@ -98,7 +99,7 @@ class Updater
         $currentMagicAIVersion = $this->currentMagicAIVersion();
 
         if (VersionComparator::compareVersion($magicAIVersion, $currentMagicAIVersion, '=')) {
-            cache()->forget('magicai_next_version_cache');
+            Cache::forget('magicai_next_version_cache');
 
             return [
                 'title'   => trans('MagicAI installed successfully'),
@@ -109,7 +110,7 @@ class Updater
 
         if ($updaterVersion && VersionComparator::compareVersion($updaterVersion, $currentUpdater['version'], '=')) {
 
-            cache()->forget('magicai_next_version_cache');
+            Cache::forget('magicai_next_version_cache');
 
             return [
                 'title'           => trans('MagicAI is ready to update'),

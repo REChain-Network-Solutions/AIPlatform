@@ -12,6 +12,7 @@ use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use RuntimeException;
 
 class IntegrationController extends Controller
 {
@@ -67,7 +68,7 @@ class IntegrationController extends Controller
             ->where('integration_id', $integration->getAttribute('id'))
             ->first();
 
-        $userIntegration->update([
+        $userIntegration?->update([
             'credentials' => $class::form($request->all()),
         ]);
 
@@ -206,15 +207,15 @@ class IntegrationController extends Controller
             }
 
             $response = $service->addImage([
-                'file'  => fopen($tempFilePath, 'r'),
+                'file'  => fopen($tempFilePath, 'rb'),
                 'title' => basename($imagePath),
             ]);
 
             if (isset($response)) {
                 return redirect()->back()->with('success', trans('Document created successfully'));
-            } else {
-                throw new Exception('Error while creating post: ' . json_encode($response));
             }
+
+            throw new RuntimeException('Error while creating post: ' . json_encode($response));
         } catch (\GuzzleHttp\Exception\GuzzleException $e) {
             return back()->with([
                 'type'    => 'error',

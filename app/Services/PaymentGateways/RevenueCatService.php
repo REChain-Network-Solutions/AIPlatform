@@ -48,9 +48,9 @@ class RevenueCatService
         if ($activeSub != null) {
             if ($activeSub->stripe_status == 'trialing') {
                 return \Carbon\Carbon::parse($activeSub->trial_ends_at)->diffInDays();
-            } else {
-                return \Carbon\Carbon::parse($activeSub->ends_at)->diffInDays();
             }
+
+            return \Carbon\Carbon::parse($activeSub->ends_at)->diffInDays();
         }
 
         return null;
@@ -64,9 +64,9 @@ class RevenueCatService
         if ($activeSub != null) {
             if ($activeSub->stripe_status == 'trialing') {
                 return \Carbon\Carbon::parse($activeSub->trial_ends_at)->format('F jS, Y');
-            } else {
-                return \Carbon\Carbon::parse($activeSub->ends_at)->format('F jS, Y');
             }
+
+            return \Carbon\Carbon::parse($activeSub->ends_at)->format('F jS, Y');
         }
 
         return null;
@@ -96,9 +96,9 @@ class RevenueCatService
             Log::error('Gateway not found. RevenueCatService@getSubscriptionStatus');
             if ($fromApi) {
                 return response()->json(['message' => 'Gateway not found.'], 412);
-            } else {
-                return null;
             }
+
+            return null;
         }
 
         $apiKey = $gateway->live_client_id;
@@ -106,9 +106,9 @@ class RevenueCatService
             Log::error('Gateway is not set properly. RevenueCatService@getSubscriptionStatus');
             if ($fromApi) {
                 return response()->json(['message' => 'Gateway is not set properly.'], 412);
-            } else {
-                return null;
             }
+
+            return null;
         }
 
         $settings = Setting::getCache();
@@ -122,9 +122,9 @@ class RevenueCatService
             Log::error('User is not set properly. User must login at least once from mobile app. RevenueCatService@getSubscriptionStatus');
             if ($fromApi) {
                 return response()->json(['message' => 'User is not set properly. User must login at least once from mobile app.'], 412);
-            } else {
-                return null;
             }
+
+            return null;
         }
 
         // Get subscription status from RevenueCat API
@@ -142,9 +142,9 @@ class RevenueCatService
             Log::error('Error getting subscription status from RevenueCat API. RevenueCatService@getSubscriptionStatus');
             if ($fromApi) {
                 return response()->json(['message' => 'Error getting subscription status from RevenueCat API.'], 500);
-            } else {
-                return null;
             }
+
+            return null;
         }
 
         $response = json_decode($response, true);
@@ -187,9 +187,9 @@ class RevenueCatService
                             Log::error('RevenueCat product not found. Identifier: ' . $identifier);
                             if ($fromApi) {
                                 return response()->json(['message' => 'RevenueCat product not found.'], 412);
-                            } else {
-                                return null;
                             }
+
+                            return null;
                         }
                     }
 
@@ -198,9 +198,9 @@ class RevenueCatService
                         Log::error('Gateway product not found for RevenueCat. Identifier: ' . $identifier);
                         if ($fromApi) {
                             return response()->json(['message' => 'Gateway product not found.'], 412);
-                        } else {
-                            return null;
                         }
+
+                        return null;
                     }
 
                     $plan = $revenueCatProduct->plan;
@@ -208,9 +208,9 @@ class RevenueCatService
                         Log::error('Plan not found for RevenueCat. Identifier: ' . $identifier);
                         if ($fromApi) {
                             return response()->json(['message' => 'Plan not found.'], 412);
-                        } else {
-                            return null;
                         }
+
+                        return null;
                     }
 
                     $order = new UserOrder;
@@ -263,11 +263,7 @@ class RevenueCatService
         foreach ($subscriptions as $identifier => $subs) {
 
             $orderId = (string) $subs['purchase_date'];
-            $orderId = str_replace('-', '', $orderId);
-            $orderId = str_replace(':', '', $orderId);
-            $orderId = str_replace(' ', '', $orderId);
-            $orderId = str_replace('T', '', $orderId);
-            $orderId = str_replace('Z', '', $orderId);
+            $orderId = str_replace(['-', ':', ' ', 'T', 'Z'], '', $orderId);
 
             $revenueCatProduct = RevenueCatProducts::where('google_id', $identifier)->first();
             if ($revenueCatProduct == null) {
@@ -276,9 +272,9 @@ class RevenueCatService
                     Log::error('RevenueCat product not found. Identifier: ' . $identifier);
                     if ($fromApi) {
                         return response()->json(['message' => 'RevenueCat product not found.'], 412);
-                    } else {
-                        return null;
                     }
+
+                    return null;
                 }
             }
 
@@ -287,9 +283,9 @@ class RevenueCatService
                 Log::error('Gateway product not found for RevenueCat. Identifier: ' . $identifier);
                 if ($fromApi) {
                     return response()->json(['message' => 'Gateway product not found.'], 412);
-                } else {
-                    return null;
                 }
+
+                return null;
             }
 
             $plan = $revenueCatProduct->plan;
@@ -297,9 +293,9 @@ class RevenueCatService
                 Log::error('Plan not found for RevenueCat. Identifier: ' . $identifier);
                 if ($fromApi) {
                     return response()->json(['message' => 'Plan not found.'], 412);
-                } else {
-                    return null;
                 }
+
+                return null;
             }
 
             $planId = $plan->id;
@@ -338,7 +334,11 @@ class RevenueCatService
                 if ($subs['unsubscribe_detected_at'] == null) {
                     // Subscription is active
                     $isTrial = $subs['period_type'] == 'trial';
-                    $status = $subs['billing_issues_detected_at'] == null ? ($isTrial == true ? 'trialing' : 'active') : 'cancelled';
+                    $status = match (true) {
+                        $subs['billing_issues_detected_at'] !== null => 'cancelled',
+                        $isTrial                                     => 'trialing',
+                        default                                      => 'active',
+                    };
                     if ($subs['billing_issues_detected_at'] != null) {
                         Log::error('Billing issue detected at RevenueCat. User ID: ' . $userId . ' Subscription: ' . $identifier);
                     }
@@ -408,8 +408,11 @@ class RevenueCatService
                 // / Order already exists, but maybe subscription is cancelled
 
                 $isTrial = $subs['period_type'] == 'trial';
-                $status = ($subs['billing_issues_detected_at'] == null && $subs['unsubscribe_detected_at'] == null) ? ($isTrial == true ? 'trialing' : 'active') : 'cancelled';
-
+                $status = match (true) {
+                    $subs['billing_issues_detected_at'] !== null || $subs['unsubscribe_detected_at'] !== null => 'cancelled',
+                    $isTrial                                                                                  => 'trialing',
+                    default                                                                                   => 'active',
+                };
                 if ($subs['unsubscribe_detected_at'] != null) {
                     // Subscription is cancelled
                     if ($subs['billing_issues_detected_at'] != null) {

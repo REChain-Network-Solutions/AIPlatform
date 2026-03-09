@@ -16,7 +16,7 @@ class AdsController extends Controller
 
     public function store(Request $request)
     {
-        request()->validate([
+        request()?->validate([
             'code' => 'required',
         ]);
 
@@ -35,7 +35,7 @@ class AdsController extends Controller
 
     public function update(Request $request, $id)
     {
-        request()->validate([
+        request()?->validate([
             'code' => 'required',
         ]);
 

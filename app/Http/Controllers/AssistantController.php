@@ -115,9 +115,9 @@ class AssistantController extends Controller
         if (isset($response['id'])) {
             return redirect()->route('dashboard.admin.ai-assistant.index')
                 ->with(['message' => __('Assistant Created Successfully'), 'type' => 'success']);
-        } else {
-            return redirect()->back()->with(['message' => $response['message'], 'type' => 'error']);
         }
+
+        return redirect()->back()->with(['message' => $response['message'], 'type' => 'error']);
     }
 
     /**
@@ -213,9 +213,9 @@ class AssistantController extends Controller
 
         if (isset($response['id'])) {
             return redirect()->back()->with(['message' => __('Assistant Trained Successfully'), 'type' => 'success']);
-        } else {
-            return redirect()->back()->with(['message' => $response['message'], 'type' => 'error']);
         }
+
+        return redirect()->back()->with(['message' => $response['message'], 'type' => 'error']);
     }
 
     /**

@@ -21,12 +21,12 @@ trait HasStatusResponse
                     'status'  => 'error',
                     'message' => $resData['errMsg'] ?? __('Something went wrong. Please contact support for assistance.'),
                 ]);
-            } else {
-                return FacadesResponse::json([
-                    'status'  => 'success',
-                    'resData' => $resData,
-                ]);
             }
+
+            return FacadesResponse::json([
+                'status'  => 'success',
+                'resData' => $resData,
+            ]);
         }
 
         Log::error('Vizard error response', [

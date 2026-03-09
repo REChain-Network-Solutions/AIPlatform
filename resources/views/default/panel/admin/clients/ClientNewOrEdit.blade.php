@@ -9,13 +9,25 @@
         onsubmit="return clientSave({{ $client->id ?? null }});"
         enctype="multipart/form-data"
     >
-        @if (isset($client))
-            <img
-                class="size-12 rounded-full object-cover object-center"
-                src="{{ url('') . isset($client) ? (str_starts_with($client->avatar, 'asset') ? custom_theme_url($client->avatar) : '/clientAvatar/' . $client->avatar) : custom_theme_url('assets/img/auth/default-avatar.png') }}"
-                alt="Avatar"
-            />
-        @endif
+		@if (isset($client))
+			@php
+				$avatarSrc = custom_theme_url('assets/img/auth/default-avatar.png');
+
+				if (isset($client) && $client->avatar) {
+					if (str_starts_with($client->avatar, 'asset')) {
+						$avatarSrc = custom_theme_url($client->avatar);
+					} else {
+						$avatarSrc = url('') . '/clientAvatar/' . $client->avatar;
+					}
+				}
+			@endphp
+
+			<img
+				class="size-12 rounded-full object-cover object-center"
+				src="{{ $avatarSrc }}"
+				alt="Avatar"
+			/>
+		@endif
 
         <x-forms.input
             id="avatar"

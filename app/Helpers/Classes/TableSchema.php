@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Helpers\Classes;
 
-use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
 class TableSchema
@@ -14,8 +16,8 @@ class TableSchema
 
     public function allTables(): array
     {
-        return once(static function () {
-            return Arr::pluck(Schema::getTables(), 'name');
+        return Cache::rememberForever('database_tables', function () {
+            return Schema::getTableListing();
         });
     }
 }

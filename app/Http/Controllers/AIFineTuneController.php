@@ -30,12 +30,12 @@ class AIFineTuneController extends Controller
 
         if (empty($file['name'])) {
             return response()->json(__('Select a JSONL File!'), 419);
-        } else {
-            $file_name = basename($file['name']);
-            $tmp_file = $file['tmp_name'];
-            $file_type = $file['type'];
-            $c_file = curl_file_create($tmp_file, $file_type, $file_name);
         }
+
+        $file_name = basename($file['name']);
+        $tmp_file = $file['tmp_name'];
+        $file_type = $file['type'];
+        $c_file = curl_file_create($tmp_file, $file_type, $file_name);
 
         $fine_tune_list = json_decode(SettingTwo::getCache()->fine_tune_list, true);
         $apiKey = ApiHelper::setOpenAiKey();

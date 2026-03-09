@@ -54,11 +54,11 @@ class PermissionsChecker
      */
     private function addFile($folder, $permission, $isSet)
     {
-        array_push($this->results['permissions'], [
+        $this->results['permissions'][] = [
             'folder'     => $folder,
             'permission' => $permission,
             'isSet'      => $isSet,
-        ]);
+        ];
     }
 
     /**

@@ -39,8 +39,8 @@ class SendEmail implements ShouldQueue
             new \App\Mail\SendEmail($this->user, $this->settings, $this->template)
         );
 
-        if (config('queue.default') == 'sync') {
-            sleep(rand(1, 4));
+        if (config('queue.default') === 'sync') {
+            sleep(random_int(1, 4));
         }
     }
 }

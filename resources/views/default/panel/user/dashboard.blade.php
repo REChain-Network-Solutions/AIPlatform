@@ -1,92 +1,77 @@
 @php
-    $userId = auth()->id();
-    $plan = Auth::user()->activePlan();
-    $plan_type = 'regular';
-    // $team = Auth::user()->getAttribute('team');
-    $teamManager = Auth::user()->getAttribute('teamManager');
+	$userId = $user->id;
+	$plan = $user?->relationPlan;
+	$plan_type = 'regular';
+	$teamManager = $user->teamManager;
+	$user_is_premium = false;
 
-    if ($plan != null) {
-        $plan_type = strtolower($plan->plan_type);
-    }
+	if ($plan) {
+		$plan_type = strtolower($plan->plan_type);
+		if ($plan->plan_type === 'all' || $plan->plan_type === 'premium') {
+			$user_is_premium = true;
+		}
+	}
 
-    $titlebar_links = [
-        [
-            'label' => 'All',
-            'link' => '#all',
-        ],
-        [
-            'label' => 'AI Assistant',
-            'link' => '#all',
-        ],
-        [
-            'label' => 'Your Plan',
-            'link' => '#plan',
-        ],
-        [
-            'label' => 'Team Members',
-            'link' => '#team',
-        ],
-        [
-            'label' => 'Recent',
-            'link' => '#recent',
-        ],
-        [
-            'label' => 'Documents',
-            'link' => '#documents',
-        ],
-        [
-            'label' => 'Templates',
-            'link' => '#templates',
-        ],
-        [
-            'label' => 'Overview',
-            'link' => '#all',
-        ],
-    ];
+	$titlebar_links = [
+		[
+			'label' => 'All',
+			'link' => '#all',
+		],
+		[
+			'label' => 'AI Assistant',
+			'link' => '#all',
+		],
+		[
+			'label' => 'Your Plan',
+			'link' => '#plan',
+		],
+		[
+			'label' => 'Team Members',
+			'link' => '#team',
+		],
+		[
+			'label' => 'Recent',
+			'link' => '#recent',
+		],
+		[
+			'label' => 'Documents',
+			'link' => '#documents',
+		],
+		[
+			'label' => 'Templates',
+			'link' => '#templates',
+		],
+		[
+			'label' => 'Overview',
+			'link' => '#all',
+		],
+	];
 
-    $premium_features = \App\Models\OpenAIGenerator::query()->where('active', 1)->where('premium', 1)->limit(5)->get()->pluck('title')->toArray();
-    $user_is_premium = false;
-    $plan = auth()->user()?->relationPlan;
-    if ($plan) {
-        $planType = strtolower($plan->plan_type ?? 'all');
-        if ($plan->plan_type === 'all' || $plan->plan_type === 'premium') {
-            $user_is_premium = true;
-        }
-    }
+	$style_string = '';
+	$bg_color = setting('announcement_background_color', null);
+	$bg_image = setting('announcement_background_image', null);
+	$bg_color_dark = setting('announcement_background_color_dark', null);
+	$bg_image_dark = setting('announcement_background_image_dark', null);
 
-    $style_string = '';
+	if ($bg_color) $style_string .= '.lqd-card.lqd-announcement-card{background-color:' . $bg_color . '}';
+	if ($bg_image) $style_string .= '.lqd-card.lqd-announcement-card{background-image:url(' . $bg_image . ')}';
+	if ($bg_color_dark) $style_string .= '.theme-dark .lqd-card.lqd-announcement-card{background-color:' . $bg_color_dark . '}';
+	if ($bg_image_dark) $style_string .= '.theme-dark .lqd-card.lqd-announcement-card{background-image:url(' . $bg_image_dark . ')}';
 
-    if (setting('announcement_background_color')) {
-        $style_string .= '.lqd-card.lqd-announcement-card { background-color: ' . setting('announcement_background_color') . ';}';
-    }
-
-    if (setting('announcement_background_image')) {
-        $style_string .= '.lqd-card.lqd-announcement-card { background-image: url(' . setting('announcement_background_image') . '); }';
-    }
-
-    if (setting('announcement_background_color_dark')) {
-        $style_string .= '.theme-dark .lqd-card.lqd-announcement-card { background-color: ' . setting('announcement_background_color_dark') . ';}';
-    }
-
-    if (setting('announcement_background_image_dark')) {
-        $style_string .= '.theme-dark .lqd-card.lqd-announcement-card { background-image: url(' . setting('announcement_background_image_dark') . '); }';
-    }
-
-    $favoriteOpenAis = cache("user:{$userId}:favorite_openai");
+	$favoriteOpenAis = cache()->get("user:{$userId}:favorite_openai");
+	$shouldShowTeam = showTeamFunctionality();
 @endphp
 
-@if (filled($style_string))
-    @push('css')
-        <style>
-            {{ $style_string }}
-        </style>
-    @endpush
+@if ($style_string)
+	@push('css')
+		<style>{{ $style_string }}</style>
+	@endpush
 @endif
 
 @extends('panel.layout.app', ['disable_tblr' => true])
 @section('title', __('Dashboard'))
 @section('titlebar_title')
-    {{ __('Welcome') }}, {{ auth()->user()?->name }}.
+    {{ __('Welcome') }}, {{ $user?->name }}.
 @endsection
 @section('titlebar_after')
     <ul class="lqd-filter-list mt-1 flex list-none flex-wrap items-center gap-x-4 gap-y-2 text-heading-foreground max-sm:gap-3">
@@ -114,7 +99,7 @@
             class="grid w-full grid-cols-1 gap-10"
             id="all"
         >
-            @if (setting('announcement_active', 0) && !auth()->user()?->dash_notify_seen)
+            @if (setting('announcement_active', 0) && !$user?->dash_notify_seen)
                 <div
                     class="lqd-announcement"
                     data-name="{{ \App\Enums\Introduction::DASHBOARD_FIRST }}"
@@ -225,7 +210,7 @@
         <!-- end: landing badge -->
 
         <!-- start: ongoing payment -->
-        @if ($ongoingPayments != null)
+        @if ($ongoingPayments)
             <div class="w-full">
                 @includeIf('panel.user.finance.ongoingPayments')
             </div>
@@ -234,10 +219,10 @@
 
         <!-- start: finance subscription status -->
         <x-card
-            class="{{ showTeamFunctionality() || !$user_is_premium ? 'lg:w-[48%]' : 'lg:w-full' }} w-full text-center"
+            class="{{ $shouldShowTeam || !$user_is_premium ? 'lg:w-[48%]' : 'lg:w-full' }} w-full text-center"
             class:body="md:px-10 px-5"
             id="plan"
-            data-name="{{ \App\Enums\Introduction::DASHBOARD_THREE }}"
+            data-name="{{ \App\Enums\Introduction::DASHBOARD_THREE->value }}"
             size="lg"
         >
             @includeIf('panel.user.finance.subscriptionStatus')
@@ -324,7 +309,7 @@
         {{-- end: account summary --}}
 
         {{-- begin: invite team --}}
-        @if (showTeamFunctionality())
+        @if ($shouldShowTeam)
             <x-card
                 class="w-full lg:w-[48%]"
                 id="team"
@@ -648,7 +633,7 @@
             >
                 <div class="lqd-docs-list grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5 lg:max-xl:grid-cols-3">
                     @php
-                        $folders = auth()->user()->folders()->get();
+						$folders = $user?->folders ?? collect();
                     @endphp
                     @foreach ($recently_launched as $entry)
                         @if ($entry->generator != null)

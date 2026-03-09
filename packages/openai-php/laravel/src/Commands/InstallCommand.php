@@ -136,7 +136,7 @@ class InstallCommand extends Command
     {
         $links = [
             ...self::LINKS,
-            ...rand(0, 1) ? self::FUNDING_LINKS : array_reverse(self::FUNDING_LINKS, true),
+            ...random_int(0, 1) ? self::FUNDING_LINKS : array_reverse(self::FUNDING_LINKS, true),
         ];
 
         foreach ($links as $message => $link) {

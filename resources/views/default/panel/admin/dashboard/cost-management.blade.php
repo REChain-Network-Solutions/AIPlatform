@@ -30,7 +30,7 @@
                 @lang('Cost Per User')
             </p>
             <p class="mb-0 text-base font-semibold opacity-70 sm:text-[22px]">
-                {{ currency()->symbol . (\App\Helpers\Classes\Helper::appIsDemo()  ? 7 : cache('cost_per_user', 0.0)) }}
+                {{ currency()->symbol . (\App\Helpers\Classes\Helper::appIsDemo()  ? 7 : cache()->get('cost_per_user', 0.0)) }}
             </p>
             <p class="mb-0 text-2xs font-medium opacity-70">
                 @lang('Average')
@@ -42,11 +42,11 @@
                 @lang('Income Per User')
             </p>
             <p class="mb-0 text-base font-semibold opacity-70 sm:text-[22px]">
-                {{ currency()->symbol .(\App\Helpers\Classes\Helper::appIsDemo()  ? 5 : cache('income_per_user', 0.0)) }}
+                {{ currency()->symbol .(\App\Helpers\Classes\Helper::appIsDemo()  ? 5 : cache()->get('income_per_user', 0.0)) }}
             </p>
             <p class="mb-0 text-2xs font-medium opacity-70">
                 @lang('Net Profit')
-				{{ currency()->symbol . (\App\Helpers\Classes\Helper::appIsDemo() ? 2 : cache('net_profit', 0.0)) }}
+				{{ currency()->symbol . (\App\Helpers\Classes\Helper::appIsDemo() ? 2 : cache()->get('net_profit', 0.0)) }}
             </p>
         </div>
     </x-card>
@@ -61,7 +61,7 @@
             </ul>
             <div
                 class="absolute top-1/2 flex -translate-y-1/2 bg-card-background px-2"
-                style="left: {{ max(0, min(99, \App\Helpers\Classes\Helper::appIsDemo() ? 64 : cache('net_profit', 0.0) )) }}%"
+                style="left: {{ max(0, min(99, \App\Helpers\Classes\Helper::appIsDemo() ? 64 : cache()->get('net_profit', 0.0) )) }}%"
             >
                 <span class="h-5 w-1.5 rounded-[55px] bg-foreground/30"></span>
             </div>

@@ -68,6 +68,13 @@
         window.liquid = {
             assetsPath: '{{ url(custom_theme_url('assets')) }}'
         };
+
+        // Suppress Alpine.js SecurityError when it walks cross-origin iframes
+        window.addEventListener('error', function(e) {
+            if (e.error instanceof DOMException && e.error.name === 'SecurityError' && e.message && e.message.indexOf('cross-origin') > -1) {
+                e.preventDefault();
+            }
+        });
     </script>
 
     {{-- CSS files --}}

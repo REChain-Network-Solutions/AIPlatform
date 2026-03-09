@@ -10,11 +10,11 @@
     x-data="{ isFavorite: {{ $isFavorite ? 'true' : 'false' }} }"
     @click.prevent="$ajax('{{ $updateUrl }}', {
 		method: 'post',
-		body: { _token: '{{ csrf_token() }}', id: {{ $id }} },
+		body: { _token: '{{ csrf_token() }}', id: {{ \Illuminate\Support\Js::from($id) }} },
 		events: true,
 	})"
     @ajax:missing="$event.preventDefault()"
-    @ajax:after="isFavorite = !isFavorite; $dispatch('favorite-toggled', { id: {{ $id }}, isFavorite: isFavorite })"
+    @ajax:after="isFavorite = !isFavorite; $dispatch('favorite-toggled', { id: {{ \Illuminate\Support\Js::from($id) }}, isFavorite: isFavorite })"
     href="#"
     title="{{ __('Favorite') }}"
 >

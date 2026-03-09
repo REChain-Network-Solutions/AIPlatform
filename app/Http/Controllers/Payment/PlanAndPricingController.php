@@ -10,6 +10,7 @@ use App\Models\Gateways;
 use App\Models\OpenAIGenerator;
 use App\Models\Plan;
 use App\Models\Team\Team;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -74,12 +75,18 @@ class PlanAndPricingController extends Controller
     {
         $cacheKey = $request->get('cache_key', 'credit-list-cache');
         $planId = $request->get('plan_id');
-        $plan = new Plan;
+        $userId = $request->get('user_id');
+        $user = $userId ? User::find($userId) : auth()->user();
+
+        $plan = $planId ? Plan::getCache(
+            static function () use ($planId) {
+                return Plan::query()->find($planId);
+            },
+            '-' . $planId
+        ) : null;
 
         if ($planId) {
-            $plan = Plan::getCache()->find($planId);
             $cacheKey .= '-' . $planId;
-
             $trackedKeys = Cache::get('credit-list-plan-tracked-keys', []);
             if (! in_array($cacheKey, $trackedKeys, true)) {
                 $trackedKeys[] = $cacheKey;
@@ -87,21 +94,17 @@ class PlanAndPricingController extends Controller
             }
         }
 
-        if ($planId) {
-            $html = Cache::rememberForever($cacheKey, static function () use ($plan) {
+        $html = Cache::remember(
+            $cacheKey,
+            $planId ? null : 2,
+            static function () use ($plan, $user) {
                 return view('default.components.credit-list-partial', [
                     'categories' => EntityStats::all(),
                     'plan'       => $plan,
+                    'user'       => $plan ? null : $user,
                 ])->render();
-            });
-        } else {
-            $html = Cache::remember($cacheKey, 2, static function () use ($plan) {
-                return view('default.components.credit-list-partial', [
-                    'categories' => EntityStats::all(),
-                    'plan'       => $plan,
-                ])->render();
-            });
-        }
+            }
+        );
 
         return response()->json(['html' => $html]);
     }

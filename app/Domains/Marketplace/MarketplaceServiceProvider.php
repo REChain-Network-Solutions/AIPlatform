@@ -35,7 +35,6 @@ class MarketplaceServiceProvider extends ServiceProvider
         'ai-avatar'              => \App\Extensions\AiAvatar\System\AiAvatarServiceProvider::class,
         'ai-persona'             => \App\Extensions\AiPersona\System\AiPersonaServiceProvider::class,
         'ai-music'               => \App\Extensions\AiMusic\System\AiMusicServiceProvider::class,
-        'ai-replica'             => \App\Extensions\AiReplica\System\AiReplicaServiceProvider::class,
         'ai-video-pro'           => \App\Extensions\AiVideoPro\System\AiVideoProServiceProvider::class,
         'seo-tool'               => \App\Extensions\SEOTool\System\SEOToolServiceProvider::class,
         'ai-social-media'        => \App\Extensions\AISocialMedia\System\AISocialMediaServiceProvider::class,
@@ -68,6 +67,7 @@ class MarketplaceServiceProvider extends ServiceProvider
         'midjourney'             => \App\Extensions\Midjourney\System\MidjourneyServiceProvider::class,
         'social-media'           => \App\Extensions\SocialMedia\System\SocialMediaServiceProvider::class,
         'social-media-agent'     => \App\Extensions\SocialMediaAgent\System\SocialMediaAgentServiceProvider::class,
+        'blogpilot'              => \App\Extensions\BlogPilot\System\BlogPilotServiceProvider::class,
         'chatbot-agent'          => \App\Extensions\ChatbotAgent\System\ChatbotAgentServiceProvider::class,
         'xero'                   => \App\Extensions\Xero\System\XeroServiceProvider::class,
         'speechify-tts'          => \App\Extensions\SpeechifyTTS\System\SpeechifyServiceProvider::class,
@@ -100,7 +100,11 @@ class MarketplaceServiceProvider extends ServiceProvider
         'ai-music-pro'           => \App\Extensions\AiMusicPro\System\AiMusicProServiceProvider::class,
         'see-dream-v4'           => \App\Extensions\SeeDreamV4\System\SeeDreamV4ServiceProvider::class,
         'ai-presentation'        => \App\Extensions\AiPresentation\System\AiPresentationServiceProvider::class,
+        'ai-image-pro'           => \App\Extensions\AIImagePro\System\AIImageProServiceProvider::class,
+        'ai-chat-pro-image-chat' => \App\Extensions\AiChatProImageChat\System\AiChatProImageChatServiceProvider::class,
+        'ai-chat-pro-folders'    => \App\Extensions\AIChatProFolders\System\AIChatProFoldersServiceProvider::class,
         'ai-chat-pro-memory'     => \App\Extensions\AIChatProMemory\System\AIChatProMemoryServiceProvider::class,
+        'fashion-studio'         => \App\Extensions\FashionStudio\System\FashionStudioServiceProvider::class,
     ];
 
     public function register(): void

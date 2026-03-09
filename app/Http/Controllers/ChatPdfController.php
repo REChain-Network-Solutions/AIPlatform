@@ -74,7 +74,7 @@ class ChatPdfController extends Controller
         for ($i = 0; $i < $countwords; $i++) {
             if (2000 * $i + 4000 > strlen($page)) {
                 try {
-                    $subtxt = substr($page, 2000 * $i, strlen($page) - 2000 * $i);
+                    $subtxt = substr($page, 2000 * $i);
                     $subtxt = mb_convert_encoding($subtxt, 'UTF-8', 'UTF-8');
                     $subtxt = iconv('UTF-8', 'UTF-8//IGNORE', $subtxt);
                     $response = OpenAI::embeddings()->create([
@@ -82,12 +82,12 @@ class ChatPdfController extends Controller
                         'input' => $subtxt,
                     ]);
 
-                    if (strlen(substr($page, 2000 * $i, strlen($page) - 2000 * $i)) > 10) {
+                    if (strlen(substr($page, 2000 * $i)) > 10) {
 
                         $chatpdf = new PdfData;
 
                         $chatpdf->chat_id = $chat_id;
-                        $chatpdf->content = substr($page, 2000 * $i, strlen($page) - 2000 * $i);
+                        $chatpdf->content = substr($page, 2000 * $i);
                         $chatpdf->vector = json_encode($response->embeddings[0]->embedding);
 
                         $chatpdf->save();

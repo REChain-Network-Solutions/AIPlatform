@@ -65,11 +65,13 @@ enum EntityEnum: string
 
     // Anthropic
     case CLAUDE_SONNET_4_5 = 'claude-sonnet-4-5-20250929';
+    case CLAUDE_SONNET_4_6 = 'claude-sonnet-4-6';
     case CLAUDE_SONNET_4 = 'claude-sonnet-4-20250514';
     case CLAUDE_3_7_SONNET = 'claude-3-7-sonnet-20250219';
     case CLAUDE_3_5_SONNET_V2 = 'claude-3-5-sonnet-20241022';
     case CLAUDE_3_5_SONNET = 'claude-3-5-sonnet-20240620';
     case CLAUDE_3_SONNET = 'claude-3-sonnet-20240229';
+    case CLAUDE_OPUS_4_6 = 'claude-opus-4-6';
     case CLAUDE_OPUS_4_5 = 'claude-opus-4-5-20251101';
     case CLAUDE_OPUS_4_1 = 'claude-opus-4-1-20250805';
     case CLAUDE_OPUS_4 = 'claude-opus-4-20250514';
@@ -192,6 +194,7 @@ enum EntityEnum: string
     // Gemini
     case GEMINI_2_5_FLASH_PREVIEW_05_20 = 'gemini-2.5-flash-preview-05-20';
     case GEMINI_3_PRO_PREVIEW = 'gemini-3-pro-preview';
+    case GEMINI_3_1_PRO_PREVIEW = 'gemini-3.1-pro-preview';
     case GEMINI_2_5_PRO = 'gemini-2.5-pro';
     case GEMINI_2_0_FLASH = 'gemini-2.0-flash';
     case GEMINI_2_0_FLASH_LITE = 'gemini-2.0-flash-lite';
@@ -226,6 +229,7 @@ enum EntityEnum: string
     case PIXABAY = 'pixabay';
 
     case ELEVENLABS = 'elevenlabs';
+    case ELEVENLABS_V3 = 'eleven_v3';
 
     case ELEVENLABS_VOICE_CHATBOT = 'elevenlabs-voice-chatbot';
 
@@ -289,6 +293,18 @@ enum EntityEnum: string
 
     case NANO_BANANA_PRO_EDIT = 'nano-banana-pro/edit';
 
+    case NANO_BANANA_2 = 'nano-banana-2';
+
+    case NANO_BANANA_2_EDIT = 'nano-banana-2/edit';
+
+    case GROK_IMAGINE_IMAGE = 'xai/grok-imagine-image';
+
+    case GROK_IMAGINE_IMAGE_EDIT = 'xai/grok-imagine-image/edit';
+
+    case GROK_IMAGINE_VIDEO_TTV = 'xai/grok-imagine-video/text-to-video';
+
+    case GROK_IMAGINE_VIDEO_ITV = 'xai/grok-imagine-video/image-to-video';
+
     case SEEDREAM_4 = 'seedream/v4/text-to-image';
 
     case SEEDREAM_4_EDIT = 'seedream/v4/edit';
@@ -325,6 +341,12 @@ enum EntityEnum: string
 
     case KLING_2_6_PRO_TTV = 'kling-video/v2.6/pro/text-to-video';
     case KLING_2_6_PRO_ITV = 'kling-video/v2.6/pro/image-to-video';
+    case KLING_2_6_PRO_MOTION_CONTROL = 'kling-video/v2.6/pro/motion-control';
+    case KLING_2_6_STANDARD_MOTION_CONTROL = 'kling-video/v2.6/standard/motion-control';
+    case KLING_3_PRO_TTV = 'kling-video/v3/pro/text-to-video';
+    case KLING_3_PRO_ITV = 'kling-video/v3/pro/image-to-video';
+    case KLING_3_STANDARD_TTV = 'kling-video/v3/standard/text-to-video';
+    case KLING_3_STANDARD_ITV = 'kling-video/v3/standard/image-to-video';
 
     case KLING_IMAGE = 'klingImage';
 
@@ -496,6 +518,8 @@ enum EntityEnum: string
             self::SORA_2_PRO                  => __('Sora 2 Pro (Most advanced synced-audio video generation)'),
             // Anthropic
             self::CLAUDE_SONNET_4_5    => __('Claude Sonnet 4.5'),
+            self::CLAUDE_SONNET_4_6    => __('Claude Sonnet 4.6'),
+            self::CLAUDE_OPUS_4_6      => __('Claude Opus 4.6'),
             self::CLAUDE_OPUS_4_5      => __('Claude Opus 4.5'),
             self::CLAUDE_OPUS_4_1      => __('Claude Opus 4.1'),
             self::CLAUDE_OPUS_4        => __('Claude Opus 4'),
@@ -520,16 +544,17 @@ enum EntityEnum: string
             self::HEYGEN               => __('Heygen'),
             self::PEBBLELY             => __('Pebblely'),
             // Gemini
-            self::GEMINI_3_PRO_PREVIEW           => __('Gemini 3 Pro Preview The most intelligent model family to date, built on a foundation of state-of-the-art reasoning.'),
-            self::GEMINI_2_5_FLASH_PREVIEW_05_20 => __('Gemini 2.5 Flash Preview 05-20 Adaptive thinking, cost efficiency'),
-            self::GEMINI_2_5_PRO                 => __('Gemini 2.5 Pro Preview Enhanced thinking and reasoning, multimodal understanding, advanced coding, and more'),
-            self::GEMINI_2_0_FLASH               => __('Gemini 2.0 Flash Next generation features, speed, thinking, realtime streaming, and multimodal generation'),
-            self::GEMINI_2_0_FLASH_LITE          => __('Gemini 2.0 Flash-Lite Cost efficiency and low latency'),
-            self::GEMINI_1_5_PRO                 => __('Gemini 1.5 Pro Complex reasoning tasks requiring more intelligence'),
-            self::GEMINI_1_5_FLASH               => __('Gemini 1.5 Flash Fast and versatile performance across a diverse variety of tasks'),
-            self::GEMINI_3_FLASH                 => __('Gemini 3 Flash Advanced reasoning, coding, and multimodal capabilities with high speed'),
-            self::GEMINI_EMBEDDING_EXP           => __('Gemini Embedding Measuring the relatedness of text strings'),
-            self::GEMINI_TEXT_EMBEDDING_004      => __('Gemini Text Embeding 004'),
+            self::GEMINI_3_PRO_PREVIEW             => __('Gemini 3 Pro Preview The most intelligent model family to date, built on a foundation of state-of-the-art reasoning.'),
+            self::GEMINI_3_1_PRO_PREVIEW           => __('Gemini 3.1 Pro Preview Refined performance and reliability, thinking, multimodal, function calling, structured outputs.'),
+            self::GEMINI_2_5_FLASH_PREVIEW_05_20   => __('Gemini 2.5 Flash Preview 05-20 Adaptive thinking, cost efficiency'),
+            self::GEMINI_2_5_PRO                   => __('Gemini 2.5 Pro Preview Enhanced thinking and reasoning, multimodal understanding, advanced coding, and more'),
+            self::GEMINI_2_0_FLASH                 => __('Gemini 2.0 Flash Next generation features, speed, thinking, realtime streaming, and multimodal generation'),
+            self::GEMINI_2_0_FLASH_LITE            => __('Gemini 2.0 Flash-Lite Cost efficiency and low latency'),
+            self::GEMINI_1_5_PRO                   => __('Gemini 1.5 Pro Complex reasoning tasks requiring more intelligence'),
+            self::GEMINI_1_5_FLASH                 => __('Gemini 1.5 Flash Fast and versatile performance across a diverse variety of tasks'),
+            self::GEMINI_3_FLASH                   => __('Gemini 3 Flash Advanced reasoning, coding, and multimodal capabilities with high speed'),
+            self::GEMINI_EMBEDDING_EXP             => __('Gemini Embedding Measuring the relatedness of text strings'),
+            self::GEMINI_TEXT_EMBEDDING_004        => __('Gemini Text Embeding 004'),
             // Deepseek
             self::DEEPSEEK_CHAT     => __('Deepseek Chat'),
             self::DEEPSEEK_REASONER => __('Deepseek DeepSeek-R1'),
@@ -541,6 +566,7 @@ enum EntityEnum: string
             self::PIXABAY => __('Pixabay for AI Article Wizard'),
             // Elevenlabs
             self::ELEVENLABS               => __('Elevenlabs for TTS'),
+            self::ELEVENLABS_V3            => __('ElevenLabs v3 for TTS'),
             self::ELEVENLABS_VOICE_CHATBOT => __('Elevenlabs Voice Chatbots'),
             self::ISOLATOR                 => __('Voice Isolator (1 word = 5 used characters of elevenlabs) X 1 token'),
             self::ELEVENLABS_AI_MUSIC      => __('Elevenlabs for AI Music Pro'),
@@ -589,6 +615,12 @@ enum EntityEnum: string
             self::NANO_BANANA_EDIT                       => __('Nano Banana Edit'),
             self::NANO_BANANA_PRO                        => __('Nano Banana Pro'),
             self::NANO_BANANA_PRO_EDIT                   => __('Nano Banana Pro Edit'),
+            self::NANO_BANANA_2                          => __('Nano Banana 2'),
+            self::NANO_BANANA_2_EDIT                     => __('Nano Banana 2 Edit'),
+            self::GROK_IMAGINE_IMAGE                     => __('Grok Imagine Image'),
+            self::GROK_IMAGINE_IMAGE_EDIT                => __('Grok Imagine Image Edit'),
+            self::GROK_IMAGINE_VIDEO_TTV                 => __('Grok Imagine Video Text-to-Video'),
+            self::GROK_IMAGINE_VIDEO_ITV                 => __('Grok Imagine Video Image-to-Video'),
             self::SEEDREAM_4                             => __('SeeDream v4 '),
             self::SEEDREAM_4_EDIT                        => __('SeeDream v4 Edit'),
             self::FLUX_PRO_KONTEXT_MAX_MULTI             => __('Flux Pro Kontext Max Multi'),
@@ -607,6 +639,12 @@ enum EntityEnum: string
             self::KLING_2_5_TURBO_STANDARD_ITV           => __('Kling 2.5 Turbo Standard Image to Video'),
             self::KLING_2_6_PRO_TTV                      => __('Kling Video v2.6 Pro Text to Video'),
             self::KLING_2_6_PRO_ITV                      => __('Kling Video v2.6 Pro Image to Video'),
+            self::KLING_2_6_PRO_MOTION_CONTROL           => __('Kling Video v2.6 Pro Motion Control'),
+            self::KLING_2_6_STANDARD_MOTION_CONTROL      => __('Kling Video v2.6 Standard Motion Control'),
+            self::KLING_3_PRO_TTV                        => __('Kling Video v3 Pro Text to Video'),
+            self::KLING_3_PRO_ITV                        => __('Kling Video v3 Pro Image to Video'),
+            self::KLING_3_STANDARD_TTV                   => __('Kling Video v3 Standard Text to Video'),
+            self::KLING_3_STANDARD_ITV                   => __('Kling Video v3 Standard Image to Video'),
             self::KLING_IMAGE                            => __('Kling Image to Video'),
             self::LUMA_DREAM_MACHINE                     => __('Luma Dream Machine'),
             self::HAIPER                                 => __('Haiper'),
@@ -736,6 +774,8 @@ enum EntityEnum: string
             self::GPT_O_4_MINI => EngineEnum::OPEN_AI,
             // Anthropic
             self::CLAUDE_SONNET_4_5,
+            self::CLAUDE_SONNET_4_6,
+            self::CLAUDE_OPUS_4_6,
             self::CLAUDE_OPUS_4_5,
             self::CLAUDE_OPUS_4_1,
             self::CLAUDE_SONNET_4,
@@ -770,6 +810,7 @@ enum EntityEnum: string
             self::PEBBLELY => EngineEnum::PEBBLELY,
             // Gemini
             self::GEMINI_3_PRO_PREVIEW,
+            self::GEMINI_3_1_PRO_PREVIEW,
             self::GEMINI_2_5_FLASH_PREVIEW_05_20,
             self::GEMINI_2_5_PRO,
             self::GEMINI_2_0_FLASH,
@@ -787,6 +828,7 @@ enum EntityEnum: string
             self::PIXABAY => EngineEnum::PIXABAY,
             // Elevenlabs
             self::ELEVENLABS,
+            self::ELEVENLABS_V3,
             self::ELEVENLABS_VOICE_CHATBOT,
             self::ELEVENLABS_AI_MUSIC,
             self::ISOLATOR => EngineEnum::ELEVENLABS,
@@ -813,9 +855,11 @@ enum EntityEnum: string
             self::VEO_3_1_TEXT_TO_VIDEO, self::VEO_3_1_TEXT_TO_VIDEO_FAST, self::VEO_3_1_FIRST_LAST_FRAME_TO_VIDEO, self::VEO_3_1_FIRST_LAST_FRAME_TO_VIDEO_FAST, self::VEO_3_1_IMAGE_TO_VIDEO, self::VEO_3_1_IMAGE_TO_VIDEO_FAST, self::VEO_3_1_REFERENCE_TO_VIDEO,
             self::VEO_3, self::VEO_3_FAST,
             self::KLING_2_5_TURBO_PRO_TTV, self::KLING_2_5_TURBO_PRO_ITV, self::KLING_2_5_TURBO_STANDARD_ITV,
-            self::KLING_VIDEO, self::VIDEO_UPSCALER, self::COGVIDEOX_5B, self::ANIMATEDIFF_V2V, self::FAST_ANIMATEDIFF_TURBO, self::FLUX_PRO, self::NANO_BANANA, self::NANO_BANANA_EDIT, self::NANO_BANANA_PRO, self::NANO_BANANA_PRO_EDIT, self::SEEDREAM_4, self::SEEDREAM_4_EDIT, self::IMAGEN_4, self::FLUX_PRO_KONTEXT_MAX_MULTI, self::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE, self::FLUX_PRO_KONTEXT, self::FLUX_PRO_1_1, self::FLUX_REALISM, self::FLUX_SCHNELL, self::IDEOGRAM,
+            self::KLING_VIDEO, self::VIDEO_UPSCALER, self::COGVIDEOX_5B, self::ANIMATEDIFF_V2V, self::FAST_ANIMATEDIFF_TURBO, self::FLUX_PRO, self::NANO_BANANA, self::NANO_BANANA_EDIT, self::NANO_BANANA_PRO, self::NANO_BANANA_PRO_EDIT, self::NANO_BANANA_2, self::NANO_BANANA_2_EDIT, self::GROK_IMAGINE_IMAGE, self::GROK_IMAGINE_IMAGE_EDIT, self::GROK_IMAGINE_VIDEO_TTV, self::GROK_IMAGINE_VIDEO_ITV, self::SEEDREAM_4, self::SEEDREAM_4_EDIT, self::IMAGEN_4, self::FLUX_PRO_KONTEXT_MAX_MULTI, self::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE, self::FLUX_PRO_KONTEXT, self::FLUX_PRO_1_1, self::FLUX_REALISM, self::FLUX_SCHNELL, self::IDEOGRAM,
             self::KLING, self::KLING_2_1, self::KLING_IMAGE, self::LUMA_DREAM_MACHINE, self::HAIPER, self::MINIMAX,
-            self::KLING_2_6_PRO_TTV, self::KLING_2_6_PRO_ITV, self::FLUX_2_FLEX, self::FLUX_2_FLEX_EDIT => EngineEnum::FAL_AI,
+            self::KLING_2_6_PRO_TTV, self::KLING_2_6_PRO_ITV, self::KLING_2_6_PRO_MOTION_CONTROL, self::KLING_2_6_STANDARD_MOTION_CONTROL,
+            self::KLING_3_PRO_TTV, self::KLING_3_PRO_ITV, self::KLING_3_STANDARD_TTV, self::KLING_3_STANDARD_ITV,
+            self::FLUX_2_FLEX, self::FLUX_2_FLEX_EDIT => EngineEnum::FAL_AI,
             // Creatify
             self::AD_MARKETING_VIDEO => EngineEnum::CREATIFY,
             // Topview
@@ -924,6 +968,8 @@ enum EntityEnum: string
 
             // Anthropic
             self::CLAUDE_SONNET_4_5    => Anthropic\ClaudeSonnet45Driver::class,
+            self::CLAUDE_SONNET_4_6    => Anthropic\ClaudeSonnet46Driver::class,
+            self::CLAUDE_OPUS_4_6      => Anthropic\ClaudeOpus46Driver::class,
             self::CLAUDE_OPUS_4_5      => Anthropic\ClaudeOpus45Driver::class,
             self::CLAUDE_OPUS_4_1      => Anthropic\ClaudeOpus41Driver::class,
             self::CLAUDE_SONNET_4      => Anthropic\ClaudeSonnet4Driver::class,
@@ -941,16 +987,17 @@ enum EntityEnum: string
             self::VOYAGE_LARGE_2       => Anthropic\VoyageLarge2Driver::class,
             self::VOYAGE_CODE_2        => Anthropic\VoyageCode2Driver::class,
             // Gemini
-            self::GEMINI_3_PRO_PREVIEW           => Gemini\Gemini3ProPreviewDriver::class,
-            self::GEMINI_2_5_FLASH_PREVIEW_05_20 => Gemini\Gemini25FlashPreview0417Driver::class,
-            self::GEMINI_2_5_PRO                 => Gemini\Gemini25ProExp0325Driver::class,
-            self::GEMINI_2_0_FLASH               => Gemini\Gemini20FlashDriver::class,
-            self::GEMINI_2_0_FLASH_LITE          => Gemini\Gemini20FlashLiteDriver::class,
-            self::GEMINI_1_5_PRO                 => Gemini\Gemini15ProDriver::class,
-            self::GEMINI_1_5_FLASH               => Gemini\Gemini15FlashDriver::class,
-            self::GEMINI_3_FLASH                 => Gemini\Gemini3FlashDriver::class,
-            self::GEMINI_EMBEDDING_EXP           => Gemini\GeminiEmbeddingExpDriver::class,
-            self::GEMINI_TEXT_EMBEDDING_004      => Gemini\GeminiTextEmbeding004Driver::class,
+            self::GEMINI_3_PRO_PREVIEW             => Gemini\Gemini3ProPreviewDriver::class,
+            self::GEMINI_3_1_PRO_PREVIEW           => Gemini\Gemini31ProPreviewDriver::class,
+            self::GEMINI_2_5_FLASH_PREVIEW_05_20   => Gemini\Gemini25FlashPreview0417Driver::class,
+            self::GEMINI_2_5_PRO                   => Gemini\Gemini25ProExp0325Driver::class,
+            self::GEMINI_2_0_FLASH                 => Gemini\Gemini20FlashDriver::class,
+            self::GEMINI_2_0_FLASH_LITE            => Gemini\Gemini20FlashLiteDriver::class,
+            self::GEMINI_1_5_PRO                   => Gemini\Gemini15ProDriver::class,
+            self::GEMINI_1_5_FLASH                 => Gemini\Gemini15FlashDriver::class,
+            self::GEMINI_3_FLASH                   => Gemini\Gemini3FlashDriver::class,
+            self::GEMINI_EMBEDDING_EXP             => Gemini\GeminiEmbeddingExpDriver::class,
+            self::GEMINI_TEXT_EMBEDDING_004        => Gemini\GeminiTextEmbeding004Driver::class,
             // Deepseek
             self::DEEPSEEK_CHAT     => Deepseek\DeepseekChatDriver::class,
             self::DEEPSEEK_REASONER => Deepseek\DeepseekReasonerDriver::class,
@@ -966,6 +1013,7 @@ enum EntityEnum: string
             self::PEXELS                   => PexelsDriver::class,
             self::PIXABAY                  => PixabayDriver::class,
             self::ELEVENLABS               => ElevenLabs\ElevenlabsDriver::class,
+            self::ELEVENLABS_V3            => ElevenLabs\ElevenlabsV3Driver::class,
             self::ELEVENLABS_VOICE_CHATBOT => ElevenLabs\ElevenlabsVoiceChatbotDriver::class,
             self::ISOLATOR                 => ElevenLabs\IsolatorDriver::class,
             self::ELEVENLABS_AI_MUSIC      => ElevenLabs\ElevenlabsAIMusicDriver::class,
@@ -1009,6 +1057,12 @@ enum EntityEnum: string
             self::NANO_BANANA_EDIT                       => FalAI\NanoBananaEditDriver::class,
             self::NANO_BANANA_PRO                        => FalAI\NanoBananaProDriver::class,
             self::NANO_BANANA_PRO_EDIT                   => FalAI\NanoBananaProEditDriver::class,
+            self::NANO_BANANA_2                          => FalAI\NanoBanana2Driver::class,
+            self::NANO_BANANA_2_EDIT                     => FalAI\NanoBanana2EditDriver::class,
+            self::GROK_IMAGINE_IMAGE                     => FalAI\GrokImagineImageDriver::class,
+            self::GROK_IMAGINE_IMAGE_EDIT                => FalAI\GrokImagineImageEditDriver::class,
+            self::GROK_IMAGINE_VIDEO_TTV                 => FalAI\GrokImagineVideoTTVDriver::class,
+            self::GROK_IMAGINE_VIDEO_ITV                 => FalAI\GrokImagineVideoITVDriver::class,
             self::SEEDREAM_4                             => FalAI\SeeDream4Driver::class,
             self::SEEDREAM_4_EDIT                        => FalAI\SeeDream4EditDriver::class,
             self::IMAGEN_4                               => FalAI\Imagen4Driver::class,
@@ -1028,6 +1082,12 @@ enum EntityEnum: string
             self::KLING_2_5_TURBO_STANDARD_ITV           => FalAI\Kling25Turbo\Kling25TurboStandardITVDriver::class,
             self::KLING_2_6_PRO_TTV                      => FalAI\Kling26Pro\KlingV26ProTTVDriver::class,
             self::KLING_2_6_PRO_ITV                      => FalAI\Kling26Pro\KlingV26ProITVDriver::class,
+            self::KLING_2_6_PRO_MOTION_CONTROL           => FalAI\Kling26Pro\KlingV26ProMotionControlDriver::class,
+            self::KLING_2_6_STANDARD_MOTION_CONTROL      => FalAI\Kling26Standard\KlingV26StandardMotionControlDriver::class,
+            self::KLING_3_PRO_TTV                        => FalAI\KlingV3\KlingV3ProTTVDriver::class,
+            self::KLING_3_PRO_ITV                        => FalAI\KlingV3\KlingV3ProITVDriver::class,
+            self::KLING_3_STANDARD_TTV                   => FalAI\KlingV3\KlingV3StandardTTVDriver::class,
+            self::KLING_3_STANDARD_ITV                   => FalAI\KlingV3\KlingV3StandardITVDriver::class,
             self::KLING_IMAGE                            => FalAI\KlingImageDriver::class,
             self::LUMA_DREAM_MACHINE                     => FalAI\LumaDreamMachineDriver::class,
             self::HAIPER                                 => FalAI\HaiperDriver::class,
@@ -1136,7 +1196,7 @@ enum EntityEnum: string
             self::SORA_2_PRO                  => 0.50,
 
             // Anthropic
-            self::CLAUDE_SONNET_4_5, self::CLAUDE_OPUS_4_1, self::CLAUDE_OPUS_4_5, self::CLAUDE_OPUS_4, self::CLAUDE_SONNET_4, self::CLAUDE_3_7_SONNET, self::CLAUDE_3_5_SONNET_V2, self::CLAUDE_3_5_SONNET, self::CLAUDE_3_SONNET => 0.000015,
+            self::CLAUDE_SONNET_4_5, self::CLAUDE_SONNET_4_6, self::CLAUDE_OPUS_4_6, self::CLAUDE_OPUS_4_1, self::CLAUDE_OPUS_4_5, self::CLAUDE_OPUS_4, self::CLAUDE_SONNET_4, self::CLAUDE_3_7_SONNET, self::CLAUDE_3_5_SONNET_V2, self::CLAUDE_3_5_SONNET, self::CLAUDE_3_SONNET => 0.000015,
             self::CLAUDE_3_5_HAIKU => 0.000003,
             self::CLAUDE_3_OPUS    => 0.000015,
             self::CLAUDE_3_HAIKU   => 0.000003,
@@ -1160,22 +1220,24 @@ enum EntityEnum: string
             self::PEBBLELY        => 0.019,
 
             // Gemini
-            self::GEMINI_3_PRO_PREVIEW           => 0.0001197,
-            self::GEMINI_2_5_FLASH_PREVIEW_05_20 => 0.00000333,
-            self::GEMINI_2_5_PRO                 => 0.00001333,
-            self::GEMINI_2_0_FLASH               => 0.00000053,
-            self::GEMINI_2_0_FLASH_LITE          => 0.00000040,
-            self::GEMINI_1_5_PRO                 => 0.00001333,
-            self::GEMINI_EMBEDDING_EXP           => 0.00001,
-            self::GEMINI_1_5_FLASH               => 0.00000051,
-            self::GEMINI_3_FLASH                 => 0.00000266,
-            self::GEMINI_TEXT_EMBEDDING_004      => 0.00001,
+            self::GEMINI_3_PRO_PREVIEW             => 0.0001197,
+            self::GEMINI_3_1_PRO_PREVIEW           => 0.0001197,
+            self::GEMINI_2_5_FLASH_PREVIEW_05_20   => 0.00000333,
+            self::GEMINI_2_5_PRO                   => 0.00001333,
+            self::GEMINI_2_0_FLASH                 => 0.00000053,
+            self::GEMINI_2_0_FLASH_LITE            => 0.00000040,
+            self::GEMINI_1_5_PRO                   => 0.00001333,
+            self::GEMINI_EMBEDDING_EXP             => 0.00001,
+            self::GEMINI_1_5_FLASH                 => 0.00000051,
+            self::GEMINI_3_FLASH                   => 0.00000266,
+            self::GEMINI_TEXT_EMBEDDING_004        => 0.00001,
 
             // Unsplash
             self::UNSPLASH, self::PEXELS, self::PIXABAY => 0.01,
 
             // Elevenlabs
             self::ELEVENLABS,
+            self::ELEVENLABS_V3,
             self::ELEVENLABS_VOICE_CHATBOT,
             self::ELEVENLABS_AI_MUSIC,
             self::ISOLATOR => 0.3,
@@ -1211,12 +1273,16 @@ enum EntityEnum: string
             self::GROK_4_1_FAST_NON_REASONING => 0.00001995,
 
             // FAL AI
-            self::NANO_BANANA     => 0.039,
-            self::NANO_BANANA_PRO => 0.039,
-            self::SEEDREAM_4      => 0.03,
+            self::NANO_BANANA            => 0.039,
+            self::NANO_BANANA_PRO        => 0.039,
+            self::NANO_BANANA_2          => 0.039,
+            self::GROK_IMAGINE_IMAGE     => 0.039,
+            self::GROK_IMAGINE_VIDEO_TTV, self::GROK_IMAGINE_VIDEO_ITV => 0.5,
+            self::SEEDREAM_4             => 0.03,
             self::FLUX_PRO_1_1, self::FLUX_REALISM, self::IMAGEN_4 => 0.04,
-            self::NANO_BANANA_EDIT, self::SEEDREAM_4_EDIT => 0.4,
+            self::NANO_BANANA_EDIT, self::SEEDREAM_4_EDIT, self::GROK_IMAGINE_IMAGE_EDIT => 0.4,
             self::NANO_BANANA_PRO_EDIT                   => 0.4,
+            self::NANO_BANANA_2_EDIT                     => 0.4,
             self::GAMMA_AI                               => 0.01,
             self::VEO_2                                  => 2.5,
             self::VEED                                   => 0.35,
@@ -1236,7 +1302,11 @@ enum EntityEnum: string
             self::KLING_2_5_TURBO_PRO_TTV, self::KLING_2_5_TURBO_PRO_ITV, self::KLING_2_5_TURBO_STANDARD_ITV => 0.6,
             self::KLING, self::KLING_2_1, self::KLING_IMAGE, self::LUMA_DREAM_MACHINE, self::HAIPER, self::MINIMAX => 0.5,
             self::KLING_2_6_PRO_TTV, self::KLING_2_6_PRO_ITV => 1.4,
-            self::IDEOGRAM => 0.6,
+            self::KLING_2_6_PRO_MOTION_CONTROL      => 1.12,
+            self::KLING_2_6_STANDARD_MOTION_CONTROL => 0.70,
+            self::KLING_3_PRO_TTV, self::KLING_3_PRO_ITV => 1.4,
+            self::KLING_3_STANDARD_TTV, self::KLING_3_STANDARD_ITV => 0.70,
+            self::IDEOGRAM                          => 0.6,
             self::VIDEO_UPSCALER, self::COGVIDEOX_5B, self::ANIMATEDIFF_V2V, self::FAST_ANIMATEDIFF_TURBO => 0.20,
 
             // Creatify

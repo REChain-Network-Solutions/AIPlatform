@@ -54,7 +54,7 @@ class FontsService
 
     public static function updateFontsCache(): array
     {
-        cache()->forget(self::FONTS_KEY);
+        Cache::forget(self::FONTS_KEY);
 
         return self::getGoogleFonts();
     }

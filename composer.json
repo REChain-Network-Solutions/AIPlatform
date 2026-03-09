@@ -9,6 +9,12 @@
 	"license": "MIT",
 	"repositories": [
 		{
+			"name": "yoomoney",
+			"type": "vcs",
+			"url": "https://github.com/yoomoney/yookassa-sdk-php.git",
+			"canonical": false
+		},
+		{
 			"type": "path",
 			"url": "./packages/magicai/magicai-updater",
 			"options": {
@@ -55,6 +61,7 @@
 		"bacon/bacon-qr-code": "^3.0",
 		"barryvdh/laravel-dompdf": "^2.0",
 		"brick/math": "^0.12.1",
+		"enshrined/svg-sanitize": "^0.22.0",
 		"coingate/coingate-php": "^4.1",
 		"cryptomus/api-php-sdk": "^1.0",
 		"darkaonline/l5-swagger": "^8.5",
@@ -63,7 +70,7 @@
 		"doctrine/dbal": "^3.6",
 		"drewm/mailchimp-api": "^2.5",
 		"elseyyid/laravel-json-mysql-locations-manager": "^1.0",
-		"enshrined/svg-sanitize": "^0.22.0",
+		"erusev/parsedown": "^1.7",
 		"fahlisaputra/laravel-minify": "^1.1",
 		"firebase/php-jwt": "^6.10",
 		"gehrisandro/tailwind-merge-laravel": "^1.1",
@@ -98,7 +105,7 @@
 		"paquettg/php-html-parser": "^2.2",
 		"php-ffmpeg/php-ffmpeg": "^1.2",
 		"php-http/guzzle7-adapter": "^1.0",
-		"phpoffice/phpspreadsheet": "^5.0",
+		"phpoffice/phpspreadsheet": "^4.5",
 		"phpoffice/phpword": "^1.1",
 		"phpseclib/phpseclib": "^3.0",
 		"pragmarx/google2fa-laravel": "^2.2",
@@ -126,6 +133,7 @@
 	"require-dev": {
 		"barryvdh/laravel-debugbar": "^3.9",
 		"fakerphp/faker": "^1.9.1",
+		"laravel/boost": "^1.8",
 		"laravel/breeze": "^1.19",
 		"laravel/pint": "^1.17",
 		"laravel/sail": "^1.18",
@@ -179,17 +187,25 @@
 	"extra": {
 		"laravel": {
 			"dont-discover": [
-				"laravel/telescope"
+				"laravel/telescope",
+				"iazaran/smart-cache"
 			]
 		}
 	},
 	"config": {
+		"process-timeout": 900,
 		"optimize-autoloader": true,
 		"preferred-install": "dist",
 		"sort-packages": true,
 		"allow-plugins": {
 			"pestphp/pest-plugin": true,
 			"php-http/discovery": true
+		},
+		"audit": {
+			"ignore": [
+				"PKSA-4g5g-4rkv-myqs",
+				"PKSA-64jn-3d9t-gncx"
+			]
 		}
 	},
 	"minimum-stability": "stable",

@@ -269,8 +269,9 @@ function generatePost(ring, svg){
 		try {
 			data = data.result;
 			$('#thePost').text(data);
-			if ($('#content')) {
-				$('#content').val(data);
+			const content = $('#content');
+			if (content) {
+				content.val(data);
 			}
 			isGenerating = false;
 			$('#reviweNextBtn').prop('disabled', false);

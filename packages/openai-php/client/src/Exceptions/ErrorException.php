@@ -15,7 +15,7 @@ final class ErrorException extends Exception
      */
     public function __construct(private readonly array $contents, private readonly int $statusCode)
     {
-        $message = ($contents['message'] ?: (string) $this->contents['code']) ?: 'Unknown error';
+        $message = $contents['message'] ?: ((string) $this->contents['code']) ?: 'Unknown error';
 
         if (is_array($message)) {
             $message = implode(PHP_EOL, $message);

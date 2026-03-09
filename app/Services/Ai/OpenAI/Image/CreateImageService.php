@@ -18,6 +18,8 @@ class CreateImageService
 
     private string $size = '1024x1024';
 
+    private string $background = 'auto';
+
     private string $quality = 'auto';
 
     private string $output_format = 'webp';
@@ -108,6 +110,7 @@ class CreateImageService
             //            'response_format' => 'b64_json',
             'output_format'   => $this->getOutputFormat(),
             'quality'         => $this->getQuality(),
+            'background'      => $this->getBackground(),
         ];
     }
 
@@ -145,6 +148,18 @@ class CreateImageService
     public function getSize(): string
     {
         return $this->size;
+    }
+
+    public function setBackground(string $background): CreateImageService
+    {
+        $this->background = $background;
+
+        return $this;
+    }
+
+    public function getBackground(): string
+    {
+        return $this->background;
     }
 
     public function setQuality(string $quality): CreateImageService

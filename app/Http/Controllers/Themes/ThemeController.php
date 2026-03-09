@@ -16,7 +16,9 @@ class ThemeController extends Controller
 
     public function index()
     {
-        $items = $this->extensionRepository->themes();
+        $items = $this->extensionRepository->mergedInstalled(
+            $this->extensionRepository->themes()
+        );
 
         // sort the result desc
         $extensions = Extension::query()

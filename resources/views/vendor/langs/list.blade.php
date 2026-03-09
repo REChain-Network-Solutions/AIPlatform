@@ -61,18 +61,18 @@
 									name="ids_to_edit[]"
 									value="{{ $value->id }}"
 								/></td>
-							@foreach ($value->toArray() as $key => $element)
-								@if ($key !== 'code')
+							@foreach ($value->toArray() as $subKey => $element)
+								@if ($subKey !== 'code')
 									@if ($key === 'en')
 										<td class="w-[45%]">
-											<div data-name="{{ $key }}">{{ $element }}</div>
+											<div data-name="{{ $subKey }}">{{ $element }}</div>
 										</td>
 									@else
 										<td class="w-[50%]">
 											<input
 												class="form-control w-full px-2 py-2 placeholder:text-gray-300 dark:border-solid dark:border-[--tblr-border-color] dark:placeholder:text-white/50"
 												data-pk="{{ $value->code }}"
-												data-name="{{ $key }}"
+												data-name="{{ $subKey }}"
 												type="text"
 												value="{{ $element }}"
 												placeholder="{{ __('enter string') }}"

@@ -88,7 +88,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscriptionCustomer = new \Iyzipay\Request\Subscription\SubscriptionCreateCustomerRequest;
         $requestSubscriptionCustomer->setLocale($this->locale);
-        $requestSubscriptionCustomer->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionCustomer->setConversationId($this->generateRandomNumber());
 
         $customer = new \Iyzipay\Model\Customer;
         $customer->setName($request->name ?? '');
@@ -119,7 +119,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscriptionCustomer = new \Iyzipay\Request\Subscription\SubscriptionRetrieveCustomerRequest;
         $requestSubscriptionCustomer->setLocale($this->locale);
-        $requestSubscriptionCustomer->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionCustomer->setConversationId($this->generateRandomNumber());
         $requestSubscriptionCustomer->setCustomerReferenceCode($request->customerReferenceCode);
 
         $subscriptionCustomer = \Iyzipay\Model\Subscription\SubscriptionCustomer::retrieve($requestSubscriptionCustomer, $this->config);
@@ -132,7 +132,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscriptionCustomer = new \Iyzipay\Request\Subscription\SubscriptionUpdateCustomerRequest;
         $requestSubscriptionCustomer->setLocale($this->locale);
-        $requestSubscriptionCustomer->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionCustomer->setConversationId($this->generateRandomNumber());
         $requestSubscriptionCustomer->setCustomerReferenceCode($request->customerReferenceCode);
 
         $customer = new \Iyzipay\Model\Customer;
@@ -166,7 +166,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscriptionCustomer = new \Iyzipay\Request\Subscription\SubscriptionDeleteCustomerRequest;
         $requestSubscriptionCustomer->setLocale($this->locale);
-        $requestSubscriptionCustomer->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionCustomer->setConversationId($this->generateRandomNumber());
         $requestSubscriptionCustomer->setCustomerReferenceCode($request->customerReferenceCode);
 
         $subscriptionCustomer = \Iyzipay\Model\Subscription\SubscriptionCustomer::delete($requestSubscriptionCustomer, $this->config);
@@ -186,7 +186,7 @@ class IyzipayActions // extends Controller
 
         $requestSubscriptionProduct = new \Iyzipay\Request\Subscription\SubscriptionCreateProductRequest;
         $requestSubscriptionProduct->setLocale($this->locale);
-        $requestSubscriptionProduct->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionProduct->setConversationId($this->generateRandomNumber());
         $requestSubscriptionProduct->setName($request->name);
         $requestSubscriptionProduct->setDescription($request->description ?? '');
 
@@ -200,7 +200,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscriptionProduct = new \Iyzipay\Request\Subscription\SubscriptionRetrieveProductRequest;
         $requestSubscriptionProduct->setLocale($this->locale);
-        $requestSubscriptionProduct->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionProduct->setConversationId($this->generateRandomNumber());
         $requestSubscriptionProduct->setProductReferenceCode($request->productReferenceCode);
 
         $subscriptionProduct = \Iyzipay\Model\Subscription\SubscriptionProduct::retrieve($requestSubscriptionProduct, $this->config);
@@ -213,7 +213,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscriptionProduct = new \Iyzipay\Request\Subscription\SubscriptionUpdateProductRequest;
         $requestSubscriptionProduct->setLocale($this->locale);
-        $requestSubscriptionProduct->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionProduct->setConversationId($this->generateRandomNumber());
         $requestSubscriptionProduct->setProductReferenceCode($request->productReferenceCode);
         $requestSubscriptionProduct->setName($request->name);
         $requestSubscriptionProduct->setDescription($request->description ?? '');
@@ -228,7 +228,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscriptionProduct = new \Iyzipay\Request\Subscription\SubscriptionDeleteProductRequest;
         $requestSubscriptionProduct->setLocale($this->locale);
-        $requestSubscriptionProduct->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionProduct->setConversationId($this->generateRandomNumber());
         $requestSubscriptionProduct->setProductReferenceCode($request->productReferenceCode);
 
         $subscriptionProduct = \Iyzipay\Model\Subscription\SubscriptionProduct::delete($requestSubscriptionProduct, $this->config);
@@ -259,7 +259,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscriptionPricingPlan = new \Iyzipay\Request\Subscription\SubscriptionCreatePricingPlanRequest;
         $requestSubscriptionPricingPlan->setLocale($this->locale);
-        $requestSubscriptionPricingPlan->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionPricingPlan->setConversationId($this->generateRandomNumber());
         $requestSubscriptionPricingPlan->setProductReferenceCode($request->productReferenceCode);
         $requestSubscriptionPricingPlan->setName($request->name ?? '');
         $requestSubscriptionPricingPlan->setCurrencyCode($this->currency);
@@ -280,7 +280,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscriptionPricingPlan = new \Iyzipay\Request\Subscription\SubscriptionRetrievePricingPlanRequest;
         $requestSubscriptionPricingPlan->setLocale($this->locale);
-        $requestSubscriptionPricingPlan->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionPricingPlan->setConversationId($this->generateRandomNumber());
         $requestSubscriptionPricingPlan->setPricingPlanReferenceCode($request->pricingPlanReferenceCode);
 
         $subscriptionPricingPlan = \Iyzipay\Model\Subscription\SubscriptionPricingPlan::retrieve($requestSubscriptionPricingPlan, $this->config);
@@ -293,7 +293,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscriptionPricingPlan = new \Iyzipay\Request\Subscription\SubscriptionUpdatePricingPlanRequest;
         $requestSubscriptionPricingPlan->setLocale($this->locale);
-        $requestSubscriptionPricingPlan->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionPricingPlan->setConversationId($this->generateRandomNumber());
         $requestSubscriptionPricingPlan->setPricingPlanReferenceCode($request->pricingPlanReferenceCode);
         $requestSubscriptionPricingPlan->setName($request->name ?? '');
         $requestSubscriptionPricingPlan->setTrialPeriodDays($request->trialPeriodDays ?? '');
@@ -308,7 +308,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscriptionPricingPlan = new \Iyzipay\Request\Subscription\SubscriptionDeletePricingPlanRequest;
         $requestSubscriptionPricingPlan->setLocale($this->locale);
-        $requestSubscriptionPricingPlan->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionPricingPlan->setConversationId($this->generateRandomNumber());
         $requestSubscriptionPricingPlan->setPricingPlanReferenceCode($request->pricingPlanReferenceCode);
 
         $subscriptionPricingPlan = \Iyzipay\Model\Subscription\SubscriptionPricingPlan::delete($requestSubscriptionPricingPlan, $this->config);
@@ -393,7 +393,7 @@ class IyzipayActions // extends Controller
     {
         $requestOneTimePayment = new \Iyzipay\Request\CreateCheckoutFormInitializeRequest;
         $requestOneTimePayment->setLocale($this->locale);
-        $requestOneTimePayment->setConversationId(self::generateRandomNumber());
+        $requestOneTimePayment->setConversationId($this->generateRandomNumber());
         $requestOneTimePayment->setPrice($request->price ?? '');
         $requestOneTimePayment->setPaidPrice($request->paidPrice ?? '');
         $requestOneTimePayment->setCurrency($this->currency ?? '');
@@ -418,7 +418,7 @@ class IyzipayActions // extends Controller
     {
         $requestOneTimePayment = new \Iyzipay\Request\RetrieveCheckoutFormRequest;
         $requestOneTimePayment->setLocale($this->locale);
-        $requestOneTimePayment->setConversationId(self::generateRandomNumber());
+        $requestOneTimePayment->setConversationId($this->generateRandomNumber());
         $requestOneTimePayment->setToken($request['token']);
 
         $checkoutForm = \Iyzipay\Model\CheckoutForm::retrieve($requestOneTimePayment, $this->config);
@@ -437,7 +437,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscription = new \Iyzipay\Request\Subscription\SubscriptionCreateCheckoutFormRequest;
         $requestSubscription->setLocale($this->locale);
-        $requestSubscription->setConversationId(self::generateRandomNumber());
+        $requestSubscription->setConversationId($this->generateRandomNumber());
         $requestSubscription->setCallbackUrl($request->callbackUrl);
         $requestSubscription->setPricingPlanReferenceCode($request->pricingPlanReferenceCode);
         $requestSubscription->setSubscriptionInitialStatus($request->subscriptionInitialStatus);
@@ -453,7 +453,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscriptionDetails = new \Iyzipay\Request\Subscription\SubscriptionDetailsRequest;
         $requestSubscriptionDetails->setLocale($this->locale);
-        $requestSubscriptionDetails->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionDetails->setConversationId($this->generateRandomNumber());
         $requestSubscriptionDetails->setSubscriptionReferenceCode($request->subscriptionReferenceCode);
 
         $subscriptionDetails = \Iyzipay\Model\Subscription\SubscriptionDetails::retrieve($requestSubscriptionDetails, $this->config);
@@ -466,7 +466,7 @@ class IyzipayActions // extends Controller
     {
         $requestSubscriptionCancel = new \Iyzipay\Request\Subscription\SubscriptionCancelRequest;
         $requestSubscriptionCancel->setLocale($this->locale);
-        $requestSubscriptionCancel->setConversationId(self::generateRandomNumber());
+        $requestSubscriptionCancel->setConversationId($this->generateRandomNumber());
         $requestSubscriptionCancel->setSubscriptionReferenceCode($request->subscriptionReferenceCode);
 
         $subscriptionCancel = \Iyzipay\Model\Subscription\SubscriptionCancel::cancel($requestSubscriptionCancel, $this->config);

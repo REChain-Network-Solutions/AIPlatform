@@ -421,7 +421,7 @@ class PaymentProcessController extends Controller
     {
         if (! $activeSub) {
             $user = auth()->user();
-            $needsToBeCancelled = Subscriptions::where('user_id', $user->id)
+            $needsToBeCancelled = Subscriptions::where('user_id', $user?->id)
                 ->where('stripe_status', 'cancelled')
                 ->whereDate('ends_at', Carbon::today())
                 ->first();

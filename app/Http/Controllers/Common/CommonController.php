@@ -164,7 +164,7 @@ class CommonController extends Controller
                 }
             }
 
-            array_push($paths, $path);
+            $paths[] = $path;
         }
 
         return response()->json(['path' => $paths]);

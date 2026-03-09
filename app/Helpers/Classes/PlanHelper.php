@@ -16,11 +16,15 @@ class PlanHelper
     public static function userPlan()
     {
         if (Auth::check()) {
-
-            $subscription = getCurrentActiveSubscription(Auth::id());
-
+            $userId = Auth::id();
+            $subscription = getCurrentActiveSubscription($userId);
             if ($subscription) {
-                return Plan::query()->where('id', $subscription->plan_id)->first();
+                return Plan::getCache(
+                    static function () use ($subscription) {
+                        return Plan::query()->where('id', $subscription->plan_id)->first();
+                    },
+                    '_user_plan_' . $userId . '_' . $subscription->plan_id
+                );
             }
         }
 
@@ -37,17 +41,17 @@ class PlanHelper
             return true;
         }
 
-        $dataAiTools = array_map(function ($item) {
+        $dataAiTools = array_map(static function ($item) {
             return $item['key'];
         }, MenuService::planAiToolsMenu());
 
-        $dataFeature = array_map(function ($item) {
+        $dataFeature = array_map(static function ($item) {
             return $item['key'];
         }, MenuService::planFeatureMenu());
 
         $data = array_merge($dataAiTools, $dataFeature);
 
-        if (! in_array($key, $data)) {
+        if (! in_array($key, $data, true)) {
             return true;
         }
 
@@ -58,7 +62,7 @@ class PlanHelper
         $checkArray = array_merge($plan_ai_tools, $plan_features);
 
         if ($checkArray) {
-            return array_key_exists($key, $checkArray) && $checkArray[$key] == true;
+            return array_key_exists($key, $checkArray) && $checkArray[$key];
         }
 
         return false;

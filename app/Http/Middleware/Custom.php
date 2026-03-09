@@ -15,10 +15,10 @@ class Custom
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->user()->isAdmin()) {
+        if (auth()->user()?->isAdmin()) {
             return $next($request);
-        } else {
-            return redirect()->route('dashboard.index');
         }
+
+        return redirect()->route('dashboard.index');
     }
 }

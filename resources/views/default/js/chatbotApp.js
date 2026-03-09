@@ -7,16 +7,22 @@ import clipboard from "./components/clipboard";
 import '../scss/chatbot-embed.scss';
 
 window.fetchEventSource = fetchEventSource;
-window.Alpine = Alpine;
+const alpine = window.Alpine || Alpine;
+window.Alpine = alpine;
+const livewire = window.Livewire || Livewire;
+window.Livewire = livewire;
 
-Alpine.plugin(ajax);
+alpine.plugin(ajax);
 console.log('chatbotApp yüklendi');
 
 document.addEventListener('alpine:init', () => {
-    Alpine.data('clipboard', (data) => clipboard(data));
+    alpine.data('clipboard', (data) => clipboard(data));
 });
 
-Livewire.start();
+if ( !window.__livewireStarted ) {
+    window.__livewireStarted = true;
+    livewire.start();
+}
 
 document.querySelectorAll('[magic-load]').forEach(function (element) {
     element.removeAttribute('magic-load');

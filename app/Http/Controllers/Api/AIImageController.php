@@ -25,6 +25,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use OpenAI\Laravel\Facades\OpenAI as FacadesOpenAI;
@@ -162,18 +163,15 @@ class AIImageController extends Controller
             return response()->json(['message' => 'Image generation in progress. Please try again later.'], 409);
         }
 
-        $engineCheck = match ($param['image_generator']) {
-            'flux-pro' => EngineEnum::FAL_AI->value,
-            'dall-e'   => EngineEnum::OPEN_AI->value,
-            default    => $param['image_generator'],
-        };
+        $imageGenerator = $param['image_generator'] ?? null;
+        $engineCheck = $this->resolveImageEngineSlug($imageGenerator);
         $entries = [];
 
         try {
             $engine = EngineEnum::fromSlug($engineCheck);
-            $model = $this->getDefaultModel($engine);
+            $model = $this->resolveImageModel($imageGenerator, $engine);
             $code = $this->getEngineCode($engine);
-            $number_of_images = (int) $param['image_number_of_images'];
+            $number_of_images = (int) ($param['image_number_of_images'] ?? 1);
 
             $driver = Entity::driver($model)->inputImageCount($number_of_images)->calculateCredit();
             $chkLmt = Helper::checkImageDailyLimit($lockKey);
@@ -203,6 +201,53 @@ class AIImageController extends Controller
         }
 
         return response()->json(['status' => 'success', 'images' => $entries, 'image_storage' => $this->settings_two->ai_image_storage]);
+    }
+
+    private function resolveImageEngineSlug(?string $imageGenerator): string
+    {
+        return match ($imageGenerator) {
+            'flux-pro',
+            'flux-2-flex',
+            'flux-2-flex/edit',
+            'ideogram',
+            'flux-pro-kontext',
+            'nano-banana',
+            'nano-banana-pro',
+            'nano-banana/edit',
+            'nano-banana-pro/edit',
+            EntityEnum::SEEDREAM_4->value,
+            EntityEnum::SEEDREAM_4_EDIT->value,
+            EntityEnum::GROK_IMAGINE_IMAGE->value,
+            EntityEnum::GROK_IMAGINE_IMAGE_EDIT->value => EngineEnum::FAL_AI->value,
+            EntityEnum::GPT_IMAGE_1->value,
+            EntityEnum::GPT_IMAGE_1_5->value,
+            'gpt-image-1',
+            'gpt-image-1.5',
+            'gpt-image-1-5',
+            'dall-e' => EngineEnum::OPEN_AI->value,
+            default  => $imageGenerator ?? EngineEnum::OPEN_AI->value,
+        };
+    }
+
+    private function resolveImageModel(?string $imageGenerator, ?EngineEnum $engine): ?EntityEnum
+    {
+        return match ($imageGenerator) {
+            'flux-pro-kontext'                         => $this->getKontextModel(),
+            'nano-banana'                              => EntityEnum::NANO_BANANA,
+            'nano-banana-pro'                          => EntityEnum::NANO_BANANA_PRO,
+            'nano-banana/edit'                         => EntityEnum::NANO_BANANA_EDIT,
+            'nano-banana-pro/edit'                     => EntityEnum::NANO_BANANA_PRO_EDIT,
+            EntityEnum::SEEDREAM_4->value              => EntityEnum::SEEDREAM_4,
+            EntityEnum::SEEDREAM_4_EDIT->value         => EntityEnum::SEEDREAM_4_EDIT,
+            EntityEnum::GROK_IMAGINE_IMAGE->value      => EntityEnum::GROK_IMAGINE_IMAGE,
+            EntityEnum::GROK_IMAGINE_IMAGE_EDIT->value => EntityEnum::GROK_IMAGINE_IMAGE_EDIT,
+            'flux-2-flex'                              => EntityEnum::FLUX_2_FLEX,
+            'flux-2-flex/edit'                         => EntityEnum::FLUX_2_FLEX_EDIT,
+            'ideogram'                                 => EntityEnum::IDEOGRAM,
+            'gpt-image-1'                              => EntityEnum::GPT_IMAGE_1,
+            'gpt-image-1.5', 'gpt-image-1-5' => EntityEnum::GPT_IMAGE_1_5,
+            default => $this->getDefaultModel($engine),
+        };
     }
 
     private function getOpenAIApiKey(): string
@@ -525,8 +570,29 @@ class AIImageController extends Controller
 
     private function processFalAIImage(?EntityEnum $model, array $param): array
     {
-        $prompt = $param['description_flux_pro'];
-        $requestId = FalAIService::generate($prompt, $model);
+        $prompt = ($param['image_generator'] ?? null) === 'ideogram'
+            ? ($param['description_ideogram'] ?? null)
+            : ($param['description_flux_pro'] ?? ($param['description'] ?? null));
+
+        if (is_null($prompt)) {
+            throw new RuntimeException(__('You must provide a prompt'));
+        }
+
+        if (! $model) {
+            throw new RuntimeException(__('Invalid AI model'));
+        }
+
+        if (FalAIService::isGrokModel($model)) {
+            return $this->processGrokSyncImage($model, $prompt);
+        }
+
+        if ($model === EntityEnum::IDEOGRAM) {
+            $requestId = FalAIService::ideogramGenerate($prompt);
+        } elseif ($model === EntityEnum::FLUX_PRO_KONTEXT || $model === EntityEnum::FLUX_PRO_KONTEXT_MAX_MULTI) {
+            $requestId = FalAIService::generateKontext($prompt, $model, request('image_src'));
+        } else {
+            $requestId = FalAIService::generate($prompt, $model);
+        }
 
         return [
             'engine'                => EngineEnum::FAL_AI,
@@ -537,6 +603,90 @@ class AIImageController extends Controller
             'imageContent'          => null,
             'nameOfImage'           => Str::random(12) . '-FLUX-' . Str::slug(explode(' ', mb_substr($prompt, 0, 15))[0]) . '.png',
         ];
+    }
+
+    private function processGrokSyncImage(EntityEnum $model, string $prompt): array
+    {
+        $result = FalAIService::generateGrokSync($prompt, $model);
+        $imageUrl = (string) data_get($result, 'images.0.url', '');
+
+        if ($imageUrl === '') {
+            throw new RuntimeException(__('Image generation failed.'));
+        }
+
+        $imagePayload = $this->resolveFalImagePayload(
+            $imageUrl,
+            (string) data_get($result, 'images.0.content_type', '')
+        );
+
+        if (! $imagePayload) {
+            throw new RuntimeException(__('Failed to download generated image.'));
+        }
+
+        $extension = mimeToExtension($imagePayload['mime'] ?: 'image/png');
+        if (! $extension) {
+            $extension = pathinfo((string) parse_url($imageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'png';
+        }
+
+        return [
+            'engine'       => EngineEnum::FAL_AI,
+            'requestId'    => null,
+            'status'       => 'COMPLETED',
+            'prompt'       => $prompt,
+            'imageContent' => $imagePayload['binary'],
+            'nameOfImage'  => Str::random(12) . '-GROK-' . Str::slug(explode(' ', mb_substr($prompt, 0, 15))[0]) . '.' . $extension,
+        ];
+    }
+
+    private function resolveFalImagePayload(string $imageUrl, string $fallbackMimeType = ''): ?array
+    {
+        if (str_starts_with($imageUrl, 'data:image')) {
+            if (! preg_match('/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/', $imageUrl, $matches)) {
+                return null;
+            }
+
+            $binary = base64_decode(str_replace(' ', '+', $matches[2]), true);
+            if ($binary === false) {
+                return null;
+            }
+
+            return [
+                'binary' => $binary,
+                'mime'   => $matches[1],
+            ];
+        }
+
+        $response = Http::timeout(120)->get($imageUrl);
+        if (! $response->successful()) {
+            return null;
+        }
+
+        $mimeType = $response->header('Content-Type');
+        if (is_string($mimeType)) {
+            $mimeType = trim(strtok($mimeType, ';'));
+        } else {
+            $mimeType = '';
+        }
+
+        return [
+            'binary' => $response->body(),
+            'mime'   => $mimeType ?: $fallbackMimeType,
+        ];
+    }
+
+    private function getKontextModel(): EntityEnum
+    {
+        $imageSrc = request('image_src');
+
+        if ($imageSrc === null) {
+            return EntityEnum::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE;
+        }
+
+        if (is_array($imageSrc)) {
+            return count($imageSrc) === 1 ? EntityEnum::FLUX_PRO_KONTEXT : EntityEnum::FLUX_PRO_KONTEXT_MAX_MULTI;
+        }
+
+        return EntityEnum::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE;
     }
 
     private function saveEntryToDatabase(array $imageDetails, User $user, OpenAIGenerator $post, string $code, string $savePath): UserOpenai
@@ -557,7 +707,11 @@ class AIImageController extends Controller
             'payload'   => request()?->all(),
             'engine'	   => isset($imageDetails['engine']) ? $imageDetails['engine']?->value : null,
         ];
-        if (isset($imageDetails['engine']) && $imageDetails['engine'] === EngineEnum::FAL_AI) {
+        $isQueuedEngineOutput = isset($imageDetails['engine'])
+            && $imageDetails['engine'] === EngineEnum::FAL_AI
+            && empty($imageDetails['imageContent']);
+
+        if ($isQueuedEngineOutput) {
             $data['request_id'] = $imageDetails['requestId'];
             $data['status'] = $imageDetails['status'];
             $data['output'] = $imageDetails['output'];
@@ -568,7 +722,11 @@ class AIImageController extends Controller
 
     private function saveImageOutputToStorage(array $imageDetails): string
     {
-        if (isset($imageDetails['engine']) && $imageDetails['engine'] === EngineEnum::FAL_AI) {
+        $isQueuedEngineOutput = isset($imageDetails['engine'])
+            && $imageDetails['engine'] === EngineEnum::FAL_AI
+            && empty($imageDetails['imageContent']);
+
+        if ($isQueuedEngineOutput) {
             return '/';
         }
 
@@ -671,7 +829,14 @@ class AIImageController extends Controller
 
         $user = $request->user();
         $openai = OpenAIGenerator::where('slug', 'ai_image_generator')->firstOrFail();
-        $documents = UserOpenai::where('user_id', $user->id)->where('openai_id', $openai->id)->latest('created_at')->take(10)->get();
+        $documents = UserOpenai::where('user_id', $user->id)
+            ->where('openai_id', $openai->id)
+            ->when(Schema::hasColumn('user_openai', 'is_fashion_studio'), function ($query) {
+                $query->where('is_fashion_studio', false);
+            })
+            ->latest('created_at')
+            ->take(10)
+            ->get();
 
         return response()->json($documents, 200);
 

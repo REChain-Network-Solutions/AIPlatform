@@ -18,11 +18,11 @@ class NotificationController extends Controller
                 }
 
                 return response()->json(['success' => true]);
-            } else {
-                $request->user()->unreadNotifications->markAsRead();
-
-                return response()->json(['success' => true]);
             }
+
+            $request->user()->unreadNotifications->markAsRead();
+
+            return response()->json(['success' => true]);
         }
     }
 }

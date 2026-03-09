@@ -6,6 +6,7 @@ use App\Domains\Marketplace\Services\ExtensionUninstallService;
 use App\Models\Extension;
 use Exception;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
@@ -70,7 +71,7 @@ trait UninstallExtension
             Artisan::call('cache:clear');
 
             if ($extensionSlug == 'maintenance') {
-                cache()->forget('maintenance');
+                Cache::forget('maintenance');
             }
 
             return [

@@ -554,12 +554,12 @@ class StripeService
                     DB::commit();
 
                     return redirect($newSubscription->url);
-                } else {
-                    $newSubscription = $stripe->subscriptions->create($subscriptionInfo);
-
-                    $subscription->stripe_id = $newSubscription->id;
-                    $subscription->save();
                 }
+
+                $newSubscription = $stripe->subscriptions->create($subscriptionInfo);
+
+                $subscription->stripe_id = $newSubscription->id;
+                $subscription->save();
 
                 $paymentIntent = [
                     'subscription_id' => $newSubscription->id,
@@ -608,14 +608,22 @@ class StripeService
             }
 
             $previousRequest = app('request')->create(url()->previous());
-            $intentType = $request->has('payment_intent') ? 'payment_intent' : ($request->has('setup_intent') ? 'setup_intent' : null);
+            $intentType = match (true) {
+                $request->has('payment_intent') => 'payment_intent',
+                $request->has('setup_intent')   => 'setup_intent',
+                default                         => null,
+            };
             $intentId = $request->input($intentType);
             $clientSecret = $request->input($intentType . '_client_secret');
             $redirectStatus = $request->input('redirect_status');
             if ($redirectStatus != 'succeeded') {
                 return back()->with(['message' => __("A problem occurred! $redirectStatus"), 'type' => 'error']);
             }
-            $intentStripe = $request->has('payment_intent') ? 'paymentIntents' : ($request->has('setup_intent') ? 'setupIntents' : null);
+            $intentStripe = match (true) {
+                $request->has('payment_intent') => 'paymentIntents',
+                $request->has('setup_intent')   => 'setupIntents',
+                default                         => null,
+            };
             $intent = $stripe->{$intentStripe}->retrieve($intentId) ?? abort(404);
         }
 
@@ -1031,17 +1039,19 @@ class StripeService
             $activeSub = $sub->asStripeSubscription();
             if ($activeSub->status == 'active' || $activeSub->status == 'trialing') {
                 return Carbon::now()->diffInDays(Carbon::createFromTimeStamp($activeSub->current_period_end));
-            } elseif ($sub->stripe_status == 'stripe_approved') {
-                return Carbon::now()->diffInDays(Carbon::parse($sub->ends_at));
-            } else {
-                return Carbon::now()->diffInDays(Carbon::parse($sub->trial_ends_at));
             }
+
+            if ($sub->stripe_status == 'stripe_approved') {
+                return Carbon::now()->diffInDays(Carbon::parse($sub->ends_at));
+            }
+
+            return Carbon::now()->diffInDays(Carbon::parse($sub->trial_ends_at));
         } catch (Throwable $th) {
             if ($sub->stripe_status == 'stripe_approved') {
                 return Carbon::now()->diffInDays(Carbon::parse($sub->ends_at));
-            } else {
-                return Carbon::now()->diffInDays(Carbon::parse($sub->trial_ends_at));
             }
+
+            return Carbon::now()->diffInDays(Carbon::parse($sub->trial_ends_at));
         }
     }
 
@@ -1056,23 +1066,23 @@ class StripeService
             try {
                 if ($sub->asStripeSubscription()->status == 'active' || $sub->asStripeSubscription()->status == 'trialing' || $sub->stripe_status == 'stripe_approved') {
                     return true;
-                } else {
-                    $sub->stripe_status = 'cancelled';
-                    $sub->ends_at = Carbon::now();
-                    $sub->save();
-
-                    return false;
                 }
+
+                $sub->stripe_status = 'cancelled';
+                $sub->ends_at = Carbon::now();
+                $sub->save();
+
+                return false;
             } catch (Throwable $th) {
                 if ($sub->stripe_status === 'stripe_approved') {
                     return true;
-                } else {
-                    $sub->stripe_status = 'cancelled';
-                    $sub->ends_at = Carbon::now();
-                    $sub->save();
-
-                    return false;
                 }
+
+                $sub->stripe_status = 'cancelled';
+                $sub->ends_at = Carbon::now();
+                $sub->save();
+
+                return false;
             }
         }
 
@@ -1237,10 +1247,9 @@ class StripeService
             event(new StripeWebhookEvent($payload));
 
             return response()->json(['success' => true]);
-        } else {
-            // Incoming json is NOT verified
-            abort(404);
         }
+
+        abort(404);
     }
 
     public static function createWebhook()

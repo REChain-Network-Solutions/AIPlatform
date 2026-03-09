@@ -18,8 +18,8 @@
 			size="none"
 			x-init="true"
 			::class="{
-                'hidden': ($store.chatsFilter.searchStr !== '' || $store.chatsFilter.filter !== 'all') &&
-                    (!$el.getAttribute('data-title').includes($store.chatsFilter.searchStr) && !$el.getAttribute('data-description').includes($store.chatsFilter.searchStr)) ||
+                'hidden': (($store.chatsFilter.searchStr !== '' || $store.chatsFilter.filter !== 'all') &&
+                    (!$el.getAttribute('data-title').includes($store.chatsFilter.searchStr) && !$el.getAttribute('data-description').includes($store.chatsFilter.searchStr))) ||
                     ($store.chatsFilter.filter !== 'all' && ($store.chatsFilter.filter === 'favorite' && $el.getAttribute('data-favorite') !== 'true')) ||
                     (($store.chatsFilter.filter !== 'all' && $store.chatsFilter.filter !== 'favorite') && $store.chatsFilter.filter !== $el.getAttribute('data-filter'))
             }"

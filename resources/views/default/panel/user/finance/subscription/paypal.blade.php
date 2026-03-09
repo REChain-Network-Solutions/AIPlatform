@@ -36,9 +36,8 @@
             couponValue = getParameterByName('coupon', currentURL);
         }
 
-
         //its lifetime plan, take payment for one time
-        if (bilingID == null) {
+        if (! bilingID) {
             paypal.Buttons({
                 style: {
                     color: 'blue',
@@ -68,6 +67,7 @@
                                 'X-CSRF-TOKEN': "{{ csrf_token() }}",
                             },
                             body: JSON.stringify({
+                                orderID: data.orderID,
                                 paypalSubscriptionID: "lifetime",
                                 billingPlanId: "lifetime",
                                 planID: "{{ $plan->id }}",

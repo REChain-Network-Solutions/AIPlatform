@@ -10,10 +10,17 @@ class ThemeHelper
     public static function googleFontsString(string $landingOrDash = 'landingPage'): string
     {
         $google_fonts_string = '';
-        $theme_google_fonts = Theme::getSetting($landingOrDash . '.googleFonts');
+
+        $settingThemeName = $landingOrDash === 'dashboard'
+            ? setting('dash_theme', 'default')
+            : setting('front_theme', 'default');
+
+        $theme_google_fonts = Theme::exists($settingThemeName)
+            ? Theme::find($settingThemeName)->getSetting($landingOrDash . '.googleFonts')
+            : Theme::getSetting($landingOrDash . '.googleFonts');
 
         if (MarketplaceHelper::isRegistered('live-customizer')) {
-            $theme_google_fonts = array_merge(LiveCustomizer::getFontSetting(), $theme_google_fonts);
+            $theme_google_fonts = array_merge(LiveCustomizer::getFontSetting(), $theme_google_fonts ?? []);
         }
 
         $i = 0;
@@ -32,6 +39,13 @@ class ThemeHelper
 
     public static function dashboardScssPath(): string
     {
+        $dash_theme = setting('dash_theme', 'default');
+        $path = 'resources/views/' . $dash_theme . '/scss/dashboard.scss';
+
+        if (file_exists(base_path($path))) {
+            return $path;
+        }
+
         return 'resources/views/' . self::getTheme() . '/scss/dashboard.scss';
     }
 

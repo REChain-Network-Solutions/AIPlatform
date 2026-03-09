@@ -47,10 +47,12 @@ function LoginForm() {
 		contentType: false,
 		processData: false,
 		cache: false,
+		dataType: 'json',
 		success: function (data) {
 			toastr.success(magicai_localize.login_redirect);
 
-			window.location.href = data.link;
+			var href = (data && typeof data.link === 'string') ? data.link : '/dashboard/user';
+			window.location.href = href;
 			// Alpine.store('appLoadingIndicator').hide();
 		},
 		error: function (data) {

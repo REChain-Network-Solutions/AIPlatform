@@ -1254,21 +1254,21 @@ class IyzicoService
             if ($activeSub->stripe_status === 'iyzico_approved') {
                 // later we can renew from here or from command
                 return true;
-            } else {
-                $subscriptionRequest = json_decode(json_encode([
-                    'subscriptionReferenceCode' => $activeSub->stripe_id,
-                ], JSON_THROW_ON_ERROR), false, 512, JSON_THROW_ON_ERROR);
-                $subscription = $iyzipayActions->getSubscriptionDetails($subscriptionRequest);
-                if (Str::lower($subscription->getSubscriptionStatus()) === 'active') {
-                    return true;
-                } else {
-                    $activeSub->stripe_status = 'cancelled';
-                    $activeSub->ends_at = Carbon::now();
-                    $activeSub->save();
-
-                    return false;
-                }
             }
+
+            $subscriptionRequest = json_decode(json_encode([
+                'subscriptionReferenceCode' => $activeSub->stripe_id,
+            ], JSON_THROW_ON_ERROR), false, 512, JSON_THROW_ON_ERROR);
+            $subscription = $iyzipayActions->getSubscriptionDetails($subscriptionRequest);
+            if (Str::lower($subscription->getSubscriptionStatus()) === 'active') {
+                return true;
+            }
+
+            $activeSub->stripe_status = 'cancelled';
+            $activeSub->ends_at = Carbon::now();
+            $activeSub->save();
+
+            return false;
         }
 
         return null;
@@ -1292,20 +1292,20 @@ class IyzicoService
                 self::creditDecreaseCancelPlan($user, $plan);
 
                 return true;
-            } else {
-                // cancel subscription
-                $cancelSubscriptionRequest = json_decode(json_encode([
-                    'subscriptionReferenceCode' => $activeSub->stripe_id,
-                ], JSON_THROW_ON_ERROR), false, 512, JSON_THROW_ON_ERROR);
-                $cancelSubscription = $iyzipayActions->cancelSubscription($cancelSubscriptionRequest);
-                if ($cancelSubscription) {
-                    $activeSub->stripe_status = 'cancelled';
-                    $activeSub->ends_at = Carbon::now();
-                    $activeSub->save();
-                    self::creditDecreaseCancelPlan($user, $plan);
+            }
 
-                    return true;
-                }
+            // cancel subscription
+            $cancelSubscriptionRequest = json_decode(json_encode([
+                'subscriptionReferenceCode' => $activeSub->stripe_id,
+            ], JSON_THROW_ON_ERROR), false, 512, JSON_THROW_ON_ERROR);
+            $cancelSubscription = $iyzipayActions->cancelSubscription($cancelSubscriptionRequest);
+            if ($cancelSubscription) {
+                $activeSub->stripe_status = 'cancelled';
+                $activeSub->ends_at = Carbon::now();
+                $activeSub->save();
+                self::creditDecreaseCancelPlan($user, $plan);
+
+                return true;
             }
         }
 

@@ -14,8 +14,12 @@ use App\Models\PrivacyTerms;
 use App\Models\UserOrder;
 use App\Services\Chatbot\ParserExcelService;
 use Datlechin\GoogleTranslate\Facades\GoogleTranslate;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -37,10 +41,10 @@ function getImageUrlByOrderId($orderId)
 
 function bankActive()
 {
-    return Gateways::query()
-        ->where('code', 'banktransfer')
-        ->where('is_active', 1)
-        ->exists();
+    return Gateways::getCache(
+        static fn () => Gateways::query()->where('code', 'banktransfer')->where('is_active', 1)->exists(),
+        '_banktransfer_active'
+    );
 }
 
 function countBankTansactions()
@@ -65,40 +69,55 @@ function getCurrentActiveSubscriptionYokkasa($userid = null)
     if (Helper::appIsDemo()) {
         return null;
     }
+
     $userID = $userid ?? auth()->user()?->id;
 
-    return once(static function () use ($userID) {
+    $cacheKey = 'yokassa_subscription_' . ($userID ? 'user_' . $userID : 'guest');
+
+    return Cache::remember($cacheKey, 3, static function () use ($userID) {
+        $yokassaActive = Gateways::getCache(
+            static fn () => Gateways::query()
+                ->where(['code' => 'yokassa', 'is_active' => 1])
+                ->first(),
+            '_active_yokassa'
+        );
+
+        if (! $yokassaActive) {
+            return null;
+        }
+
         return YokassaSubscription::query()
             ->where('user_id', $userID)
-            ->whereIn('subscription_status', [
-                'active',
-                'yokassa_approved',
-            ])
+            ->whereIn('subscription_status', ['active', 'yokassa_approved'])
             ->first();
     });
 }
 
 function getTokenPlans()
 {
-    return Plan::where('type', 'prepaid')->where('active', 1)->get();
+    return Plan::getCache(
+        static fn () => Plan::query()->where('type', 'prepaid')->where('active', 1)->get(),
+        '_prepaid_plans'
+    );
 }
 function getSubsPlans()
 {
-    return Plan::where('type', TypeEnum::SUBSCRIPTION->value)
-        ->where('active', 1)
-        ->where(function ($query) {
-            $query->where('price', 0)
-                ->orWhere('frequency', FrequencyEnum::LIFETIME_MONTHLY)
-                ->orWhere('frequency', FrequencyEnum::LIFETIME_YEARLY);
-        })
-        ->get();
+    return Plan::getCache(
+        static fn () => Plan::query()->where('type', TypeEnum::SUBSCRIPTION->value)
+            ->where('active', 1)
+            ->where(function ($query) {
+                $query->where('price', 0)
+                    ->orWhere('frequency', FrequencyEnum::LIFETIME_MONTHLY)
+                    ->orWhere('frequency', FrequencyEnum::LIFETIME_YEARLY);
+            })
+            ->get(),
+        '_subs_plans'
+    );
 }
 
 function formatCamelCase($input)
 {
-    $formatted = ucwords(str_replace('_', ' ', $input));
-
-    return $formatted;
+    return ucwords(str_replace('_', ' ', $input));
 }
 
 function checkCouponInRequest($code = null)
@@ -130,9 +149,7 @@ function checkCouponInRequest($code = null)
 
 function taxToVal($price, $tax)
 {
-    $tax_with_val = ($tax > 0) ? ($price * $tax / 100) : 0;
-
-    return $tax_with_val;
+    return ($tax > 0) ? ($price * $tax / 100) : 0;
 }
 
 function displayCurr($symbol, $price, $taxValue = 0, $discountedprice = null, $tax_included = false)
@@ -143,32 +160,32 @@ function displayCurr($symbol, $price, $taxValue = 0, $discountedprice = null, $t
         if (in_array($symbol, config('currency.currencies_with_right_symbols'))) {
             if ($discountedprice !== null && $discountedprice < $price) {
                 return "<span style='text-decoration: line-through; color:grey;'>" . $newPrice . $symbol . '</span> <b>' . $discountedprice + $taxValue . $symbol . '</b>';
-            } else {
-                return $newPrice . $symbol;
             }
-        } else {
-            if ($discountedprice !== null && $discountedprice < $price) {
-                return "<span style='text-decoration: line-through; color:grey;'>" . $symbol . $newPrice . '</span> <b>' . $symbol . $discountedprice + $taxValue . '</b>';
-            } else {
-                return $symbol . $newPrice;
-            }
+
+            return $newPrice . $symbol;
         }
+
+        if ($discountedprice !== null && $discountedprice < $price) {
+            return "<span style='text-decoration: line-through; color:grey;'>" . $symbol . $newPrice . '</span> <b>' . $symbol . $discountedprice + $taxValue . '</b>';
+        }
+
+        return $symbol . $newPrice;
     } catch (\Exception $th) {
         $discountedprice = (float) str_replace(',', '', $discountedprice);
         $price = (float) str_replace(',', '', $price);
         if (in_array($symbol, config('currency.currencies_with_right_symbols'))) {
             if ($discountedprice !== null && $discountedprice < $price) {
                 return "<span style='text-decoration: line-through; color:grey;'>" . $newPrice . $symbol . '</span> <b>' . $discountedprice + $taxValue . $symbol . '</b>';
-            } else {
-                return $newPrice . $symbol;
             }
-        } else {
-            if ($discountedprice !== null && $discountedprice < $price) {
-                return "<span style='text-decoration: line-through; color:grey;'>" . $symbol . $newPrice . '</span> <b>' . $symbol . $discountedprice + $taxValue . '</b>';
-            } else {
-                return $symbol . $newPrice;
-            }
+
+            return $newPrice . $symbol;
         }
+
+        if ($discountedprice !== null && $discountedprice < $price) {
+            return "<span style='text-decoration: line-through; color:grey;'>" . $symbol . $newPrice . '</span> <b>' . $symbol . $discountedprice + $taxValue . '</b>';
+        }
+
+        return $symbol . $newPrice;
     }
 
 }
@@ -178,16 +195,16 @@ function displayCurrPlan($symbol, $price, $discountedprice = null)
     if (in_array($symbol, config('currency.currencies_with_right_symbols'))) {
         if ($discountedprice !== null && $discountedprice < $price) {
             return "<small class='inline-flex mb-[0.3em] font-normal text-[0.35em]'><span style='text-decoration: line-through;'>" . $price . '</span>' . $symbol . '</small>&nbsp;' . $discountedprice . "<small class='inline-flex mb-[0.3em] font-normal text-[0.35em]'>" . $symbol . '</small>';
-        } else {
-            return '<span>' . $price . "</span> <small class='inline-flex mb-[0.3em] font-normal text-[0.35em]'>" . $symbol . '</small>';
         }
-    } else {
-        if ($discountedprice !== null && $discountedprice < $price) {
-            return "<small class='inline-flex mb-[0.3em] font-normal text-[0.35em]'>" . $symbol . "<span style='text-decoration: line-through;'>" . $price . "</span> </small>&nbsp; <small class='inline-flex mb-[0.3em] font-normal text-[0.35em]'>" . $symbol . '</small>' . $discountedprice;
-        } else {
-            return "<small class='inline-flex mb-[0.3em] font-normal text-[0.35em]'>" . $symbol . '</small> <span>' . $price . '</span>';
-        }
+
+        return '<span>' . $price . "</span> <small class='inline-flex mb-[0.3em] font-normal text-[0.35em]'>" . $symbol . '</small>';
     }
+
+    if ($discountedprice !== null && $discountedprice < $price) {
+        return "<small class='inline-flex mb-[0.3em] font-normal text-[0.35em]'>" . $symbol . "<span style='text-decoration: line-through;'>" . $price . "</span> </small>&nbsp; <small class='inline-flex mb-[0.3em] font-normal text-[0.35em]'>" . $symbol . '</small>' . $discountedprice;
+    }
+
+    return "<small class='inline-flex mb-[0.3em] font-normal text-[0.35em]'>" . $symbol . '</small> <span>' . $price . '</span>';
 }
 
 function activeRoute(...$route_name): string
@@ -197,23 +214,23 @@ function activeRoute(...$route_name): string
         'ai_pdf', 'ai_vision', 'ai_chat_image', 'ai_code_generator', 'ai_youtube', 'ai_rss',
     ];
 
-    $slug = request()->route('slug');
+    $slug = request()?->route('slug');
 
     if ($slug && in_array($slug, $exceptListSlugs)) {
         return '';
     }
 
-    return request()->routeIs(...$route_name) ? 'active' : '';
+    return request()?->routeIs(...$route_name) ? 'active' : '';
 }
 
 function activeRouteBulk(...$route_names)
 {
-    return request()->routeIs(...$route_names) ? 'active' : '';
+    return request()?->routeIs(...$route_names) ? 'active' : '';
 }
 
 function activeRouteBulkShow(...$route_names)
 {
-    return request()->routeIs(...$route_names) ? 'show' : '';
+    return request()?->routeIs(...$route_names) ? 'show' : '';
 }
 
 if (! function_exists('custom_theme_url')) {
@@ -296,9 +313,7 @@ if (! function_exists('hsl_to_hex')) {
         $g = round($g * 255);
         $b = round($b * 255);
 
-        $hex = sprintf('#%02x%02x%02x', $r, $g, $b);
-
-        return $hex;
+        return sprintf('#%02x%02x%02x', $r, $g, $b);
     }
 }
 // hex_to_hsl
@@ -371,9 +386,9 @@ function percentageChangeSign($old, $new, int $precision = 2)
 
     if (percentageChange($old, $new) > 0) {
         return 'plus';
-    } else {
-        return 'minus';
     }
+
+    return 'minus';
 }
 
 function currency()
@@ -418,14 +433,12 @@ function getSubscriptionName()
 {
     $subscription = getSubscription();
 
-    return $subscription !== null ? Plan::query()->where('id', $subscription->name)->first()?->name : '';
-}
-
-function getYokassaSubscriptionName()
-{
-    $user = Auth::user();
-
-    return Plan::where('id', getYokassaSubscription()->plan_id)->first()->plan_id;
+    return $subscription !== null ?
+        Plan::getCache(
+            static fn () => Plan::query()->where('id', $subscription->plan_id)->first(),
+            '-' . $subscription->plan_id
+        )?->name
+        : '';
 }
 
 function getSubscriptionRenewDate()
@@ -542,8 +555,8 @@ function getVoiceNames($hash)
         // "da-DK-Neural2-D" => "Neural2 - FEMALE",
         // "da-DK-Neural2-F" => "Neural2 - MALE",
         'da-DK-Standard-A' => 'Emma (' . __('Female') . ')',
-        'da-DK-Standard-A' => 'Freja (' . __('Female') . ')',
-        'da-DK-Standard-A' => 'Ida (' . __('Female') . ')',
+        // 'da-DK-Standard-A' => 'Freja (' . __('Female') . ')',
+        // 'da-DK-Standard-A' => 'Ida (' . __('Female') . ')',
         'da-DK-Standard-C' => 'Noah (' . __('Male') . ')',
         'da-DK-Standard-D' => 'Mathilde (' . __('Female') . ')',
         'da-DK-Standard-E' => 'Clara (' . __('Female') . ')',
@@ -1044,8 +1057,14 @@ function newPlanDiscountPrice(?Plan $plan)
             ->orderBy('amount', 'desc')
             ->get();
 
+        $codes = Gateways::getCache(
+            static fn () => Gateways::where('is_active', 1)
+                ->pluck('code')
+                ->implode(','),
+            '-active-gateway-codes'
+        );
         foreach ($activeDiscounts as $discount) {
-            if (\App\Extensions\DiscountManager\System\Services\DiscountService::checkDiscountConditionsFor($discount, $planId, Gateways::where('is_active', 1)->pluck('code')->implode(','))) {
+            if (\App\Extensions\DiscountManager\System\Services\DiscountService::checkDiscountConditionsFor($discount, $planId, $codes)) {
                 $discounted = $price - ($price * ($discount->amount / 100));
 
                 return $cache[$planId] = $discounted;
@@ -1083,7 +1102,7 @@ function getVersion(?string $version = ''): string
             $parts[] = '0';
         }
     }
-    $parts = array_map(fn ($p) => (string) (int) $p, $parts);
+    $parts = array_map(static fn ($p) => (string) (int) $p, $parts);
     $parts = array_slice(array_pad($parts, 3, '0'), 0, 3);
 
     return implode('.', $parts);
@@ -1144,11 +1163,11 @@ function getMetaDesc($setting, $settingTwo)
     return $desc;
 }
 
-function parseRSS($feed_url, $limit = 10)
+function parseRSS($feed_url, $limit = 10): null|array|string
 {
 
     try {
-        $rss = simplexml_load_file($feed_url);
+        $rss = simplexml_load_string(file_get_contents($feed_url));
         $posts = [];
         $id = 1;
 
@@ -1191,162 +1210,324 @@ function isChatBot($id)
 
 }
 
-function ThumbImage($source_file, $max_width = 450, $max_height = 450, $quality = 80)
+function ThumbImage($source_file, $max_width = 800, $max_height = 800, $quality = 80, $convert_to_webp = true)
 {
     if (setting('image_thumbnail') == 0 || Str::contains($source_file, 'http') || Str::contains($source_file, 'loading.svg')) {
         return $source_file;
     }
 
     try {
+        $original_source_file = $source_file;
         $source_file = public_path($source_file);
         $disk = 'thumbs';
-        $dst_dir = ''; // Since setting the root in the disk configuration, leave this empty
-        if (! Storage::disk($disk)->exists($dst_dir)) {
-            Storage::disk($disk)->makeDirectory($dst_dir, $mode = 7777, true, true);
+        $dst_dir = '';
+        $thumbDisk = Storage::disk($disk);
+        if (! $thumbDisk->exists($dst_dir)) {
+            $thumbDisk->makeDirectory($dst_dir, $mode = 7777, true, true);
         }
 
-        $dst_file_name = basename($source_file);
         $is_url = filter_var($source_file, FILTER_VALIDATE_URL);
+        $extension = strtolower(pathinfo($source_file, PATHINFO_EXTENSION));
         if ($is_url) {
             $url_parts = pathinfo($source_file);
-            $extension = strtolower($url_parts['extension']);
+            $extension = strtolower($url_parts['extension'] ?? '');
             $mime_map = [
                 'jpg'  => 'image/jpeg',
                 'jpeg' => 'image/jpeg',
                 'png'  => 'image/png',
                 'gif'  => 'image/gif',
+                'webp' => 'image/webp',
             ];
             if (array_key_exists($extension, $mime_map)) {
                 $mime = $mime_map[$extension];
             } else {
                 $mime = mime_content_type($source_file);
             }
-            $dst_file_name .= '.' . $extension;
         } else {
-            // check if file exists
             if (! file_exists($source_file)) {
-                return $source_file;
+                return $original_source_file;
             }
 
             if (is_dir($source_file)) {
-                return $source_file;
+                return $original_source_file;
             }
 
             $imgsize = getimagesize($source_file);
+            if (! $imgsize) {
+                return $original_source_file;
+            }
             $width = $imgsize[0];
             $height = $imgsize[1];
             $mime = $imgsize['mime'];
         }
-        if (Storage::disk($disk)->exists($dst_file_name)) {
-            return Storage::disk($disk)->url($dst_file_name);
-        } else {
-            if ($is_url) {
-                $temp_source_file = tempnam(sys_get_temp_dir(), 'thumb'); // Create temporary file
-                file_put_contents($temp_source_file, file_get_contents($source_file)); // Download file
-                $source_file = $temp_source_file;
+        $signature = 'v3|' . $source_file . '|' . ($is_url ? '' : @filemtime($source_file)) . '|' . $max_width . 'x' . $max_height . '|webp:' . (int) $convert_to_webp;
+        $dst_file_name = pathinfo(basename($source_file), PATHINFO_FILENAME) . '_' . md5($signature);
+
+        // Reuse an existing generated thumbnail for this exact signature.
+        $candidateExtensions = array_values(array_filter(array_unique([
+            $convert_to_webp ? 'webp' : null,
+            $extension,
+            'jpg',
+            'jpeg',
+            'png',
+            'gif',
+        ])));
+        foreach ($candidateExtensions as $candidateExtension) {
+            $candidatePath = $dst_dir . $dst_file_name . '.' . $candidateExtension;
+            if ($thumbDisk->exists($candidatePath) && ($thumbDisk->size($candidatePath) ?? 0) > 0) {
+                return $thumbDisk->url($candidatePath);
             }
-            $dst_dir = Storage::disk($disk)->path($dst_dir . $dst_file_name);
-            switch ($mime) {
-                case 'image/gif':
-                    $image_create = 'imagecreatefromgif';
-                    $image = 'imagegif';
-
-                    break;
-
-                case 'image/png':
-                    $image_create = 'imagecreatefrompng';
-                    $image = 'imagepng';
-                    $quality = 7;
-
-                    break;
-
-                case 'image/jpeg':
-                    $image_create = 'imagecreatefromjpeg';
-                    $image = 'imagejpeg';
-                    $quality = 80;
-
-                    break;
-                case 'image/jpg':
-                    $image_create = 'imagecreatefromjpg';
-                    $image = 'imagejpg';
-                    $quality = 80;
-
-                    break;
-
-                default:
-                    // Handle unsupported file types or invalid MIME types
-                    if ($is_url) {
-                        unlink($source_file); // Remove temporary file
-                    }
-
-                    return false;
-
-                    break;
-            }
-
-            $dst_img = imagecreatetruecolor($max_width, $max_height);
-            $src_img = $image_create($source_file);
-
-            $width = imagesx($src_img);
-            $height = imagesy($src_img);
-
-            $width_new = $height * $max_width / $max_height;
-            $height_new = $width * $max_height / $max_width;
-
-            // if the new width is greater than the actual width of the image, then the height is too large and the rest cut off, or vice versa
-            if ($width_new > $width) {
-                // cut point by height
-                $h_point = (($height - $height_new) / 2);
-                // copy image
-                imagecopyresampled($dst_img, $src_img, 0, 0, 0, $h_point, $max_width, $max_height, $width, $height_new);
-            } else {
-                // cut point by width
-                $w_point = (($width - $width_new) / 2);
-                imagecopyresampled($dst_img, $src_img, 0, 0, $w_point, 0, $max_width, $max_height, $width_new, $height);
-            }
-            $image($dst_img, $dst_dir, $quality);
-
-            if ($is_url && file_exists($source_file)) {
-                unlink($source_file); // Remove temporary file
-            }
-
-            if ($dst_img) {
-                imagedestroy($dst_img);
-            }
-            if ($src_img) {
-                imagedestroy($src_img);
-            }
-
-            return Storage::disk($disk)->url($dst_file_name);
         }
+
+        if ($is_url) {
+            $temp_source_file = tempnam(sys_get_temp_dir(), 'thumb');
+            file_put_contents($temp_source_file, file_get_contents($source_file));
+            $source_file = $temp_source_file;
+        }
+
+        switch ($mime) {
+            case 'image/gif':
+                $image_create = 'imagecreatefromgif';
+                $image = 'imagegif';
+                $extension = 'gif';
+                $quality = null;
+
+                break;
+
+            case 'image/png':
+                $image_create = 'imagecreatefrompng';
+                $image = 'imagepng';
+                $extension = 'png';
+                $quality = max(0, min(9, (int) round((100 - (int) $quality) / 10)));
+
+                break;
+
+            case 'image/jpeg':
+                $image_create = 'imagecreatefromjpeg';
+                $image = 'imagejpeg';
+                $extension = 'jpg';
+                $quality = max(40, min(90, (int) $quality));
+
+                break;
+            case 'image/jpg':
+                $image_create = 'imagecreatefromjpeg';
+                $image = 'imagejpeg';
+                $extension = 'jpg';
+                $quality = max(40, min(90, (int) $quality));
+
+                break;
+
+            case 'image/webp':
+                $image_create = 'imagecreatefromwebp';
+                $image = 'imagewebp';
+                $extension = 'webp';
+                $quality = max(40, min(90, (int) $quality));
+
+                break;
+
+            default:
+                if ($is_url) {
+                    unlink($source_file);
+                }
+
+                return $original_source_file;
+
+                break;
+        }
+
+        $webp_supported = function_exists('imagewebp') && function_exists('imagecreatefromwebp');
+        $use_webp_output = $convert_to_webp && $webp_supported && $mime !== 'image/gif';
+
+        $src_img = $image_create($source_file);
+        if (! $src_img) {
+            if ($is_url && file_exists($source_file)) {
+                unlink($source_file);
+            }
+
+            return $original_source_file;
+        }
+
+        $width = imagesx($src_img);
+        $height = imagesy($src_img);
+        if ($width < 1 || $height < 1) {
+            if ($is_url && file_exists($source_file)) {
+                unlink($source_file);
+            }
+            imagedestroy($src_img);
+
+            return $original_source_file;
+        }
+
+        $ratio = min($max_width / $width, $max_height / $height, 1);
+        $target_width = max(1, (int) floor($width * $ratio));
+        $target_height = max(1, (int) floor($height * $ratio));
+
+        $dst_img = imagecreatetruecolor($target_width, $target_height);
+        if (in_array($mime, ['image/png', 'image/gif', 'image/webp'])) {
+            imagealphablending($dst_img, false);
+            imagesavealpha($dst_img, true);
+            $transparent = imagecolorallocatealpha($dst_img, 0, 0, 0, 127);
+            imagefilledrectangle($dst_img, 0, 0, $target_width, $target_height, $transparent);
+        }
+
+        imagecopyresampled($dst_img, $src_img, 0, 0, 0, 0, $target_width, $target_height, $width, $height);
+
+        $target_max = 300 * 1024;
+        $output_extension = $use_webp_output ? 'webp' : $extension;
+        $final_path = $thumbDisk->path($dst_dir . $dst_file_name . '.' . $output_extension);
+
+        // Mild sharpening to avoid overly soft thumbnails after resize.
+        if (function_exists('imageconvolution')) {
+            @imageconvolution($dst_img, [
+                [-1, -1, -1],
+                [-1, 16, -1],
+                [-1, -1, -1],
+            ], 8, 0);
+        }
+
+        if ($use_webp_output) {
+            $webp_quality_steps = [88, 84, 80, 76, 72];
+            $saved = false;
+            foreach ($webp_quality_steps as $webp_quality) {
+                $write_result = imagewebp($dst_img, $final_path, $webp_quality);
+                $filesize = @filesize($final_path) ?: 0;
+                if ($write_result && $filesize > 0) {
+                    $saved = true;
+                }
+                if ($saved && $filesize <= $target_max) {
+                    break;
+                }
+            }
+            if (! $saved) {
+                $output_extension = $extension;
+                $final_path = $thumbDisk->path($dst_dir . $dst_file_name . '.' . $output_extension);
+                if ($mime === 'image/png') {
+                    $saved = (bool) imagepng($dst_img, $final_path, max(0, min(9, (int) $quality)));
+                } elseif ($mime === 'image/gif') {
+                    $saved = (bool) imagegif($dst_img, $final_path);
+                } else {
+                    $saved = (bool) imagejpeg($dst_img, $final_path, 84);
+                }
+                if (! $saved || ! file_exists($final_path) || (@filesize($final_path) ?: 0) < 1) {
+                    if ($is_url && file_exists($source_file)) {
+                        unlink($source_file);
+                    }
+                    imagedestroy($dst_img);
+                    imagedestroy($src_img);
+
+                    return $original_source_file;
+                }
+            }
+        } elseif ($mime === 'image/gif') {
+            $saved = (bool) $image($dst_img, $final_path);
+            if (! $saved || ! file_exists($final_path) || (@filesize($final_path) ?: 0) < 1) {
+                if ($is_url && file_exists($source_file)) {
+                    unlink($source_file);
+                }
+                imagedestroy($dst_img);
+                imagedestroy($src_img);
+
+                return $original_source_file;
+            }
+        } elseif ($mime === 'image/png') {
+            $compressionLevels = array_values(array_unique([
+                (int) $quality,
+                4,
+                6,
+                8,
+                9,
+            ]));
+
+            $saved = false;
+            foreach ($compressionLevels as $compressionLevel) {
+                $write_result = $image($dst_img, $final_path, max(0, min(9, $compressionLevel)));
+                $filesize = @filesize($final_path) ?: 0;
+                if ($write_result && $filesize > 0) {
+                    $saved = true;
+                }
+                if ($saved && $filesize <= $target_max) {
+                    break;
+                }
+            }
+            if (! $saved) {
+                if ($is_url && file_exists($source_file)) {
+                    unlink($source_file);
+                }
+                imagedestroy($dst_img);
+                imagedestroy($src_img);
+
+                return $original_source_file;
+            }
+        } else {
+            $qualitySteps = array_values(array_unique([
+                (int) $quality,
+                88,
+                84,
+                80,
+                76,
+                72,
+                68,
+            ]));
+            rsort($qualitySteps);
+
+            $saved = false;
+            foreach ($qualitySteps as $qualityStep) {
+                $write_result = $image($dst_img, $final_path, max(68, min(92, $qualityStep)));
+                $filesize = @filesize($final_path) ?: 0;
+                if ($write_result && $filesize > 0) {
+                    $saved = true;
+                }
+                if ($saved && $filesize <= $target_max) {
+                    break;
+                }
+            }
+            if (! $saved) {
+                if ($is_url && file_exists($source_file)) {
+                    unlink($source_file);
+                }
+                imagedestroy($dst_img);
+                imagedestroy($src_img);
+
+                return $original_source_file;
+            }
+        }
+
+        if ($is_url && file_exists($source_file)) {
+            unlink($source_file);
+        }
+
+        if ($dst_img) {
+            imagedestroy($dst_img);
+        }
+        if ($src_img) {
+            imagedestroy($src_img);
+        }
+
+        return $thumbDisk->url($dst_file_name . '.' . $output_extension);
     } catch (Exception $e) {
-        return $source_file;
+        return $original_source_file ?? $source_file;
     }
 
 }
 
-function PurgeThumbImages()
+function PurgeThumbImages(): void
 {
     $dst_dir = public_path('uploads/thumbnail/');
 
     try {
         \Illuminate\Support\Facades\File::deleteDirectory($dst_dir);
     } catch (\Exception $e) {
-        \Log::error($e->getMessage());
+        Log::error($e->getMessage());
     }
 }
 
-function convertHistoryToGemini($history)
+function convertHistoryToGemini($history): array
 {
     $convertedHistory = [];
     $system = false;
     foreach ($history as $item) {
         $role = $item['role'];
         switch ($role) {
-            case 'user':
-                $role = 'user';
-
-                break;
             case 'assistant':
                 $role = 'model';
 
@@ -1383,17 +1564,17 @@ function convertHistoryToGemini($history)
                     'parts' => [],
                 ];
 
-                foreach ($content as $item) {
+                foreach ($content as $contentItem) {
 
-                    if ($item['type'] == 'text') {
+                    if ($contentItem['type'] === 'text') {
                         $convertedItem['parts'][] = [
                             'text' => $item['text'],
                         ];
-                    } elseif ($item['type'] == 'image_url') {
+                    } elseif ($contentItem['type'] === 'image_url') {
                         $convertedItem['parts'][] = [
                             'inline_data' => [
-                                'mime_type' => extractMimeType($item['image_url']['url']),
-                                'data'      => extractBase64ImageData($item['image_url']['url']),
+                                'mime_type' => extractMimeType($contentItem['image_url']['url']),
+                                'data'      => extractBase64ImageData($contentItem['image_url']['url']),
                             ],
                         ];
                     }
@@ -1489,7 +1670,10 @@ function showTeamFunctionality(): bool
         return true;
     }
 
-    $plan = Plan::query()->where('is_team_plan', 1)->first();
+    $plan = Plan::getCache(
+        static fn () => Plan::query()->where('is_team_plan', 1)->first(),
+        '_team'
+    );
 
     return Helper::setting('team_functionality') && ! auth()?->user()?->getAttribute('team_id') && $plan;
 }
@@ -1922,6 +2106,43 @@ if (! function_exists('isFileSecure')) {
     }
 }
 
+if (! function_exists('processSecureFileUpload')) {
+    function processSecureFileUpload($file, string $basePath): ?string
+    {
+        if (! $file) {
+            return null;
+        }
+
+        $fileName = $file->getClientOriginalName();
+
+        // Security check first
+        if (! isFileSecure($file)) {
+            throw new RuntimeException(__("File '{$fileName}' is not allowed for security reasons."));
+        }
+
+        // Calculate hash of new file
+        $newHash = md5_file($file->getRealPath());
+
+        // Get all files in the user's folder using Storage
+        $existingFiles = Storage::disk('public')->files($basePath);
+
+        foreach ($existingFiles as $existingFilePath) {
+            $fullPath = Storage::disk('public')->path($existingFilePath);
+
+            if (file_exists($fullPath)) {
+                $existingHash = md5_file($fullPath);
+
+                // Found file with same content - reuse it
+                if ($existingHash === $newHash) {
+                    return '/uploads/' . $existingFilePath;
+                }
+            }
+        }
+
+        return '/uploads/' . $file->store($basePath, 'public');
+    }
+}
+
 if (! function_exists('measureVoiceLength')) {
     function measureVoiceLength($filePath): ?float
     {
@@ -2068,5 +2289,74 @@ if (! function_exists('autoTranslateLanguage')) {
                 'translated_count' => 0,
             ];
         }
+    }
+}
+
+if (! function_exists('getSelectedOrUploadedFile')) {
+    /**
+     * Get the selected file path or upload a new one.
+     *
+     * @param  bool  $full  Return full URL or relative path
+     */
+    function getSelectedOrUploadedFile(UploadedFile $uploadedFile, bool $full = true): ?string
+    {
+        if (! isFileSecure($uploadedFile)) {
+            return null;
+        }
+
+        $userId = auth()?->id();
+
+        $fileDirectory = match ($uploadedFile->getClientMimeType()) {
+            'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp' => 'images',
+            'audio/mpeg', 'audio/wav', 'audio/ogg'                            => 'voices',
+            default                                                           => 'others',
+        };
+
+        $baseDirectory = $userId
+            ? "/uploads/media/{$fileDirectory}/u-{$userId}/"
+            : '/uploads/guest/';
+
+        $absoluteBasePath = public_path($baseDirectory);
+
+        if (! File::exists($absoluteBasePath)) {
+            File::makeDirectory($absoluteBasePath, 0755, true);
+        }
+
+        $originalName = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = strtolower($uploadedFile->guessExtension() ?: 'bin');
+        $safeBaseName = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $originalName);
+        $fileName = "{$safeBaseName}.{$extension}";
+        $absolutePath = $absoluteBasePath . $fileName;
+
+        if ($extension === 'bin') {
+            return null;
+        }
+
+        if (File::exists($absolutePath)) {
+            $existingHash = sha1_file($absolutePath);
+            $currentHash = sha1_file($uploadedFile->getRealPath());
+
+            if ($existingHash === $currentHash) {
+                $relative = $baseDirectory . $fileName;
+
+                return $full ? url($relative) : $relative;
+            }
+
+            $timestamp = now()->format('YmdHis');
+            $fileName = "{$safeBaseName}_{$timestamp}.{$extension}";
+            $absolutePath = $absoluteBasePath . $fileName;
+        }
+
+        $uploadedFile->move($absoluteBasePath, $fileName);
+
+        if (! validateUploadedFile($absolutePath, $extension)) {
+            File::delete($absolutePath);
+
+            return null;
+        }
+
+        $relative = $baseDirectory . $fileName;
+
+        return $full ? url($relative) : $relative;
     }
 }

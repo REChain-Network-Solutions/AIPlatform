@@ -1,7 +1,7 @@
 @if ($app_is_demo || (($setting->feature_affilates ?? true) && \auth()->user()?->affiliate_status == 1))
     @php
 		$userId = auth()->id();
-		$totalEarning = cache("user:{$userId}:total_earnings") ?: 0;
+		$totalEarning = cache()->get("user:{$userId}:total_earnings") ?: 0;
     @endphp
     <x-card
         class="flex w-full flex-col lg:w-[48%]"
