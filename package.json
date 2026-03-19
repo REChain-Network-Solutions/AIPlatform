@@ -28,7 +28,7 @@
 		"laravel-vite-plugin": "^2.1.0",
 		"lodash": "^4.17.23",
 		"postcss": "^8.5.8",
-		"pusher-js": "^8.4.0-rc2",
+		"pusher-js": "^8.4.3",
 		"sass": "^1.98.0",
 		"tailwindcss": "^4.2.2",
 		"tailwindcss-motion": "^1.1.1",
