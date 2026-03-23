@@ -17,7 +17,7 @@
                         class:label="w-2/3"
                         class="space-y-2"
                         tooltip="{{ $defaultModel->label() }}"
-                        label="{{ $defaultModel->value }} ({!! $defaultModel->subLabel() . ($defaultModel->value === \App\Domains\Entity\Enums\EntityEnum::GPT_4_O->value ? __(' & Vision') : '' ) !!} Model)"
+                        label="{{ $defaultModel->value }} ({!! $defaultModel->subLabel() . ($defaultModel->value === \App\Domains\Entity\Enums\EntityEnum::GPT_5_MINI->value ? __(' & Vision') : '' ) !!} Model)"
                         :error="'entities.' . $defaultModel->engine()->slug() . '.' . $defaultModel->slug() . '.credit'"
                     >
                         <div class="absolute -top-0.5 end-0 !m-0 lg:top-0">

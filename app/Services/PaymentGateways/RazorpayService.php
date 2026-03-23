@@ -98,6 +98,7 @@ class RazorpayService implements BaseGatewayService, ProductInterface
             return true;
         } catch (Exception $ex) {
             DB::rollBack();
+
             Log::error(self::$GATEWAY_CODE . "-> saveProduct():\n" . $ex->getMessage());
 
             return back()->with(['message' => $ex->getMessage(), 'type' => 'error']);

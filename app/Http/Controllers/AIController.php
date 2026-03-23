@@ -790,20 +790,9 @@ class AIController extends Controller
 
         $driver = Entity::driver();
         $driver->redirectIfNoCreditBalance();
-        if ($driver->enum()->value === EntityEnum::TEXT_DAVINCI_003->value) {
-            $response = FacadesOpenAI::completions()->create([
-                'model'      => $driver->enum()->value,
-                'prompt'     => $prompt,
-                'max_tokens' => (int) $this->settings->openai_max_output_length,
-            ]);
-        } else {
-            $response = FacadesOpenAI::chat()->create([
-                'model'    => $driver->enum()->value,
-                'messages' => [
-                    ['role' => 'user', 'content' => $prompt],
-                ],
-            ]);
-        }
+
+        $output = app(\App\Services\Ai\AiCompletionService::class)->completeUserOnly($prompt);
+
         $entry = new UserOpenai([
             'team_id'     => $user->team_id,
             'title'       => request('title') ?: null,
@@ -811,14 +800,10 @@ class AIController extends Controller
             'user_id'     => Auth::id(),
             'openai_id'   => $post->id,
             'input'       => $prompt,
-            'response'    => json_encode($response->toArray(), JSON_THROW_ON_ERROR),
+            'response'    => $output,
         ]);
 
-        if ($driver->enum()->value === EntityEnum::TEXT_DAVINCI_003->value) {
-            $entry->output = $response['choices'][0]['text'];
-        } else {
-            $entry->output = $response->choices[0]->message->content;
-        }
+        $entry->output = $output;
         $entry->hash = Str::random(256);
         $entry->credits = countWords($entry->output);
         $entry->words = 0;
@@ -1462,42 +1447,21 @@ class AIController extends Controller
             return response()->json(['result' => '']);
         }
 
-        ApiHelper::setOpenAiKey();
-        $detect = FacadesOpenAI::chat()->create([
-            'model'    => $driver->enum()->value,
-            'messages' => [
-                [
-                    'role'    => 'system',
-                    'content' => 'You are a helpful language detection assistant. Must detect the content language and return it only ' . app()->getLocale() . ' language code. For example: "en_US"',
-                ],
-                [
-                    'role'    => 'user',
-                    'content' => "$prompt\n\nContent: \"$content\"",
-                ],
-            ],
-        ]);
+        $aiService = app(\App\Services\Ai\AiCompletionService::class);
 
-        $languageCode = $detect->choices[0]->message->content;
+        $languageCode = $aiService->complete(
+            'You are a helpful language detection assistant. Must detect the content language and return it only ' . app()->getLocale() . ' language code. For example: "en_US"',
+            "$prompt\n\nContent: \"$content\""
+        );
 
-        $completion = FacadesOpenAI::chat()->create([
-            'model'    => $driver->enum()->value,
-            'messages' => [
-                [
-                    'role'    => 'system',
-                    'content' => 'You are a helpful assistant. You must response only with answer. Response language must be: ' . $languageCode,
-                ],
-                [
-                    'role'    => 'user',
-                    'content' => "$prompt\n\nContent: \"$content\"",
-                ],
-            ],
-        ]);
-
-        $content = $completion->choices[0]->message->content;
+        $content = $aiService->complete(
+            'You are a helpful assistant. You must response only with answer. Response language must be: ' . $languageCode,
+            "$prompt\n\nContent: \"$content\""
+        );
         $driver->input($content)->calculateCredit()->decreaseCredit();
         Usage::getSingle()->updateWordCounts($driver->calculate());
 
-        return response()->json(['result' => $completion->choices[0]->message->content]);
+        return response()->json(['result' => $content]);
     }
 
     public function reWrite()

@@ -9,6 +9,7 @@ use App\Domains\Entity\Enums\EntityEnum;
 use App\Enums\AccessType;
 use App\Enums\Plan\FrequencyEnum;
 use App\Enums\Plan\TypeEnum;
+use App\Helpers\Classes\Helper;
 use App\Models\Concerns\HasCache;
 use App\Services\Common\MenuService;
 use App\Services\Finance\PlanService;
@@ -61,11 +62,15 @@ class Plan extends Model
         'ai_models',
         'hidden',
         'max_subscribe',
+        'chatbot_limit',
+        'chatbot_channels',
+        'chatbot_human_agent',
         'multi_model_support',
         'last_date',
         'created_at',
         'updated_at',
         'affiliate_status',
+        'voice_call_seconds_limit',
     ];
 
     private ?array $mergedAiFeatures = null;
@@ -102,6 +107,8 @@ class Plan extends Model
         'is_team_plan'              => 'boolean',
         'active'                    => 'boolean',
         'user_api'                  => 'boolean',
+        'chatbot_limit'             => 'integer',
+        'chatbot_human_agent'       => 'boolean',
         'social_media_agent_limits' => 'array',
         'blogpilot_limits'          => 'array',
     ];
@@ -373,14 +380,18 @@ class Plan extends Model
                 'agents'        => -1,
                 'monthly_posts' => -1,
             ],
-            'default_ai_model'              => EntityEnum::GPT_4_O->slug(),
+            'default_ai_model'              => Helper::defaultWordModel()->slug(),
             'ai_models'                     => EngineEnum::getNestedPlanLimits(),
             'hidden_url'                    => null,
             'hidden'                        => false,
             'reset_credits_on_renewal'      => false,
             'max_subscribe'                 => 0,
+            'chatbot_limit'                 => null,
+            'chatbot_channels'              => [],
+            'chatbot_human_agent'           => true,
             'multi_model_support'           => false,
             'last_date'                     => null,
+            'voice_call_seconds_limit'      => -1,
         ];
     }
 
@@ -426,5 +437,31 @@ class Plan extends Model
             ],
             $attributes
         ));
+    }
+
+    protected function chatbotChannels(): Attribute
+    {
+        $getChannels = static function (?string $value) {
+            if (empty($value)) {
+                return [];
+            }
+
+            $decoded = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+
+            return is_array($decoded) ? $decoded : [];
+        };
+
+        $setChannels = static function (?array $value) {
+            if (! $value) {
+                return null;
+            }
+
+            return json_encode($value, JSON_THROW_ON_ERROR);
+        };
+
+        return Attribute::make(
+            get: static fn (?string $value) => $getChannels($value),
+            set: static fn (?array $value) => $setChannels($value),
+        );
     }
 }

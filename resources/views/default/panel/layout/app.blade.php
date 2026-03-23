@@ -281,6 +281,7 @@
         <x-demo-switcher themes-type="Dashboard" />
     @endif
 
+	@includeIf('demoextension::switcher')
     @includeIf('content-manager::media-modal')
 </body>
 

@@ -140,7 +140,7 @@
 
                             <a
                                 class="absolute inset-0 opacity-0"
-								@if(isset($theme['slug']) && $theme['slug'] === 'aichatpro')
+								@if(isset($theme['slug']) && in_array($theme['slug'], ['aichatpro', 'imagepro']))
 									href="https://aichatpro.magicproject.ai/"
 								@else
 									href="https://{{ $theme['slug'] == 'default' ? 'magicai.liquid-themes.com' : $theme['slug'] . '.projecthub.ai' }}"

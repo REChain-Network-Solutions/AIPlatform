@@ -61,7 +61,7 @@ test('transfer image and word limits for all models', function () {
         'credit'      => 50,
         'isUnlimited' => false,
     ];
-    $expectedCredits[EntityEnum::GPT_4_O->engine()->slug()][EntityEnum::GPT_4_O->slug()] = [
+    $expectedCredits[EntityEnum::GPT_5_MINI->engine()->slug()][EntityEnum::GPT_5_MINI->slug()] = [
         'credit'      => 100,
         'isUnlimited' => false,
     ];
@@ -110,7 +110,7 @@ test('transfer word limit for all models', function () {
     $this->artisan('migrate', ['--path' => 'database/migrations/' . $migrationFilename . '.php']);
 
     $expectedCredits = User::getFreshCredits();
-    $expectedCredits[EntityEnum::GPT_4_O->engine()->slug()][EntityEnum::GPT_4_O->slug()] = [
+    $expectedCredits[EntityEnum::GPT_5_MINI->engine()->slug()][EntityEnum::GPT_5_MINI->slug()] = [
         'credit'      => 100,
         'isUnlimited' => false,
     ];

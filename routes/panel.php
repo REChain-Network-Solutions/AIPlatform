@@ -414,6 +414,8 @@ Route::middleware(['auth', 'updateUserActivity'])
                     'prefix' => 'ai-chat-model',
                 ], function () {
                     Route::get('', [AiChatbotModelController::class, 'index'])->name('index');
+                    Route::get('all-models', [AiChatbotModelController::class, 'modelsIndex'])->name('models.index');
+                    Route::post('update-engine-images', [AiChatbotModelController::class, 'updateEngineImages'])->name('update.engine.images');
                     Route::post('', [AiChatbotModelController::class, 'update'])->name('update');
                 });
 

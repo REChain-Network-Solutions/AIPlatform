@@ -61,10 +61,11 @@
     <x-modal
         class:modal="select-ai-model-modal"
         class:modal-body="max-sm:p-3"
-        class:modal-head="gap-1 sticky top-0 z-50 bg-background p-4"
+        class:modal-head="gap-1 sticky top-0 z-[100] shrink-0 bg-background p-4"
         class:modal-content="mx-5 container"
         class:close-btn="!hidden"
         id="openRouterModel"
+        disable-focus="true"
     >
         <x-slot:trigger
             variant="ghost-shadow"
@@ -117,8 +118,8 @@
                     @endif
                 </div>
 
-                <div class="lg:ms-auto">
-                    <form action="#">
+                <div class="relative z-10 shrink-0 lg:ms-auto" @click.stop>
+                    <form action="#" @submit.prevent>
                         <x-forms.input
                             class="max-h-9 rounded-full bg-clay ps-8 sm:min-w-64"
                             type="search"
@@ -126,7 +127,7 @@
                             @input="searchString = $event.target.value"
                         >
                             <x-slot:icon>
-                                <x-tabler-search class="absolute start-3 top-1/2 size-4 -translate-y-1/2" />
+                                <x-tabler-search class="absolute start-3 top-1/2 size-4 -translate-y-1/2 pointer-events-none" />
                             </x-slot:icon>
                         </x-forms.input>
                     </form>
@@ -165,10 +166,11 @@
                                     <div class="w-full">
                                         <div class="mb-6 flex justify-between gap-1.5">
                                             <figure class="inline-grid size-10 shrink-0 place-content-center rounded-full bg-heading-foreground/5">
-                                                <x-tabler-brand-openai
-                                                    class="size-6"
-                                                    stroke-width="1.5"
-                                                />
+                                               @if($driver->model()?->image)
+                                                    <img src="{{ asset($driver->model()?->image) }}" alt="{{ $driver->model()?->selected_title ?? $model?->value }}" class="size-6 object-contain">
+                                                @else
+                                                    <x-tabler-brand-openai class="size-6" stroke-width="1.5"/>
+                                                @endif
                                             </figure>
                                             <div class="text-end">
                                                 <p class="m-0 text-3xs font-medium text-heading-foreground">

@@ -46,7 +46,7 @@
         @endif
         @if ($isImage)
             @php
-                $imageSource = $isExternalImageDoc ? ($entry->output_url ?? $entry->output) : ThumbImage(custom_theme_url($entry->output));
+                $imageSource = $isExternalImageDoc ? $entry->output_url ?? $entry->output : ThumbImage(custom_theme_url($entry->output));
             @endphp
             <img
                 class="lqd-posts-item-img lqd-docs-item-img size-9 rounded-full object-cover object-center group-[&[data-view-mode=grid]]:mb-2 group-[&[data-view-mode=grid]]:aspect-video group-[&[data-view-mode=grid]]:h-auto group-[&[data-view-mode=grid]]:w-full group-[&[data-view-mode=grid]]:rounded-md"
@@ -116,7 +116,7 @@
     </div>
 
     <p
-        class="lqd-posts-item-type lqd-docs-item-type sort-file inline-block w-auto justify-self-start rounded-md bg-primary px-1.5 py-1 text-3xs font-medium leading-tight text-primary-foreground group-[&[data-view-mode=grid]]:col-span-2 group-[&[data-view-mode=grid]]:max-w-[calc(100%-50px)]"
+        class="lqd-posts-item-type lqd-docs-item-type sort-file inline-block w-auto max-w-full justify-self-start overflow-hidden truncate rounded-md bg-primary px-1.5 py-1 text-3xs font-medium leading-tight text-primary-foreground group-[&[data-view-mode=grid]]:col-span-2 group-[&[data-view-mode=grid]]:max-w-[calc(100%-50px)]"
         data-generator-title="{{ trim($entry->generator->title) }}"
         @if ($entry->generator->color) style="background: {{ $entry->generator->color }}; color: black;" @endif
     >
@@ -142,7 +142,7 @@
     </span>
 
     <div class="lqd-posts-item-actions lqd-docs-item-actions flex items-center justify-end gap-2 font-normal">
-        @if (!$hideFav)
+        @if (!$hideFav && ! $isExternalImageDoc)
             <x-favorite-button
                 class="group-[&[data-view-mode=grid]]:absolute group-[&[data-view-mode=grid]]:end-3 group-[&[data-view-mode=grid]]:top-3 group-[&[data-view-mode=grid]]:h-8 group-[&[data-view-mode=grid]]:w-8"
                 id="{{ $documentId }}"
@@ -179,7 +179,7 @@
             <x-slot:dropdown
                 class="overflow-hidden whitespace-nowrap py-1 text-2xs font-medium group-[&[data-view-mode=grid]]:-me-3"
             >
-                @if (! $isExternalImageDoc)
+                @if (!$isExternalImageDoc)
                     <x-modal
                         title="{{ __('Move Document') }}"
                         disable-modal="{{ $app_is_demo }}"

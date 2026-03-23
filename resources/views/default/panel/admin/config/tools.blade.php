@@ -44,6 +44,41 @@
         <div class="col-md-12 mb-4">
             <div class="mb-3">
                 @php
+                    $external_chatbot_engines = [
+                        EngineEnum::OPEN_AI,
+                        EngineEnum::ANTHROPIC,
+                        EngineEnum::GEMINI,
+                        // EngineEnum::DEEP_SEEK,
+                        // EngineEnum::X_AI,
+                    ];
+                    $current_external_chatbot_engine = setting('default_external_chatbot_engine', EngineEnum::OPEN_AI->value);
+                @endphp
+                <x-card
+                    class="w-full"
+                    size="sm"
+                >
+                    <label class="form-label">{{ __('Default External Chatbot Engine') }}</label>
+                    <select
+                        class="form-select"
+                        id="default_external_chatbot_engine"
+                        name="default_external_chatbot_engine"
+                    >
+                        @foreach ($external_chatbot_engines as $engine)
+                            <option
+                                value="{{ $engine->value }}"
+                                {{ $current_external_chatbot_engine === $engine->value ? 'selected' : null }}
+                            >
+                                {{ $engine->label() }}
+                            </option>
+                        @endforeach
+                    </select>
+                </x-card>
+            </div>
+        </div>
+
+        <div class="col-md-12 mb-4">
+            <div class="mb-3">
+                @php
                     $voice_chat_engines = [EngineEnum::OPEN_AI, EngineEnum::ELEVENLABS];
                     $current_engine = setting('default_voice_chat_engine', EngineEnum::OPEN_AI->value);
                 @endphp

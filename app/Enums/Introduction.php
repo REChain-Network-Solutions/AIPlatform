@@ -22,6 +22,7 @@ enum Introduction: string implements Contracts\WithStringBackedEnum
     case AI_DOCUMENT = 'documents';
     case AI_EXT_CHATBOT = 'ext_chat_bot';
     case AI_EXT_VOICE_CHATBOT = 'ext_voice_chatbot';
+    case AI_EXT_VOICE_CALL = 'ext_voice_call';
     case AI_EXT_CHATBOT_AGENT = 'ext_chat_bot_agent';
     case AI_VIDEO = 'ai_video';
 
@@ -42,6 +43,7 @@ enum Introduction: string implements Contracts\WithStringBackedEnum
     case AI_VOICEOVER_CLONE = 'ai_voiceover_clone';
     case TEAM_MENU = 'team_menu';
     case AI_EXT_CHATBOT_KNOWLEDGE_BASE_ARTICLES = 'ext_chatbot_knowledge_base_article';
+    case AI_EXT_CHATBOT_CANNED_RESPONSES = 'ext_chatbot_canned_response';
     case AI_EXT_CHAT_KNOWLEDGE_BASE_ARTICLES = 'ext_chat_knowledge_base_article';
     case AI_EXT_CHATBOT_CHATBOT_CUSTOMER_ARTICLE = 'ext_chatbot_chatbot_customer_article';
     case AI_EXT_SOCIAL_MEDIA_DROPDOWN = 'ext_social_media_dropdown';
@@ -116,28 +118,25 @@ enum Introduction: string implements Contracts\WithStringBackedEnum
     case INFLUENCER_AVATAR = 'influencer_avatar';
     case VIRAL_CLIPS = 'viral_clips';
 
+    case ADMIN_AI_ENGINES = 'ai_engines';
+
     public function label(): string
     {
         return match ($this) {
-            self::AI_REALTIME_IMAGE                       => __('Realtime Image'),
-            self::AI_REALTIME_VOICE_CHAT                  => __('Realtime Voice Chat'),
-            self::AI_INFLUENCER                           => __('Ai Influencer'),
-            self::URL_TO_VIDEO                            => __('Url To Video'),
-            self::INFLUENCER_AVATAR                       => __('Influencer Avatar'),
-            self::VIRAL_CLIPS                             => __('Viral Clips'),
             self::INITIALIZE                              => __('Onboarding'),
             self::LAST                                    => __('Onboarding End'),
             self::AFFILIATE_SEND                          => __('Affiliate'),
             self::SELECT_PLAN                             => __('Select Plan'),
             self::AI_WRITER                               => __('AI Writer'),
-            self::AI_IMAGE                                => __('AI Image'),
-            self::AI_PDF                                  => __('AI File Chat'),
-            self::AI_CODE                                 => __('AI Code'),
             self::AI_EDITOR                               => __('AI Editor'),
             self::AI_DOCUMENT                             => __('Documents'),
             self::AI_EXT_CHATBOT                          => __('AI Bots'),
             self::AI_EXT_VOICE_CHATBOT                    => __('AI Voice Bots'),
+            self::AI_EXT_VOICE_CALL                       => __('AI Voice Call'),
+            self::AI_EXT_CHATBOT_AGENT                    => __('AI Chatbot Agent'),
             self::AI_VIDEO                                => __('AI Video'),
+            self::AI_CHAT_PRO_IMAGE_CHAT                  => __('AI Chat Pro Image Chat'),
+            self::AI_VIDEO_TO_VIDEO                       => __('AI Video to Video'),
             self::AI_ARTICLE_WIZARD                       => __('AI Article Wizard'),
             self::AI_VISION                               => __('AI Vision'),
             self::AI_REWRITER                             => __('AI ReWriter'),
@@ -150,22 +149,34 @@ enum Introduction: string implements Contracts\WithStringBackedEnum
             self::AI_RSS                                  => __('AI RSS'),
             self::AI_SPEECH_TO_TEXT                       => __('AI Speech to Text'),
             self::AI_VOICEOVER                            => __('AI Voiceover'),
-            self::AI_VOICEOVER_CLONE, self::AI_VOICE_ISOLATOR => __('AI Voice Isolator'),
+            self::AI_VOICEOVER_CLONE                      => __('AI Voice Isolator'),
+            self::TEAM_MENU                               => __('Team'),
+            self::AI_EXT_CHATBOT_KNOWLEDGE_BASE_ARTICLES  => __('AI Ext Chatbot Knowledge Base Articles'),
+            self::AI_EXT_CHATBOT_CANNED_RESPONSES         => __('AI Bot Canned Responses'),
+            self::AI_EXT_CHAT_KNOWLEDGE_BASE_ARTICLES     => __('AI Ext Chat Knowledge Base Articles'),
+            self::AI_EXT_CHATBOT_CHATBOT_CUSTOMER_ARTICLE => __('AI Ext Chatbot Customer Articles'),
+            self::AI_EXT_SOCIAL_MEDIA_DROPDOWN            => __('AI Ext Social Media Dropdown'),
+            self::AI_EXT_BLOGPILOT_DROPDOWN               => __('AI BlogPilot Dropdown'),
+            self::AI_EXT_CHATBOT_CUSTOMER                 => __('AI Ext Chatbot Customer'),
+            self::BRAND_VOICE                             => __('Brand Voice'),
+            self::ADVANCED_IMAGE                          => __('Advanced Image Editor'),
+            self::AI_VOICE_ISOLATOR                       => __('AI Voice Isolator'),
             self::AI_AVATAR                               => __('AI Avatar'),
             self::AI_AVATAR_PRO                           => __('AI Persona'),
-            self::ADVANCED_IMAGE                          => __('Advanced Image Editor'),
-            self::BRAND_VOICE                             => __('Brand Voice'),
-            self::TEAM_MENU                               => __('Team'),
             self::AI_FALL_VIDEO                           => __('Fall Video'),
-            self::AI_CHAT_PRO_IMAGE_CHAT                  => __('AI Chat Pro Image Chat'),
             self::AI_REPLICA                              => __('AI Replica'),
             self::AI_MUSIC                                => __('AI Music'),
             self::AI_MUSIC_PRO                            => __('AI Music Pro'),
             self::AI_PRODUCT_SHOT                         => __('AI Product Photography'),
-            self::USER_API_KEYS, self::API_KEYS           => __('API Keys'),
+            self::USER_API_KEYS                           => __('API Keys'),
+            self::API_KEYS                                => __('API Keys'),
             self::AFFILIATES                              => __('Affiliates'),
             self::SUPPORT                                 => __('Support'),
             self::INTEGRATION                             => __('Integration'),
+            self::AI_IMAGE                                => __('AI Image'),
+            self::AI_PDF                                  => __('AI File Chat'),
+            self::AI_CODE                                 => __('AI Code'),
+            self::AI_PRESENTATION                         => __('AI Presentation'),
             self::ADMIN_DASHBOARD                         => __('Dashboard'),
             self::ADMIN_MARKETPLACE                       => __('Admin Marketplace'),
             self::ADMIN_THEMES                            => __('Admin Themes'),
@@ -189,11 +200,13 @@ enum Introduction: string implements Contracts\WithStringBackedEnum
             self::ADMIN_MAILCHIMP_NEWSLETTER              => __('Admin Mailchimp Newsletter'),
             self::ADMIN_HUBSPOT_NEWSLETTER                => __('Admin Hubspot Newsletter'),
             self::ADMIN_API_INTEGRATION                   => __('Admin Api Integration'),
+            self::ADMIN_AI_IMAGE_PRO_PUBLISH_REQS         => __('Admin AI Image Pro Publish Requests'),
             self::ADMIN_SETTINGS                          => __('Admin Settings'),
             self::ADMIN_SITE_HEALTH                       => __('Admin Site Health'),
             self::ADMIN_LICENSE                           => __('Admin License'),
             self::ADMIN_UPDATE                            => __('Admin Update'),
             self::ADMIN_MENU_SETTINGS                     => __('Admin Menu Settings'),
+            self::ADMIN_FOOTER_MENU_SETTINGS              => __('Admin Footer Menu Settings'),
             self::SIDEBAR                                 => __('Sidebar'),
             self::DASHBOARD_FIRST                         => __('Dashboard First'),
             self::DASHBOARD_TWO                           => __('Dashboard Two'),
@@ -202,16 +215,13 @@ enum Introduction: string implements Contracts\WithStringBackedEnum
             self::SOCIAL_MEDIA                            => __('Social Media'),
             self::BLOGPILOT                               => __('Blog Pilot'),
             self::FASHION_STUDIO                          => __('AI Fashion Studio'),
-            self::ADMIN_AI_IMAGE_PRO_PUBLISH_REQS         => __('Admin AI Image Pro Publish Requests'),
-            self::AI_EXT_CHATBOT_AGENT                    => __('AI Chatbot Agent'),
-            self::AI_VIDEO_TO_VIDEO                       => __('AI Video to Video'),
-            self::AI_EXT_CHATBOT_KNOWLEDGE_BASE_ARTICLES  => __('AI Ext Chatbot Knowledge Base Articles'),
-            self::AI_EXT_CHAT_KNOWLEDGE_BASE_ARTICLES     => __('AI Ext Chat Knowledge Base Articles'),
-            self::AI_EXT_CHATBOT_CHATBOT_CUSTOMER_ARTICLE => __('AI Ext Chatbot Customer Articles'),
-            self::AI_EXT_SOCIAL_MEDIA_DROPDOWN            => __('AI Ext Social Media Dropdown'),
-            self::AI_EXT_CHATBOT_CUSTOMER                 => __('AI Ext Chatbot Customer'),
-            self::AI_PRESENTATION                         => __('AI Presentation'),
-            self::ADMIN_FOOTER_MENU_SETTINGS              => __('Admin Footer Menu Settings'),
+            self::AI_REALTIME_VOICE_CHAT                  => __('Realtime Voice Chat'),
+            self::AI_REALTIME_IMAGE                       => __('Realtime Image'),
+            self::AI_INFLUENCER                           => __('Ai Influencer'),
+            self::URL_TO_VIDEO                            => __('Url To Video'),
+            self::INFLUENCER_AVATAR                       => __('Influencer Avatar'),
+            self::VIRAL_CLIPS                             => __('Viral Clips'),
+            self::ADMIN_AI_ENGINES                        => __('AI Engines'),
         };
     }
 }

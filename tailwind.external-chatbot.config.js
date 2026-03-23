@@ -5,6 +5,7 @@ export default {
 	content: [
 		'./resources/views/**/components/**/*.blade.php',
 		'./app/Extensions/Chatbot/**/*.blade.php',
+		'./app/Extensions/ChatbotEcommerce/**/*.blade.php',
 	],
 	theme: {
 		extend: {
@@ -28,6 +29,14 @@ export default {
 				'lg': '0 15px 33px rgb(0 0 0 / 5%)',
 				'xl': '0 20px 50px rgb(0 0 0 / 20%)',
 				'2xl': '0 33px 44px rgb(0 0 0 / 12%)',
+			},
+			colors: {
+				primary: {
+					DEFAULT: 'var(--primary)',
+					foreground: 'var(--primary-foreground)',
+				},
+				background: 'var(--background)',
+				foreground: 'var(--foreground)',
 			},
 			keyframes: {
 				...defaultConfig.theme.extend.keyframes,

@@ -2,6 +2,8 @@
 
 namespace App\Helpers\Classes;
 
+use App\Domains\Engine\Enums\EngineEnum;
+use App\Domains\Entity\Enums\EntityEnum;
 use App\Domains\Marketplace\Repositories\Contracts\ExtensionRepositoryInterface;
 use App\Enums\Roles;
 use App\Helpers\Classes\RateLimiter\RateLimiter;
@@ -253,6 +255,17 @@ class Helper
         $setting = $setting ?: Setting::getCache();
 
         return $setting?->getAttribute($key) ?? $default;
+    }
+
+    public static function defaultEngine(): EngineEnum
+    {
+        return EngineEnum::fromSlug((string) self::setting('default_ai_engine', EngineEnum::OPEN_AI->value))
+            ?? EngineEnum::OPEN_AI;
+    }
+
+    public static function defaultWordModel(): EntityEnum
+    {
+        return self::defaultEngine()->getDefaultWordModel(Setting::getCache());
     }
 
     public static function appIsDemoForChatbot(): bool

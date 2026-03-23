@@ -1,7 +1,7 @@
 @php
     $base_class = 'lqd-modal lqd-modal-' . $type . ' relative';
-    $modal_base_class = 'lqd-modal-modal z-[999] flex items-center justify-center overflow-y-auto overscroll-contain';
-    $modal_backdrop_base_class = 'lqd-modal-backdrop fixed inset-0 bg-black/5 backdrop-blur-sm';
+    $modal_base_class = 'lqd-modal-modal z-[999] flex items-center justify-center overflow-y-auto overscroll-contain px-4';
+    $modal_backdrop_base_class = 'lqd-modal-backdrop fixed inset-0 bg-black/50 backdrop-blur-sm';
     $modal_head_base_class = 'lqd-modal-head flex flex-wrap items-center gap-3 border-b px-4 py-2 relative';
     $modal_body_base_class = 'lqd-modal-body p-10';
     $modal_content_base_class =
@@ -32,14 +32,7 @@
 
 <div
     {{ $attributes->withoutTwMergeClasses()->twMerge($base_class, $attributes->get('class')) }}
-    x-data="{
-        modalOpen: false,
-        toggleModal() {
-            @if ($disableModal) toastr.info( '{{ $disableModalMessage }}' )
-			@else
-			this.modalOpen = !this.modalOpen @endif
-        }
-    }"
+    x-data="liquidModal"
     :class="{ 'modal-open': modalOpen }"
 >
     @if (!empty($trigger))
@@ -68,14 +61,14 @@
             {{ $attributes->twMergeFor('modal', $modal_base_class) }}
             x-show="modalOpen"
             x-transition
-            @keyup.escape="modalOpen = false"
-            :class="{ 'hidden': !modalOpen }"
+            @keyup.escape="if ( !modalLocked ) { modalOpen = false }"
+            :class="{ 'hidden': !modalOpen, 'modal-open': modalOpen }"
         >
             <div {{ $attributes->twMergeFor('modal-backdrop', $modal_backdrop_base_class) }}></div>
 
             <div
                 {{ $attributes->twMergeFor('modal-content', $modal_content_base_class) }}
-                @click.outside="modalOpen = false"
+                @click.outside="if ( !modalLocked ) { modalOpen = false }"
             >
                 @if ($type === 'page')
                     <div {{ $attributes->twMergeFor('modal-container', 'container px-0') }}>
@@ -116,3 +109,32 @@
 @endif
 @endif
 </div>
+
+@pushOnce('script')
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('liquidModal', () => ({
+                modalLocked: false,
+                _modalOpen: false,
+
+                get modalOpen() {
+                    return this._modalOpen;
+                },
+                set modalOpen(value) {
+                    if (this.modalLocked) return;
+
+                    this._modalOpen = value;
+                },
+
+                toggleModal() {
+                    if (this.modalLocked) return;
+                    @if ($disableModal)
+                        toastr.info('{{ $disableModalMessage }}')
+                    @else
+                        this.modalOpen = !this.modalOpen
+                    @endif
+                }
+            }))
+        })
+    </script>
+@endPushOnce

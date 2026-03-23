@@ -10,7 +10,7 @@ class RecentSearchKey extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['keyword'];
+    protected $fillable = ['user_id', 'keyword'];
 
     // user for key
     public function user(): BelongsTo

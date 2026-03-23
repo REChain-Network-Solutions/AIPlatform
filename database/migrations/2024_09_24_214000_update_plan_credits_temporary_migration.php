@@ -67,10 +67,10 @@ return new class extends Migration
                 }
             });
 
-        if ($defaultWordModel === EntityEnum::GPT_4_O) {
+        if ($defaultWordModel === EntityEnum::GPT_4_O || $defaultWordModel === EntityEnum::GPT_5_MINI) {
             Setting::query()
                 ->updateOrCreate([
-                    'openai_default_model' => EntityEnum::GPT_4_O,
+                    'openai_default_model' => EntityEnum::GPT_5_MINI,
                 ]);
         }
     }
@@ -246,10 +246,10 @@ return new class extends Migration
         $defaultEngine = setting('default_ai_engine');
 
         return match ($defaultEngine) {
-            'openai'    => EntityEnum::GPT_4_O,
+            'openai'    => EntityEnum::GPT_5_MINI,
             'anthropic' => EntityEnum::fromSlug(setting('anthropic_default_model')),
             'gemini'    => EntityEnum::fromSlug(setting('gemini_default_model')),
-            default     => EntityEnum::GPT_4_O,
+            default     => EntityEnum::GPT_5_MINI,
         };
     }
 };

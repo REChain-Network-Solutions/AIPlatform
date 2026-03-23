@@ -616,9 +616,17 @@ class InstallationHelper
                             try {
                                 Models\Common\Menu::query()
                                     ->where([
+                                        'key' => 'ext_chatbot_customer_tag',
+                                    ])->update([
+                                        'parent_id' => null,
+                                    ]);
+
+                                Models\Common\Menu::query()
+                                    ->where([
                                         'key' => 'chat_training_extension',
                                     ])->update([
                                         'label' => 'Chatbot Training',
+                                        'icon'  => 'tabler-tags',
                                     ]);
                                 Models\Common\Menu::query()
                                     ->where([

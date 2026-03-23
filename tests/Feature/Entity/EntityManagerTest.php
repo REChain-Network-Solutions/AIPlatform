@@ -132,17 +132,17 @@ test('updated schema with missing models from user credits', function () {
 
     expect($creditModel->entity_credits)
         ->toHaveCount($enginesFirstLevelCount)
-        ->toHaveKey(EntityEnum::GPT_4_O->engine()->slug());
+        ->toHaveKey(EntityEnum::GPT_5_MINI->engine()->slug());
 
     assertExpectedCreditsSize($creditModel->entity_credits, $fullCount);
 
     // retrun array not collection
     $enginesWithEntitiesWithoutGPT40Entity = collect($creditModel->entity_credits)
         ->map(function ($entities, $engine) {
-            if ($engine === EntityEnum::GPT_4_O->engine()->slug()) {
+            if ($engine === EntityEnum::GPT_5_MINI->engine()->slug()) {
                 return collect($entities)
                     ->filter(function ($entity, $key) {
-                        return $key !== EntityEnum::GPT_4_O->slug();
+                        return $key !== EntityEnum::GPT_5_MINI->slug();
                     });
             }
 
@@ -151,8 +151,8 @@ test('updated schema with missing models from user credits', function () {
 
     expect($enginesWithEntitiesWithoutGPT40Entity)
         ->toHaveCount($enginesFirstLevelCount)
-        ->toHaveKey(EntityEnum::GPT_4_O->engine()->slug())
-        ->and($enginesWithEntitiesWithoutGPT40Entity[EntityEnum::GPT_4_O->engine()->slug()])->not->toHaveKey(EntityEnum::GPT_4_O->slug());
+        ->toHaveKey(EntityEnum::GPT_5_MINI->engine()->slug())
+        ->and($enginesWithEntitiesWithoutGPT40Entity[EntityEnum::GPT_5_MINI->engine()->slug()])->not->toHaveKey(EntityEnum::GPT_5_MINI->slug());
 
     assertExpectedCreditsSize($enginesWithEntitiesWithoutGPT40Entity, $fullCount - 1);
 
@@ -165,7 +165,7 @@ test('updated schema with missing models from user credits', function () {
 
     expect($newModelCredits)
         ->toHaveCount($enginesFirstLevelCount)
-        ->toHaveKey(EntityEnum::GPT_4_O->engine()->slug());
+        ->toHaveKey(EntityEnum::GPT_5_MINI->engine()->slug());
 
     assertExpectedCreditsSize($newModelCredits, $fullCount);
 });

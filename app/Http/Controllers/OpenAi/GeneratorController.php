@@ -126,7 +126,7 @@ class GeneratorController extends Controller
         $default_ai_engine = $this->determineAiEngine($chat_bot, $chatParams['chatbot_front_model']);
 
         $message = $this->createChatMessage($user, $chatParams);
-        $history = $this->buildChatHistory($chatParams, $message->user_openai_chat_id);
+        $history = $this->buildChatHistory($chatParams, $message->user_openai_chat_id, $message->id);
         $isFileSearch = setting('openai_file_search', 0) && ! empty($chatParams['chat']->openai_vector_id);
 
         if ($this->realtimeCreditsFailed) {
@@ -215,7 +215,7 @@ class GeneratorController extends Controller
         $default_ai_engine = setting('default_ai_engine', EngineEnum::OPEN_AI->value);
 
         if ($default_ai_engine === EngineEnum::OPEN_AI->value) {
-            $chat_bot = $this->settings?->openai_default_model ?: EntityEnum::GPT_4_O->value;
+            $chat_bot = $this->settings?->openai_default_model ?: EntityEnum::GPT_5_MINI->value;
         } elseif ($default_ai_engine === EngineEnum::GEMINI->value) {
             $chat_bot = setting('gemini_default_model', 'gemini-1.5-pro-latest');
         } elseif ($default_ai_engine === EngineEnum::ANTHROPIC->value) {
@@ -225,7 +225,7 @@ class GeneratorController extends Controller
         } elseif ($default_ai_engine === EngineEnum::X_AI->value) {
             $chat_bot = setting('xai_default_model', EntityEnum::GROK_2_1212->value);
         } else {
-            $chat_bot = $this->settings?->openai_default_model ?: EntityEnum::GPT_4_O->value;
+            $chat_bot = $this->settings?->openai_default_model ?: EntityEnum::GPT_5_MINI->value;
         }
 
         $chat_bot_model = PlanHelper::userPlanAiModel();
@@ -310,11 +310,18 @@ class GeneratorController extends Controller
         return UserOpenaiChatMessage::create($attributes);
     }
 
-    private function buildChatHistory(array &$chatParams, int $chat_id): array
+    private function buildChatHistory(array &$chatParams, int $chat_id, ?int $currentMessageId = null): array
     {
         $chat = $chatParams['chat'];
         $category = $chat->category;
         $systemRole = EntityEnum::fromSlug($this->determineChatBot($chatParams['chatbot_front_model']))->isBetaEntity() ? 'system' : 'user';
+
+        $previousMessageCount = $chat->messages()
+            ->whereNotNull('input')
+            ->when($currentMessageId, fn ($q) => $q->where('id', '!=', $currentMessageId))
+            ->count();
+
+        $chatParams['is_first_message'] = $previousMessageCount === 0;
 
         $history = $this->initializeHistory($category, $systemRole);
 

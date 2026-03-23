@@ -24,6 +24,7 @@ class Entity extends Model
         'status',
         'is_selected',
         'selected_title',
+        'image',
     ];
 
     protected $casts = [

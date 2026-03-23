@@ -21,13 +21,13 @@ test('auth error', function () {
 })->throws(RuntimeException::class, 'User is not provided');
 
 test('driverClass', function () {
-    expect(Entity::driver())->toBeInstanceOf(EntityEnum::GPT_4_O->driverClass());
+    expect(Entity::driver())->toBeInstanceOf(EntityEnum::GPT_5_MINI->driverClass());
 });
 
 test('driverClass for user', function () {
     $user = loginAsUser();
 
-    expect(Entity::driverForUser($user))->toBeInstanceOf(EntityEnum::GPT_4_O->driverClass());
+    expect(Entity::driverForUser($user))->toBeInstanceOf(EntityEnum::GPT_5_MINI->driverClass());
 });
 
 test('specific driverClass for user', function () {
@@ -51,7 +51,7 @@ test('driver has accessible', function () {
 });
 
 test('input test', function () {
-    $driver = Entity::driver(EntityEnum::GPT_4_O);
+    $driver = Entity::driver(EntityEnum::GPT_5_MINI);
 
     $driver->input('foo bar');
 

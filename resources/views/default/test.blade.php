@@ -14,7 +14,7 @@
     <title>Document</title>
 </head>
 
-<body>
+<body style="height: 100vh; background-image: url(https://unsplash.com/photos/fkS-me35j7I/download?force=true&w=1920); background-size: cover; background-position: center;">
 
     <script
         defer

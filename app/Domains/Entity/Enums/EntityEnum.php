@@ -151,6 +151,10 @@ enum EntityEnum: string
     case GPT_5_2 = 'gpt-5.2';
     case GPT_5_2_PRO = 'gpt-5.2-pro';
 
+    case GPT_5_3_CHAT = 'gpt-5.3-chat-latest';
+
+    case GPT_5_4 = 'gpt-5.4';
+
     case SORA_2 = 'sora-2';
 
     case SORA_2_PRO = 'sora-2-pro';
@@ -432,7 +436,9 @@ enum EntityEnum: string
             self::GPT_5_2,
             self::GPT_5_2_PRO,
             self::GPT_5_MINI,
-            self::GPT_5_NANO => true,
+            self::GPT_5_NANO,
+            self::GPT_5_3_CHAT,
+            self::GPT_5_4    => true,
             default          => false,
         };
     }
@@ -513,6 +519,8 @@ enum EntityEnum: string
             self::GPT_5_1_CHAT                => __('GPT-5.1 Chat (Sep 30, 2024 knowledge cutoff, 16k max output tokens.)'),
             self::GPT_5_2                     => __('GPT-5.2 (Aug 31, 2025 knowledge cutoff, 128k max output tokens.)'),
             self::GPT_5_2_PRO                 => __('GPT-5.2 Pro (Aug 31, 2025 knowledge cutoff, 128k max output tokens.)'),
+            self::GPT_5_3_CHAT                => __('GPT-5.3 Instant (Aug 31, 2025 knowledge cutoff, 16k max output tokens.)'),
+            self::GPT_5_4                     => __('GPT-5.4 (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)'),
 
             self::SORA_2                      => __('Sora 2 (Flagship video generation with synced audio)'),
             self::SORA_2_PRO                  => __('Sora 2 Pro (Most advanced synced-audio video generation)'),
@@ -769,6 +777,8 @@ enum EntityEnum: string
             self::GPT_5_1_CHAT,
             self::GPT_5_2,
             self::GPT_5_2_PRO,
+            self::GPT_5_3_CHAT,
+            self::GPT_5_4,
             self::SORA_2,
             self::SORA_2_PRO,
             self::GPT_O_4_MINI => EngineEnum::OPEN_AI,
@@ -963,6 +973,8 @@ enum EntityEnum: string
             self::GPT_5_1_CHAT                => OpenAI\GPT51ChatDriver::class,
             self::GPT_5_2                     => OpenAI\GPT52Driver::class,
             self::GPT_5_2_PRO                 => OpenAI\GPT52ProDriver::class,
+            self::GPT_5_3_CHAT                => OpenAI\GPT53ChatDriver::class,
+            self::GPT_5_4                     => OpenAI\GPT54Driver::class,
             self::SORA_2                      => OpenAI\Sora2Driver::class,
             self::SORA_2_PRO                  => OpenAI\Sora2ProDriver::class,
 
@@ -1192,6 +1204,8 @@ enum EntityEnum: string
             self::GPT_5_1_CHAT                => 0.0000133,
             self::GPT_5_2                     => 0.00175,
             self::GPT_5_2_PRO                 => 0.021,
+            self::GPT_5_3_CHAT                => 0.000014,
+            self::GPT_5_4                     => 0.025,
             self::SORA_2                      => 0.10,
             self::SORA_2_PRO                  => 0.50,
 
@@ -1545,6 +1559,8 @@ enum EntityEnum: string
                 self::GPT_5_1_CHAT,
                 self::GPT_5_2,
                 self::GPT_5_2_PRO,
+                self::GPT_5_3_CHAT,
+                self::GPT_5_4,
                 self::DEEPSEEK_CHAT,
                 self::DEEPSEEK_REASONER,
             ]

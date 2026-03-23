@@ -76,6 +76,7 @@ class AiToolsController extends Controller
         setting(
             [
                 'default_ai_engine'               => $request->get('default_ai_engine'),
+                'default_external_chatbot_engine' => $request->get('default_external_chatbot_engine'),
                 'default_ai_influencer_tool'      => $request->get('ai_influencer_tool'),
                 'default_ai_clip_tool'      	     => $request->get('ai_clip_tool'),
                 'default_photo_studio'            => $request->get('default_photo_studio'),

@@ -52,26 +52,48 @@ class GeminiService
     }
 
     /**
-     * Read a line from the stream.
+     * Read a complete JSON object from the stream by tracking brace depth,
+     * ignoring braces inside quoted strings and escaped characters.
      */
     public function readLine($stream): ?string
     {
         $buffer = '';
         $depth = 0;
+        $inString = false;
+        $escaped = false;
 
         while (! $stream->eof()) {
             $char = $stream->read(1);
-
-            if ($char === '{') {
-                $depth++;
-            } elseif ($char === '}') {
-                $depth--;
-            }
-
             $buffer .= $char;
 
-            if ($depth === 0 && ! empty(trim($buffer))) {
-                return $buffer;
+            if ($escaped) {
+                $escaped = false;
+
+                continue;
+            }
+
+            if ($char === '\\' && $inString) {
+                $escaped = true;
+
+                continue;
+            }
+
+            if ($char === '"') {
+                $inString = ! $inString;
+
+                continue;
+            }
+
+            if (! $inString) {
+                if ($char === '{') {
+                    $depth++;
+                } elseif ($char === '}') {
+                    $depth--;
+                }
+
+                if ($depth === 0 && ! empty(trim($buffer))) {
+                    return $buffer;
+                }
             }
         }
 

@@ -217,10 +217,11 @@
 									<div class="w-full">
 										<div class="mb-6 flex justify-between gap-1.5">
 											<figure class="inline-grid size-10 shrink-0 place-content-center rounded-full bg-heading-foreground/5">
-												<x-tabler-brand-openai
-													class="size-6"
-													stroke-width="1.5"
-												/>
+											@if($driver->model()?->image)
+                                                    <img src="{{ asset($driver->model()?->image) }}" alt="{{ $driver->model()?->selected_title ?? $model?->value }}" class="size-6 object-contain">
+                                                @else
+                                                    <x-tabler-brand-openai class="size-6" stroke-width="1.5"/>
+                                                @endif
 											</figure>
 											<div class="text-end">
 												<p class="m-0 text-3xs font-medium text-heading-foreground">

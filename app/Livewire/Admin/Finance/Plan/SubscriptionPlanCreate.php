@@ -37,6 +37,7 @@ class SubscriptionPlanCreate extends Component
         $this->step = 1;
         $this->useOrCreatePlan($plan);
         $this->privatePlanData();
+        $this->hydrateChatbotChannels();
     }
 
     #[On('updateEntities')]
@@ -59,6 +60,14 @@ class SubscriptionPlanCreate extends Component
             'plan.price_tax_included'                      => 'required_if:step,1|nullable|boolean',
             'plan.plan_allow_seat'                         => 'nullable|numeric|min:0',
             'plan.trial_days'                              => 'required_if:step,1|numeric|min:0',
+            'plan.chatbot_limit'                           => 'nullable|integer|min:0',
+            'plan.chatbot_channels'                        => 'nullable|array',
+            'plan.chatbot_channels.*'                      => 'nullable|boolean',
+            'plan.chatbot_channels.telegram'               => 'nullable|boolean',
+            'plan.chatbot_channels.whatsapp'               => 'nullable|boolean',
+            'plan.chatbot_channels.messenger'              => 'nullable|boolean',
+            'plan.chatbot_channels.instagram'              => 'nullable|boolean',
+            'plan.chatbot_human_agent'                     => 'nullable|boolean',
             'plan.affiliate_status'                        => 'nullable|boolean',
             'plan.is_featured'                             => 'required_if:step,1|nullable|boolean',
             'plan.user_api'                                => 'required_if:step,1|nullable|boolean',
@@ -74,6 +83,7 @@ class SubscriptionPlanCreate extends Component
             'plan.social_media_agent_limits.monthly_posts' => 'nullable|integer|min:-1',
             'plan.blogpilot_limits.agents'                 => 'nullable|integer|min:-1',
             'plan.blogpilot_limits.monthly_posts'          => 'nullable|integer|min:-1',
+            'plan.voice_call_seconds_limit'                => 'nullable|integer|min:-1',
         ],
             // Step 2
             $this->rulesOfPlanAiTools(),
@@ -267,6 +277,33 @@ class SubscriptionPlanCreate extends Component
                 $this->plan->type,
                 Str::random(20)
             );
+        }
+    }
+
+    private function hydrateChatbotChannels(): void
+    {
+        if (! class_exists(\App\Extensions\Chatbot\System\Helpers\ChatbotHelper::class)) {
+            return;
+        }
+
+        $availableChannels = \App\Extensions\Chatbot\System\Helpers\ChatbotHelper::installedChannelKeys();
+
+        if ($availableChannels === []) {
+            return;
+        }
+
+        $channels = $this->plan->chatbot_channels ?? [];
+
+        foreach ($availableChannels as $channelKey) {
+            if (! array_key_exists($channelKey, $channels)) {
+                $channels[$channelKey] = true;
+            }
+        }
+
+        $this->plan->chatbot_channels = $channels;
+
+        if (is_null($this->plan->chatbot_human_agent)) {
+            $this->plan->chatbot_human_agent = true;
         }
     }
 }

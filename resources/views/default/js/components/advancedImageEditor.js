@@ -45,6 +45,7 @@ export default (options = {}) => {
 		supportMultipleImageTools: [
 			'reimagine',
 		],
+		mobileNavbarShow: false,
 		/**
 		 * Do not use these properties directly, use the getters and setters instead.
 		 */
@@ -327,7 +328,6 @@ export default (options = {}) => {
 
 			this.handleFiles(files);
 		},
-		// TODO: handle files array
 		handleFiles(files) {
 			if ( !files[0] ) return;
 
@@ -610,10 +610,11 @@ export default (options = {}) => {
 		paint(event) {
 			if (!this.painting) return;
 
+			const point = event.touches?.[0] || event;
 			const canvas = this.$refs.editorMaskCanvas;
 			const canvasRect = canvas.getBoundingClientRect();
-			const x = (event.clientX - canvasRect.left) * (canvas.width / canvasRect.width);
-			const y = (event.clientY - canvasRect.top) * (canvas.height / canvasRect.height);
+			const x = (point.clientX - canvasRect.left) * (canvas.width / canvasRect.width);
+			const y = (point.clientY - canvasRect.top) * (canvas.height / canvasRect.height);
 
 			this.canvasCtx.lineWidth = this.brushSize;
 			this.canvasCtx.opacityTo = 7;

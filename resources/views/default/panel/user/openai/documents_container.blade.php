@@ -94,7 +94,7 @@
 </div>
 
 <div
-    class="pointer-events-none fixed bottom-8 end-0 start-0 z-10 transition-all lg:start-[--navbar-width]"
+    class="pointer-events-none fixed bottom-8 end-0 start-0 z-20 transition-all max-lg:bottom-[calc(var(--bottom-menu-height)+1rem)] lg:start-[--navbar-width]"
     x-init=""
     x-cloak
     x-show="$store.documentsSelection.selectedItems.length > 0"
@@ -128,7 +128,7 @@
             </p>
             <div class="flex items-center gap-3">
                 <x-forms.input
-                    class="w-full rounded-full md:w-auto md:pe-12"
+                    class="w-full rounded-full pe-12 md:w-auto md:pe-12"
                     type="select"
                     size="md"
                     x-model="selectedAction"

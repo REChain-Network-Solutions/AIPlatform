@@ -114,24 +114,24 @@
             modal-trigger-variant="ghost-shadow"
         />
 
-        <x-button
-            class="hover:bg-primary"
-            data-name="{{ \App\Enums\Introduction::SELECT_PLAN }}"
-            variant="ghost-shadow"
-            href="{{ route('dashboard.user.payment.subscription') }}"
-        >
-            <x-tabler-plus class="size-4" />
-            {{ __('Select a Plan') }}
-        </x-button>
-
         @if (getSubscriptionStatus())
             <x-button
-                variant="danger"
-                onclick="return confirm('Are you sure to cancel your plan? You will lose your remaining usage.');"
-                href="{{ route('dashboard.user.payment.cancelActiveSubscription') }}"
+                class="hover:bg-primary"
+                variant="ghost-shadow"
+                href="{{ route('dashboard.user.payment.subscription') }}"
             >
-                <x-tabler-circle-minus class="size-4" />
-                {{ __('Cancel My Plan') }}
+                <x-tabler-settings class="size-4" />
+                {{ __('Manage My Plan') }}
+            </x-button>
+        @else
+            <x-button
+                class="hover:bg-primary"
+                data-name="{{ \App\Enums\Introduction::SELECT_PLAN }}"
+                variant="ghost-shadow"
+                href="{{ route('dashboard.user.payment.subscription') }}"
+            >
+                <x-tabler-plus class="size-4" />
+                {{ __('Select a Plan') }}
             </x-button>
         @endif
     </div>

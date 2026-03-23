@@ -21,6 +21,21 @@
                         tooltip="{{ $tool['tooltip'] ?? $tool['label'] }}"
                     />
                 </x-form.group>
+
+                @if ($tool['key'] === \App\Enums\Introduction::AI_EXT_VOICE_CALL->value)
+                    <x-form.group
+                        class="col-span-2 sm:col-span-1"
+                        label="{{ __('Voice Call Seconds Limit') }}"
+                        tooltip="{{ __('-1 for unlimited, 0 to disable, >0 for max seconds per month') }}"
+                        error="plan.voice_call_seconds_limit"
+                    >
+                        <x-form.stepper
+                            wire:model="plan.voice_call_seconds_limit"
+                            step="1"
+                            min="-1"
+                        />
+                    </x-form.group>
+                @endif
             @endforeach
         </div>
     @endif

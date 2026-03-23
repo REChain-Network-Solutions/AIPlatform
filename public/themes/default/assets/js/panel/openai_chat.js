@@ -252,7 +252,7 @@ function getAiResponseString({ responseObj = null, withoutDone = true }) {
 
 	if (!responseObj) return '';
 
-	const string = responseObj.response
+	let string = responseObj.response
 		.join('')
 		.trim()
 		.replace(/<br\s*\/?>/g, '\n');
@@ -1057,6 +1057,31 @@ function sendRequest(type, images, responseObj, sharedMessageUUID = null) {
 		onmessage: async e => {
 			const txt = e.data;
 
+			if (e.event === 'title') {
+				try {
+					const titleData = JSON.parse(txt);
+					if (titleData.title && titleData.chat_id) {
+						applyStreamedChatTitle(titleData.chat_id, titleData.title);
+						stripTitleFromBubble(responseObj);
+						throttledOnAiResponse(responseObj);
+					}
+				} catch (err) {}
+				return;
+			}
+
+			if (e.event === 'suggestions') {
+				try {
+					const suggestionsData = JSON.parse(txt);
+					if (suggestionsData?.suggestions?.length) {
+						responseObj._streamedSuggestions = suggestionsData.suggestions;
+						stripSuggestionsFromBubble(responseObj);
+						throttledOnAiResponse(responseObj);
+						applySuggestionsToContainer(responseObj);
+					}
+				} catch (err) {}
+				return;
+			}
+
 			if (!receivedMessageId) {
 				const eventData = e.event
 					.split('\n')
@@ -1095,9 +1120,11 @@ function sendRequest(type, images, responseObj, sharedMessageUUID = null) {
 					content: getAiResponseString({ responseObj }),
 				});
 
-				if (messages.length >= 6) {
-					messages.splice(1, 2);
-				}
+					if (messages.length >= 6) {
+						messages.splice(1, 2);
+					}
+
+					stripSuggestionsFromBubble(responseObj);
 
 				// if it's done signal, add a space before
 				responseObj.response.push(`${isDoneSignal ? ' ' : ''}${txt}`);
@@ -1110,15 +1137,17 @@ function sendRequest(type, images, responseObj, sharedMessageUUID = null) {
 					handleCanvasResponseStore(responseObj);
 				}
 
-				if (responseIndex === aiResponses.length - 1) {
-					window.removeEventListener('beforeunload', onBeforePageUnload);
+					if (responseIndex === aiResponses.length - 1) {
+						window.removeEventListener('beforeunload', onBeforePageUnload);
+					}
 
-					changeChatTitle(responseObj.responseId);
-				}
-
-				document.dispatchEvent(new CustomEvent('chat:response-complete', {
-					detail: { messageId: responseObj.responseId, bubbleEl: responseObj.bubbleEl }
-				}));
+					document.dispatchEvent(new CustomEvent('chat:response-complete', {
+						detail: {
+							messageId: responseObj.responseId,
+							bubbleEl: responseObj.bubbleEl,
+							suggestionsHandled: !!responseObj._streamedSuggestions
+						}
+					}));
 
 				return;
 			}
@@ -2697,27 +2726,65 @@ function changeChatTitle(responseId) {
 		},
 		success: function (data) {
 			if (data.changed) {
-				const chatTitleEl = document.querySelector(
-					`#chat_${data.chat_id} .chat-item-title`,
-				);
-
-				if (!chatTitleEl) return;
-
-				const newTitle = data.new_title.replaceAll(' ', '\u00a0');
-				const newTitleStringArray = newTitle.split('');
-
-				chatTitleEl.innerText = '';
-
-				const interval = setInterval(() => {
-					chatTitleEl.innerText += newTitleStringArray.shift();
-
-					if (!newTitleStringArray.length) {
-						clearInterval(interval);
-					}
-				}, 30);
+				applyStreamedChatTitle(data.chat_id, data.new_title);
 			}
 		},
 	});
+}
+
+function applyStreamedChatTitle(chatId, title) {
+	const chatTitleEl = document.querySelector(
+		`#chat_${chatId} .chat-item-title`,
+	);
+
+	if (!chatTitleEl) return;
+
+	const newTitle = title.replaceAll(' ', '\u00a0');
+	const newTitleStringArray = newTitle.split('');
+
+	chatTitleEl.innerText = '';
+
+	const interval = setInterval(() => {
+		chatTitleEl.innerText += newTitleStringArray.shift();
+
+		if (!newTitleStringArray.length) {
+			clearInterval(interval);
+		}
+	}, 30);
+}
+
+function stripTitleFromBubble(responseObj) {
+	if (!responseObj.response || !responseObj.response.length) return;
+
+	const combined = responseObj.response.join('');
+	const cleaned = combined.replace(/^\s*(<br\s*\/?>|\s)*(```[\w]*\s*(<br\s*\/?>|\s)*)?\{"title"\s*:\s*"[^"]*"\s*\}\s*(```\s*)?(<br\s*\/?>|\s)*/i, '');
+
+	if (cleaned !== combined) {
+		responseObj.response = [cleaned];
+	}
+}
+
+function stripSuggestionsFromBubble(responseObj) {
+	if (!responseObj.response || !responseObj.response.length) return;
+
+	const combined = responseObj.response.join('');
+	const cleaned = combined.replace(/\s*(<br\s*\/?>)*\s*(```[\w]*\s*(<br\s*\/?>|\s)*)?\{"suggestions"\s*:\s*\[.*\]\s*\}\s*(```\s*)?(<br\s*\/?>|\s)*$/i, '');
+
+	if (cleaned !== combined) {
+		responseObj.response = [cleaned];
+	}
+}
+
+function applySuggestionsToContainer(responseObj) {
+	if (!responseObj._streamedSuggestions?.length || !responseObj.bubbleEl) return;
+
+	const container = responseObj.bubbleEl.querySelector('.lqd-chat-bubble-suggestions');
+	if (!container) return;
+
+	const alpineData = Alpine?.$data(container);
+	if (alpineData) {
+		alpineData.suggestions = responseObj._streamedSuggestions;
+	}
 }
 
 function setChatsCssVars() {

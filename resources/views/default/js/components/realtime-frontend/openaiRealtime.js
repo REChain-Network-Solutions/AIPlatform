@@ -37,7 +37,7 @@ Alpine.store( 'realtimeChatStatus', {
 	},
 } );
 
-export default ( prompt1, prompt2, prompt3 ) => ( {
+export default () => ( {
 	apiKey: '',
 	recordingActive: false,
 	buffer: new Uint8Array(),
@@ -91,9 +91,34 @@ export default ( prompt1, prompt2, prompt3 ) => ( {
 
 		this.switchVisualizers( 'waiting' );
 
+		let tokenData;
+
+		try {
+			const tokenResponse = await fetch( '/dashboard/user/realtime/chat/session', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRF-TOKEN': document.querySelector( 'meta[name="csrf-token"]' )?.getAttribute( 'content' ),
+				},
+			} );
+
+			if ( !tokenResponse.ok ) {
+				this.stop();
+				this.appendToChatBubble( 'ai', '[Error]: Unable to start voice chat session. Please try again.' );
+				return;
+			}
+
+			tokenData = await tokenResponse.json();
+		} catch ( error ) {
+			this.stop();
+			console.error( 'Error fetching session token:', error );
+			this.appendToChatBubble( 'ai', '[Error]: Unable to start voice chat session. Please try again.' );
+			return;
+		}
+
 		this.wsConnection = new LowLevelRTClient(
-			{ key: atob( prompt1 ) + atob( prompt2 ) + atob( prompt3 ) },
-			{ model: 'gpt-4o-realtime-preview-2024-12-17' }
+			{ key: tokenData.ephemeral_key },
+			{ model: tokenData.model }
 		);
 
 		try {
@@ -174,7 +199,7 @@ export default ( prompt1, prompt2, prompt3 ) => ( {
 					silence_duration_ms: 500
 				},
 				input_audio_transcription: {
-					model: 'whisper-1'
+					model: 'gpt-4o-mini-transcribe'
 				},
 			},
 		};
@@ -244,9 +269,19 @@ export default ( prompt1, prompt2, prompt3 ) => ( {
 					break;
 				}
 				case 'conversation.item.input_audio_transcription.completed':
-					this.lastUserQuestion += message.transcript;
-					this.appendToChatBubble( 'user', message.transcript );
-
+					if ( message.transcript ) {
+						this.lastUserQuestion += message.transcript;
+						this.appendToChatBubble( 'user', message.transcript );
+					}
+					break;
+				case 'conversation.item.input_audio_transcription.delta':
+					if ( message.delta ) {
+						this.lastUserQuestion += message.delta;
+						this.appendToChatBubble( 'user', message.delta );
+					}
+					break;
+				case 'conversation.item.input_audio_transcription.failed':
+					console.error( 'Input audio transcription failed:', JSON.stringify( message ) );
 					break;
 				case 'response.output_item.done':
 					break;

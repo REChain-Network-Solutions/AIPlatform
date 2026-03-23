@@ -391,7 +391,7 @@ input::file-selector-button {
 	}
 
 	.cp_caret {
-		@apply opacity-0;
+		@apply opacity-0 w-full h-full p-0;
 	}
 }
 

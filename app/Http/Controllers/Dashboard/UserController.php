@@ -867,7 +867,7 @@ class UserController extends Controller
                 $item->output_url = $item->video_url;
                 $item->url = $item->video_url;
                 $item->format_date = $item->created_at->format('M d, Y');
-                $item->model ??= 'veo2';
+                $item->model = $item->model ?? 'veo2';
                 $item->is_demo = $item->is_demo ?? 0;
                 $item->slug = Str::slug($item->title);
                 $item->generator = (object) [

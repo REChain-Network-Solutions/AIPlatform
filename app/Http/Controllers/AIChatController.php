@@ -1142,7 +1142,7 @@ class AIChatController extends Controller
         $message = UserOpenaiChatMessage::whereId($message_id)->first();
         $prompt = $message->input;
 
-        $chat_bot = $this->settings?->openai_default_model ?? EntityEnum::GPT_4_O->value;
+        $chat_bot = $this->settings?->openai_default_model ?? EntityEnum::GPT_5_MINI->value;
         $history = [];
 
         if (setting('default_ai_engine', EngineEnum::OPEN_AI->value) === EngineEnum::ANTHROPIC->value) {
@@ -1675,7 +1675,7 @@ class AIChatController extends Controller
         $message_id = $request->get('message_id');
         $message = UserOpenaiChatMessage::whereId($message_id)->first();
         $prompt = $message->input;
-        $chat_bot = EntityEnum::GPT_4_O->value;
+        $chat_bot = EntityEnum::GPT_5_MINI->value;
         $history = [];
 
         $chat = UserOpenaiChat::whereId($chat_id)->first();
@@ -2270,7 +2270,7 @@ class AIChatController extends Controller
                     }
                 } elseif ($type === 'vision') {
                     try {
-                        $driver = EntityFacade::driver(EntityEnum::GPT_4_O);
+                        $driver = EntityFacade::driver(EntityEnum::GPT_5_MINI);
                         $gclient = new Client;
                         $openaiApiKey = $this->getOpenAiApiKey(Auth::user());
                         $url = 'https://api.openai.com/v1/chat/completions';
@@ -2546,7 +2546,7 @@ class AIChatController extends Controller
     public function lowChatSave(Request $request): JsonResponse
     {
         $chat = UserOpenaiChat::find($request->chat_id);
-        $chat_bot = EntityEnum::fromSlug(empty($request->model) ? $this->settings?->openai_default_model : $request->model) ?? EntityEnum::GPT_4_O;
+        $chat_bot = EntityEnum::fromSlug(empty($request->model) ? $this->settings?->openai_default_model : $request->model) ?? EntityEnum::GPT_5_MINI;
 
         if (! empty($chat->category->slug) && $chat->category->slug === 'ai_chat_image') {
             $chat_bot = $this->getDefaultOpenAiImageModel();
@@ -2599,25 +2599,13 @@ class AIChatController extends Controller
         $chat_id = $message?->user_openai_chat_id;
         $chat = UserOpenaiChat::whereId($chat_id)->first();
         if ($chat) {
-            $chat_bot = EntityEnum::GPT_4_O;
             if ($chat->messages()->count() <= 2) {
-                $systemPromot = $this->applyPromptRules('You are a chatbot. Generate a title for a chat based on provided conversation. You must return a title only.');
-                $generatedNewChatTitle = OpenAI::chat()->create([
-                    'model'    => $chat_bot->value,
-                    'messages' => [
-                        [
-                            'role'    => 'system',
-                            'content' => $systemPromot,
-                        ],
-                        [
-                            'role'    => 'user',
-                            'content' => "Generate a title for a chat based on the following conversation: \n\n\n\n\n"
-                                . 'User Input: ' . $message->input . "\n\n\n\n\n"
-                                . 'Assistant Response: ' . $message->response,
-                        ],
-                    ],
-                ]);
-                $newTitle = $generatedNewChatTitle['choices'][0]['message']['content'];
+                $systemPrompt = $this->applyPromptRules('You are a chatbot. Generate a title for a chat based on provided conversation. You must return a title only.');
+                $userContent = "Generate a title for a chat based on the following conversation: \n\n\n\n\n"
+                    . 'User Input: ' . $message->input . "\n\n\n\n\n"
+                    . 'Assistant Response: ' . $message->response;
+
+                $newTitle = app(\App\Services\Ai\AiCompletionService::class)->complete($systemPrompt, $userContent);
                 $chat->title = $newTitle;
                 $chat->save();
                 $changed = true;

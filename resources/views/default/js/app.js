@@ -11,7 +11,7 @@ import clipboard from './components/clipboard';
 import assignViewCredits from './components/assignViewCredits';
 import openaiRealtime from './components/realtime-frontend/openaiRealtime';
 import advancedImageEditor from './components/advancedImageEditor';
-import { debounce, throttle, defer } from 'lodash';
+import { debounce, throttle } from 'lodash';
 import creativeSuite from './components/creative-suite/creativeSuite';
 import { lqdCustomizer, lqdCustomizerFontPicker } from './components/customizer';
 import { lqdSidedrawer } from './components/sidedrawer';
@@ -45,6 +45,19 @@ alpine.plugin( sort );
 alpine.plugin( intersect );
 
 Sortable.mount( new MultiDrag() );
+
+window.lockUnlockAllModals = function(locked = true) {
+	if ( !('Alpine' in window) ) return;
+	const modals = document.querySelectorAll('.lqd-modal');
+
+	modals.forEach(modal => {
+		const modalData = Alpine.$data(modal);
+
+		if ( !modalData ) return;
+
+		modalData.modalLocked = locked;
+	});
+};
 
 document.addEventListener( 'alpine:init', () => {
 	const persist = Alpine.$persist;
@@ -1894,6 +1907,14 @@ document.addEventListener( 'alpine:init', () => {
 					this.$refs.colorInput.dispatchEvent( new Event( 'input', { bubbles: true } ) );
 				}
 			} );
+
+			this.picker.on('open', () => {
+				lockUnlockAllModals(true);
+			});
+
+			this.picker.on('close', () => {
+				lockUnlockAllModals(false);
+			});
 		},
 
 		checkDarkMode() {
@@ -2095,6 +2116,80 @@ document.addEventListener( 'alpine:init', () => {
 
 	Alpine.data( 'lqdSidedrawer', lqdSidedrawer );
 
+	// Info Tooltip (Floating UI)
+	Alpine.data( 'lqdInfoTooltip', ( { preferredPlacement = 'top' } = {} ) => ( {
+		open: false,
+		cleanupAutoUpdate: null,
+
+		show() {
+			this.open = true;
+			this.startAutoUpdate();
+		},
+
+		hide() {
+			this.open = false;
+			this.stopAutoUpdate();
+		},
+
+		startAutoUpdate() {
+			this.stopAutoUpdate();
+
+			const trigger = this.$refs.trigger;
+			const tooltip = this.$refs.tooltip;
+
+			if ( !trigger || !tooltip ) return;
+
+			this.cleanupAutoUpdate = autoUpdate( trigger, tooltip, () => {
+				this.updatePosition();
+			} );
+		},
+
+		stopAutoUpdate() {
+			if ( this.cleanupAutoUpdate ) {
+				this.cleanupAutoUpdate();
+				this.cleanupAutoUpdate = null;
+			}
+		},
+
+		async updatePosition() {
+			const trigger = this.$refs.trigger;
+			const tooltip = this.$refs.tooltip;
+
+			if ( !trigger || !tooltip ) return;
+
+			const padding = 8;
+
+			const { x, y } = await computePosition( trigger, tooltip, {
+				placement: preferredPlacement,
+				strategy: 'fixed',
+				middleware: [
+					offset( 8 ),
+					flip( { padding } ),
+					shift( { padding, crossAxis: true } ),
+					size( {
+						padding,
+						apply( { availableWidth, availableHeight, elements } ) {
+							elements.floating.style.maxHeight = `${ Math.max( 0, availableHeight ) }px`;
+
+							if ( availableWidth < elements.floating.offsetWidth ) {
+								elements.floating.style.maxWidth = `${ Math.max( 0, availableWidth ) }px`;
+							}
+						},
+					} ),
+				],
+			} );
+
+			Object.assign( tooltip.style, {
+				left: `${ x }px`,
+				top: `${ y }px`,
+			} );
+		},
+
+		destroy() {
+			this.stopAutoUpdate();
+		},
+	} ) );
+
 	Alpine.directive( 'masonry', ( el, { expression }, { evaluate, cleanup } ) => {
 		const config = expression ? evaluate( expression ) : {};
 		let iso = null;
@@ -2134,20 +2229,20 @@ document.addEventListener( 'alpine:init', () => {
 			// const filteredItems = [ ...iso.filteredItems ];
 
 			// filteredItems.forEach(item => {
-				// const existingItemsWithSameIdIndex = filteredItems.findIndex(it => it.id === item.id);
+			// const existingItemsWithSameIdIndex = filteredItems.findIndex(it => it.id === item.id);
 
-				// if ( existingItemsWithSameIdIndex === -1 ) return;
+			// if ( existingItemsWithSameIdIndex === -1 ) return;
 
-				// const existingItem = filteredItems.at(existingItemsWithSameIdIndex);
+			// const existingItem = filteredItems.at(existingItemsWithSameIdIndex);
 
-				// if ( existingItem && existingItem.size?.width === 0 && existingItem.size?.height === 0 ) {
-				// 	filteredItems.splice(existingItemsWithSameIdIndex, 1);
-				// }
+			// if ( existingItem && existingItem.size?.width === 0 && existingItem.size?.height === 0 ) {
+			// 	filteredItems.splice(existingItemsWithSameIdIndex, 1);
+			// }
 			// });
 
 			// iso.filteredItems = filteredItems;
 
-			iso.filteredItems = iso.filteredItems.filter(item => item.size.width > 0 && item.size.height > 0)
+			iso.filteredItems = iso.filteredItems.filter(item => item.size.width > 0 && item.size.height > 0);
 
 			defer(() => {
 				iso.reloadItems();

@@ -229,14 +229,14 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
     {
         return match ($this) {
             self::OPEN_AI          => [
-                EntityEnum::fromSlug($setting?->openai_default_model ?? EntityEnum::GPT_4_O->slug()),
+                EntityEnum::fromSlug($setting?->openai_default_model ?? EntityEnum::GPT_5_MINI->slug()),
                 EntityEnum::fromSlug($this->getDefaultOpenAiImageModel($settingTwo)),
                 EntityEnum::TTS_1_HD,
                 EntityEnum::TTS_1,
                 EntityEnum::WHISPER_1,
                 EntityEnum::TEXT_EMBEDDING_3_SMALL,
-                ...(EntityEnum::fromSlug($setting?->openai_default_model ?? EntityEnum::GPT_4_O->slug()) !== EntityEnum::GPT_4_O
-                    ? [EntityEnum::GPT_4_O]
+                ...(EntityEnum::fromSlug($setting?->openai_default_model ?? EntityEnum::GPT_5_MINI->slug()) !== EntityEnum::GPT_5_MINI
+                    ? [EntityEnum::GPT_5_MINI]
                     : []),
                 EntityEnum::GPT_4_O_REALTIME_PREVIEW,
                 EntityEnum::GPT_4_O_SEARCH_PREVIEW,
@@ -353,7 +353,7 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
     public function getDefaultWordModel(?Setting $setting): EntityEnum
     {
         return match ($this) {
-            self::OPEN_AI          => EntityEnum::fromSlug($setting?->openai_default_model ?? EntityEnum::GPT_4_O->slug()),
+            self::OPEN_AI          => EntityEnum::fromSlug($setting?->openai_default_model ?? EntityEnum::GPT_5_MINI->slug()),
             self::ANTHROPIC        => EntityEnum::fromSlug(setting('anthropic_default_model', EntityEnum::CLAUDE_3_OPUS->slug())),
             self::GEMINI           => EntityEnum::fromSlug(setting('gemini_default_model', EntityEnum::GEMINI_3_FLASH->slug())),
             self::DEEP_SEEK        => EntityEnum::fromSlug(setting('deepseek_default_model', EntityEnum::DEEPSEEK_CHAT->slug())),

@@ -22,7 +22,7 @@
             </p>
         @endif
 
-        @if (isset($item['db_version']) && $item['version'] != $item['db_version'] && $item['installed'])
+        @if (isset($item['db_version']) && $item['version'] != $item['db_version'] && $item['installed'] && $app_is_not_demo)
             <p
                 class="top-{{ $item['price'] == 0 ? '10' : '5' }} absolute end-5 m-0 rounded bg-purple-50 px-2 py-1 text-4xs font-semibold uppercase leading-tight tracking-widest text-[#242425] text-purple-700 ring-1 ring-inset ring-purple-700/10">
                 <a href="{{ route('dashboard.admin.marketplace.liextension') }}">{{ __('Update Available') }}</a>

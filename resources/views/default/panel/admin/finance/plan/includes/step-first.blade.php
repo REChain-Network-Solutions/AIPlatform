@@ -307,33 +307,7 @@
 		</div>
 	</div>
 
-	<div class="row gap-y-7">
-		<div class="col-12">
-			<x-form-step
-				class="mb-0"
-				step="3"
-				label="{{ __('Users API Key Option') }}"
-			/>
-			<div class="form-label mt-5">
-				{{ __('Enabling this feature in a plan will require users to provide their own API keys instead of using the admin API key for continued functionality.') }}
-			</div>
-			<div class="col-12 col-sm-6 space-y-5">
-				<x-form.group
-					class:container="mb-4"
-					no-group-label
-					error="plan.user_api"
-				>
-					<x-form.checkbox
-						class:container="w-full mt-4"
-						wire:model="plan.user_api"
-						label="{{ __('User API Key') }}"
-						tooltip="{{ __('User API Key') }}"
-						switcher
-					/>
-				</x-form.group>
-			</div>
-		</div>
-	</div>
+	@includeIf('chatbot::partials.plan-features', ['plan' => $plan])
 
 	<!-- Hidden Plan-->
 	<div class="row gap-y-7">

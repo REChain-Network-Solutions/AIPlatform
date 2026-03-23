@@ -22,6 +22,10 @@
 
     <meta charset="UTF-8" />
     <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}"
+    >
+    <meta
         http-equiv="X-UA-Compatible"
         content="IE=edge"
     />
@@ -200,6 +204,8 @@
     @if ($app_is_demo)
         <x-demo-switcher themes-type="Frontend" />
     @endif
+
+	@includeIf('demoextension::switcher')
 </body>
 
 </html>

@@ -1048,22 +1048,14 @@ class AIRealTimeChatController extends Controller
 
         $newTitle = '';
         if ($chat->messages()->count() <= 2) {
-            $generatedNewChatTitle = OpenAI::chat()->create([
-                'model'    => $this->settings->openai_default_model,
-                'messages' => [
-                    [
-                        'role'    => 'system',
-                        'content' => 'You are a chatbot. Generate a title for a chat based on provided conversation. You must return a title only.',
-                    ],
-                    [
-                        'role'    => 'user',
-                        'content' => "Generate a title for a chat based on the following conversation: \n\n\n\n\n"
-                        . 'User Input: ' . $message->input . "\n\n\n\n\n"
-                        . 'Assistant Response: ' . $message->response,
-                    ],
-                ],
-            ]);
-            $newTitle = $generatedNewChatTitle['choices'][0]['message']['content'];
+            $userContent = "Generate a title for a chat based on the following conversation: \n\n\n\n\n"
+                . 'User Input: ' . $message->input . "\n\n\n\n\n"
+                . 'Assistant Response: ' . $message->response;
+
+            $newTitle = app(\App\Services\Ai\AiCompletionService::class)->complete(
+                'You are a chatbot. Generate a title for a chat based on provided conversation. You must return a title only.',
+                $userContent
+            );
             $chat->title = $newTitle;
             $chat->save();
             $changed = true;

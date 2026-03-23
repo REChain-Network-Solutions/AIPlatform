@@ -2,6 +2,7 @@
 
 namespace App\Helpers\Classes;
 
+use App\Extensions\Chatbot\System\Helpers\ChatbotHelper;
 use App\Models\OpenAIGenerator;
 use App\Models\Plan;
 use Illuminate\Support\Facades\Auth;
@@ -109,6 +110,10 @@ class MenuHelper
 
         if (! $plan && $menuIsAdmin === false && $menu['type'] === 'item' && $menu['key'] !== 'dashboard') {
             return false;
+        }
+
+        if ($slug === 'ext_chat_bot_agent') {
+            return ChatbotHelper::planAllowsHumanAgent($plan);
         }
 
         if (! in_array($slug, $data)) {

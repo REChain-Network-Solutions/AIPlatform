@@ -209,15 +209,9 @@ class AIArticleWizardController extends Controller
             $driver = Entity::driver($chatBot);
             $driver->redirectIfNoCreditBalance();
 
-            $completion = OpenAI::chat()->create([
-                'model'    => $chatBot?->value,
-                'messages' => [[
-                    'role'    => 'user',
-                    'content' => "Generate $request->count keywords(simple words or 2 words, not phrase, not person name) about '$request->topic'. Must resut as array json data. in '$request->language' language. Result format is [keyword1, keyword2, ..., keywordn].  Must not write ```json",
-                ]],
-            ]);
-
-            $responsedText = $completion['choices'][0]['message']['content'];
+            $responsedText = app(\App\Services\Ai\AiCompletionService::class)->completeUserOnly(
+                "Generate $request->count keywords(simple words or 2 words, not phrase, not person name) about '$request->topic'. Must resut as array json data. in '$request->language' language. Result format is [keyword1, keyword2, ..., keywordn].  Must not write ```json"
+            );
             $driver->input($responsedText)->calculateCredit()->decreaseCredit();
             Usage::getSingle()->updateWordCounts($driver->calculate());
 
@@ -249,14 +243,7 @@ class AIArticleWizardController extends Controller
             if ($request->topic != '') {
                 $prompt = "Generate $request->count titles(Maximum title length is $request->length., Must not be 'title1', 'title2', 'title3', 'title4', 'title5') about Topic: '" . $request->topic . "'. in '$request->language' language. Resut must be array json data. This is result format: [title1, title2, ..., titlen]. Maximum title length is $request->length  Must not write ```json";
             }
-            $completion = OpenAI::chat()->create([
-                'model'    => $defaultModel?->value,
-                'messages' => [[
-                    'role'    => 'user',
-                    'content' => $prompt,
-                ]],
-            ]);
-            $responsedText = $completion['choices'][0]['message']['content'];
+            $responsedText = app(\App\Services\Ai\AiCompletionService::class)->completeUserOnly($prompt);
             $driver
                 ->input($responsedText)
                 ->calculateCredit()
@@ -282,15 +269,8 @@ class AIArticleWizardController extends Controller
             $chatBot = $this->getDefaultOpenAiWordModel();
             $driver = Entity::driver($chatBot);
             $driver->redirectIfNoCreditBalance();
-            $completion = OpenAI::chat()->create([
-                'model'    => $chatBot?->value,
-                'messages' => [[
-                    'role'    => 'user',
-                    'content' => $prompt,
-                ]],
-            ]);
 
-            $responsedText = $completion['choices'][0]['message']['content'];
+            $responsedText = app(\App\Services\Ai\AiCompletionService::class)->completeUserOnly($prompt);
             $driver->input($responsedText)
                 ->calculateCredit()
                 ->decreaseCredit();
@@ -1007,7 +987,7 @@ class AIArticleWizardController extends Controller
 
     private function getDefaultOpenAiWordModel(): EntityEnum
     {
-        return EntityEnum::fromSlug($this->settings?->openai_default_model) ?? EntityEnum::GPT_4_O;
+        return EntityEnum::fromSlug($this->settings?->openai_default_model) ?? EntityEnum::GPT_5_MINI;
     }
 
     private function getDefaultOpenAiImageModel(): EntityEnum

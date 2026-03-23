@@ -280,6 +280,23 @@ class MenuService
                 ],
                 'show_condition' => Route::has('dashboard.chatbot.index'),
             ],
+            'ext_chatbot_analytics' => [
+                'parent_key'       => null,
+                'key'              => 'ext_chatbot_analytics',
+                'route'            => 'dashboard.chatbot.analytics.index',
+                'label'            => 'AI Bot Analytics',
+                'icon'             => 'tabler-chart-bar',
+                'svg'              => null,
+                'order'            => 4,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.chatbot.analytics.*',
+                ],
+                'show_condition' => Route::has('dashboard.chatbot.analytics.index'),
+            ],
             'ext_chatbot_knowledge_base_article' => [
                 'parent_key'       => null,
                 'key'              => 'ext_chatbot_knowledge_base_article',
@@ -298,6 +315,25 @@ class MenuService
                 ],
                 'show_condition' => Route::has('dashboard.chatbot.knowledge-base-article.index'),
             ],
+            'ext_chatbot_canned_response' => [
+                'parent_key'       => null,
+                'key'              => 'ext_chatbot_canned_response',
+                'route'            => 'dashboard.chatbot.canned-response.index',
+                'label'            => 'AI Bot Canned Responses',
+                'data-name'        => Introduction::AI_EXT_CHATBOT_CANNED_RESPONSES,
+                'icon'             => 'tabler-message-reply',
+                'svg'              => null,
+                'order'            => 5,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.chatbot.*',
+                ],
+                'show_condition' => Route::has('dashboard.chatbot.canned-response.index'),
+            ],
+
             'ext_chatbot_chatbot_customer_article' => [
                 'parent_key'       => null,
                 'key'              => 'ext_chatbot_chatbot_customer_article',
@@ -762,6 +798,25 @@ class MenuService
                 ],
                 'show_condition' => MarketplaceHelper::isRegistered('fashion-studio'),
             ],
+
+            'ext_chatbot_customer_tag' => [
+                'parent_key'       => null,
+                'key'              => 'ext_chatbot_customer_tag',
+                'route'            => 'dashboard.chatbot-customer-tags.index',
+                'label'            => 'Customer Tags',
+                'icon'             => 'tabler-tags',
+                'svg'              => null,
+                'order'            => 6,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.chatbot-customer-tags.*',
+                ],
+                'show_condition'   => Route::has('dashboard.chatbot-customer-tags.index'),
+            ],
+
             'ext_social_media_dropdown' => [
                 'parent_key'       => null,
                 'key'              => 'ext_social_media_dropdown',
@@ -2402,7 +2457,7 @@ class MenuService
                 'active_condition' => [
                     'dashboard.admin.chatbot.*', 'dashboard.admin.openai.chat.list',
                     'dashboard.admin.openai.chat.addOrUpdate', 'dashboard.admin.openai.chat.category',
-                    'dashboard.admin.openai.chat.addOrUpdateCategory', 'dashboard.admin.ai-chat-model.index',
+                    'dashboard.admin.openai.chat.addOrUpdateCategory', 'dashboard.admin.ai-chat-model.*',
                     'dashboard.admin.ai-assistant.*',
                 ],
                 'show_condition' => true,
@@ -2512,6 +2567,25 @@ class MenuService
                 'extension'        => null,
                 'active_condition' => [
                     'dashboard.admin.ai-chat-model.index',
+                ],
+                'show_condition' => true,
+                'is_admin'       => true,
+            ],
+            'ai_engines' => [
+                'parent_key'       => 'chat_settings',
+                'key'              => 'ai_engines',
+                'route'            => 'dashboard.admin.ai-chat-model.models.index',
+                'label'            => 'AI Engines',
+                'data-name'        => Introduction::ADMIN_AI_ENGINES,
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 45,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => null,
+                'active_condition' => [
+                    'dashboard.admin.ai-chat-model.models.*',
                 ],
                 'show_condition' => true,
                 'is_admin'       => true,
@@ -4211,6 +4285,24 @@ class MenuService
                 'show_condition' => Route::has('dashboard.admin.chatbot-instagram.settings.index'),
             ],
 
+            'chatbot_voice_call_settings_extension' => [
+                'parent_key'       => 'settings',
+                'key'              => 'chatbot_voice_call_settings_extension',
+                'route'            => 'dashboard.admin.settings.voice-call',
+                'label'            => 'Voice Call Settings',
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 79,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.admin.settings.voice-call',
+                ],
+                'show_condition' => Route::has('dashboard.admin.settings.voice-call'),
+            ],
+
             'chat_settings_extension' => [
                 'parent_key'       => null,
                 'key'              => 'chat_settings_extension',
@@ -4536,7 +4628,7 @@ class MenuService
             }
         }
 
-        return collect($data)
+        $result = collect($data)
             ->filter(function ($item) use ($keys) {
                 if (! isset($item['show_condition'])) {
                     $item['show_condition'] = false;
@@ -4546,6 +4638,18 @@ class MenuService
             })
             ->values()
             ->toArray();
+
+        // Plan-only items that don't appear in sidebar
+        if (MarketplaceHelper::isRegistered('chatbot-voice-call')) {
+            $result[] = [
+                'key'       => Introduction::AI_EXT_VOICE_CALL->value,
+                'label'     => 'AI Voice Call',
+                'data-name' => Introduction::AI_EXT_VOICE_CALL,
+                'icon'      => 'tabler-phone',
+            ];
+        }
+
+        return $result;
     }
 
     public static function planFeatureMenu(): array

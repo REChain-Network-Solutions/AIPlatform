@@ -190,7 +190,7 @@
                 @php
                     $openaiWordDrivers = \App\Domains\Entity\EntityStats::word()->filterByEngine(\App\Domains\Engine\Enums\EngineEnum::OPEN_AI)->list();
 
-                    $current_model = EntityEnum::fromSlug($setting->openai_default_model ?? EntityEnum::GPT_4_O->slug())->slug();
+                    $current_model = EntityEnum::fromSlug($setting->openai_default_model ?? EntityEnum::GPT_5_MINI->slug())->slug();
                 @endphp
                 <x-model-select-list-with-change-alert
                     :listLabel="'OpenAI Default Word Model'"

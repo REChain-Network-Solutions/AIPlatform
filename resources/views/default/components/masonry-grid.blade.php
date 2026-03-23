@@ -7,6 +7,9 @@
     x-masonry="{
         itemSelector: '{{ $itemSelector }}',
         percentPosition: true,
+        masonry: {
+            columnWidth: '{{ $itemSelector }}',
+        },
 		transitionDuration: 100
     }"
 >

@@ -33,13 +33,13 @@ class SearchController extends Controller
             $userId = auth()->id();
 
             $template_search = OpenAIGenerator::where('title', 'like', "%$word%")
-                ->select('id', 'title', 'slug') // Only select needed columns
+                ->select('id', 'title', 'slug', 'color', 'image', 'active', 'premium', 'type')
                 ->get();
 
             $workbook_search = UserOpenai::where('user_id', $userId)
                 ->where('title', 'like', "%$word%")
-                ->select('id', 'title', 'user_id', 'openai_id') // Only needed columns
-                ->with('generator:id,title,slug') // Specify generator columns
+                ->select('id', 'title', 'slug', 'user_id', 'openai_id')
+                ->with('generator:id,title,slug,color,image,type')
                 ->get();
 
             $ai_chat_search = OpenaiGeneratorChatCategory::whereNotIn('slug', ['ai_webchat', 'ai_vision', 'ai_pdf'])
@@ -47,7 +47,7 @@ class SearchController extends Controller
                     $query->where('name', 'like', "%$word%")
                         ->orWhere('description', 'like', "%$word%");
                 })
-                ->select('id', 'name', 'slug', 'description') // Only needed columns
+                ->select('id', 'name', 'slug', 'short_name', 'description', 'color')
                 ->get();
 
             if ($template_search->isEmpty() && $workbook_search->isEmpty() && $ai_chat_search->isEmpty()) {

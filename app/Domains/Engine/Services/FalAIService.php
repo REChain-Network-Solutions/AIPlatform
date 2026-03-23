@@ -210,6 +210,10 @@ class FalAIService
             $url .= '/preview';
         }
 
+        if ($ratio) {
+            $request = Arr::add($request, 'image_size', $ratio);
+        }
+
         $http = Http::timeout(3000)->withHeaders([
             'Content-Type'  => 'application/json',
             'Accept'        => 'application/json',
