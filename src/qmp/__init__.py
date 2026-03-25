@@ -62,11 +62,21 @@ class QMPService:
         """Register a message handler for a specific message type."""
         self.message_handlers[message_type] = handler
     
+    async def send(self, writer, message: QMPMessage):
+        """Send a message to a specific connected node."""
+        message_data = json.dumps(message.to_dict()).encode()
+        try:
+            writer.write(len(message_data).to_bytes(4, 'big') + message_data)
+            await writer.drain()
+        except Exception as e:
+            print(f"Error sending message: {e}")
+            self.connections.discard(writer)
+
     async def broadcast(self, message: QMPMessage, exclude: set = None):
         """Broadcast a message to all connected nodes."""
         if exclude is None:
             exclude = set()
-        
+
         message_data = json.dumps(message.to_dict()).encode()
         for writer in self.connections - exclude:
             try:

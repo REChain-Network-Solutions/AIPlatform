@@ -58,6 +58,7 @@ class GitFederation:
         self.node_id = node_id
         self.git_port = git_port
         self.manifests: Dict[str, RepoManifest] = {}
+        self._git_daemon_proc: Optional[subprocess.Popen] = None
         self._load_manifests()
 
     @property
@@ -235,6 +236,67 @@ class GitFederation:
     # -------------------------------------------------------------------------
     # QMP integration
     # -------------------------------------------------------------------------
+
+    # -------------------------------------------------------------------------
+    # Git daemon server
+    # -------------------------------------------------------------------------
+
+    def start_server(self) -> bool:
+        """
+        Start git daemon to serve repos to peers over git://.
+
+        Only repos owned by this node get a git-daemon-export-ok file,
+        so only those are served. Returns True if daemon started successfully.
+        """
+        if self._git_daemon_proc and self._git_daemon_proc.poll() is None:
+            logger.debug("git daemon already running")
+            return True
+
+        # Mark owned repos as exportable
+        for manifest in self.manifests.values():
+            if manifest.owner_node_id == self.node_id:
+                repo_path = self.repos_path / f"{manifest.name}.git"
+                if repo_path.exists():
+                    (repo_path / "git-daemon-export-ok").touch()
+
+        cmd = [
+            "git", "daemon",
+            "--reuseaddr",
+            f"--base-path={self.repos_path}",
+            f"--port={self.git_port}",
+            "--verbose",
+            str(self.repos_path),
+        ]
+
+        try:
+            self._git_daemon_proc = subprocess.Popen(
+                cmd,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+            )
+            logger.info(f"git daemon started on port {self.git_port}")
+            return True
+        except FileNotFoundError:
+            logger.error("git not found in PATH — cannot start git daemon")
+            return False
+
+    def stop_server(self):
+        """Stop the git daemon subprocess."""
+        if self._git_daemon_proc:
+            self._git_daemon_proc.terminate()
+            try:
+                self._git_daemon_proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                self._git_daemon_proc.kill()
+            self._git_daemon_proc = None
+            logger.info("git daemon stopped")
+
+    def server_running(self) -> bool:
+        """Return True if the git daemon is currently running."""
+        return (
+            self._git_daemon_proc is not None
+            and self._git_daemon_proc.poll() is None
+        )
 
     def get_announce_payload(self) -> dict:
         """Build a QMP payload announcing this node's repos."""
