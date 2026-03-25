@@ -1,204 +1,94 @@
-# Web3/4/5 Integration Guide
+# Titan Zero BOS Integration Guide
 
-This document explains how to integrate Web3, Web4, and Web5 technologies in the AIPlatform.
+This guide explains how integrations should align to the **Titan Zero BOS** model: device-first, privacy-first, federated, mobile/PWA-first, voice-first, and local-first AI.
 
-## Architecture Overview
+## Integration overview (target)
 
 ```mermaid
 graph TD
-    A[Web5 - Identity & Data] -->|Verifiable Credentials| B[Web4 - AI/ML]
-    B -->|Model Outputs| C[Web3 - Smart Contracts]
-    C -->|Payments & Governance| A
-    
-    D[User] -->|Uses| A
-    D -->|Trains| B
-    D -->|Governs| C
-    
-    E[Developer] -->|Builds on| B
-    E -->|Deploys to| C
-    E -->|Secures with| A
+    U[User (voice/mobile)] --> P[PWA + Service Worker]
+    P --> L[Local Queue + IndexedDB]
+    L --> C[Coordinator / API]
+    P --> N[On-Device / Native AI]
+    P --> O[Local / Ollama AI]
+    C --> S[Cloud AI (fallback)]
+    C --> B[Federation Bridges (Web3/identity/payments)]
 ```
 
-## Integration Points
+## Core rules
+- **Local-first execution:** Use on-device or local/Ollama inference before any remote call. Cloud AI is last resort and must be auditable.
+- **Reconciliation-based sync:** Treat coordinator sync as conflict-aware reconciliation, not overwrite.
+- **Voice-first surfaces:** Provide voice command paths alongside touch/keyboard interactions.
+- **Privacy-first:** Default to local storage; explicitly gate any data that leaves the device.
+- **Federated nodes:** Each device performs a trust/bootstrap handshake before participating in shared operations.
 
-### 1. User Onboarding Flow
+## Integration patterns
 
-1. **Web5**: User creates a DID
-2. **Web3**: User receives platform tokens
-3. **Web4**: User sets up AI preferences
+### User onboarding (device-first)
+1. Bootstrap PWA, register service worker, hydrate local stores.
+2. Perform trust handshake with coordinator (auth + tenant boundary).
+3. Prime voice intents and offline command set.
+4. Sync only the minimal data needed; keep sensitive preferences local when possible.
 
+### AI execution
 ```javascript
-// Example onboarding flow
-async function onboardUser() {
-  // 1. Create Web5 DID
-  const { web5, did } = await Web5.connect();
-  
-  // 2. Mint platform tokens (Web3)
-  const tx = await tokenContract.mint(did, '1000');
-  await tx.wait();
-  
-  // 3. Set up AI preferences (Web4)
-  await web5.dwn.records.create({
-    data: {
-      preferences: {
-        language: 'en',
-        modelSize: 'medium',
-        privacyLevel: 'high'
-      }
-    },
-    message: {
-      dataFormat: 'application/json',
-      schema: 'https://schema.org/UserPreferences'
-    }
-  });
+// Placeholder helpers for illustration; replace with real implementations.
+const validateInput = (query, context) =>
+  query ? { ok: true } : { ok: false, error: 'query cannot be empty' };
+const tryOnDeviceAI = async (query, context) => ({ ok: false, error: 'on-device AI unavailable' });
+const tryLocalHostAI = async (query, context) => ({ ok: false, error: 'local host unavailable' });
+const callCloudAI = async (query, context, options) => ({ ok: false, error: 'cloud AI unavailable' });
+
+async function executeAIWithFallback(query, context) {
+  const attempts = [];
+  const validation = validateInput(query, context);
+  if (!validation.ok) {
+    return { ok: false, error: `Invalid input: ${validation.error}` };
+  }
+
+  // 1) On-device/native path (preferred)
+  const localResult = await tryOnDeviceAI(query, context);
+  if (localResult?.ok) return { ...localResult, attempts };
+  attempts.push({ tier: 'on-device', error: localResult?.error ?? 'unavailable' });
+
+  // 2) Local/Ollama host
+  const localHostResult = await tryLocalHostAI(query, context);
+  if (localHostResult?.ok) return { ...localHostResult, attempts };
+  attempts.push({ tier: 'local-host', error: localHostResult?.error ?? 'unavailable' });
+
+  // 3) Cloud fallback (audited)
+  const cloudResult = await callCloudAI(query, context, { audit: true, notifyUser: true });
+  if (cloudResult?.ok) return { ...cloudResult, attempts };
+
+  return {
+    ok: false,
+    error: 'All AI execution tiers failed. Check device AI availability, local host connectivity, and cloud service status.',
+    attempts,
+    cloudError: cloudResult?.error ?? 'cloud unavailable',
+  };
 }
 ```
 
-### 2. AI Model Training
+### Data sync & reconciliation
+- Queue signals locally; include vector clocks or versions to support merge.
+- On reconnect, send batches to coordinator; resolve conflicts deterministically.
+- Never overwrite blindly—prefer merge strategies and audit logs.
 
-1. **Web4**: Train model with federated learning
-2. **Web5**: Store model with user-controlled access
-3. **Web3**: Reward participants with tokens
+### Federation bridges (Web3/identity)
+- Treat blockchain/identity/payments as **bridges**, not core runtime.
+- Keep private keys and credentials local; sign locally, submit minimal payloads.
+- Mark bridge features as **optional** modules that depend on tenant policy.
 
-```solidity
-// Smart Contract for AI Training Rewards
-contract AIRewards {
-    mapping(address => uint256) public rewards;
-    address public modelOwner;
-    
-    event RewardDistributed(address indexed participant, uint256 amount);
-    
-    constructor() {
-        modelOwner = msg.sender;
-    }
-    
-    function distributeRewards(
-        address[] calldata participants,
-        uint256[] calldata amounts
-    ) external {
-        require(msg.sender == modelOwner, "Not authorized");
-        require(participants.length == amounts.length, "Invalid input");
-        
-        for (uint i = 0; i < participants.length; i++) {
-            rewards[participants[i]] += amounts[i];
-            emit RewardDistributed(participants[i], amounts[i]);
-        }
-    }
-}
-```
+## Implementation roadmap (label truthfully)
+- **Implemented:** Laravel backend, Blade/Livewire UI, AI bridge stubs, worker queues.
+- **In transition:** PWA-first build with service worker + IndexedDB caches; local signal queue.
+- **Target:** Strong device-first execution with enforced AI fallback order and reconciliation-first sync.
 
-### 3. Data Marketplace
-
-1. **Web5**: Users own and control their data
-2. **Web3**: Smart contracts handle transactions
-3. **Web4**: AI models consume the data
-
-```javascript
-// Example data listing
-async function listDataset(web5, dataset, price) {
-  // 1. Store data in DWN
-  const { record } = await web5.dwn.records.create({
-    data: dataset,
-    message: {
-      dataFormat: 'application/json',
-      schema: 'https://schema.org/Dataset',
-    },
-  });
-  
-  // 2. Create listing on blockchain
-  const tx = await marketplaceContract.listDataset(
-    record.id,
-    web5.did,
-    price
-  );
-  
-  return tx.hash;
-}
-```
-
-## Implementation Roadmap
-
-### Phase 1: Foundation (Q1 2024)
-- [ ] Implement Web5 DID and basic DWN
-- [ ] Deploy core smart contracts
-- [ ] Set up federated learning infrastructure
-
-### Phase 2: Integration (Q2 2024)
-- [ ] Connect DWN with smart contracts
-- [ ] Implement token incentives
-- [ ] Develop basic AI models
-
-### Phase 3: Scaling (Q3 2024)
-- [ ] Optimize for performance
-- [ ] Add more AI capabilities
-- [ ] Improve user experience
-
-## Security Considerations
-
-1. **Data Privacy**:
-   - End-to-end encryption
-   - Zero-knowledge proofs
-   - Selective disclosure
-
-2. **Smart Contract Security**:
-   - Formal verification
-   - Audits
-   - Bug bounties
-
-3. **Access Control**:
-   - Fine-grained permissions
-   - Time-based access
-   - Revocation mechanisms
-
-## Example: Decentralized AI Assistant
-
-```javascript
-// Web5: User identity and data
-const { web5, did } = await Web5.connect();
-
-// Web4: Load AI model
-const model = await loadAIModel('gpt-4');
-
-// Web3: Check token balance
-const balance = await tokenContract.balanceOf(did);
-
-// Process user query
-async function processQuery(query) {
-  // 1. Get user context from DWN
-  const { records } = await web5.dwn.records.query({
-    message: {
-      filter: {
-        schema: 'https://schema.org/UserContext'
-      }
-    }
-  });
-  
-  const context = await records[0].data.json();
-  
-  // 2. Generate response using AI
-  const response = await model.generate({
-    prompt: query,
-    context: context
-  });
-  
-  // 3. Store interaction
-  await web5.dwn.records.create({
-    data: { query, response },
-    message: {
-      dataFormat: 'application/json',
-      schema: 'https://schema.org/ChatInteraction'
-    }
-  });
-  
-  // 4. Pay for computation (microtransaction)
-  const tx = await tokenContract.transfer(
-    '0x...AIProvider',
-    '0.01'
-  );
-  
-  return { response, txHash: tx.hash };
-}
-```
+## Security considerations
+1. **Trust bootstrap:** Mutual TLS or signed tokens for node registration; verify tenant + device identity.
+2. **Data privacy:** End-to-end encryption for sync; avoid transmitting raw user data unless required.
+3. **Auditability:** Log AI fallbacks, bridge calls, and reconciliation events; keep replayable trails.
+4. **Access control:** Respect least privilege; disable bridges by default unless policy enables them.
 
 ## Getting Started
 

@@ -1,367 +1,79 @@
-<html>
-<body>
-<!--StartFragment--><html><head></head><body><h1>MagicAI (AIPlatform) Wiki</h1>
-<hr>
-<h2>🌐 Overview</h2>
-<ul>
-<li>
-<p><strong>Repository</strong>: <a href="https://github.com/REChain-Network-Solutions/AIPlatform.git">REChain-Network-Solutions/AIPlatform</a></p>
-</li>
-<li>
-<p><strong>Codename / Product</strong>: MagicAI</p>
-</li>
-<li>
-<p><strong>Purpose</strong>: AI SaaS starter platform including landing page, dashboard, customization, and core AI features.</p>
-</li>
-<li>
-<p><strong>License</strong>: BSD 3-Clause</p>
-</li>
-<li>
-<p><strong>Languages</strong>: JavaScript (41.4%), PHP (27%), Blade (20%), CSS/SCSS/Sass (remaining)</p>
-</li>
-</ul>
-<hr>
-<h2>🚀 Key Features</h2>
-<ul>
-<li>
-<p><strong>Landing Page &amp; Dashboard</strong>: Out-of-the-box templates for SaaS presentation and operations.</p>
-</li>
-<li>
-<p><strong>Theme Customization</strong>: Change visual appearance with one click.</p>
-</li>
-<li>
-<p><strong>Extensions Support</strong>: Modular AI features via <code inline="">magicai-extentions</code>.</p>
-</li>
-<li>
-<p><strong>Localization</strong>: Multi-language support via <code inline="">lang/</code>.</p>
-</li>
-<li>
-<p><strong>Secure Foundation</strong>: Security policy included in <code inline="">SECURITY.md</code>.</p>
-</li>
-</ul>
-<hr>
-<h2>📂 Repository Structure</h2>
+# Titan Zero BOS
 
-Path | Description
--- | --
-.github/ | GitHub workflows, issue templates
-app/ | Core application logic: controllers, models, services
-bootstrap/ | Initialization & environment bootstrapping
-config/ | Configuration files (app, DB, cache, etc.)
-database/ | Migrations, seeds, SQL dump (magicai.sql)
-documents/ | Documentation & project notes
-lang/ | Translation & localization files
-magicai-extentions/ | Custom AI extensions/plugins
-packages/ | External or internal packages/modules
-public/ | Public assets (CSS, JS, images)
-resources/ | Views, Blade templates, frontend resources
-routes/ | API & web routes
-storage/ | Logs, cached data, temporary files
-tests/ | Unit & integration tests
+Titan Zero BOS is a business operating system built for device-first, privacy-first operations. It treats every device as a federated node that can work offline, reconcile when connected, and prefer on-device intelligence before using any remote AI. The platform ships with a Laravel core, Blade/Livewire UI, and a PWA-oriented frontend toolchain (Vite, Tailwind) that we are aligning to this model.
 
+## What this repository is
+- **Platform identity:** Titan Zero BOS (formerly documented as MagicAI / AIPlatform in legacy materials).
+- **Repository slug:** `Titan-BOS` (kept for continuity); platform identity is Titan Zero BOS.
+- **Purpose:** Provide a mobile-first, PWA-first runtime with federated device nodes, local storage/queues, and voice-first control surfaces.
+- **Current implementation:** Laravel 10 backend, Blade/Livewire views, Vite/Tailwind build, extensions under `packages/` and `app/Providers/ExtensionServiceProvider`.
+- **Target model:** Offline-capable PWA with service worker, IndexedDB/local stores, local signal queue, node bootstrap + trust handshake, and reconciliation-based sync.
 
-<p>Other important files:</p>
-<ul>
-<li>
-<p><code inline="">.env.example</code> → environment template</p>
-</li>
-<li>
-<p><code inline="">composer.json</code> / <code inline="">composer.lock</code> → PHP dependencies</p>
-</li>
-<li>
-<p><code inline="">package.json</code> / <code inline="">package-lock.json</code> → JavaScript dependencies</p>
-</li>
-<li>
-<p><code inline="">vite.config.mjs</code> → Vite frontend bundler config</p>
-</li>
-<li>
-<p><code inline="">phpunit.xml</code> → PHPUnit test configuration</p>
-</li>
-<li>
-<p><code inline="">version.txt</code> → Current app version</p>
-</li>
-<li>
-<p><code inline="">README.md</code>, <code inline="">SECURITY.md</code> → Documentation</p>
-</li>
-</ul>
-<hr>
-<h2>⚙️ Installation &amp; Setup</h2>
-<ol>
-<li>
-<p><strong>Clone Repository</strong></p>
-<pre><code class="language-bash">git clone https://github.com/REChain-Network-Solutions/AIPlatform.git
-cd AIPlatform
-</code></pre>
-</li>
-<li>
-<p><strong>Environment Setup</strong></p>
-<pre><code class="language-bash">cp .env.example .env
-# edit DB credentials, API keys, etc.
-</code></pre>
-</li>
-<li>
-<p><strong>Install Dependencies</strong></p>
-<pre><code class="language-bash">composer install
-npm install   # or yarn
-</code></pre>
-</li>
-<li>
-<p><strong>Database Setup</strong></p>
-<pre><code class="language-bash">php artisan migrate --seed
-# optionally import magicai.sql
-</code></pre>
-</li>
-<li>
-<p><strong>Build Frontend</strong></p>
-<pre><code class="language-bash">npm run build   # or npm run dev for development
-</code></pre>
-</li>
-<li>
-<p><strong>Run Application</strong></p>
-<pre><code class="language-bash">php artisan serve
-</code></pre>
-</li>
-</ol>
-<hr>
-<h2>🧩 Architecture</h2>
-<ul>
-<li>
-<p><strong>Backend</strong>: Laravel-based (PHP + Blade templating)</p>
-</li>
-<li>
-<p><strong>Frontend</strong>: Tailwind CSS + Vite build system</p>
-</li>
-<li>
-<p><strong>Database</strong>: SQL migrations &amp; schema (<code inline="">magicai.sql</code>)</p>
-</li>
-<li>
-<p><strong>Extensions</strong>: Modular plug-ins via <code inline="">magicai-extentions</code></p>
-</li>
-<li>
-<p><strong>Localization</strong>: Multi-language system in <code inline="">lang/</code></p>
-</li>
-<li>
-<p><strong>Testing</strong>: PHPUnit for backend, potential JS tests</p>
-</li>
-</ul>
-<hr>
-<h2>🔐 Security</h2>
-<ul>
-<li>
-<p>Security guidelines in <code inline="">SECURITY.md</code></p>
-</li>
-<li>
-<p>BSD 3-Clause license</p>
-</li>
-<li>
-<p><code inline="">.env</code> file for sensitive configs (DB, API keys)</p>
-</li>
-<li>
-<p>Recommend HTTPS + reverse proxy for production</p>
-</li>
-</ul>
-<hr>
-<h2>📊 Project Status</h2>
-<ul>
-<li>
-<p><strong>Commits</strong>: ~7 (early development stage)</p>
-</li>
-<li>
-<p><strong>Releases</strong>: none published</p>
-</li>
-<li>
-<p><strong>Stars/Forks</strong>: minimal (early community adoption)</p>
-</li>
-</ul>
-<hr>
-<h2>🌍 Usage Scenarios</h2>
-<ul>
-<li>
-<p>SaaS startups needing ready AI landing + dashboard</p>
-</li>
-<li>
-<p>Enterprises requiring multilingual AI interface</p>
-</li>
-<li>
-<p>Developers launching branded AI tools with quick theme customization</p>
-</li>
-<li>
-<p>Educational projects experimenting with AI SaaS architecture</p>
-</li>
-</ul>
-<hr>
-<h2>📌 Roadmap (Suggested)</h2>
-<ul class="contains-task-list">
-<li class="task-list-item">
-<p><input type="checkbox" disabled=""> Publish first official release</p>
-</li>
-<li class="task-list-item">
-<p><input type="checkbox" disabled=""> Extend AI integrations (OpenAI, HuggingFace, local models)</p>
-</li>
-<li class="task-list-item">
-<p><input type="checkbox" disabled=""> Add CI/CD pipelines in <code inline="">.github/workflows/</code></p>
-</li>
-<li class="task-list-item">
-<p><input type="checkbox" disabled=""> Dockerize for production deployment</p>
-</li>
-<li class="task-list-item">
-<p><input type="checkbox" disabled=""> Expand automated test coverage</p>
-</li>
-<li class="task-list-item">
-<p><input type="checkbox" disabled=""> Create official documentation site</p>
-</li>
-</ul>
-<hr>
-<h2>🧭 Summary</h2>
-<p>MagicAI (AIPlatform) is a <strong>flexible AI SaaS starter kit</strong> offering a complete landing + dashboard solution, fast theming, localization, and extensibility. Though early in development, it provides a strong base for building scalable AI-powered applications.</p></body></html><!--EndFragment-->
-</body>
-</html># MagicAI (AIPlatform) Wiki
+## Core principles
+- **Device-first & federated:** Devices are primary execution nodes that sync via reconciliation, not overwrite. Server coordination is supportive, not default.
+- **Privacy-first:** Local data and local inference are preferred; remote calls are gated and auditable.
+- **Mobile-first & PWA-first:** Service worker + IndexedDB/local caches keep the experience responsive and offline-capable.
+- **Voice-first control:** Voice is a primary command surface across mobile and desktop surfaces.
+- **AI fallback order:**  
+  1) On-device / native models  
+  2) Local/Ollama hosts  
+  3) Server/cloud AI as last resort
 
----
+## Architecture at a glance
+- **Runtime:** Laravel backend, Blade/Livewire UI, Vite-built assets, Tailwind styling.
+- **Local-first data:** Target use of IndexedDB/local stores for PWA data, with local signal queues before server submission.
+- **Federated nodes:** Each device performs a bootstrap + trust validation handshake before joining the mesh; sync is reconciliation-focused.
+- **Governance & audit:** Actions are logged for replayability; tenant boundaries must remain explicit in shared environments.
+- **Extensions:** Optional packages live under `packages/` and discovery code under `app/Providers/ExtensionServiceProvider`; foundational runtime stays in core.
+- **Voice & accessibility:** Voice commands and low-friction mobile controls are first-class interaction goals.
 
-## 🌐 Overview
+### Current state vs. target (honest view)
+| Area | Current | Target / Plan |
+| --- | --- | --- |
+| Identity | Legacy MagicAI/AIPlatform labels remain in code & packages | Canonical name Titan Zero BOS; keep legacy labels noted until safe migrations |
+| Frontend | Laravel Blade/Livewire + Vite | PWA-first with service worker + IndexedDB caches and local signal queues |
+| AI execution | Remote AI providers configured; local preference not enforced | Enforce local/on-device then Ollama/local hosts, cloud last |
+| Sync | Server-first flows | Reconciliation-based sync with device-led queues |
+| Voice | Voice integrations present in bridges | Voice treated as default command surface in UX copy and flows |
 
-* **Repository**: [[REChain-Network-Solutions/AIPlatform](https://github.com/REChain-Network-Solutions/AIPlatform.git)](https://github.com/REChain-Network-Solutions/AIPlatform.git)
-* **Codename / Product**: MagicAI
-* **Purpose**: AI SaaS starter platform including landing page, dashboard, customization, and core AI features.
-* **License**: BSD 3-Clause
-* **Languages**: JavaScript (41.4%), PHP (27%), Blade (20%), CSS/SCSS/Sass (remaining)
+## Getting started (developer)
+```bash
+git clone https://github.com/Masterleeaus/Titan-BOS.git Titan-BOS
+cd Titan-BOS
+cp .env.example .env    # set APP_NAME, DB credentials, API keys
+composer install
+npm install
+php artisan migrate --seed   # import seed data as needed
+npm run dev                  # or npm run build for production assets
+php artisan serve            # start Laravel server
+```
 
----
+> Repository slug is `Titan-BOS` for compatibility; platform identity is **Titan Zero BOS**.
+> Legacy docs referenced `REChain-Network-Solutions/AIPlatform`; the active repository lives at `Masterleeaus/Titan-BOS`.
 
-## 🚀 Key Features
+### PWA/mobile-first notes
+- Ensure HTTPS + valid host when testing service-worker capable builds.
+- Prefer local storage/queues for commands; treat server sync as reconciliation.
+- When implementing new screens, keep mobile-first layouts and voice entry points visible.
 
-* **Landing Page & Dashboard**: Out-of-the-box templates for SaaS presentation and operations.
-* **Theme Customization**: Change visual appearance with one click.
-* **Extensions Support**: Modular AI features via `magicai-extentions`.
-* **Localization**: Multi-language support via `lang/`.
-* **Secure Foundation**: Security policy included in `SECURITY.md`.
+### AI execution policy
+- Attempt **on-device** or **native** inference first.
+- If unavailable, route to **local/Ollama** hosts.
+- Use **server/cloud** AI only when the above cannot satisfy the request, and surface that fallthrough to the user.
 
----
+## Migration notes (legacy names)
+- Composer packages and DB names still reference `magicai`/`AIPlatform`; these remain for stability and require a separate migration plan.
+- UI text, docs, and display names should use **Titan Zero BOS** going forward. If legacy terms appear for technical reasons, annotate them as legacy.
 
-## 📂 Repository Structure
+## Contributing
+- Follow privacy-first and device-first patterns for new features.
+- Prefer local/offline-friendly storage and reconciliation patterns over server-first writes.
+- Document whether a feature is **implemented**, **in transition**, or **target** to avoid overstating capabilities.
 
-| Path                  | Description                                           |
-| --------------------- | ----------------------------------------------------- |
-| `.github/`            | GitHub workflows, issue templates                     |
-| `app/`                | Core application logic: controllers, models, services |
-| `bootstrap/`          | Initialization & environment bootstrapping            |
-| `config/`             | Configuration files (app, DB, cache, etc.)            |
-| `database/`           | Migrations, seeds, SQL dump (`magicai.sql`)           |
-| `documents/`          | Documentation & project notes                         |
-| `lang/`               | Translation & localization files                      |
-| `magicai-extentions/` | Custom AI extensions/plugins                          |
-| `packages/`           | External or internal packages/modules                 |
-| `public/`             | Public assets (CSS, JS, images)                       |
-| `resources/`          | Views, Blade templates, frontend resources            |
-| `routes/`             | API & web routes                                      |
-| `storage/`            | Logs, cached data, temporary files                    |
-| `tests/`              | Unit & integration tests                              |
+## Security & privacy
+- Keep secrets in `.env`; do not commit keys.
+- Enforce HTTPS, rate limits, and tenant isolation.
+- Audit trails and replayability are required for governance surfaces.
 
-Other important files:
-
-* `.env.example` → environment template
-* `composer.json` / `composer.lock` → PHP dependencies
-* `package.json` / `package-lock.json` → JavaScript dependencies
-* `vite.config.mjs` → Vite frontend bundler config
-* `phpunit.xml` → PHPUnit test configuration
-* `version.txt` → Current app version
-* `README.md`, `SECURITY.md` → Documentation
-
----
-
-## ⚙️ Installation & Setup
-
-1. **Clone Repository**
-
-   ```bash
-   git clone https://github.com/REChain-Network-Solutions/AIPlatform.git
-   cd AIPlatform
-   ```
-
-2. **Environment Setup**
-
-   ```bash
-   cp .env.example .env
-   # edit DB credentials, API keys, etc.
-   ```
-
-3. **Install Dependencies**
-
-   ```bash
-   composer install
-   npm install   # or yarn
-   ```
-
-4. **Database Setup**
-
-   ```bash
-   php artisan migrate --seed
-   # optionally import magicai.sql
-   ```
-
-5. **Build Frontend**
-
-   ```bash
-   npm run build   # or npm run dev for development
-   ```
-
-6. **Run Application**
-
-   ```bash
-   php artisan serve
-   ```
-
----
-
-## 🧩 Architecture
-
-* **Backend**: Laravel-based (PHP + Blade templating)
-* **Frontend**: Tailwind CSS + Vite build system
-* **Database**: SQL migrations & schema (`magicai.sql`)
-* **Extensions**: Modular plug-ins via `magicai-extentions`
-* **Localization**: Multi-language system in `lang/`
-* **Testing**: PHPUnit for backend, potential JS tests
-
----
-
-## 🔐 Security
-
-* Security guidelines in `SECURITY.md`
-* BSD 3-Clause license
-* `.env` file for sensitive configs (DB, API keys)
-* Recommend HTTPS + reverse proxy for production
-
----
-
-## 📊 Project Status
-
-* **Commits**: \~7 (early development stage)
-* **Releases**: none published
-* **Stars/Forks**: minimal (early community adoption)
-
----
-
-## 🌍 Usage Scenarios
-
-* SaaS startups needing ready AI landing + dashboard
-* Enterprises requiring multilingual AI interface
-* Developers launching branded AI tools with quick theme customization
-* Educational projects experimenting with AI SaaS architecture
-
----
-
-## 📌 Roadmap (Suggested)
-
-* [ ] Publish first official release
-* [ ] Extend AI integrations (OpenAI, HuggingFace, local models)
-* [ ] Add CI/CD pipelines in `.github/workflows/`
-* [ ] Dockerize for production deployment
-* [ ] Expand automated test coverage
-* [ ] Create official documentation site
-
----
-
-## 🧭 Summary
-
-MagicAI (AIPlatform) is a **flexible AI SaaS starter kit** offering a complete landing + dashboard solution, fast theming, localization, and extensibility. Though early in development, it provides a strong base for building scalable AI-powered applications.
+## License
+BSD 3-Clause (see `LICENSE` where applicable).

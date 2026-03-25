@@ -1,36 +1,34 @@
-# Architecture Overview — AIPlatform
+# Titan Zero BOS — Architecture Overview
 
-## High-level
-AIPlatform is modular, composed of:
-- **Frontend (`app/`)**: landing + dashboard (SPA)
-- **API / Backend (`ai-driven-core/`)**: authentication, tenancy, orchestration
-- **Gen AI Engine (`gen-ai-engine/`)**: prompt management, pipelines, model adapters
-- **Quantum Modules (`quantum-engineering/`)**: experimental accelerators & prototypes
-- **Integrations**: git-systems, gitflic, storage adapters, real-time clients
+## High-level model
+Titan Zero BOS treats every device as a federated node. The server coordinates and reconciles, but execution aims to stay local first.
 
-## Data flows
-1. User -> Frontend -> API
-2. API invokes GenAI pipelines or delegates to adapters
-3. Adapters call model providers or experimental quantum modules
-4. Storage: object stores for artifacts; relational DB for metadata
-5. Events: message bus (Redis / RabbitMQ) for async jobs
+- **PWA runtime (`resources/`, `public/`)**: service worker-ready build, IndexedDB/local caches (planned), voice-first UI surfaces.
+- **Backend (`app/`, `routes/`, `config/`)**: Laravel core for orchestration, APIs, tenancy, and policy enforcement.
+- **Signal queue (planned)**: local queue per device with reconciliation to server queues; server resolves conflicts rather than overwriting.
+- **AI adapters (`packages/`, `bridges/`)**: connectors to on-device/native, local/Ollama, and cloud AI in that preference order.
+- **Extensions (`packages/`, `app/Providers/ExtensionServiceProvider`)**: optional modules; core runtime stays lean.
 
-## Deployment topology
-- Stateless frontends behind a load balancer
-- Autoscaled backends (horizontal)
-- Worker pool for gen-ai tasks (GPU nodes recommended)
-- Optional quantum accelerator nodes (experimental)
+## Data & interaction flows
+1. User (voice/touch) -> PWA -> **local queue/storage first**.
+2. Device performs **trust handshake** with coordinating services when online.
+3. Reconciliation sync merges local signals; conflicts are resolved, not overwritten.
+4. AI calls try **on-device**, then **local/Ollama**, then **cloud** as last resort.
+5. Audit events are logged for replayability and governance.
 
-## Security & multi-tenancy
-- Per-tenant DB schemas or row-level isolation (configurable)
-- JWT + OAuth2 for auth
-- Rate limiting and quota enforcement in API gateway
+## Deployment topology (current vs. target)
+- **Current:** Laravel app with Blade/Livewire UI behind a web server; workers handle background jobs; frontend built with Vite/Tailwind.
+- **Target:** Service-worker-enabled PWA assets served at the edge; device-local stores keep working offline; server nodes act as coordinators and reconciliation authorities; optional GPU/AI nodes join as local-first inference hosts.
+
+## Security & tenancy
+- Tenant isolation is required in any shared deployment; respect per-tenant DB/schema boundaries.
+- Trust bootstrap between devices and coordinators must validate identity and permissions before sync.
+- Prefer end-to-end encryption for device <-> server channels; local data remains local unless explicitly shared.
 
 ## Observability
-- Metrics: Prometheus
-- Traces: Jaeger / OpenTelemetry
-- Logs: centralized ELK / Loki
+- Collect metrics/traces/logs, but ensure privacy-first sampling and redaction policies.
+- Offline nodes buffer telemetry and flush after reconciliation.
 
 ## Extensibility
-- Adapters follow an interface: `adapter.register()` + async call patterns
-- Add new model providers by implementing the provider interface in `gen-ai-engine/providers/`
+- Keep platform primitives in core; extensions remain modular under `packages/` or dedicated providers.
+- When adding adapters, document whether they execute locally, on nearby nodes, or in the cloud, and how they respect the AI fallback order.

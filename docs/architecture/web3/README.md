@@ -1,9 +1,9 @@
-# Web3 Architecture
+# Web3 Bridge — Titan Zero BOS
 
 ## Overview
-The Web3 layer provides the blockchain infrastructure for AIPlatform, enabling decentralized governance, tokenomics, and trustless interactions.
+In Titan Zero BOS, Web3 is a **bridge**, not the default runtime. Devices remain the primary nodes, and blockchain rails augment governance, payments, and auditability when policy allows.
 
-## Core Components
+## Core Components (optional)
 
 ### 1. Smart Contracts
 - **Governance**: DAO for platform decisions
@@ -33,7 +33,7 @@ graph TD
     G[Oracles] --> B
 ```
 
-## Implementation Guide
+## Implementation Guide (treat as optional extension)
 
 ### 1. Setting Up Development Environment
 ```bash
