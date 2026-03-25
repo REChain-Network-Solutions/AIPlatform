@@ -78,6 +78,15 @@ export default () => ( {
 		this.processAudioRecordingBuffer = this.processAudioRecordingBuffer.bind( this );
 	},
 	async start() {
+		if ( this.isConsentRequired() ) {
+			const hint = document.querySelector( 'meta[name="voice-consent-hint"]' )?.getAttribute( 'content' ) || 'Voice streaming sends audio to remote providers. Continue?';
+			const approved = window.confirm( hint );
+
+			if ( !approved ) {
+				return;
+			}
+		}
+
 		this.checkBalanceRealtime( true ).then( result => {
 			if ( result.shouldStop ) {
 				toastr.error( result.errorMsg );
@@ -100,6 +109,7 @@ export default () => ( {
 					'Content-Type': 'application/json',
 					'X-CSRF-TOKEN': document.querySelector( 'meta[name="csrf-token"]' )?.getAttribute( 'content' ),
 				},
+				body: JSON.stringify( { consent: true } ),
 			} );
 
 			if ( !tokenResponse.ok ) {
@@ -541,5 +551,8 @@ export default () => ( {
 				}
 			} );
 		} );
+	},
+	isConsentRequired() {
+		return document.querySelector( 'meta[name="voice-consent-required"]' )?.getAttribute( 'content' ) === '1';
 	}
 } );

@@ -203,21 +203,26 @@ class ExtensionRepository implements ExtensionRepositoryInterface
 
     public function request(string $method, string $route, array $body = [], $fullUrl = null)
     {
-        $fullUrl = $fullUrl ?? self::API_URL . $route;
+        $fullUrl = $fullUrl ?? rtrim(config('marketplace.base_url', self::API_URL), '/') . '/' . ltrim($route, '/');
 
-        return Http::withHeaders([
-            'Accept'         => 'application/json',
-            'Content-Type'   => 'application/json',
-            'x-domain'       => request()?->getHost(),
-            'x-domain-key'   => $this->domainKey(),
-            'x-license-type' => $this->licenseType(),
-            'x-app-key'      => $this->appKey(),
-            'x-app-version'  => (string) $this->appVersion(),
-        ])->when($method === 'post', function ($http) use ($fullUrl, $body) {
-            return $http->post($fullUrl, $body);
-        }, function ($http) use ($fullUrl, $body) {
-            return $http->get($fullUrl, $body);
-        });
+        return Http::retry(
+            (int) config('marketplace.retry.times', 1),
+            (int) config('marketplace.retry.sleep', 200)
+        )
+            ->timeout((int) config('marketplace.timeout', 10))
+            ->withHeaders([
+                'Accept'         => 'application/json',
+                'Content-Type'   => 'application/json',
+                'x-domain'       => request()?->getHost(),
+                'x-domain-key'   => $this->domainKey(),
+                'x-license-type' => $this->licenseType(),
+                'x-app-key'      => $this->appKey(),
+                'x-app-version'  => (string) $this->appVersion(),
+            ])->when($method === 'post', function ($http) use ($fullUrl, $body) {
+                return $http->post($fullUrl, $body);
+            }, function ($http) use ($fullUrl, $body) {
+                return $http->get($fullUrl, $body);
+            });
     }
 
     public function check($request, Closure $next)

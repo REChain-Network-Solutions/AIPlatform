@@ -114,4 +114,9 @@ return [
     'midtrans' => [
         'class' => App\Services\PaymentGateways\MidtransService::class,
     ],
+
+    'ollama' => [
+        'base_url' => env('OLLAMA_BASE_URL', ''),
+        'model'    => env('OLLAMA_MODEL', 'llama3'),
+    ],
 ];

@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Models\UserOpenai;
 use App\Models\UserOpenaiChat;
 use App\Models\UserOpenaiChatMessage;
+use App\Services\Voice\VoicePolicyService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ class AIRealTimeChatController extends Controller
 
     protected $settings_two;
 
-    public function __construct()
+    public function __construct(private VoicePolicyService $voicePolicy)
     {
         // Settings
         $this->settings = Setting::getCache();
@@ -1097,6 +1098,7 @@ class AIRealTimeChatController extends Controller
      */
     public function getWebsocketCredentials(Request $request)
     {
+        $this->voicePolicy->assertConsent($request);
 
         $apiKey = ApiHelper::setOpenAiKey();
         $len = strlen($apiKey);

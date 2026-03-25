@@ -33,6 +33,18 @@
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     />
+    <link
+        rel="manifest"
+        href="{{ asset('manifest.json') }}"
+    >
+    <meta
+        name="voice-consent-required"
+        content="{{ config('voice.require_consent') ? '1' : '0' }}"
+    >
+    <meta
+        name="voice-consent-hint"
+        content="{{ config('voice.consent_hint') }}"
+    >
     <meta
         name="description"
         content="{{ getMetaDesc($setting, $settings_two) }}"
@@ -196,6 +208,11 @@
             toastr.{{ \Session::get('type') }}('{{ \Session::get('message') }}')
         </script>
     @endif
+
+    <script
+        src="{{ asset('js/pwa/register-sw.js') }}"
+        defer
+    ></script>
 
     @livewireScriptConfig()
 

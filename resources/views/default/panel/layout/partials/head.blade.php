@@ -27,6 +27,18 @@
         http-equiv="X-UA-Compatible"
         content="ie=edge"
     />
+    <link
+        rel="manifest"
+        href="{{ asset('manifest.json') }}"
+    >
+    <meta
+        name="voice-consent-required"
+        content="{{ config('voice.require_consent') ? '1' : '0' }}"
+    >
+    <meta
+        name="voice-consent-hint"
+        content="{{ config('voice.consent_hint') }}"
+    >
     <meta
         http-equiv="Content-Security-Policy"
         content="upgrade-insecure-requests"

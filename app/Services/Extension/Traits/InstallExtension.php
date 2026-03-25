@@ -65,6 +65,13 @@ trait InstallExtension
             Storage::disk('local')->delete('file.zip');
 
             try {
+                if (File::isDirectory($this->zipExtractPath . DIRECTORY_SEPARATOR . 'Extensions' . DIRECTORY_SEPARATOR . 'Extensions')) {
+                    return [
+                        'status'  => false,
+                        'message' => trans('Invalid extension package: nested Extensions/Extensions detected.'),
+                    ];
+                }
+
                 // index json
                 $this->getIndexJson();
 

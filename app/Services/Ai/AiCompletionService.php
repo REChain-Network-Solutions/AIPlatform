@@ -12,9 +12,16 @@ use App\Helpers\Classes\Helper;
 use GuzzleHttp\Client;
 use OpenAI as OpenAIMain;
 use OpenAI\Laravel\Facades\OpenAI;
+use Illuminate\Support\Facades\Log;
 
 class AiCompletionService
 {
+    public function __construct(
+        private readonly ApiKeyResolver $keyResolver,
+        private readonly DeviceCompletionService $deviceCompletion,
+        private readonly LocalCompletionService $localCompletion,
+    ) {}
+
     public function completeUserOnly(string $userContent, ?EngineEnum $engine = null): string
     {
         return $this->complete('You are a helpful assistant.', $userContent, $engine);
@@ -24,6 +31,35 @@ class AiCompletionService
     {
         $engine ??= Helper::defaultEngine();
 
+        foreach (config('ai.routing.order', ['device', 'local', 'cloud']) as $layer) {
+            if ($layer === 'device') {
+                $result = $this->deviceCompletion->complete($systemPrompt, $userContent);
+
+                if ($result !== null) {
+                    return $result;
+                }
+            }
+
+            if ($layer === 'local') {
+                $result = $this->localCompletion->complete($systemPrompt, $userContent);
+
+                if ($result !== null) {
+                    return $result;
+                }
+            }
+
+            if ($layer === 'cloud') {
+                return $this->completeViaCloud($systemPrompt, $userContent, $engine);
+            }
+        }
+
+        Log::warning('AI completion fell through all routing layers, using cloud fallback');
+
+        return $this->completeViaCloud($systemPrompt, $userContent, $engine);
+    }
+
+    private function completeViaCloud(string $systemPrompt, string $userContent, EngineEnum $engine): string
+    {
         return match ($engine) {
             EngineEnum::ANTHROPIC => $this->viaAnthropic($systemPrompt, $userContent),
             EngineEnum::GEMINI    => $this->viaGemini($systemPrompt, $userContent, $engine),
@@ -35,7 +71,7 @@ class AiCompletionService
 
     private function viaOpenAi(string $systemPrompt, string $userContent): string
     {
-        ApiHelper::setOpenAiKey();
+        $this->keyResolver->applyOpenAiKey();
 
         $model = Helper::defaultWordModel();
 
@@ -55,6 +91,8 @@ class AiCompletionService
 
     private function viaAnthropic(string $systemPrompt, string $userContent): string
     {
+        $this->keyResolver->applyAnthropicKey();
+
         $client = app(AnthropicService::class);
 
         $response = $client
@@ -75,6 +113,8 @@ class AiCompletionService
 
     private function viaGemini(string $systemPrompt, string $userContent, EngineEnum $engine): string
     {
+        $this->keyResolver->applyGeminiKey();
+
         $model = $engine->getDefaultWordModel(null);
 
         $client = app(GeminiService::class);
@@ -96,7 +136,7 @@ class AiCompletionService
 
     private function viaDeepSeek(string $systemPrompt, string $userContent, EngineEnum $engine): string
     {
-        ApiHelper::setDeepseekKey();
+        $this->keyResolver->applyDeepseekKey();
 
         $model = $engine->getDefaultWordModel(null);
         $apiKey = config('deepseek.api_key');
@@ -124,6 +164,8 @@ class AiCompletionService
 
     private function viaXAi(string $systemPrompt, string $userContent, EngineEnum $engine): string
     {
+        $this->keyResolver->applyXAiKey();
+
         $apiKey = ApiHelper::setXAiKey();
         $model = $engine->getDefaultWordModel(null);
 

@@ -206,6 +206,11 @@
 
     @stack('script')
 
+    <script
+        src="{{ asset('js/pwa/register-sw.js') }}"
+        defer
+    ></script>
+
     <script src="{{ custom_theme_url('/assets/js/frontend.js') }}"></script>
 
     @if ($setting->dashboard_code_before_body != null)

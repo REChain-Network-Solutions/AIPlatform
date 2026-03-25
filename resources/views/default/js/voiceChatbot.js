@@ -44,6 +44,15 @@ const elevenLabsConversationalAI = ( agentId, botUuid ) => ( {
 	},
 	// start conversation
 	async startConversation() {
+		if ( this.isConsentRequired() ) {
+			const hint = document.querySelector( 'meta[name="voice-consent-hint"]' )?.getAttribute( 'content' ) || 'Voice streaming sends audio to remote providers. Continue?';
+			const approved = window.confirm( hint );
+
+			if ( !approved ) {
+				return;
+			}
+		}
+
 		// disable the btn to prevent double click
 		this.startConversationBtn.setAttribute( 'disabled', true );
 		this.startConversationBtn.querySelector( 'span' ).textContent = 'starting...';
@@ -99,6 +108,9 @@ const elevenLabsConversationalAI = ( agentId, botUuid ) => ( {
 			alert( 'Something went wrong with voice agent' );
 			console.error( error );
 		}
+	},
+	isConsentRequired() {
+		return document.querySelector( 'meta[name="voice-consent-required"]' )?.getAttribute( 'content' ) === '1';
 	},
 	// stop conversation
 	async stopConversation() {
