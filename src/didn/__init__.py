@@ -16,6 +16,8 @@ from typing import Dict, Optional
 from dataclasses import dataclass, asdict
 from datetime import datetime
 
+from src.crypto import verify as _verify_sig
+
 logger = logging.getLogger(__name__)
 
 
@@ -109,15 +111,47 @@ class DIDN:
 
         This is the replication mechanism: after connecting to a peer via QMP,
         nodes exchange their DIDN state and merge it locally.
-        Existing entries are NOT overwritten (local-first wins).
+
+        Rules:
+        - Existing entries are NOT overwritten (local-first wins).
+        - Each incoming identity is verified: identity_id must equal
+          SHA-256(public_key_bytes) and the signature must be a valid
+          Ed25519 signature of public_key_hex using the matching private key.
+          Entries that fail either check are silently dropped with a warning.
         """
         added_identities = 0
         added_data = 0
 
         for iid, raw in peer_identities.items():
-            if iid not in self.identities:
-                self.identities[iid] = Identity.from_dict(raw)
-                added_identities += 1
+            if iid in self.identities:
+                continue  # local-first: never overwrite
+
+            pub_key = raw.get("public_key", "")
+            signature = raw.get("signature", "")
+
+            # 1. Verify identity_id == SHA-256(public_key_bytes)
+            try:
+                expected_iid = hashlib.sha256(bytes.fromhex(pub_key)).hexdigest()
+            except ValueError:
+                logger.warning(f"Dropping identity {iid[:16]}...: public_key is not valid hex")
+                continue
+
+            if expected_iid != iid:
+                logger.warning(
+                    f"Dropping identity {iid[:16]}...: "
+                    "identity_id does not match SHA-256(public_key)"
+                )
+                continue
+
+            # 2. Verify signature proves ownership of the private key
+            if not _verify_sig(pub_key, pub_key.encode(), signature):
+                logger.warning(
+                    f"Dropping identity {iid[:16]}...: Ed25519 signature verification failed"
+                )
+                continue
+
+            self.identities[iid] = Identity.from_dict(raw)
+            added_identities += 1
 
         for did, raw in peer_data.items():
             if did not in self.data_store:

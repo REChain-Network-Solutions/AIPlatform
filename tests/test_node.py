@@ -6,10 +6,12 @@ from unittest.mock import AsyncMock, MagicMock, patch, call
 
 from src.node import Node, NodeConfig
 from src.qmp import QMPMessage
+from src.crypto import KeyPair
 
 
-NODE_A_ID = "a" * 64
-NODE_B_ID = "b" * 64
+# Real Ed25519 keypair for a simulated peer
+_PEER_KP = KeyPair.generate()
+NODE_B_ID = _PEER_KP.node_id
 
 
 @pytest.fixture
@@ -81,18 +83,24 @@ def test_all_handlers_registered(node):
 # _handle_handshake
 # ---------------------------------------------------------------------------
 
+def _peer_handshake_content(kp: KeyPair, qmp_port: int = 9000) -> dict:
+    """Build a valid, signed handshake payload for a keypair."""
+    return {
+        "node_id": kp.node_id,
+        "public_key": kp.public_key_hex,
+        "signature": kp.sign(kp.node_id.encode()),
+        "qmp_port": qmp_port,
+        "capabilities": ["git"],
+    }
+
+
 @pytest.mark.asyncio
 async def test_handshake_registers_peer(node):
     writer = _mock_writer("192.168.1.10")
     node.qmp.send = AsyncMock()
 
     msg = QMPMessage(
-        content={
-            "node_id": NODE_B_ID,
-            "public_key": "pub_b",
-            "qmp_port": 9000,
-            "capabilities": ["git"],
-        },
+        content=_peer_handshake_content(_PEER_KP, qmp_port=9000),
         sender_id=NODE_B_ID,
         message_type="node.handshake",
         timestamp=1000.0,
@@ -111,12 +119,7 @@ async def test_handshake_sends_git_announce_and_didn_request(node):
     node.qmp.send = AsyncMock()
 
     msg = QMPMessage(
-        content={
-            "node_id": NODE_B_ID,
-            "public_key": "pub_b",
-            "qmp_port": 9001,
-            "capabilities": [],
-        },
+        content=_peer_handshake_content(_PEER_KP, qmp_port=9001),
         sender_id=NODE_B_ID,
         message_type="node.handshake",
         timestamp=1000.0,
@@ -130,6 +133,55 @@ async def test_handshake_sends_git_announce_and_didn_request(node):
 
 
 @pytest.mark.asyncio
+async def test_handshake_rejects_bad_signature(node):
+    """A handshake with a wrong signature must be rejected."""
+    writer = _mock_writer("192.168.1.12")
+    node.qmp.send = AsyncMock()
+
+    msg = QMPMessage(
+        content={
+            "node_id": _PEER_KP.node_id,
+            "public_key": _PEER_KP.public_key_hex,
+            "signature": "deadbeef" * 16,   # invalid
+            "qmp_port": 9002,
+            "capabilities": [],
+        },
+        sender_id=NODE_B_ID,
+        message_type="node.handshake",
+        timestamp=1000.0,
+    )
+    await node._handle_handshake(msg, writer)
+
+    node.qmp.send.assert_not_awaited()
+    assert node.registry.get_peer(NODE_B_ID) is None
+
+
+@pytest.mark.asyncio
+async def test_handshake_rejects_id_key_mismatch(node):
+    """node_id that doesn't match SHA-256(public_key) must be rejected."""
+    writer = _mock_writer("192.168.1.13")
+    node.qmp.send = AsyncMock()
+
+    kp2 = KeyPair.generate()
+    msg = QMPMessage(
+        content={
+            "node_id": _PEER_KP.node_id,         # node_id from kp1
+            "public_key": kp2.public_key_hex,    # but key from kp2 — mismatch
+            "signature": kp2.sign(_PEER_KP.node_id.encode()),
+            "qmp_port": 9003,
+            "capabilities": [],
+        },
+        sender_id=NODE_B_ID,
+        message_type="node.handshake",
+        timestamp=1000.0,
+    )
+    await node._handle_handshake(msg, writer)
+
+    node.qmp.send.assert_not_awaited()
+    assert node.registry.get_peer(NODE_B_ID) is None
+
+
+@pytest.mark.asyncio
 async def test_handshake_ignores_own_node_id(node):
     """A handshake from our own node_id should be silently ignored."""
     writer = _mock_writer("127.0.0.1")
@@ -138,7 +190,8 @@ async def test_handshake_ignores_own_node_id(node):
     msg = QMPMessage(
         content={
             "node_id": node.node_id,
-            "public_key": "self",
+            "public_key": node.registry.local_node.public_key,
+            "signature": node.registry.keypair.sign(node.node_id.encode()),
             "qmp_port": 9000,
             "capabilities": [],
         },
@@ -204,11 +257,15 @@ async def test_didn_sync_request_sends_state(node):
 
 @pytest.mark.asyncio
 async def test_didn_sync_response_merges_state(node):
+    # Build a properly signed identity so merge_from_peer accepts it
+    kp = KeyPair.generate()
+    sig = kp.sign(kp.public_key_hex.encode())
+
     peer_state = {
         "identities": {
-            "c" * 64: {
-                "public_key": "peer_pub",
-                "signature": "peer_sig",
+            kp.node_id: {
+                "public_key": kp.public_key_hex,
+                "signature": sig,
                 "timestamp": "2025-01-01T00:00:00",
                 "metadata": {},
             }
@@ -224,9 +281,9 @@ async def test_didn_sync_response_merges_state(node):
     )
     await node._handle_didn_sync_response(msg, writer)
 
-    identity = node.didn.resolve_identity("c" * 64)
+    identity = node.didn.resolve_identity(kp.node_id)
     assert identity is not None
-    assert identity.public_key == "peer_pub"
+    assert identity.public_key == kp.public_key_hex
 
 
 # ---------------------------------------------------------------------------

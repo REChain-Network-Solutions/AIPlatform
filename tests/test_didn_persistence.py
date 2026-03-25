@@ -3,6 +3,7 @@
 import pytest
 from pathlib import Path
 from src.didn import DIDN, Identity
+from src.crypto import KeyPair
 
 
 @pytest.fixture
@@ -57,32 +58,69 @@ def test_in_memory_mode_no_files(tmp_path):
 # ---------------------------------------------------------------------------
 
 def test_merge_from_peer_adds_new_identities(persistent_didn):
-    """merge_from_peer should add identities not already present."""
-    peer_state = {
-        "identities": {
-            "a" * 64: {
-                "public_key": "peer_pub",
-                "signature": "peer_sig",
-                "timestamp": "2025-01-01T00:00:00",
-                "metadata": {},
-            }
-        },
-        "data": {},
+    """merge_from_peer should add identities that pass Ed25519 verification."""
+    kp = KeyPair.generate()
+    sig = kp.sign(kp.public_key_hex.encode())
+
+    peer_identities = {
+        kp.node_id: {
+            "public_key": kp.public_key_hex,
+            "signature": sig,
+            "timestamp": "2025-01-01T00:00:00",
+            "metadata": {},
+        }
     }
-    persistent_didn.merge_from_peer(peer_state["identities"], peer_state["data"])
-    identity = persistent_didn.resolve_identity("a" * 64)
+    persistent_didn.merge_from_peer(peer_identities, {})
+    identity = persistent_didn.resolve_identity(kp.node_id)
     assert identity is not None
-    assert identity.public_key == "peer_pub"
+    assert identity.public_key == kp.public_key_hex
+
+
+def test_merge_from_peer_rejects_invalid_signature(persistent_didn):
+    """Identities with bad signatures should be silently dropped."""
+    kp = KeyPair.generate()
+    peer_identities = {
+        kp.node_id: {
+            "public_key": kp.public_key_hex,
+            "signature": "deadbeef" * 16,   # wrong signature
+            "timestamp": "2025-01-01T00:00:00",
+            "metadata": {},
+        }
+    }
+    persistent_didn.merge_from_peer(peer_identities, {})
+    assert persistent_didn.resolve_identity(kp.node_id) is None
+
+
+def test_merge_from_peer_rejects_id_mismatch(persistent_didn):
+    """identity_id must equal SHA-256(public_key_bytes); mismatches are dropped."""
+    kp = KeyPair.generate()
+    sig = kp.sign(kp.public_key_hex.encode())
+    wrong_id = "0" * 64   # doesn't match SHA-256(kp.public_key_hex)
+
+    peer_identities = {
+        wrong_id: {
+            "public_key": kp.public_key_hex,
+            "signature": sig,
+            "timestamp": "2025-01-01T00:00:00",
+            "metadata": {},
+        }
+    }
+    persistent_didn.merge_from_peer(peer_identities, {})
+    assert persistent_didn.resolve_identity(wrong_id) is None
 
 
 def test_merge_from_peer_does_not_overwrite_local(persistent_didn):
     """Local-first: existing entries should not be overwritten by peer data."""
-    iid = persistent_didn.register_identity("local_pub", "local_sig", {"trust": "local"})
+    kp = KeyPair.generate()
+    sig = kp.sign(kp.public_key_hex.encode())
+    iid = persistent_didn.register_identity(kp.public_key_hex, sig, {"trust": "local"})
 
+    # Build a second valid keypair attempting to register under the same iid (impossible
+    # because iid is derived from the public key, but test the local-first guard anyway)
     peer_identities = {
         iid: {
-            "public_key": "tampered_pub",
-            "signature": "tampered_sig",
+            "public_key": kp.public_key_hex,
+            "signature": sig,
             "timestamp": "2099-01-01T00:00:00",
             "metadata": {"trust": "peer"},
         }
@@ -90,12 +128,14 @@ def test_merge_from_peer_does_not_overwrite_local(persistent_didn):
     persistent_didn.merge_from_peer(peer_identities, {})
 
     identity = persistent_didn.resolve_identity(iid)
-    assert identity.public_key == "local_pub"  # unchanged
+    assert identity.metadata["trust"] == "local"  # unchanged
 
 
 def test_export_state_includes_all_data(persistent_didn):
     """export_state should return a snapshot usable by merge_from_peer."""
-    iid = persistent_didn.register_identity("export_pub", "export_sig")
+    kp = KeyPair.generate()
+    sig = kp.sign(kp.public_key_hex.encode())
+    iid = persistent_didn.register_identity(kp.public_key_hex, sig)
     persistent_didn.store_data(iid, {"key": "value"}, "sig")
 
     state = persistent_didn.export_state()

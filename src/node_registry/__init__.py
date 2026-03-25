@@ -12,13 +12,14 @@ Each node generates a keypair-derived identity on first run, persisted to
 import asyncio
 import json
 import hashlib
-import secrets
 import socket
 import time
 import logging
 from pathlib import Path
 from dataclasses import dataclass, asdict, field
 from typing import Dict, List, Optional
+
+from src.crypto import KeyPair
 
 logger = logging.getLogger(__name__)
 
@@ -76,39 +77,42 @@ class NodeRegistry:
         self.storage_path.mkdir(parents=True, exist_ok=True)
         self.peers_file = self.storage_path / "peers.json"
         self.identity_file = self.storage_path / "node_identity.json"
+        self.keypair_file = self.storage_path / "node_keypair.seed"
         self.qmp_port = qmp_port
 
         self.peers: Dict[str, NodePeer] = {}
         self.local_node: Optional[LocalNode] = None
+        self.keypair: Optional[KeyPair] = None
         self._discovery_transport = None
 
         self._load_peers()
         self._load_or_create_identity()
 
     def _load_or_create_identity(self):
-        """Load existing identity or create a new one."""
-        if self.identity_file.exists():
+        """Load existing identity (and keypair seed) or generate a new one."""
+        if self.identity_file.exists() and self.keypair_file.exists():
             with open(self.identity_file) as f:
                 self.local_node = LocalNode.from_dict(json.load(f))
+            self.keypair = KeyPair.load_seed(self.keypair_file)
             logger.info(f"Loaded node identity: {self.local_node.node_id[:16]}...")
         else:
             self._create_identity()
 
     def _create_identity(self):
-        """Generate a new node identity."""
-        private_hint = secrets.token_hex(32)
-        public_key = hashlib.sha256(private_hint.encode()).hexdigest()
-        node_id = hashlib.sha256(f"node:{public_key}".encode()).hexdigest()
+        """Generate a new Ed25519 keypair and derive node identity from it."""
+        self.keypair = KeyPair.generate()
+        node_id = self.keypair.node_id  # SHA-256(public_key_bytes)
 
         self.local_node = LocalNode(
             node_id=node_id,
-            public_key=public_key,
-            private_key_hint=private_hint,
+            public_key=self.keypair.public_key_hex,
+            private_key_hint="",          # seed stored separately in keypair_file
             host="0.0.0.0",
             port=self.qmp_port,
             capabilities=["git", "ai", "storage"],
             created_at=time.time(),
         )
+        self.keypair.save_seed(self.keypair_file)
         self._save_identity()
         logger.info(f"Created new node identity: {node_id[:16]}...")
 

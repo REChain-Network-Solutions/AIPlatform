@@ -31,6 +31,7 @@ from src.node_registry import NodeRegistry, NodePeer
 from src.git_federation import GitFederation, RepoManifest
 from src.didn import DIDN
 from src.qmp import QMPService, QMPMessage
+from src.crypto import verify as _verify_sig
 
 logger = logging.getLogger(__name__)
 
@@ -140,17 +141,39 @@ class Node:
     async def _handle_handshake(self, message: QMPMessage, writer):
         """
         Peer connected and introduced itself.
-        Register them, then immediately share repos and request DIDN sync.
+
+        Verifies:
+        1. node_id == SHA-256(public_key_bytes) — ID is derived from the key
+        2. signature is a valid Ed25519 sig of node_id — proves key ownership
+
+        On success, registers the peer then shares repos and DIDN state.
         """
         info = message.content
         peer_node_id = info.get("node_id")
         if not peer_node_id or peer_node_id == self.node_id:
             return
 
+        pub_key = info.get("public_key", "")
+        signature = info.get("signature", "")
         host = writer.get_extra_info("peername")[0]
         port = info.get("qmp_port", 0)
-        pub_key = info.get("public_key", "")
         caps = info.get("capabilities", [])
+
+        # Verify node_id is derived from public_key
+        try:
+            import hashlib
+            expected_id = hashlib.sha256(bytes.fromhex(pub_key)).hexdigest()
+        except ValueError:
+            logger.warning(f"Rejecting handshake from {host}: public_key is not valid hex")
+            return
+        if expected_id != peer_node_id:
+            logger.warning(f"Rejecting handshake from {host}: node_id/public_key mismatch")
+            return
+
+        # Verify the peer holds the matching private key
+        if not _verify_sig(pub_key, peer_node_id.encode(), signature):
+            logger.warning(f"Rejecting handshake from {host}: signature verification failed")
+            return
 
         self.registry.add_peer(host, port, peer_node_id, pub_key, caps)
         self._peer_writers[peer_node_id] = writer
@@ -209,7 +232,7 @@ class Node:
             self._peer_writers[peer.node_id] = writer
             logger.info(f"Connected to peer {peer.node_id[:16]}... at {peer.host}:{peer.port}")
 
-            # Send handshake
+            # Send handshake (includes signature proving we hold the private key)
             await self.qmp.send(
                 writer,
                 self.qmp.create_message(
@@ -218,6 +241,7 @@ class Node:
                         "public_key": self.registry.local_node.public_key,
                         "qmp_port": self.registry.local_node.port,
                         "capabilities": self.registry.local_node.capabilities,
+                        "signature": self.registry.keypair.sign(self.node_id.encode()),
                     },
                     "node.handshake",
                 ),
