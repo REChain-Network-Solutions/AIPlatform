@@ -1,10 +1,17 @@
 /* Titan Zero BOS IndexedDB bootstrap */
 
 const DB_NAME = 'titan-zero-bos';
-const DB_VERSION = 1;
-const STORES = ['local_signals', 'sync_queue', 'runtime_meta'];
+const DB_VERSION = 2;
+const STORES = [
+  'tz_jobs',
+  'tz_customers',
+  'tz_invoices',
+  'tz_local_signals',
+  'tz_sync_queue',
+  'tz_runtime_meta',
+];
 
-export function openTitanDb() {
+export function initTitanDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
@@ -21,26 +28,83 @@ export function openTitanDb() {
     request.onerror = () => reject(request.error);
   });
 }
+export const initDB = initTitanDB;
 
-export async function saveLocalSignal(signal) {
-  const db = await openTitanDb();
+const runWrite = async (storeName, mutator) => {
+  const db = await initTitanDB();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction('local_signals', 'readwrite');
-    tx.objectStore('local_signals').add({
-      ...signal,
-      status: 'pending',
-      queued_at: Date.now(),
-    });
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
+    const request = mutator(store);
     tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+    request.onerror = () => reject(request.error);
+  });
+};
+
+export async function putRecord(storeName, record) {
+  return runWrite(storeName, (store) => store.put({ ...record, updated_at: Date.now() }));
+}
+
+export async function getRecord(storeName, key) {
+  const db = await initTitanDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readonly');
+    const store = tx.objectStore(storeName);
+    const req = store.get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
     tx.onerror = () => reject(tx.error);
   });
 }
 
-export async function readPendingSignals(limit = 50) {
-  const db = await openTitanDb();
+export async function queueSignal(signal) {
+  return runWrite('tz_local_signals', (store) =>
+    store.add({
+      ...signal,
+      status: 'pending',
+      queued_at: Date.now(),
+    }),
+  );
+}
+
+export async function flushSignals(limit = 50) {
+  const pending = await _readPendingSignals(limit);
+
+  await Promise.all(
+    pending.map((signal) =>
+      runWrite('tz_sync_queue', (store) =>
+        store.add({
+          // Fallback to 'unknown_signal' when type metadata is absent.
+          object_type: signal.signal_type ?? 'unknown_signal',
+          object_id: signal.id ?? null,
+          action: signal.action ?? 'capture',
+          status: 'pending',
+          retry_count: 0,
+          payload_json: signal.payload_json ?? signal.payload ?? null,
+          created_at: Date.now(),
+        }),
+      ),
+    ),
+  );
+
+  await Promise.all(
+    pending.map((signal) =>
+      runWrite('tz_local_signals', (store) =>
+        store.put({ ...signal, status: 'queued', updated_at: Date.now() }),
+      ),
+    ),
+  );
+
+  return pending.length;
+}
+
+// Internal helper to keep pending-signal traversal private to this module.
+async function _readPendingSignals(limit = 50) {
+  const db = await initDB();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction('local_signals', 'readonly');
-    const store = tx.objectStore('local_signals');
+    const tx = db.transaction('tz_local_signals', 'readonly');
+    const store = tx.objectStore('tz_local_signals');
     const results = [];
     const cursorReq = store.openCursor();
     cursorReq.onsuccess = (event) => {
@@ -53,37 +117,5 @@ export async function readPendingSignals(limit = 50) {
       }
     };
     cursorReq.onerror = () => reject(cursorReq.error);
-  });
-}
-
-export async function markSignalStatus(id, status = 'dispatched') {
-  const db = await openTitanDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('local_signals', 'readwrite');
-    const store = tx.objectStore('local_signals');
-    const getReq = store.get(id);
-    getReq.onsuccess = () => {
-      const record = getReq.result;
-      if (!record) return resolve(false);
-      record.status = status;
-      record.updated_at = Date.now();
-      store.put(record);
-    };
-    tx.oncomplete = () => resolve(true);
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-export async function logRuntimeMeta(metaKey, metaValue) {
-  const db = await openTitanDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('runtime_meta', 'readwrite');
-    tx.objectStore('runtime_meta').add({
-      meta_key: metaKey,
-      meta_value: metaValue,
-      created_at: Date.now(),
-    });
-    tx.oncomplete = () => resolve(true);
-    tx.onerror = () => reject(tx.error);
   });
 }

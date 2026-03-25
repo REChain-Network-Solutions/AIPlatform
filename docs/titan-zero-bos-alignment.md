@@ -48,3 +48,30 @@
 ## Compatibility Status
 - Documentation aligned  
 - Runtime partially aligned (infrastructure stubs added; execution wiring pending)  
+
+## Runtime Infrastructure Inventory (Mar 2026)
+- **IMPLEMENTED**
+  - Service worker with offline cache, background sync hook, POST queueing, and offline fallback (`public/sw.js`).
+  - IndexedDB bootstrap with required datastores (`tz_jobs`, `tz_customers`, `tz_invoices`, `tz_local_signals`, `tz_sync_queue`, `tz_runtime_meta`) and queue helpers (`resources/js/titan/indexeddb.js`).
+  - Local signal dispatcher that persists first, queues for sync, retries failed, and logs telemetry (`app/Services/TitanSignal/LocalQueueService.php`).
+  - Execution telemetry layer writing to `tz_runtime_meta` (`app/Services/TitanRuntime/TelemetryService.php`).
+  - Background sync engine for reconnect flush (`resources/js/titan/background-sync.js`).
+  - Device capability detector and execution tier selection (`resources/js/titan/device-capabilities.js`).
+  - Database tables for local signals, sync queue, and runtime meta (`database/migrations/2026_03_25_000001_create_titan_runtime_tables.php`).
+
+- **STUBBED**
+  - AI fallback resolver tier calls (device/native, local/Ollama, cloud) are stubs; telemetry + fallback order are active (`app/Services/TitanAI/FallbackResolver.php`).
+  - Federation handshake scaffold for node identity/exchange/conflict logging (`app/Services/TitanFederation/HandshakeService.php`).
+
+- **DETECTED**
+  - Pipeline order enforced: capture → local store → sync queue → later reconciliation; no cloud calls precede local persistence (service worker + LocalQueueService).
+  - Offline signal capture handled via IndexedDB + service worker background sync.
+
+- **MISSING**
+  - Full reconciliation/merge engine and conflict resolution policies.
+  - Actual provider integrations for device/local/cloud AI execution.
+
+- **DEFERRED**
+  - Legacy namespace/package/database identifier renames remain deferred to avoid runtime breakage.
+
+**Compliance status:** Documentation aligned; Runtime mostly aligned (infrastructure in place, provider integrations pending).
