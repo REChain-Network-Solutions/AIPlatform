@@ -1,5 +1,11 @@
 name: CI/CD Pipeline
 
+env:
+  DB_TEST_PASSWORD: root
+  DB_TEST_DATABASE: aiplatform_test
+  DB_TEST_HOST: 127.0.0.1
+  DB_TEST_USERNAME: root
+
 on:
   push:
     branches: [ main, develop ]
@@ -59,16 +65,28 @@ jobs:
           cp .env.example .env
           if [ -d vendor ]; then \
             php artisan key:generate; \
-            php -r "file_put_contents('.env', str_replace('DB_DATABASE=aiplatform', 'DB_DATABASE=aiplatform_test', file_get_contents('.env')));"; \
-            php -r "file_put_contents('.env', str_replace('REDIS_HOST=127.0.0.1', 'REDIS_HOST=127.0.0.1\nDB_HOST=127.0.0.1\nDB_USERNAME=root\nDB_PASSWORD=root', file_get_contents('.env')));"; \
+            CONFIG_OVERRIDES=(DB_DATABASE=${DB_TEST_DATABASE} DB_HOST=${DB_TEST_HOST} DB_USERNAME=${DB_TEST_USERNAME} DB_PASSWORD="${DB_TEST_PASSWORD}"); \
+            for kv in "${CONFIG_OVERRIDES[@]}"; do \
+              key="${kv%%=*}"; \
+              value="${kv#*=}"; \
+              if grep -q "^${key}=" .env; then \
+                escaped_value="${value//\\/\\\\}"; \
+                escaped_value="${escaped_value//\//\\/}"; \
+                escaped_value="${escaped_value//#/\\#}"; \
+                escaped_value="${escaped_value//&/\\&}"; \
+                sed -i "s#^${key}=.*#${key}=${escaped_value}#" .env; \
+              else \
+                echo "${key}=${value}" >> .env; \
+              fi; \
+            done; \
             php artisan config:clear; \
           else \
-            echo \"Skipping Laravel bootstrap because composer dependencies are unavailable\"; \
+            echo "Skipping Laravel bootstrap because composer dependencies are unavailable"; \
           fi
 
       - name: Create Database
         run: |
-          if mysqladmin ping -h 127.0.0.1 -u root -proot --silent; then mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS aiplatform_test;"; else echo "MySQL not available, skipping DB creation"; fi
+          if mysqladmin ping -h 127.0.0.1 -u root -p"${DB_TEST_PASSWORD}" --silent; then mysql -h 127.0.0.1 -u root -p"${DB_TEST_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS aiplatform_test;"; else echo "MySQL not available, skipping DB creation"; fi
 
       - name: Run Migrations
         run: |
