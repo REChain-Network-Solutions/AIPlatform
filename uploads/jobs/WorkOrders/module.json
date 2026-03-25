@@ -1,0 +1,16 @@
+{
+  "name": "WorkOrders",
+  "alias": "workorders",
+  "description": "Work Orders (field service) extracted from Smart FSM",
+  "keywords": [
+    "smart-fsm",
+    "work-orders",
+    "nwidart"
+  ],
+  "priority": 0,
+  "providers": [
+    "Modules\\WorkOrders\\Providers\\WorkOrdersServiceProvider",
+    "Modules\\WorkOrders\\Providers\\WorkOrdersEventServiceProvider"
+  ],
+  "active": 1
+}

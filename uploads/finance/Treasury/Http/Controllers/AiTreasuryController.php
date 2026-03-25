@@ -1,0 +1,3 @@
+<?php
+namespace Modules\Treasury\Http\Controllers; use Illuminate\Routing\Controller; use Illuminate\Http\Request; use Modules\Treasury\Services\AiClient;
+class AiTreasuryController extends Controller{public function __construct(private AiClient $ai){}public function forecast(Request $r){$payload=$r->validate(['days'=>'nullable|integer|min:7|max:365']);$text=$this->ai->forecast(['days'=>$payload['days']??90,'tenant_id'=>optional($r->user())->tenant_id]);return response()->json(['ok'=>true,'text'=>$text]);}public function reconSuggest(Request $r){$payload=$r->validate(['book_txn'=>'required|string','bank_txn'=>'required|string']);$text=$this->ai->suggestMatches($payload+['tenant_id'=>optional($r->user())->tenant_id]);return response()->json(['ok'=>true,'text'=>$text]);}}

@@ -1,0 +1,23 @@
+{
+  "name": "JobManagement",
+  "alias": "jobmanagement",
+  "description": "Job Management suite: Requests \u2192 Work Orders \u2192 Recurring Jobs \u2192 Services Catalog \u2192 Meters.",
+  "keywords": [
+    "jobs",
+    "work orders",
+    "requests",
+    "recurring",
+    "services",
+    "meters"
+  ],
+  "priority": 110,
+  "providers": [
+    "Modules\\JobManagement\\Providers\\JobManagementServiceProvider",
+    "Modules\\JobManagement\\Providers\\RouteServiceProvider"
+  ],
+  "autoload": {
+    "psr-4": {
+      "Modules\\JobManagement\\": ""
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Quotes & Estimates",
+  "alias": "quotes",
+  "description": "Quoting & Estimating module (Quotes & Estimates) built from Items catalog",
+  "keywords": [
+    "quotes",
+    "estimates",
+    "cpq",
+    "sales"
+  ],
+  "priority": 0,
+  "providers": [
+    "Modules\\Quotes\\Providers\\QuotesServiceProvider",
+    "Modules\\Quotes\\Providers\\RouteServiceProvider"
+  ],
+  "files": []
+}

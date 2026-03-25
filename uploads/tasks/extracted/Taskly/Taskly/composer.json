@@ -1,0 +1,26 @@
+{
+    "name": "workdo/taskly",
+    "description": "Description for taskly package",
+    "type": "library",
+    "license": "MIT",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Workdo\\Taskly\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "WorkDo",
+            "email": "support@workdo.io"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Workdo\\Taskly\\Providers\\TasklyServiceProvider",
+                "Workdo\\Taskly\\Providers\\ViewComposer"
+            ]
+        }
+    }
+}

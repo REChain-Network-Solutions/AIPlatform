@@ -1,0 +1,26 @@
+{
+  "name": "Treasury",
+  "alias": "treasury",
+  "description": "Treasury & Cash Management: bank accounts, reconciliations, payment runs, liquidity forecasts.",
+  "keywords": [
+    "treasury",
+    "cash",
+    "bank",
+    "reconciliation",
+    "payments",
+    "forecast"
+  ],
+  "priority": 160,
+  "providers": [
+    "Modules\\Treasury\\Providers\\AiRoutesServiceProvider",
+    "Modules\\Treasury\\Providers\\BindingsServiceProvider",
+    "Modules\\Treasury\\Providers\\ConsoleServiceProvider",
+    "Modules\\Treasury\\Providers\\ModuleServiceProvider",
+    "Modules\\Treasury\\Providers\\RouteServiceProvider"
+  ],
+  "autoload": {
+    "psr-4": {
+      "Modules\\Treasury\\": ""
+    }
+  }
+}

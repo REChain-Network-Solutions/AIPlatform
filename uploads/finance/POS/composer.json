@@ -1,0 +1,26 @@
+{
+    "name": "workdo/pos",
+    "description": "Description for pos package",
+    "type": "library",
+    "license": "MIT",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Workdo\\Pos\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "WorkDo",
+            "email": "support@workdo.io"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Workdo\\Pos\\Providers\\PosServiceProvider",
+                "Workdo\\Pos\\Providers\\VendorPurchase"
+            ]
+        }
+    }
+}

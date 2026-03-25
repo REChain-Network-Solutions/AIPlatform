@@ -1,0 +1,11 @@
+{
+    "name": "TasksAssignmentModule",
+    "alias": "tasksassignmentmodule",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\TasksAssignmentModule\\Providers\\TasksAssignmentModuleServiceProvider"
+    ],
+    "files": []
+}

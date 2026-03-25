@@ -1,0 +1,3 @@
+<?php
+namespace Modules\WorkOrders\Helpers;use Illuminate\Support\Facades\{Cache,Config,DB};
+function fsm_term(string $key,?string $fallback=null):string{$v=Cache::get('fsm_vertical',Config::get('worksuiteworkorders.fsm.default_vertical','general_trades'));$map=Cache::get('fsm_terms_'.$v);if(!$map){if(DB::getSchemaBuilder()->hasTable('fsm_settings')){$row=DB::table('fsm_settings')->orderBy('id','desc')->first();if($row&&$row->terminology){$arr=is_array($row->terminology)?$row->terminology:json_decode($row->terminology,true);$map=$arr?:[];}}$lang='workorders::verticals.'.$v;$map=array_merge(Config::get('worksuiteworkorders.fsm.terminology',[]),trans($lang)?:[]);Cache::put('fsm_terms_'.$v,$map,600);}return $map[$key]??($fallback??$key);}

@@ -1,0 +1,1 @@
+<x-app-layout><h1 class='text-2xl font-bold'>Work Orders</h1><ul>@foreach($orders as $o)<li><a href='{{ route("workorders.orders.show", $o->id) }}'>WO #{{ $o->id }}</a></li>@endforeach</ul>{{ $orders->links() }}</x-app-layout>

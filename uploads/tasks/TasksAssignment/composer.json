@@ -1,0 +1,31 @@
+{
+    "name": "nwidart/tasksassignmentmodule",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\TasksAssignmentModule\\": "",
+            "Modules\\TasksAssignmentModule\\App\\": "app/",
+            "Modules\\TasksAssignmentModule\\Database\\Factories\\": "database/factories/",
+            "Modules\\TasksAssignmentModule\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\TasksAssignmentModule\\Tests\\": "tests/"
+        }
+    }
+}

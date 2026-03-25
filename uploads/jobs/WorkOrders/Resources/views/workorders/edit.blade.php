@@ -1,0 +1,1 @@
+<x-app-layout><h1 class='text-2xl font-bold'>Edit Work Order</h1><form method='POST' action='{{ route("workorders.orders.update", $order->id) }}'>@csrf @method('PUT')<input name='status' value='{{ $order->status }}' class='border p-2'><button class='btn'>Update</button></form></x-app-layout>

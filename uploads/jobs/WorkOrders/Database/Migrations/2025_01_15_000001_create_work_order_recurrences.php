@@ -1,0 +1,3 @@
+<?php
+use Illuminate\Database\Migrations\Migration;use Illuminate\Database\Schema\Blueprint;use Illuminate\Support\Facades\Schema;
+return new class extends Migration{public function up():void{if(!Schema::hasTable('work_order_recurrences')) Schema::create('work_order_recurrences', function(Blueprint $t){$t->id();$t->unsignedBigInteger('work_order_id');$t->string('rrule');$t->timestamp('starts_at')->nullable();$t->timestamp('ends_at')->nullable();$t->boolean('active')->default(true);$t->timestamps();$t->index(['work_order_id','active']);});}public function down():void{/* reverse omitted */}};

@@ -1,0 +1,3 @@
+<?php
+use Illuminate\Support\Facades\Route; use Modules\Treasury\Http\Controllers\AiTreasuryController; use Modules\Treasury\Http\Middleware\TreasuryAiQuota;
+Route::middleware(['web','auth','can:treasury.access',TreasuryAiQuota::class])->prefix('treasury/ai')->name('treasury.ai.')->group(function(){Route::post('/forecast',[AiTreasuryController::class,'forecast'])->name('forecast');Route::post('/recon-suggest',[AiTreasuryController::class,'reconSuggest'])->name('recon.suggest');});

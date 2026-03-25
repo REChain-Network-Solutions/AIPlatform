@@ -1,0 +1,10 @@
+{
+    "name": "Pos",
+    "alias": "POS",
+    "description": "",
+    "priority": 50,
+    "version": 3.7,
+    "monthly_price": 0,
+    "yearly_price": 0,
+    "package_name": "pos"
+}

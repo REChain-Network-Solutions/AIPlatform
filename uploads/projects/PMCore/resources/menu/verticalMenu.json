@@ -1,0 +1,74 @@
+{
+    "menu": [
+        {
+            "name": "Project Management",
+            "icon": "menu-icon bx bx-folder",
+            "slug": [
+                "pmcore.dashboard.index",
+                "pmcore.projects.index",
+                "pmcore.timesheets.index",
+                "pmcore.resources.index",
+                "pmcore.reports.index"
+            ],
+            "addon": "PMCore",
+            "submenu": [
+                {
+                    "url": "/projects/dashboard",
+                    "name": "PM Dashboard",
+                    "slug": "pmcore.dashboard.index"
+                },
+                {
+                    "url": "/projects",
+                    "name": "All Projects",
+                    "slug": "pmcore.projects.index"
+                },
+                {
+                    "url": "/projects/timesheets",
+                    "name": "Timesheets",
+                    "slug": "pmcore.timesheets.index"
+                },
+                {
+                    "url": "/projects/resources",
+                    "name": "Resources",
+                    "slug": "pmcore.resources.index"
+                },
+                {
+                    "url": "/projects/resources/capacity",
+                    "name": "Capacity Planning",
+                    "slug": "pmcore.resources.capacity"
+                },
+                {
+                    "name": "Reports",
+                    "slug": [
+                        "pmcore.reports.index",
+                        "pmcore.reports.time",
+                        "pmcore.reports.budget",
+                        "pmcore.reports.resource"
+                    ],
+                    "submenu": [
+                        {
+                            "url": "/projects/reports",
+                            "name": "Overview",
+                            "slug": "pmcore.reports.index"
+                        },
+                        {
+                            "url": "/projects/reports/time",
+                            "name": "Time Report",
+                            "slug": "pmcore.reports.time"
+                        },
+                        {
+                            "url": "/projects/reports/budget",
+                            "name": "Budget Report",
+                            "slug": "pmcore.reports.budget"
+                        },
+                        {
+                            "url": "/projects/reports/resource",
+                            "name": "Resource Report",
+                            "slug": "pmcore.reports.resource"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

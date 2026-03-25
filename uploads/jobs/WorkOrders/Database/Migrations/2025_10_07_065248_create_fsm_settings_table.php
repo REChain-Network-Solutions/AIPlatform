@@ -1,0 +1,3 @@
+<?php
+use Illuminate\Database\Migrations\Migration;use Illuminate\Database\Schema\Blueprint;use Illuminate\Support\Facades\Schema;
+return new class extends Migration{public function up():void{if(!Schema::hasTable('fsm_settings')){Schema::create('fsm_settings',function(Blueprint $t){$t->id();$t->unsignedBigInteger('tenant_id')->nullable();$t->string('vertical')->default('general_trades');$t->json('features')->nullable();$t->json('terminology')->nullable();$t->json('branding')->nullable();$t->timestamps();$t->index(['tenant_id','vertical']);});}}public function down():void{Schema::dropIfExists('fsm_settings');}};

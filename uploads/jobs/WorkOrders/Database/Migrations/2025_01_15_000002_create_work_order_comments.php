@@ -1,0 +1,3 @@
+<?php
+use Illuminate\Database\Migrations\Migration;use Illuminate\Database\Schema\Blueprint;use Illuminate\Support\Facades\Schema;
+return new class extends Migration{public function up():void{if(!Schema::hasTable('work_order_comments')) Schema::create('work_order_comments', function(Blueprint $t){$t->id();$t->unsignedBigInteger('work_order_id');$t->unsignedBigInteger('user_id')->nullable();$t->text('body')->nullable();$t->string('attachment_path')->nullable();$t->timestamps();$t->index(['work_order_id']);});}public function down():void{/* reverse omitted */}};

@@ -1,0 +1,107 @@
+.pro-card{
+    height: 219px;
+}
+.deta-card{
+    height: 340px;
+}
+.milestone-card{
+    height: 292px;
+}
+.report-card{
+    height: 350px;
+}
+.report-chart-card{
+    height: 385px;
+}
+
+/*CIRCULAR PROGRESSBAR*/
+
+.circular-progressbar .flex-wrapper {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.circular-progressbar .single-chart {
+    width: 60%;
+    justify-content: space-around;
+}
+
+.circular-progressbar .circular-chart {
+    display: block;
+    margin: 10px auto;
+    max-width: 100%;
+    max-height: 550px;
+}
+
+.circular-progressbar .circle-bg {
+    fill: none;
+    stroke: #eee;
+    stroke-width: 3.8;
+}
+
+.circular-progressbar .circle {
+    fill: none;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    animation: progress 1s ease-out forwards;
+}
+
+@keyframes progress {
+    0% {
+        stroke-dasharray: 0 100;
+    }
+}
+
+.circular-progressbar .circular-chart.red .circle {
+    stroke: #ff3a6e;
+}
+
+.circular-progressbar .circular-chart.orange .circle {
+    stroke: #fd7e14;
+}
+
+.circular-progressbar .circular-chart.green .circle {
+    stroke: #6fd943;
+}
+
+.circular-progressbar .circular-chart.blue .circle {
+    stroke: #3c9ee5;
+}
+
+.circular-progressbar .percentage {
+   /* fill: #666;*/
+    font-family: sans-serif;
+    font-size: 0.5em;
+    text-anchor: middle;
+}
+
+.swal2-container{
+    z-index: 9999999999999999999 !important;
+}
+.apply{
+       width: 7% !important;
+       height: 41px !important;
+}
+
+
+/*End CIRCULAR PROGRESSBAR*/
+.dropzone_uploaded {
+    max-width: 140px;
+    margin: 0px 16px;
+    border-radius: inherit;
+}
+
+/*for project  */
+
+.modal-body .project {
+    box-shadow:0 6px 30px rgba(182, 186, 203, 0.3);
+}
+.dropzone .dz-preview .dz-image img{
+    object-fit: cover;
+    height: 100%;
+}
+.dropzone .dz-preview .dz-image{
+    margin-bottom: 10px;
+    width: 100px !important;
+    height: 100px !important;
+}

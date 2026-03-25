@@ -1,0 +1,19 @@
+{
+    "name": "PMCore",
+    "alias": "pmcore",
+    "displayName": "PM Core",
+    "version": "1.0.0",
+    "description": "Core Project Management Module",
+    "documentationUrl": "https://czappstudio.com/",
+    "changelogUrl": "https://czappstudio.com/",
+    "tutorialUrl": "https://czappstudio.com/",
+    "isCoreModule": true,
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\PMCore\\app\\Providers\\PMCoreServiceProvider"
+    ],
+    "files": [],
+    "category": "Core",
+    "dependencies": []
+}

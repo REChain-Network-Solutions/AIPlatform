@@ -1,0 +1,11 @@
+{
+    "name": "BudgetAllocationAprovalModule",
+    "alias": "budgetallocationaprovalmodule",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\BudgetAllocationAprovalModule\\Providers\\BudgetAllocationAprovalModuleServiceProvider"
+    ],
+    "files": []
+}

@@ -1,0 +1,31 @@
+{
+    "name": "nwidart/budgetallocationaprovalmodule",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\BudgetAllocationAprovalModule\\": "",
+            "Modules\\BudgetAllocationAprovalModule\\App\\": "app/",
+            "Modules\\BudgetAllocationAprovalModule\\Database\\Factories\\": "database/factories/",
+            "Modules\\BudgetAllocationAprovalModule\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\BudgetAllocationAprovalModule\\Tests\\": "tests/"
+        }
+    }
+}

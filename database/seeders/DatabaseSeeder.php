@@ -16,8 +16,13 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             PermissionSeeder::class,
             AdminPermissionSeeder::class,
+            // Titan BOS
+            BosModuleSeeder::class,
+            BosMenuSeeder::class,
+            BosDefaultPipelineSeeder::class,
         ]);
 
         $this->command->info('Currency table seeded!');
+        $this->command->info('Titan BOS modules seeded!');
     }
 }

@@ -1,0 +1,3 @@
+<?php
+namespace Modules\Treasury\Http\Controllers; use Illuminate\Routing\Controller; use Illuminate\Http\Request; use Modules\Treasury\Models\BankAccount;
+class TreasuryController extends Controller{public function index(){return view('Treasury::index');}public function createAccount(Request $r){$data=$r->validate(['name'=>'required|string|max:191','currency'=>'nullable|string|max:3','opening_balance'=>'nullable|numeric']);$acc=BankAccount::create($data);return redirect()->back()->with('ok',"Bank account {$acc->name} created");}}

@@ -1,0 +1,1 @@
+<x-app-layout><h2 class='text-xl font-semibold'>CRUD: create</h2><p>{{ \$resource ?? '' }} {% if(isset($id)) %}</p></x-app-layout>

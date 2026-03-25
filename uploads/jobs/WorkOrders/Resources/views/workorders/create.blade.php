@@ -1,0 +1,1 @@
+<x-app-layout><h1 class='text-2xl font-bold'>Create Work Order</h1><form method='POST' action='{{ route("workorders.orders.store") }}'>@csrf<input name='client_id' placeholder='Client ID' class='border p-2'><button class='btn'>Save</button></form></x-app-layout>
