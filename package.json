@@ -23,7 +23,7 @@
 		"gulp-csso": "^4.0.1",
 		"gulp-esbuild": "^0.14.0",
 		"gulp-file": "^0.4.0",
-		"gulp-sass": "^5.1.0",
+		"gulp-sass": "^6.0.1",
 		"laravel-echo": "^1.16.1",
 		"laravel-vite-plugin": "^2.0.0",
 		"lodash": "^4.17.23",
@@ -32,7 +32,7 @@
 		"sass": "^1.62.0",
 		"tailwindcss": "^3.4.15",
 		"tailwindcss-motion": "^1.1.1",
-		"vite": "^7.1.3",
+		"vite": "^8.0.2",
 		"vite-plugin-mkcert": "^1.17.8"
 	},
 	"dependencies": {
@@ -47,7 +47,7 @@
 		"@tiptap/extension-code": "^3.2.0",
 		"@tiptap/extension-code-block-lowlight": "^3.2.0",
 		"@tiptap/extension-floating-menu": "^3.2.0",
-		"@tiptap/extension-image": "^3.2.0",
+		"@tiptap/extension-image": "^3.20.5",
 		"@tiptap/pm": "^3.2.0",
 		"@tiptap/starter-kit": "^3.2.0",
 		"lowlight": "^3.3.0",
