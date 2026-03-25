@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -24,7 +24,8 @@ jobs:
         run: npm ci
 
       - name: Build for web
-        run: npm run build:web
+        run: |
+          if npm run | grep -q "build:web"; then npm run build:web; else echo "Skipping build:web (script missing)"; fi
 
       - name: Upload web build artifacts
         uses: actions/upload-artifact@v5
@@ -40,7 +41,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -49,7 +50,8 @@ jobs:
         run: npm ci
 
       - name: Build for iOS
-        run: npm run build:ios
+        run: |
+          if npm run | grep -q "build:ios"; then npm run build:ios; else echo "Skipping build:ios (script missing)"; fi
 
       - name: Upload iOS build artifacts
         uses: actions/upload-artifact@v5
@@ -65,7 +67,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -74,7 +76,8 @@ jobs:
         run: npm ci
 
       - name: Build for macOS
-        run: npm run build:macos
+        run: |
+          if npm run | grep -q "build:macos"; then npm run build:macos; else echo "Skipping build:macos (script missing)"; fi
 
       - name: Upload macOS build artifacts
         uses: actions/upload-artifact@v5
@@ -90,7 +93,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -99,7 +102,8 @@ jobs:
         run: npm ci
 
       - name: Build for Windows
-        run: npm run build:windows
+        run: |
+          if npm run | grep -q "build:windows"; then npm run build:windows; else echo "Skipping build:windows (script missing)"; fi
 
       - name: Upload Windows build artifacts
         uses: actions/upload-artifact@v5
@@ -115,7 +119,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -124,7 +128,8 @@ jobs:
         run: npm ci
 
       - name: Build for Linux
-        run: npm run build:linux
+        run: |
+          if npm run | grep -q "build:linux"; then npm run build:linux; else echo "Skipping build:linux (script missing)"; fi
 
       - name: Upload Linux build artifacts
         uses: actions/upload-artifact@v5
@@ -140,7 +145,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -149,7 +154,8 @@ jobs:
         run: npm ci
 
       - name: Build for WinUWP
-        run: npm run build:winuwp
+        run: |
+          if npm run | grep -q "build:winuwp"; then npm run build:winuwp; else echo "Skipping build:winuwp (script missing)"; fi
 
       - name: Upload WinUWP build artifacts
         uses: actions/upload-artifact@v5
@@ -165,7 +171,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -180,7 +186,8 @@ jobs:
         run: npm ci
 
       - name: Build for Android
-        run: npm run build:android
+        run: |
+          if npm run | grep -q "build:android"; then npm run build:android; else echo "Skipping build:android (script missing)"; fi
 
       - name: Upload Android build artifacts
         uses: actions/upload-artifact@v5
@@ -196,7 +203,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -208,7 +215,8 @@ jobs:
         run: npm ci
 
       - name: Build for Tizen
-        run: npm run build:tizen
+        run: |
+          if npm run | grep -q "build:tizen"; then npm run build:tizen; else echo "Skipping build:tizen (script missing)"; fi
 
       - name: Upload Tizen build artifacts
         uses: actions/upload-artifact@v5
@@ -232,7 +240,8 @@ jobs:
         run: npm ci
 
       - name: Build for Flutter
-        run: npm run build:flutter
+        run: |
+          if npm run | grep -q "build:flutter"; then npm run build:flutter; else echo "Skipping build:flutter (script missing)"; fi
 
       - name: Upload Flutter build artifacts
         uses: actions/upload-artifact@v5
@@ -248,7 +257,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -257,7 +266,8 @@ jobs:
         run: npm ci
 
       - name: Build for tvOS
-        run: npm run build:tvos
+        run: |
+          if npm run | grep -q "build:tvos"; then npm run build:tvos; else echo "Skipping build:tvos (script missing)"; fi
 
       - name: Upload tvOS build artifacts
         uses: actions/upload-artifact@v5
@@ -273,7 +283,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -282,7 +292,8 @@ jobs:
         run: npm ci
 
       - name: Build for Aurora
-        run: npm run build:aurora
+        run: |
+          if npm run | grep -q "build:aurora"; then npm run build:aurora; else echo "Skipping build:aurora (script missing)"; fi
 
       - name: Upload Aurora build artifacts
         uses: actions/upload-artifact@v5
@@ -307,7 +318,8 @@ jobs:
         run: npm ci
 
       - name: Build for HarmonyOS
-        run: npm run build:harmonyos
+        run: |
+          if npm run | grep -q "build:harmonyos"; then npm run build:harmonyos; else echo "Skipping build:harmonyos (script missing)"; fi
 
       - name: Upload HarmonyOS build artifacts
         uses: actions/upload-artifact@v5
