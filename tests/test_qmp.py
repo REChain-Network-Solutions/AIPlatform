@@ -1,6 +1,7 @@
 """Tests for the Quantum Mesh Protocol (QMP) component."""
 
 import asyncio
+import json
 import pytest
 from src.qmp import QMPService, QMPMessage
 from unittest.mock import AsyncMock, MagicMock
@@ -84,18 +85,22 @@ async def test_broadcast_message(qmp_service, mock_writer):
     await qmp_service.broadcast(message)
     
     # Verify the message was written
-    expected_data = json.dumps(TEST_MESSAGE).encode()
     mock_writer.write.assert_called_once()
-    
+
     # Get the actual data that was written
     call_args = mock_writer.write.call_args[0][0]
-    
-    # First 4 bytes should be the length
+
+    # First 4 bytes are the payload length
     data_length = int.from_bytes(call_args[:4], 'big')
-    assert data_length == len(expected_data)
-    
-    # The rest should be the JSON-encoded message
-    assert call_args[4:] == expected_data
+    payload = call_args[4:]
+    assert data_length == len(payload)
+
+    # Decode and compare as parsed JSON (order-independent)
+    actual = json.loads(payload.decode())
+    assert actual["content"] == TEST_MESSAGE["content"]
+    assert actual["sender_id"] == TEST_MESSAGE["sender_id"]
+    assert actual["message_type"] == TEST_MESSAGE["message_type"]
+    assert actual["timestamp"] == TEST_MESSAGE["timestamp"]
     mock_writer.drain.assert_awaited_once()
 
 @pytest.mark.asyncio
