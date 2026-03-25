@@ -922,3 +922,37 @@ Route::middleware('auth')
 if (file_exists(base_path('routes/custom_routes_panel.php'))) {
     include base_path('routes/custom_routes_panel.php');
 }
+
+// ─────────────────────────────────────────────
+//  TITAN BOS — CRM Module
+// ─────────────────────────────────────────────
+use App\Http\Controllers\Crm\CrmActivityController;
+use App\Http\Controllers\Crm\CrmCompanyController;
+use App\Http\Controllers\Crm\CrmContactController;
+use App\Http\Controllers\Crm\CrmDashboardController;
+use App\Http\Controllers\Crm\CrmDealController;
+
+Route::middleware(['auth', 'updateUserActivity'])
+    ->prefix('dashboard/crm')
+    ->name('dashboard.crm.')
+    ->group(function () {
+
+        // CRM home dashboard
+        Route::get('/', CrmDashboardController::class)->name('dashboard');
+
+        // Contacts
+        Route::resource('contacts', CrmContactController::class);
+
+        // Companies
+        Route::resource('companies', CrmCompanyController::class);
+
+        // Deals (kanban board + CRUD)
+        Route::resource('deals', CrmDealController::class);
+        Route::patch('deals/{deal}/move-stage', [CrmDealController::class, 'moveStage'])->name('deals.move-stage');
+
+        // Activities
+        Route::get('activities', [CrmActivityController::class, 'index'])->name('activities.index');
+        Route::post('activities', [CrmActivityController::class, 'store'])->name('activities.store');
+        Route::patch('activities/{activity}/done', [CrmActivityController::class, 'markDone'])->name('activities.done');
+        Route::delete('activities/{activity}', [CrmActivityController::class, 'destroy'])->name('activities.destroy');
+    });
