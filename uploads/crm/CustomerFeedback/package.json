@@ -1,0 +1,6 @@
+{
+    "name": "@titanero/customer-feedback",
+    "version": "1.0.0",
+    "description": "Unified customer feedback module",
+    "private": true
+}

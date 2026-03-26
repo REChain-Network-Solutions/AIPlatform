@@ -1,0 +1,4 @@
+@extends('customer-feedback::layouts.master')
+@section('content')
+<div class='card'><h1>Analytics dashboard</h1></div><div class='grid'><div class='card'><strong>Total tickets</strong><div>{{ $totalTickets }}</div></div><div class='card'><strong>Open tickets</strong><div>{{ $openTickets }}</div></div><div class='card'><strong>Avg resolution hours</strong><div>{{ $averageResolutionTime }}</div></div><div class='card'><strong>Satisfaction score</strong><div>{{ $satisfactionScore }}</div></div></div><div class='card'><h2>Status breakdown</h2><table><tr><th>Status</th><th>Count</th></tr>@foreach($statusBreakdown as $row)<tr><td>{{ $row['status'] }}</td><td>{{ $row['count'] }}</td></tr>@endforeach</table></div><div class='card'><h2>Priority breakdown</h2><table><tr><th>Priority</th><th>Count</th></tr>@foreach($priorityBreakdown as $row)<tr><td>{{ $row['priority'] }}</td><td>{{ $row['count'] }}</td></tr>@endforeach</table></div>
+@endsection

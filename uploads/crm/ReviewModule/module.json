@@ -1,0 +1,23 @@
+{
+    "name": "ReviewModule",
+    "alias": "reviewmodule",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ReviewModule\\Providers\\ReviewModuleServiceProvider",
+        "Modules\\ReviewModule\\Providers\\EventServiceProvider"
+    ],
+    "aliases": {},
+    "files": [
+        "start.php"
+    ],
+    "requires": [],
+    "active": 1,
+    "order": 0,
+    "permissions": [],
+    "roles_permissions": {
+        "admin": [],
+        "manager": []
+    }
+}

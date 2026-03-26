@@ -1,0 +1,45 @@
+	.avatar-list {
+		margin: 0 0 -.5rem;
+		padding: 0;
+		font-size: 0;
+		display: inline-flex;
+	}
+
+	.avatar-list-stacked .avatar {
+		margin-right: -.8em !important;
+	}
+
+
+	.brround {
+		border-radius: 50%;
+	}
+	.avatar {
+		width: 3rem;
+		height: 3rem;
+		line-height: 3rem;
+		display: inline-block;
+		position: relative;
+		text-align: center;
+		color: #fff;
+		font-weight: 600;
+		vertical-align: bottom;
+		font-size: 1.2rem;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+
+	.bg-secondary {
+		background-color: #ef6430!important;
+		color: #fff;
+	}
+	.dropdown-menu .dropdown-plus-title {
+		width: 100% !important;
+		color: #8c98b9 !important;
+		padding: 6px 12px !important;
+		font-weight: 500 !important;
+		border: 0 solid #eff2f7 !important;
+		border-bottom-width: 1px !important;
+		cursor: pointer !important;
+	}

@@ -1,0 +1,13 @@
+{
+    "name": "Inspection",
+    "alias": "inspections",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Inspection\\Providers\\InspectionServiceProvider",
+        "Modules\\Inspection\\Providers\\EventServiceProvider"
+    ],
+    "files": [],
+    "version": "1.0.1"
+}

@@ -1,0 +1,23 @@
+{
+    "name": "AuditLog",
+    "alias": "auditlog",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": 2,
+    "providers": [
+        "Modules\\AuditLog\\Providers\\AuditLogServiceProvider"
+    ],
+    "aliases":{},
+    "permissions": [
+        
+    ],
+    "roles_permissions": {
+        "admin": [
+            
+        ],
+        "manager": [
+            
+        ]
+    }
+}

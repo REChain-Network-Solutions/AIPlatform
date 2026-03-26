@@ -1,0 +1,26 @@
+{
+    "name": "AuditLog",
+    "alias": "auditlog",
+    "displayName": "Audit Log",
+    "description": "Comprehensive audit logging system for tracking all database changes across the ERP system",
+    "keywords": [
+        "audit",
+        "logging",
+        "tracking",
+        "history",
+        "changes"
+    ],
+    "version": "1.0.0",
+    "documentationUrl": "https://czappstudio.com/",
+    "changelogUrl": "https://czappstudio.com/",
+    "tutorialUrl": "https://czappstudio.com/",
+    "priority": 100,
+    "providers": [
+        "Modules\\AuditLog\\app\\Providers\\AuditLogServiceProvider",
+        "Modules\\AuditLog\\app\\Providers\\EventServiceProvider",
+        "Modules\\AuditLog\\app\\Providers\\RouteServiceProvider"
+    ],
+    "files": [],
+    "category": "System & Administration",
+    "dependencies": []
+}

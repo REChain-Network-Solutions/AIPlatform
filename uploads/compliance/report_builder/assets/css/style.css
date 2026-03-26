@@ -1,0 +1,17 @@
+.font-style-italic{
+	font-style: italic;
+}
+
+select#lstview_to {
+    height: auto;
+}
+select#lstview {
+    height: auto;
+}
+
+.font-color-red{
+	color: red;
+}
+.background-aliceblue{
+	background: aliceblue
+}

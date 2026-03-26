@@ -1,0 +1,15 @@
+{
+  "name": "Compliance",
+  "alias": "compliance",
+  "description": "Compliance module packaged for Finance Suite.",
+  "providers": [
+    "Modules\\Compliance\\Providers\\AiRoutesServiceProvider",
+    "Modules\\Compliance\\Providers\\ModuleServiceProvider",
+    "Modules\\Compliance\\Providers\\RouteServiceProvider"
+  ],
+  "autoload": {
+    "psr-4": {
+      "Modules\\Compliance\\": ""
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+    "name": "CustomerFeedback",
+    "alias": "customer-feedback",
+    "description": "Unified customer feedback, complaint management, NPS/CSAT surveys, and AI-powered insights system",
+    "keywords": ["feedback", "complaint", "nps", "csat", "survey", "customer-satisfaction", "analytics", "ai"],
+    "priority": 50,
+    "version": "1.0.0",
+    "providers": [
+        "Modules\\CustomerFeedback\\Providers\\CustomerFeedbackServiceProvider",
+        "Modules\\CustomerFeedback\\Providers\\EventServiceProvider"
+    ],
+    "files": [],
+    "depends_on": [],
+    "author": "TitanZero Team",
+    "license": "Proprietary",
+    "documentation": "README.md",
+    "features": [
+        "Unified ticket management (complaints, feedback, survey responses)",
+        "Multi-channel ingestion (email, web form, API, SMS, chat, phone)",
+        "Reply threading with public/internal visibility",
+        "NPS surveys with automatic detractor ticket creation",
+        "CSAT surveys with satisfaction tracking",
+        "AI-powered sentiment analysis and insights",
+        "Email synchronization (IMAP/POP3)",
+        "Agent assignment with group hierarchy",
+        "Reply templates and automation",
+        "File attachments and media handling",
+        "Comprehensive analytics dashboard",
+        "Type discrimination for ticket categorization",
+        "Soft deletes and company multi-tenancy",
+        "Full backward compatibility with legacy Complaint module"
+    ],
+    "entities": 15,
+    "tables": 19,
+    "controllers": 5,
+    "migrations": 4
+}

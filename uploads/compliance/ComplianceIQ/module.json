@@ -1,0 +1,12 @@
+{
+  "name": "ComplianceIQ",
+  "alias": "complianceiq",
+  "description": "Audit & compliance reporting with immutable evidence logs.",
+  "keywords": ["worksuite","compliance","audit","logs"],
+  "priority": 10,
+  "providers": [
+    "Modules\\ComplianceIQ\\Providers\\ComplianceIQServiceProvider",
+    "Modules\\ComplianceIQ\\Providers\\RouteServiceProvider"
+  ],
+  "files": []
+}
