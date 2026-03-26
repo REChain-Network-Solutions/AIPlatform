@@ -1,0 +1,19 @@
+{
+    "menu": [
+        {
+            "name": "System Monitoring",
+            "icon": "menu-icon bx bx-shield",
+            "slug": [
+                "auditlog.index"
+            ],
+            "submenu": [
+                {
+                    "url": "/auditlog",
+                    "name": "Audit Logs",
+                    "slug": "auditlog.index",
+                    "addon": "AuditLog"
+                }
+            ]
+        }
+    ]
+}

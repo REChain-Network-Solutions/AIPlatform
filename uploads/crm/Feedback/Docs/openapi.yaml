@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info:
+  title: Feedback & NPS API
+  version: 1.0.0
+paths:
+  /feedback/ai/generate:
+    post:
+      summary: Generate feedback title and description with AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+      responses:
+        '200':
+          description: OK
+  /feedback/ai/suggest-reply:
+    post:
+      summary: Suggest a reply for feedback with AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                complaint:
+                  type: string
+      responses:
+        '200':
+          description: OK
+  /feedback/nps:
+    get:
+      summary: List NPS surveys and aggregates
+    post:
+      summary: Create a new NPS survey
+
+/feedback/insights:
+  get:
+    summary: AI Insights for last 30 days of NPS/CSAT
+    responses:
+      '200':
+        description: OK

@@ -1,0 +1,11 @@
+<?php
+namespace Modules\CustomerFeedback\Http\Controllers;
+use App\Helper\Reply; use Illuminate\Http\Request; use App\Http\Controllers\AccountBaseController; use Modules\CustomerFeedback\Entities\CsatSurvey; use Modules\CustomerFeedback\Entities\CsatResponse; use Modules\CustomerFeedback\Entities\FeedbackTicket;
+class CsatSurveyController extends AccountBaseController {
+ public function index(){ $this->surveys=CsatSurvey::where('company_id',company()->id)->withCount('responses')->paginate(20); return view('customer-feedback::surveys.csat.index',$this->data); }
+ public function create(){ return view('customer-feedback::surveys.csat.create',$this->data); }
+ public function store(Request $request){ $data=$request->validate(['title'=>'required|string|max:191','description'=>'nullable|string','question'=>'nullable|string','scale_min'=>'required|integer|min:1|max:10','scale_max'=>'required|integer|min:1|max:10']); $data['company_id']=company()->id; $data['status']=true; CsatSurvey::create($data); return redirect()->route('feedback.csat.index')->with('success','CSAT survey created.'); }
+ public function show(CsatSurvey $survey){ $this->survey=$survey; $this->responses=$survey->responses()->with('user','ticket')->paginate(20); return view('customer-feedback::surveys.csat.show',$this->data); }
+ public function submitResponse(Request $request, CsatSurvey $survey){ $data=$request->validate(['score'=>'required|integer|min:1|max:10','feedback'=>'nullable|string|max:1000']); $data['company_id']=company()->id; $data['csat_survey_id']=$survey->id; $data['user_id']=auth()->id(); if(($data['score']??0)<=2){ $ticket=FeedbackTicket::create(['company_id'=>company()->id,'user_id'=>auth()->id(),'title'=>'CSAT Feedback: '.$survey->title,'description'=>$data['feedback'] ?? ('CSAT Score: '.$data['score']),'feedback_type'=>FeedbackTicket::TYPE_SURVEY_RESPONSE,'status'=>FeedbackTicket::STATUS_OPEN,'priority'=>FeedbackTicket::PRIORITY_HIGH,'csat_score'=>$data['score']]); $data['feedback_ticket_id']=$ticket->id; } CsatResponse::create($data); return response()->json(['message'=>__('customer-feedback::messages.thankYou')]); }
+ public function destroy(CsatSurvey $survey){ $survey->delete(); return Reply::success(__('messages.recordDeleted')); }
+}

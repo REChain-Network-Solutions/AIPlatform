@@ -1,0 +1,8 @@
+openapi: 3.0.0
+info:
+  title: Customer Feedback Insights API
+  version: 1.0.0
+paths:
+  /customer-feedback/insights/tickets/{ticket}:
+    get:
+      summary: Get saved insights for a ticket

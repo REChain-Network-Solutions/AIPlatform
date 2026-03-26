@@ -1,0 +1,25 @@
+{
+    "name": "hmimeee/auditlog",
+    "description": "",
+    "authors": [
+        {
+            "name": "Hossain Mohammad Imran",
+            "email": "hmimeee@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\AuditLog\\Providers\\AuditLogServiceProvider"
+            ],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\AuditLog\\": ""
+        }
+    }
+}
