@@ -33,7 +33,7 @@
 		"tailwindcss": "^4.2.2",
 		"tailwindcss-motion": "^1.1.1",
 		"vite": "^8.0.3",
-		"vite-plugin-mkcert": "^1.17.8"
+		"vite-plugin-mkcert": "^1.17.10"
 	},
 	"dependencies": {
 		"@11labs/client": "^0.1.3",
