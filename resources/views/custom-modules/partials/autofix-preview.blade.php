@@ -1,0 +1,1 @@
+<div class="alert alert-success">Auto-fix Preview: menu SQL preview, sidebar injector preview, and safe repair queue.</div>

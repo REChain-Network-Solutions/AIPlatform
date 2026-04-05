@@ -41,6 +41,17 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:clear-ai-realtime-image')->daily();
 
         $schedule->command('app:test-command')->everyMinute();
+
+        // Clean up old module uploads daily at 3 AM
+        $schedule->command('modules:cleanup-uploads --days=7')
+            ->daily()
+            ->at('03:00')
+            ->onFailure(function () {
+                \Log::error('Module upload cleanup failed');
+            })
+            ->onSuccess(function () {
+                \Log::info('Module upload cleanup completed successfully');
+            });
     }
 
     // $schedule->command(RunHealthChecksCommand::class)->everyFiveMinutes();

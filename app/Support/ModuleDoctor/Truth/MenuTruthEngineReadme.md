@@ -1,0 +1,1 @@
+# Pass 15\nAdds provider boot verification, menu eligibility scanning, runtime route truth, workspace anchor audit, SQL preview, and sidebar injector preview.\n

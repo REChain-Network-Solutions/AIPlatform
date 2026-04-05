@@ -1,0 +1,4 @@
+- fixes disappearing uploads
+- reduces stacked top bands to compact cards
+- preserves analyzer/export/download endpoints
+- adds results panel renderer

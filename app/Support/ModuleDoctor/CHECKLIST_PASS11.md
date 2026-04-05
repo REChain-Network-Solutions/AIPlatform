@@ -1,0 +1,5 @@
+- Sidebar include chain
+- Registered routes
+- Permission DB audit
+- Package entitlement audit
+- Tenant module_settings audit

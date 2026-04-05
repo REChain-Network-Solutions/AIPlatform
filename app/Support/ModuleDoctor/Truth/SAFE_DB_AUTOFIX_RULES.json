@@ -1,0 +1,14 @@
+{
+  "safe": [
+    "seed_missing_permissions",
+    "seed_company_module_settings",
+    "attach_to_selected_packages",
+    "attach_to_all_packages",
+    "clear_runtime_caches"
+  ],
+  "confirm": [
+    "rewrite_sidebar_permission_guards",
+    "rewrite_route_names",
+    "insert_role_permission_defaults"
+  ]
+}

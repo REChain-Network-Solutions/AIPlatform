@@ -1,0 +1,1 @@
+<div class='small text-muted'>Install blockers are persisted before activation when visibility truth fails.</div>

@@ -1,0 +1,13 @@
+{
+  "fields": [
+    "db_schema",
+    "role_catalog",
+    "permission_matrix",
+    "extension_registry",
+    "module_settings_truth",
+    "company_module_settings_truth",
+    "menu_registration",
+    "route_name_mismatches",
+    "tenant_visibility_proof"
+  ]
+}

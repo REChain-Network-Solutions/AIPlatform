@@ -1,0 +1,8 @@
+@extends('layouts.app')
+@section('content')
+<div class="w-100 d-flex ">@include('sections.setting-sidebar')
+<x-setting-card><x-slot name="header"><div class="s-b-n-header"><h2 class="mb-0 p-20 f-21 font-weight-normal border-bottom-grey">Installation History</h2></div></x-slot>
+<div class="p-4"><form class="row mb-3" method="GET"><div class="col-md-4"><select name="module" class="form-control"><option value="">All modules</option>@foreach($modules as $module)<option value="{{ $module }}" @selected(request('module')==$module)>{{ $module }}</option>@endforeach</select></div><div class="col-md-4"><select name="status" class="form-control"><option value="">All statuses</option>@foreach(['installed','failed','partial_failed','rolled_back','rollback_failed'] as $status)<option value="{{ $status }}" @selected(request('status')==$status)>{{ $status }}</option>@endforeach</select></div><div class="col-md-4"><button class="btn btn-primary">Filter</button></div></form>
+<div class="table-responsive"><table class="table table-bordered"><thead><tr><th>ID</th><th>Module</th><th>Status</th><th>Version</th><th>Installed</th></tr></thead><tbody>@forelse($installations as $install)<tr><td><a href="{{ route('modules.show',$install->id) }}">#{{ $install->id }}</a></td><td>{{ $install->module_name }}</td><td>{{ $install->status }}</td><td>{{ $install->version }}</td><td>{{ optional($install->installed_at)->toDateTimeString() }}</td></tr>@empty<tr><td colspan="5" class="text-muted">No installation records.</td></tr>@endforelse</tbody></table></div>{{ $installations->withQueryString()->links() }}</div>
+</x-setting-card></div>
+@endsection

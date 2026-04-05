@@ -1,0 +1,1 @@
+<pre>{{ $sidebarInjectorPreview ?? '-- no preview --' }}</pre>

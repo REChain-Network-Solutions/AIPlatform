@@ -1,0 +1,3 @@
+- Pass 58: actual ZIP inspection
+- Pass 59: safe-fix execution
+- Pass 60: rollback/snapshot log

@@ -1,0 +1,1 @@
+<pre>{{ $menuSqlPreview ?? '-- no preview --' }}</pre>

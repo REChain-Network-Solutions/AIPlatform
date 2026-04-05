@@ -1,0 +1,1 @@
+<?php return ['suffix' => '.index', 'allow_dashboard' => true];

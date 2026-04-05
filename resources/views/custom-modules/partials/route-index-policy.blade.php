@@ -1,0 +1,1 @@
+<div class='small text-muted'>Primary menu routes should end in .index unless explicitly using a dashboard route.</div>

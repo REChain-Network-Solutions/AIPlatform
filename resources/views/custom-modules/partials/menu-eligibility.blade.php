@@ -1,0 +1,1 @@
+<div class="alert alert-secondary">Menu Eligibility Scanner: route, provider, menu row, permission chain, tenant enablement.</div>

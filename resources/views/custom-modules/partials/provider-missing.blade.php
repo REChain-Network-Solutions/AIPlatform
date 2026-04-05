@@ -1,0 +1,1 @@
+<div class='alert alert-danger'>Provider missing or not bootable.</div>

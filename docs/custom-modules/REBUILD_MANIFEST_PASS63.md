@@ -1,0 +1,261 @@
+# Custom Module Installer Only - Rebuild Manifest
+
+This package contains only Custom Module Installer / Module Doctor direct-integration overlay files.
+Excluded: marketplace code, large app extractions, unrelated core overlays, pass-history reports.
+
+## Source ZIP precedence
+- custom_module_installer_upgrade_pass1.zip
+- custom_module_installer_upgrade_pass2.zip
+- custom_module_installer_upgrade_pass3.zip
+- custom_module_installer_upgrade_pass4_real.zip
+- custom_module_installer_upgrade_pass5_real.zip
+- custom_module_installer_upgrade_pass6_real.zip
+- custom_module_installer_upgrade_pass7_safe.zip
+- custom_module_installer_upgrade_pass8_safe_recreated.zip
+- custom_module_installer_upgrade_pass10_visibility_hardening.zip
+- custom_module_installer_safe_delta.zip
+- custom_module_installer_pass56_full_rebuild_overlay.zip
+- custom_module_installer_pass58_integrated_rebuild.zip
+
+## File counts
+- app: 136
+- config: 1
+- database: 12
+- docs: 7
+- public: 5
+- resources: 67
+- routes: 3
+- total: 231
+
+## Included files
+- `app/Console/Commands/FixUpgradeCompanyCommand.php` ← custom_module_installer_upgrade_pass6_real.zip
+- `app/Http/Controllers/CustomModuleController.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Http/Controllers/ModuleSettingController.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Http/Requests/CustomModules/AnalyzeModuleRequest.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Http/Requests/CustomModules/DeleteModuleRequest.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Http/Requests/CustomModules/ExportAnalysisRequest.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Http/Requests/CustomModules/SafeFixModuleRequest.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Http/Requests/CustomModules/UploadModuleRequest.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Models/CustomModulePermission.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Models/ModuleDoctorTruthSnapshot.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Models/ModuleInstallLog.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Models/ModuleMenuBlocker.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Models/ModuleSetting.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Models/ModuleVisibilityAudit.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Observers/CompanyObserver.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Observers/SuperAdmin/PackageObserver.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/Actions/QueueCacheClearAction.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/Actions/QueueCompanyModuleSettingsRepairAction.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/Actions/QueuePackageBridgeRepairAction.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/Actions/QueuePermissionRepairAction.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/Analyzers/DoctorPanelAnalyzer.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/Analyzers/ManifestAnalyzer.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/Analyzers/PermissionAnalyzer.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/Analyzers/RouteAnalyzer.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/Analyzers/SidebarAnalyzer.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/CustomModuleAnalysisExporter.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/CustomModuleAnalyzer.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/CustomModuleInstallerState.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/CustomModuleSafeFixer.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/DTO/ModuleAnalysisResult.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/DTO/ModuleFileRecord.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/DTO/SafeFixPlan.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/Rendering/AnalysisCardRenderer.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/Support/InstallHistoryFormatter.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/Support/ModuleNameSanitizer.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Services/CustomModules/Support/UploadFieldResolver.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/AuditNarrativeService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/AutoRepairQueueService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/CHECKLIST_PASS11.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/CHECKLIST_PASS15.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/CompanyModuleSeederService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/CompanyModuleSettingAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/CompanyModuleSettingsTruthService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/CompanyPermissionScopeAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/CompatibilityRuleEngine.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/DiagnosticsViewModel.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/Exports/ModuleVisibilityExportService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/ExtensionsRegistryTruthService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/InstallBlockerRegistryService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/InstallGuardRailsService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/InstallOutcomeScorer.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/InstallSnapshotService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/InstallSurfaceAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/JsonExportService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/KNOWN_MENU_BLOCKERS.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/KnownIssueRegistry.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/MenuAutoFixPlannerService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/MenuDiffPreviewService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/MenuEligibilityScannerService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/MenuLocationAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/MenuParentResolverService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/MenuRegistrationAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/MenuSqlPreviewService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/MenuVisibilityDecisionService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/ModuleDoctorCompatPatcher.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/ModuleDoctorManifest.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/ModuleDoctorReportAssembler.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/ModuleEnablementTruthService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/ModuleManifestInspector.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/ModuleRegistryAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/ModuleSettingsTruthService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/ModuleVisibilitySummaryService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/PackageBridgeReadinessService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/PackageBridgeRepairService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/PackageEntitlementAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/PackageSelectionStrategyService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/PermissionMappingRepairService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/PermissionPivotMatrixService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/PermissionReadinessService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/PermissionSeederPreviewService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/PermissionUsageExtractorService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/PostInstallVisibilityAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/ProtectedPathService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/ProviderBootVerificationService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/README_PASS11.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/README_PASS15.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/REPORT_SCHEMA_PASS11.json` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/RegisteredRouteAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/RegisteredRouteCatalogService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/RepairPlanService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/RoleCatalogService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/RolePermissionAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/RouteBootPathAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/RouteIndexPolicyService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/RouteNameMismatchExplainerService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/RouteReadinessService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/RouteReferenceExtractorService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/RuntimeRouteTruthService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/SAFE_AUTOFIX_MATRIX.json` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/SafeAutoFixExecutionService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/SidebarAnchorService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/SidebarGateAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/SidebarInclusionAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/SidebarInjectorPreviewService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/SidebarPermissionPatternRepairService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/SidebarReadinessService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/TenantMenuVisibilityProofService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/TenantVisibilityExplainerService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/TenantVisibilitySimulationService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/Truth/MenuTruthEngineReadme.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/Truth/README_PASS12.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/Truth/REPORT_FIELDS_PASS12.json` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/Truth/SAFE_DB_AUTOFIX_RULES.json` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/Truth/menu-route-policy.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/Truth/menu-safe-fixes.json` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/Truth/menu-status-codes.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/Truth/role-priority.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/Truth/visibility-truth-rules.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/Truth/workspace-anchors.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/UPGRADE_PLAN_PASS11.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/UPGRADE_PLAN_PASS15.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/UserMenuVisibilityChecklistService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/VisibilityAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/VisibilityAutoRepairService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/VisibilityDriftCheckpointService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/VisibilityProfileMatrixService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/WorkspaceAnchorAuditService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/WorksuiteDbSchemaService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/WorksuiteMenuRiskScorerService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/WorksuiteProfileService.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/doctor-manifest-pass11.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/role-profiles.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/sidebar-workspaces.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/Support/ModuleDoctor/visibility-rules.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/View/Components/CustomModules/DoctorSummaryCard.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `app/View/Components/CustomModules/QuickStat.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `config/custom-modules.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `database/migrations/2023_06_15_104818_fix_company_packages.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `database/migrations/2026_03_21_000001_create_module_install_logs_table.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `database/migrations/2026_03_22_000001_create_custom_module_install_logs_table.php` ← custom_module_installer_pass56_full_rebuild_overlay.zip
+- `database/migrations/2026_03_22_000002_create_custom_module_analysis_runs_table.php` ← custom_module_installer_pass56_full_rebuild_overlay.zip
+- `database/migrations/2026_03_22_000002_create_module_visibility_audits_table.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `database/migrations/2026_03_22_000003_create_custom_module_safe_fix_runs_table.php` ← custom_module_installer_pass56_full_rebuild_overlay.zip
+- `database/migrations/2026_03_22_000003_create_module_menu_blockers_table.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `database/migrations/2026_03_22_000004_create_module_doctor_truth_snapshots_table.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `database/migrations/2026_03_22_000011_create_custom_module_install_logs_table.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `database/migrations/2026_03_22_000012_create_custom_module_analysis_runs_table.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `database/migrations/2026_03_22_000013_create_custom_module_safe_fix_runs_table.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `database/migrations/2026_03_22_000014_create_custom_module_upload_snapshots_table.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `docs/custom-modules/ARCHITECTURE.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `docs/custom-modules/FILE_MAP.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `docs/custom-modules/FIXES.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `docs/custom-modules/INSTALL.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `docs/custom-modules/OVERVIEW.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `docs/custom-modules/ROADMAP.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `docs/custom-modules/UPGRADE_PLAN.md` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `public/css/custom-modules/installer.css` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `public/css/custom-modules/pass58.css` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `public/css/custom-modules/results.css` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `public/js/custom-modules/installer.js` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `public/js/custom-modules/upload-list.js` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/lang/eng/app.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/lang/eng/messages.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/lang/eng/modules.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/lang/eng/permissions.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/components/custom-modules/doctor-summary-card.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/components/custom-modules/quick-stat.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/components/setting-sidebar.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/components/super-admin/setting-sidebar.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/ajax/custom.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/ajax/verify.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/install.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/auto-repair-queue.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/autofix-preview.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/blocker-codes.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/checklist.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/db-truth.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/doctor-panels.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/guard-rails.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/history.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/install-profile.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/known-issues.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/menu-diff.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/menu-eligibility.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/menu-parent-preview.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/menu-registration.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/menu-risk.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/menu-sql-preview.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/menu-status-codes.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/module-doctor-manifest.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/narrative.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/package-bridge.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/permission-matrix.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/permission-readiness.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/protected-paths.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/provider-boot.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/provider-missing.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/provider-truth.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/repair-queue.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/route-index-policy.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/route-readiness.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/route-truth.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/runtime-route-catalog.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/sidebar-injector-preview.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/sidebar-readiness.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/summary-cards.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/tenant-proof.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/tenant-simulation.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/tenant-visibility-matrix.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/upload-summary-grid.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/visibility-overview.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/visibility-report.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/visibility-score.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/workspace-anchor.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/partials/workspace-inclusion.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/results-panel.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/sections/module-update.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/sections/purchase-code.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/sections/support-date.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/sections/universal-bundle.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/sections/version.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/custom-modules/upload-list.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/module-settings/ajax/modules.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/module-settings/index.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/module-settings/partials/doctor-summary.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/module-settings/partials/menu-truth-summary.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/module-settings/partials/visibility-checklist.blade.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `resources/views/sections/menu.blade.php` ← custom_module_installer_upgrade_pass6_real.zip
+- `routes/SuperAdmin/web.php` ← custom_module_installer_pass58_integrated_rebuild.zip
+- `routes/custom-module-installer.overlay.php` ← custom_module_installer_pass56_full_rebuild_overlay.zip
+- `routes/web-settings.php` ← custom_module_installer_pass58_integrated_rebuild.zip

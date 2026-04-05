@@ -1,0 +1,1 @@
+<div class="col-md-12 mb-3"><div class="card border"><div class="card-header">Recent installer history</div><div class="card-body"><ul class="list-group"><li class="list-group-item">Overlay installed</li><li class="list-group-item">Upload listing wired</li><li class="list-group-item">Compact summary cards enabled</li></ul></div></div></div>

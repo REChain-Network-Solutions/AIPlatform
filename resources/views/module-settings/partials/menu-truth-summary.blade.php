@@ -1,0 +1,1 @@
+<div class="card"><div class="card-body">Menu Truth Summary: provider, routes, menu, permissions, tenant, package.</div></div>

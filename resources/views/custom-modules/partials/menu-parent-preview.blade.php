@@ -1,0 +1,1 @@
+<div class='alert alert-light'>Preferred parent workspace: {{ $preferredMenuParent ?? 'work' }}</div>

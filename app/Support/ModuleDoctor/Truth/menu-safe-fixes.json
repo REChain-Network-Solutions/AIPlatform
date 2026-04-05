@@ -1,0 +1,8 @@
+{
+  "seed_permissions": true,
+  "attach_permissions_to_admin": true,
+  "create_package_bridge": true,
+  "create_company_module_settings": true,
+  "generate_menu_row": true,
+  "repair_sidebar_permission_patterns": true
+}

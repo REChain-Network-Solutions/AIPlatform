@@ -1,0 +1,1 @@
+<div class="alert alert-warning">Workspace Inclusion: checks whether module sidebar is actually anchored in active Worksuite workspaces.</div>
