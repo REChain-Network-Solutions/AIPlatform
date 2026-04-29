@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Extensions\Canvas\System\Http\Models\UserTiptapContent;
 use App\Helpers\Classes\MarketplaceHelper;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -33,10 +32,14 @@ class UserOpenaiChatMessage extends Model
         'realtime',
         'is_chatbot',
         'suggestions_response',
+        'is_council',
+        'council_response',
     ];
 
     protected $casts = [
         'suggestions_response' => 'array',
+        'council_response'     => 'array',
+        'used_skills'          => 'array',
     ];
 
     public function __construct(array $attributes = [])
@@ -49,6 +52,22 @@ class UserOpenaiChatMessage extends Model
 
         if (Schema::hasColumn($this->getTable(), 'shared_uuid')) {
             $this->fillable[] = 'shared_uuid';
+        }
+
+        if (Schema::hasColumn($this->getTable(), 'is_council')) {
+            $this->fillable[] = 'is_council';
+        }
+
+        if (Schema::hasColumn($this->getTable(), 'council_response')) {
+            $this->fillable[] = 'council_response';
+        }
+
+        if (Schema::hasColumn($this->getTable(), 'used_skills')) {
+            $this->fillable[] = 'used_skills';
+        }
+
+        if (Schema::hasColumn($this->getTable(), 'highlight_context')) {
+            $this->fillable[] = 'highlight_context';
         }
     }
 
@@ -88,6 +107,17 @@ class UserOpenaiChatMessage extends Model
         return $this->hasMany($modelClass, 'message_id');
     }
 
+    public function councilResponses(): HasMany
+    {
+        if (! MarketplaceHelper::isRegistered('model-council') || ! class_exists('App\\Extensions\\ModelCouncil\\System\\Models\\ModelCouncilResponse') || ! $this->tableExists('model_council_responses')) {
+            return $this->hasMany(self::class, 'id', 'id')->whereRaw('1 = 0');
+        }
+
+        $modelClass = 'App\\Extensions\\ModelCouncil\\System\\Models\\ModelCouncilResponse';
+
+        return $this->hasMany($modelClass, 'user_openai_chat_message_id');
+    }
+
     /**
      * Get the suggestions response from linked AI image records.
      */
@@ -112,14 +142,51 @@ class UserOpenaiChatMessage extends Model
         return $imageRecord?->suggestions_response;
     }
 
+    /**
+     * Get the smart images for this message (only if extension is installed).
+     */
+    public function chatSmartImages(): HasMany
+    {
+        if (! MarketplaceHelper::isRegistered('ai-chat-pro-smart-image') || ! $this->tableExists('chat_smart_images')) {
+            return $this->hasMany(self::class, 'id', 'id')->whereRaw('1 = 0');
+        }
+
+        $modelClass = 'App\\Extensions\\AiChatProSmartImage\\System\\Models\\ChatSmartImage';
+
+        return $this->hasMany($modelClass, 'message_id');
+    }
+
+    /**
+     * Get the entity highlights for this message (only if extension is installed).
+     */
+    public function chatEntityHighlights(): HasMany
+    {
+        if (! MarketplaceHelper::isRegistered('ai-chat-pro-entity-highlight') || ! $this->tableExists('chat_entity_highlights')) {
+            return $this->hasMany(self::class, 'id', 'id')->whereRaw('1 = 0');
+        }
+
+        $modelClass = 'App\\Extensions\\AiChatProEntityHighlight\\System\\Models\\ChatEntityHighlight';
+
+        return $this->hasMany($modelClass, 'message_id');
+    }
+
     // tiptap edit result
     public function tiptapContent(): MorphOne
     {
-        if (! class_exists(UserTiptapContent::class) || ! $this->tableExists('user_tiptap_contents')) {
-            return $this->morphOne(self::class, 'user_openai_chat', 'user_id', 'id')->whereRaw('1 = 0');
+        $canvasModel = 'App\\Extensions\\Canvas\\System\\Http\\Models\\UserTiptapContent';
+        $drModel = 'App\\Extensions\\AIChatProDeepResearch\\System\\Http\\Models\\DrTiptapContent';
+
+        // Canvas extension takes priority
+        if (class_exists($canvasModel) && $this->tableExists('user_tiptap_contents')) {
+            return $this->morphOne($canvasModel, 'save_contentable');
         }
 
-        return $this->morphOne(UserTiptapContent::class, 'save_contentable');
+        // Fallback to Deep Research's own tiptap table
+        if (class_exists($drModel) && $this->tableExists('dr_tiptap_contents')) {
+            return $this->morphOne($drModel, 'save_contentable');
+        }
+
+        return $this->morphOne(self::class, 'user_openai_chat', 'user_id', 'id')->whereRaw('1 = 0');
     }
 
     /**

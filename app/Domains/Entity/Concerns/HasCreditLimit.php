@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Domains\Entity\Concerns;
 
 use App\Domains\Entity\Enums\EntityEnum;
+use App\Domains\Entity\Facades\Entity;
 use App\Enums\MagicResponse;
 use App\Helpers\Classes\Helper;
+use App\Helpers\Classes\MarketplaceHelper;
+use App\Helpers\Classes\RateLimiter\RateLimiter;
 use App\Models\Plan;
 use App\Models\Setting;
 use App\Models\SettingTwo;
@@ -113,6 +116,49 @@ trait HasCreditLimit
         };
     }
 
+    /**
+     * Check if the current entity is a web search model.
+     */
+    protected function isWebSearchModel(): bool
+    {
+        return in_array($this->enum(), [
+            EntityEnum::GPT_4_O_SEARCH_PREVIEW,
+            EntityEnum::GPT_4_O_MINI_SEARCH_PREVIEW,
+        ], true);
+    }
+
+    /**
+     * Get credit data from the default OpenAI chat model for web search model fallback.
+     *
+     * @return array{credit: float, isUnlimited: bool}|null
+     */
+    protected function getDefaultChatModelCreditData(): ?array
+    {
+        $defaultModelSlug = Setting::getCache()?->openai_default_model ?? EntityEnum::GPT_5_MINI->slug();
+        $defaultEnum = EntityEnum::fromSlug($defaultModelSlug);
+
+        if (! $defaultEnum || $defaultEnum === $this->enum()) {
+            return null;
+        }
+
+        $driver = Entity::driver($defaultEnum);
+
+        $user = $this->getUser();
+        if ($user) {
+            $driver = $driver->forUser($user);
+        }
+
+        if ($this->plan?->exists) {
+            $driver = $driver->forPlan($this->plan);
+        }
+
+        if ($this->team?->exists) {
+            $driver = $driver->forTeam($this->team);
+        }
+
+        return $driver->getCredit();
+    }
+
     public function getCreditBalance(): float
     {
         $credit = $this->getCredit()['credit'];
@@ -129,9 +175,19 @@ trait HasCreditLimit
             $model && ! $model->is_selected &&
             ! in_array($model->key, $engineDefaultModels, true) &&
             ! in_array($model->id, $aiFinances, true) &&
-            ! $this->isInAiImageProSelectedModels($model->key->value)
+            ! $this->isInAiImageProSelectedModels($model->key->value) &&
+            ! $this->isWebSearchModel()
         ) {
             return 0;
+        }
+
+        if ($credit == 0 && $this->isWebSearchModel()) {
+            $defaultCredit = $this->getDefaultChatModelCreditData();
+            if ($defaultCredit) {
+                $fallback = $defaultCredit['credit'];
+
+                return is_string($fallback) ? (float) $fallback : $fallback;
+            }
         }
 
         return $credit;
@@ -152,12 +208,22 @@ trait HasCreditLimit
             $model && ! $model->is_selected &&
             ! in_array($model->key, $engineDefaultModels, true) &&
             ! in_array($model->id, $aiFinances, true) &&
-            ! $this->isInAiImageProSelectedModels($model->key->value)
+            ! $this->isInAiImageProSelectedModels($model->key->value) &&
+            ! $this->isWebSearchModel()
         ) {
             return false;
         }
 
-        return $this->getCredit()['isUnlimited'];
+        $isUnlimited = $this->getCredit()['isUnlimited'];
+
+        if (! $isUnlimited && $this->isWebSearchModel()) {
+            $defaultCredit = $this->getDefaultChatModelCreditData();
+            if ($defaultCredit) {
+                return $defaultCredit['isUnlimited'];
+            }
+        }
+
+        return $isUnlimited;
     }
 
     /**
@@ -180,7 +246,7 @@ trait HasCreditLimit
         $models = [];
 
         // Check AI Image Pro selected models (only if extension is registered)
-        if (\App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-image-pro')) {
+        if (MarketplaceHelper::isRegistered('ai-image-pro')) {
             $aiImageProModels = setting('ai_image_selected_models', null);
             if (! empty($aiImageProModels)) {
                 $slugs = is_string($aiImageProModels)
@@ -191,7 +257,7 @@ trait HasCreditLimit
         }
 
         // Check AI Chat Pro Image Chat selected models (only if extension is registered)
-        if (\App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')) {
+        if (MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')) {
             $aiChatImageModels = setting('ai_chat_pro_image_chat_selected_models', null);
             if (! empty($aiChatImageModels)) {
                 $slugs = is_string($aiChatImageModels)
@@ -221,7 +287,7 @@ trait HasCreditLimit
     public function guestHasAttempts(): bool
     {
         $clientIp = Helper::getRequestIp();
-        $rateLimiter = new \App\Helpers\Classes\RateLimiter\RateLimiter('guest-chat-attempt', (int) setting('guest_user_daily_message_limit', '10'));
+        $rateLimiter = new RateLimiter('guest-chat-attempt', (int) setting('guest_user_daily_message_limit', '10'));
         if ($rateLimiter->attempt($clientIp)) {
             return true;
         }
@@ -312,9 +378,43 @@ trait HasCreditLimit
             'total'       => $value * $unitPrice,
         ]);
 
+        if ($this->isWebSearchModel() && $this->getCredit()['credit'] == 0) {
+            return $this->decreaseCreditFromDefaultChatModel($value);
+        }
+
         return $this->updateUserCredit($value, function ($creditBalance, $credit) {
             return max(0, $creditBalance - $credit);
         });
+    }
+
+    /**
+     * Decrease credit from the default OpenAI chat model's pool for web search models.
+     *
+     * @throws Exception
+     */
+    private function decreaseCreditFromDefaultChatModel(float $value): bool
+    {
+        $defaultModelSlug = Setting::getCache()?->openai_default_model ?? EntityEnum::GPT_5_MINI->slug();
+        $defaultEnum = EntityEnum::fromSlug($defaultModelSlug);
+
+        if (! $defaultEnum || $defaultEnum === $this->enum()) {
+            return $this->updateUserCredit($value, function ($creditBalance, $credit) {
+                return max(0, $creditBalance - $credit);
+            });
+        }
+
+        $driver = Entity::driver($defaultEnum);
+
+        $user = $this->getUser();
+        if ($user) {
+            $driver = $driver->forUser($user);
+        }
+
+        if ($this->team?->exists) {
+            $driver = $driver->forTeam($this->team);
+        }
+
+        return $driver->decreaseCredit($value);
     }
 
     /**

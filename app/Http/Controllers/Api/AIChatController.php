@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Models\UserOpenai;
 use App\Models\UserOpenaiChat;
 use App\Models\UserOpenaiChatMessage;
+use App\Services\Ai\AiCompletionService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -87,7 +88,7 @@ class AIChatController extends Controller
         $category = OpenaiGeneratorChatCategory::whereSlug($cat_slug)->firstOrFail();
 
         $conversations = UserOpenaiChat::where('user_id', $request->user()->id)
-            ->where('openai_chat_category_id', $category->id)
+            ->where('openai_chat_category_id', $category?->id)
             ->orderBy('updated_at', 'desc')
             ->get();
 
@@ -231,7 +232,7 @@ class AIChatController extends Controller
         $category = OpenaiGeneratorChatCategory::where('id', $request->category_id)->firstOrFail();
         $chat = new UserOpenaiChat;
         $chat->user_id = Auth::id();
-        $chat->openai_chat_category_id = $category->id;
+        $chat->openai_chat_category_id = $category?->id;
         $chat->title = $category->name . ' Chat';
         $chat->total_credits = 0;
         $chat->total_words = 0;
@@ -1052,7 +1053,7 @@ class AIChatController extends Controller
                 . 'User Input: ' . $message->input . "\n\n\n\n\n"
                 . 'Assistant Response: ' . $message->response;
 
-            $newTitle = app(\App\Services\Ai\AiCompletionService::class)->complete(
+            $newTitle = app(AiCompletionService::class)->complete(
                 'You are a chatbot. Generate a title for a chat based on provided conversation. You must return a title only.',
                 $userContent
             );

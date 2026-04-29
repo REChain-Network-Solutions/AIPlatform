@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Google2FA;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -80,7 +81,7 @@ class Google2FAController extends Controller
     /**
      * Deactivate 2FA.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function deactivate2FA(Request $request)
     {

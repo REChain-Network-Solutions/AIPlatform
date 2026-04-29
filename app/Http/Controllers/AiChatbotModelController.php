@@ -7,6 +7,7 @@ use App\Domains\Entity\Models\Entity;
 use App\Http\Requests\Admin\Chatbot\UpdateEngineImagesRequest;
 use App\Models\Finance\AiChatModelPlan;
 use App\Models\Plan;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -77,7 +78,7 @@ class AiChatbotModelController extends Controller
         ]);
     }
 
-    public function modelsIndex(): \Illuminate\Contracts\View\View
+    public function modelsIndex(): View
     {
         $engines = Entity::query()
             ->select('engine', 'image')

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\Classes\MarketplaceHelper;
+use Dcblogdev\Xero\Facades\Xero;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Throwable;
@@ -59,7 +60,7 @@ class UserOrder extends Model
                         ],
                     ];
 
-                    $response = \Dcblogdev\Xero\Facades\Xero::invoices()->store($data);
+                    $response = Xero::invoices()->store($data);
                 } catch (Throwable $e) {
                 }
             }

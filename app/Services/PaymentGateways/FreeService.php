@@ -11,6 +11,7 @@ use App\Models\Plan;
 use App\Models\User;
 use App\Models\UserOrder;
 use App\Services\PaymentGateways\Contracts\CreditUpdater;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -152,27 +153,27 @@ class FreeService
             $subscription->trial_ends_at = null;
             switch ($plan->frequency) {
                 case FrequencyEnum::MONTHLY->value:
-                    $subscription->ends_at = \Carbon\Carbon::now()->addMonths(1);
+                    $subscription->ends_at = Carbon::now()->addMonths(1);
                     $subscription->auto_renewal = 1;
 
                     break;
                 case FrequencyEnum::YEARLY->value:
-                    $subscription->ends_at = \Carbon\Carbon::now()->addYears(1);
+                    $subscription->ends_at = Carbon::now()->addYears(1);
                     $subscription->auto_renewal = 1;
 
                     break;
                 case FrequencyEnum::LIFETIME_MONTHLY->value:
-                    $subscription->ends_at = \Carbon\Carbon::now()->addMonths(1); // ends each month but auto renewing without payment reqs
+                    $subscription->ends_at = Carbon::now()->addMonths(1); // ends each month but auto renewing without payment reqs
                     $subscription->auto_renewal = 1;
 
                     break;
                 case FrequencyEnum::LIFETIME_YEARLY->value:
-                    $subscription->ends_at = \Carbon\Carbon::now()->addYears(1); // ends each year but auto renewing without payment reqs
+                    $subscription->ends_at = Carbon::now()->addYears(1); // ends each year but auto renewing without payment reqs
                     $subscription->auto_renewal = 1;
 
                     break;
                 default:
-                    $subscription->ends_at = \Carbon\Carbon::now()->addDays(30);
+                    $subscription->ends_at = Carbon::now()->addDays(30);
                     $subscription->auto_renewal = 1;
 
                     break;
@@ -318,7 +319,7 @@ class FreeService
         $user = Auth::user();
         $sub = getCurrentActiveSubscription($user->id);
         if ($sub) {
-            return \Carbon\Carbon::now()->diffInDays($sub->ends_at);
+            return Carbon::now()->diffInDays($sub->ends_at);
         }
 
         Log::error('getSubscriptionDaysLeft()');
@@ -360,7 +361,7 @@ class FreeService
         $user = Auth::user();
         $activeSub = getCurrentActiveSubscription($user->id);
 
-        return \Carbon\Carbon::parse($activeSub->ends_at)->format('F jS, Y');
+        return Carbon::parse($activeSub->ends_at)->format('F jS, Y');
     }
 
     public static function cancelSubscribedPlan($subscription, $planId)

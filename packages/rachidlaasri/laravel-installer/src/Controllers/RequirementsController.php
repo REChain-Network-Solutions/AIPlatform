@@ -3,6 +3,7 @@
 namespace RachidLaasri\LaravelInstaller\Controllers;
 
 use Illuminate\Routing\Controller;
+use Illuminate\View\View;
 use RachidLaasri\LaravelInstaller\Helpers\RequirementsChecker;
 
 class RequirementsController extends Controller
@@ -20,7 +21,7 @@ class RequirementsController extends Controller
     /**
      * Display the requirements page.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function requirements()
     {

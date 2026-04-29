@@ -13,6 +13,8 @@ class GeminiService
 {
     public array $history = [];
 
+    public array $tools = [];
+
     public const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/';
 
     public function streamGenerateContent($entity = EntityEnum::GEMINI_3_FLASH->value): PromiseInterface|Response
@@ -23,6 +25,11 @@ class GeminiService
         $body = [
             'contents' => $this->getHistory(),
         ];
+
+        if (! empty($this->tools)) {
+            $body['tools'] = $this->tools;
+            $body['toolConfig'] = ['functionCallingConfig' => ['mode' => 'AUTO']];
+        }
 
         $url = sprintf('%s%s:streamGenerateContent?key=%s', self::ENDPOINT, $entity, config('gemini.api_key'));
 
@@ -108,6 +115,13 @@ class GeminiService
     public function setHistory(array $history): self
     {
         $this->history = $history;
+
+        return $this;
+    }
+
+    public function setTools(array $tools): self
+    {
+        $this->tools = $tools;
 
         return $this;
     }

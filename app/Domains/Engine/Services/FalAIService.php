@@ -6,6 +6,7 @@ namespace App\Domains\Engine\Services;
 
 use App\Domains\Entity\Enums\EntityEnum;
 use App\Helpers\Classes\ApiHelper;
+use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
@@ -608,7 +609,7 @@ class FalAIService
         return $response->json();
     }
 
-    public static function veo2Generate(string $prompt): \GuzzleHttp\Promise\PromiseInterface|\Illuminate\Http\Client\Response
+    public static function veo2Generate(string $prompt): PromiseInterface|Response
     {
         return Http::timeout(3000)->withHeaders([
             'Content-Type'  => 'application/json',

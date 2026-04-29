@@ -7,6 +7,7 @@ namespace App\Http\Middleware;
 use App\Support\Chatbot\ChatbotHelper;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Session\TokenMismatchException;
 use JsonException;
 use Livewire\LivewireManager;
 use ReflectionException;
@@ -14,9 +15,9 @@ use ReflectionException;
 trait ChatbotCsrf
 {
     /**
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      *
-     * @throws \Illuminate\Session\TokenMismatchException
+     * @throws TokenMismatchException
      * @throws ReflectionException|JsonException
      */
     public function handle($request, Closure $next): mixed

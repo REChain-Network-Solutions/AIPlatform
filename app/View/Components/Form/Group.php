@@ -78,7 +78,7 @@ class Group extends Component
 
     private function getErrorInBag(string $errorKey): ?string
     {
-        /** @var \Illuminate\Support\ViewErrorBag $errors */
+        /** @var ViewErrorBag $errors */
         $errors = view()->shared('errors');
 
         if ($errors && $errors->has($errorKey)) {

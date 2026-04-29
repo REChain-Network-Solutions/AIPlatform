@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use ZipArchive;
 
@@ -57,7 +58,7 @@ trait HasBackup
 
         } catch (Exception $e) {
 
-            \Illuminate\Support\Facades\Log::error('Backup failed: ', [
+            Log::error('Backup failed: ', [
                 'message' => $e->getMessage(),
             ]);
 

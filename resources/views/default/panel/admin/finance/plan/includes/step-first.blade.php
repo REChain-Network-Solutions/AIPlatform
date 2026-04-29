@@ -432,7 +432,6 @@
 		</div>
 	</div>
 
-	@includeIf('multi-model::partials.plans_option')
 	@includeIf('social-media-agent::admin.plan.social-media-agent-limits')
 	@includeIf('blogpilot::admin.plan.blogpilot-limits')
 </div>

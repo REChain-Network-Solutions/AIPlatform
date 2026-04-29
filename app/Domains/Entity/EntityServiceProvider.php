@@ -6,6 +6,7 @@ namespace App\Domains\Entity;
 
 use App\Domains\Entity\Enums\EntityEnum;
 use App\Domains\Entity\Mixins\EntityCollectionMixin;
+use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
 use ReflectionException;
 
@@ -41,6 +42,6 @@ class EntityServiceProvider extends ServiceProvider
      */
     private function registerMixins(): void
     {
-        \Illuminate\Support\Collection::mixin(new EntityCollectionMixin);
+        Collection::mixin(new EntityCollectionMixin);
     }
 }

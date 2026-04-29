@@ -1,5 +1,20 @@
 <?php
 
+use App\Extensions\Cryptomus\System\Services\CryptomusService;
+use App\Services\PaymentGateways\CoinbaseService;
+use App\Services\PaymentGateways\CoingateService;
+use App\Services\PaymentGateways\FreeService;
+use App\Services\PaymentGateways\IyzicoService;
+use App\Services\PaymentGateways\MidtransService;
+use App\Services\PaymentGateways\PaddleService;
+use App\Services\PaymentGateways\PayPalService;
+use App\Services\PaymentGateways\PaystackService;
+use App\Services\PaymentGateways\RazorpayService;
+use App\Services\PaymentGateways\RevenueCatService;
+use App\Services\PaymentGateways\StripeService;
+use App\Services\PaymentGateways\TransferService;
+use App\Services\PaymentGateways\YokassaService;
+
 return [
 
     /*
@@ -60,58 +75,58 @@ return [
     */
 
     'stripe' => [
-        'class' => App\Services\PaymentGateways\StripeService::class,
+        'class' => StripeService::class,
     ],
 
     'paypal' => [
-        'class' => App\Services\PaymentGateways\PayPalService::class,
+        'class' => PayPalService::class,
     ],
 
     'paystack' => [
-        'class' => App\Services\PaymentGateways\PaystackService::class,
+        'class' => PaystackService::class,
     ],
 
     'yokassa' => [
-        'class' => App\Services\PaymentGateways\YokassaService::class,
+        'class' => YokassaService::class,
     ],
 
     'iyzico' => [
-        'class' => App\Services\PaymentGateways\IyzicoService::class,
+        'class' => IyzicoService::class,
     ],
 
     'razorpay' => [
-        'class' => App\Services\PaymentGateways\RazorpayService::class,
+        'class' => RazorpayService::class,
     ],
 
     'banktransfer' => [
-        'class' => App\Services\PaymentGateways\TransferService::class,
+        'class' => TransferService::class,
     ],
 
     'freeservice' => [
-        'class' => App\Services\PaymentGateways\FreeService::class,
+        'class' => FreeService::class,
     ],
 
     'revenuecat' => [
-        'class' => App\Services\PaymentGateways\RevenueCatService::class,
+        'class' => RevenueCatService::class,
     ],
 
     'coinbase' => [
-        'class' => App\Services\PaymentGateways\CoinbaseService::class,
+        'class' => CoinbaseService::class,
     ],
 
     'coingate' => [
-        'class' => App\Services\PaymentGateways\CoingateService::class,
+        'class' => CoingateService::class,
     ],
 
     'paddle' => [
-        'class' => App\Services\PaymentGateways\PaddleService::class,
+        'class' => PaddleService::class,
     ],
 
     'cryptomus' => [
-        'class' => \App\Extensions\Cryptomus\System\Services\CryptomusService::class,
+        'class' => CryptomusService::class,
     ],
 
     'midtrans' => [
-        'class' => App\Services\PaymentGateways\MidtransService::class,
+        'class' => MidtransService::class,
     ],
 ];

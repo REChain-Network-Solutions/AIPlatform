@@ -2,6 +2,7 @@
 
 namespace App\Models\Integration;
 
+use App\Extensions\Wordpress\System\Services\Wordpress;
 use App\Models\Concerns\HasCache;
 use App\Models\Extension;
 use Illuminate\Database\Eloquent\Model;
@@ -51,7 +52,7 @@ class Integration extends Model
     public function getFormClassName(): string
     {
         return match ($this->slug) {
-            'wordpress' => \App\Extensions\Wordpress\System\Services\Wordpress::class,
+            'wordpress' => Wordpress::class,
         };
     }
 }

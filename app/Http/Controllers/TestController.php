@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Classes\ApiHelper;
 use Illuminate\Http\Request;
+use OpenAI\Laravel\Facades\OpenAI;
 
 class TestController extends Controller
 {
@@ -34,7 +35,7 @@ class TestController extends Controller
                 ApiHelper::setOpenAiKey();
                 $history[] = ['role' => 'user', 'content' => 'Hello, write essay about cats.'];
 
-                $stream = \OpenAI\Laravel\Facades\OpenAI::responses()->createStreamed([
+                $stream = OpenAI::responses()->createStreamed([
                     'model'             => $model,
                     'input'             => $history,
                     'max_output_tokens' => 2000,

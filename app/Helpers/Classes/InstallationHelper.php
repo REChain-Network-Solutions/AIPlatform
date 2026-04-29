@@ -2,6 +2,7 @@
 
 namespace App\Helpers\Classes;
 
+use App\Domains\Entity\Models\Entity;
 use App\Models;
 use App\Models\DashboardWidget;
 use App\Models\OpenAIGenerator;
@@ -111,7 +112,7 @@ class InstallationHelper
                 'table' => 'openai',
                 'sql'   => [
                     [
-                        'condition' => Models\OpenAIGenerator::count() === 0,
+                        'condition' => OpenAIGenerator::count() === 0,
                         'files'     => [
                             'dev_tools/openai_table.sql',
                         ],
@@ -254,49 +255,49 @@ class InstallationHelper
                 'table' => 'openai',
                 'sql'   => [
                     [
-                        'condition' => Models\OpenAIGenerator::where('slug', 'ai_article_wizard_generator')->count() === 0,
+                        'condition' => OpenAIGenerator::where('slug', 'ai_article_wizard_generator')->count() === 0,
                         'files'     => [
                             'dev_tools/ai_wizard.sql',
                         ],
                     ],
                     [
-                        'condition' => Models\OpenAIGenerator::where('slug', 'ai_vision')->count() === 0,
+                        'condition' => OpenAIGenerator::where('slug', 'ai_vision')->count() === 0,
                         'files'     => [
                             'dev_tools/ai_vision.sql',
                         ],
                     ],
                     [
-                        'condition' => Models\OpenAIGenerator::where('slug', 'ai_pdf')->count() === 0,
+                        'condition' => OpenAIGenerator::where('slug', 'ai_pdf')->count() === 0,
                         'files'     => [
                             'dev_tools/ai_pdf.sql',
                         ],
                     ],
                     [
-                        'condition' => Models\OpenAIGenerator::where('slug', 'ai_chat_image')->count() === 0,
+                        'condition' => OpenAIGenerator::where('slug', 'ai_chat_image')->count() === 0,
                         'files'     => [
                             'dev_tools/ai_chat_image.sql',
                         ],
                     ],
                     [
-                        'condition' => Models\OpenAIGenerator::where('slug', 'ai_rewriter')->count() === 0,
+                        'condition' => OpenAIGenerator::where('slug', 'ai_rewriter')->count() === 0,
                         'files'     => [
                             'dev_tools/ai_rewriter.sql',
                         ],
                     ],
                     [
-                        'condition' => Models\OpenAIGenerator::where('slug', 'ai_webchat')->count() === 0,
+                        'condition' => OpenAIGenerator::where('slug', 'ai_webchat')->count() === 0,
                         'files'     => [
                             'dev_tools/ai_webchat.sql',
                         ],
                     ],
                     [
-                        'condition' => Models\OpenAIGenerator::where('slug', 'ai_pdf')->count() === 0,
+                        'condition' => OpenAIGenerator::where('slug', 'ai_pdf')->count() === 0,
                         'files'     => [
                             'dev_tools/ai_filechat.sql',
                         ],
                     ],
                     [
-                        'condition' => Models\OpenAIGenerator::where('slug', 'ai_video')->count() === 0,
+                        'condition' => OpenAIGenerator::where('slug', 'ai_video')->count() === 0,
                         'files'     => [
                             'dev_tools/ai_video.sql',
                         ],
@@ -307,32 +308,32 @@ class InstallationHelper
                 'table' => 'openai_chat_category',
                 'sql'   => [
                     [
-                        'condition' => Models\OpenaiGeneratorChatCategory::count() === 0,
+                        'condition' => OpenaiGeneratorChatCategory::count() === 0,
                         'files'     => [
                             'dev_tools/openai_chat_categories_table.sql',
                         ],
                     ],
                     [
-                        'condition' => Models\OpenaiGeneratorChatCategory::where('slug', 'ai_vision')->count() === 0,
+                        'condition' => OpenaiGeneratorChatCategory::where('slug', 'ai_vision')->count() === 0,
                         'files'     => [
                             'dev_tools/ai_vision2.sql',
                         ],
                     ],
                     [
-                        'condition' => Models\OpenaiGeneratorChatCategory::where('slug', 'ai_pdf')->count() === 0,
+                        'condition' => OpenaiGeneratorChatCategory::where('slug', 'ai_pdf')->count() === 0,
                         'files'     => [
                             'dev_tools/ai_pdf2.sql',
                             'dev_tools/ai_filechat2.sql',
                         ],
                     ],
                     [
-                        'condition' => Models\OpenaiGeneratorChatCategory::where('slug', 'ai_chat_image')->count() === 0,
+                        'condition' => OpenaiGeneratorChatCategory::where('slug', 'ai_chat_image')->count() === 0,
                         'files'     => [
                             'dev_tools/ai_chat_image2.sql',
                         ],
                     ],
                     [
-                        'condition' => Models\OpenaiGeneratorChatCategory::where('slug', 'ai_webchat')->count() === 0,
+                        'condition' => OpenaiGeneratorChatCategory::where('slug', 'ai_webchat')->count() === 0,
                         'files'     => [
                             'dev_tools/ai_webchat2.sql',
                         ],
@@ -367,7 +368,7 @@ class InstallationHelper
                     [
                         'condition' => Schema::hasColumn('plans', 'open_ai_items') && Schema::hasTable('openai'),
                         'callback'  => function () {
-                            $openaiItems = Models\OpenAIGenerator::query()->pluck('slug')->toArray();
+                            $openaiItems = OpenAIGenerator::query()->pluck('slug')->toArray();
 
                             $plans = Models\Plan::query()->get();
 
@@ -404,7 +405,7 @@ class InstallationHelper
                     [
                         'condition' => Schema::hasTable('settings') && Schema::hasColumn('settings', 'free_open_ai_items'),
                         'callback'  => function () {
-                            $openaiItems = Models\OpenAIGenerator::query()->pluck('slug')->toArray();
+                            $openaiItems = OpenAIGenerator::query()->pluck('slug')->toArray();
                             $setting = Models\Setting::first();
 
                             $setting->update([
@@ -814,7 +815,7 @@ class InstallationHelper
                         'condition' => true,
                         'callback'  => function () {
                             try {
-                                $models = \App\Domains\Entity\Models\Entity::query()->whereNull('selected_title')->get();
+                                $models = Entity::query()->whereNull('selected_title')->get();
 
                                 foreach ($models as $model) {
                                     $model->update(['selected_title' => $model->getAttribute('title')]);

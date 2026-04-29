@@ -93,6 +93,10 @@
 	}
 
 	.chats-sidebar-wrap {
+		@apply shadow-[0_4px_20px_hsl(0_0%_0%_/7%)];
+	}
+
+	.chats-sidebar-wrap {
 		@apply lg:-translate-x-full lg:transition-all;
 
 		.chats-new {
@@ -161,7 +165,7 @@
 		}
 
 		.chat-list-item-trigger {
-			@apply lg:py-3 lg:pe-3 lg:ps-0 lg:rounded-xl lg:transition-all lg:w-full;
+			@apply md:py-3 lg:pe-3 lg:ps-0 lg:rounded-xl lg:transition-all lg:w-full;
 
 			&:has(.lqd-chat-item-thumb-wrap) {
 				align-items: center;
@@ -281,11 +285,6 @@
 		}
 	}
 
-	// .lqd-chat-ai-bubble,
-	// .lqd-chat-user-bubble {
-	// 	@apply lg:mb-6
-	// }
-
 	.lqd-chat-ai-bubble,
 	.lqd-chat-user-bubble,
 	.lqd-chat-image-bubble {
@@ -304,6 +303,14 @@
 		}
 	}
 
+	.lqd-chat-ai-bubble,
+	.lqd-chat-user-bubble {
+
+		.chat-content-container {
+			@apply max-w-full;
+		}
+	}
+
 	.chat-content-container {
 		@apply grow before:hidden static min-h-0;
 		background: transparent !important;
@@ -317,9 +324,13 @@
 			}
 		}
 	}
-
+	
+	.council-content-container,
 	.chat-content {
 		@apply p-0;
+	}
+
+	.chat-content {
 
 		img {
 			@apply rounded-lg shadow-2xl shadow-black/5 last:mb-0 first:mt-0 only-of-type:my-0;
@@ -355,6 +366,14 @@
 				}
 			}
 		}
+		&:has(.lqd-smart-image-grid) {
+			&,
+			> div,
+			> pre {
+				@apply w-full;
+			}
+		}
+
 		&:has(.social-media-agent-chat-post-card) {
 			.lqd-chat-bubble-canvas-trigger {
 				@apply hidden;
@@ -370,7 +389,7 @@
 
 		&:last-child {
 
-			.lqd-chat-bubble-suggestions {
+			.lqd-chat-bubble-suggestions:has(.lqd-btn) {
 				@apply flex;
 			}
 		}
@@ -390,10 +409,7 @@
 	}
 
 	.lqd-chat-user-bubble {
-
-		.chat-content-container {
-			@apply max-w-none;
-		}
+		@apply w-fit ms-auto;
 	}
 
 	.lqd-chat-sender-name {
@@ -403,7 +419,7 @@
 	.lqd-chat-form-inputs-container {
 
 		.lqd-realtime-chat-button {
-			@apply md:size-11 md:bg-transparent md:text-heading-foreground md:border md:border-heading-foreground/5 md:outline-none md:hover:bg-primary md:hover:border-primary md:hover:text-primary-foreground max-md:hover:bg-transparent max-md:hover:shadow-none;
+			@apply lg:size-11 md:bg-transparent md:text-heading-foreground md:border md:border-heading-foreground/5 md:outline-none md:hover:bg-primary md:hover:border-primary md:hover:text-primary-foreground max-md:hover:bg-transparent max-md:hover:shadow-none;
 		}
 	}
 
@@ -422,13 +438,6 @@
 			}
 		}
 	}
-
-	// .multi-model-response-wrap {
-
-	// 	.lqd-chat-ai-bubble {
-	// 		@apply mb-0;
-	// 	}
-	// }
 
 	.lqd-reimagine-images,
 	.lqd-download-images {

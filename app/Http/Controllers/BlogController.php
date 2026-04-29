@@ -202,7 +202,7 @@ class BlogController extends Controller
         $post->category = $request->category;
         $post->tag = $request->tag;
         $post->status = $request->status;
-        $post->user_id = \Illuminate\Support\Facades\Auth::user()->id;
+        $post->user_id = Auth::user()->id;
         $post->save();
     }
 }

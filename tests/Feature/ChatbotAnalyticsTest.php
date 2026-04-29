@@ -22,6 +22,8 @@ beforeEach(function () {
     }
     $setting = Setting::factory()->create();
     $settingTwo = SettingTwo::factory()->create();
+    Setting::forgetCache();
+    SettingTwo::forgetCache();
     View::share('setting', $setting);
     View::share('settings_two', $settingTwo);
     View::share('good_for_now', true);

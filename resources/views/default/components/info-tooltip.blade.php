@@ -21,7 +21,7 @@
         x-ref="tooltip"
         :class="{ 'invisible opacity-0': !open }"
     >
-        {{ $text }}
+        {!! $text !!}
 
         @if ($drivers->isNotEmpty())
             <div>

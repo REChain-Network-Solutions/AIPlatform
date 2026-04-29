@@ -350,7 +350,7 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
         };
     }
 
-    public function getDefaultWordModel(?Setting $setting): EntityEnum
+    public function getDefaultWordModel(mixed $setting = null): EntityEnum
     {
         return match ($this) {
             self::OPEN_AI          => EntityEnum::fromSlug($setting?->openai_default_model ?? EntityEnum::GPT_5_MINI->slug()),

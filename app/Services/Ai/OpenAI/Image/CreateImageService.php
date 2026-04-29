@@ -7,6 +7,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Log;
 
 class CreateImageService
 {
@@ -39,6 +40,11 @@ class CreateImageService
             ])->post($this->generateURL, $requestData);
 
         if ($httpClient->failed()) {
+            Log::error('CreateImageService: API request failed', [
+                'status' => $httpClient->status(),
+                'error'  => $httpClient->json('error'),
+            ]);
+
             return null;
         }
 

@@ -8,6 +8,7 @@ use App\Models\GatewayProducts;
 use App\Models\Gateways;
 use App\Models\Plan;
 use App\Models\Setting;
+use App\Models\Usage;
 use App\Models\User;
 use App\Models\UserOrder;
 use App\Services\Contracts\BaseGatewayService;
@@ -72,7 +73,7 @@ class RazorpayService implements BaseGatewayService, ProductInterface
         return null;
     }
 
-    public static function saveProduct($plan): bool|\Illuminate\Http\RedirectResponse
+    public static function saveProduct($plan): bool|RedirectResponse
     {
         try {
             $gateway = self::geteway();
@@ -303,7 +304,7 @@ class RazorpayService implements BaseGatewayService, ProductInterface
                     'payload'            => $data->toArray(),
                 ]);
 
-            \App\Models\Usage::getSingle()->updateSalesCount($totalAmount);
+            Usage::getSingle()->updateSalesCount($totalAmount);
 
             $short_link = $data['short_url'];
 
@@ -383,7 +384,7 @@ class RazorpayService implements BaseGatewayService, ProductInterface
                 'payload'  => $paymentLink->toArray(),
             ]);
 
-            \App\Models\Usage::getSingle()->updateSalesCount($totalAmount);
+            Usage::getSingle()->updateSalesCount($totalAmount);
 
             return redirect()->to($paymentLink['short_url']);
 

@@ -15,6 +15,7 @@ use App\Models\Setting;
 use App\Models\SettingTwo;
 use App\Models\Usage;
 use App\Models\UserOpenai;
+use App\Services\Ai\AiCompletionService;
 use App\Services\Bedrock\BedrockRuntimeService;
 use Exception;
 use GuzzleHttp\Client;
@@ -22,6 +23,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\File;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -195,7 +197,7 @@ class AIArticleWizardController extends Controller
     /** # | not rec
      * Generate keywords from topic
      */
-    public function userRemaining(Request $request): \Illuminate\Http\JsonResponse
+    public function userRemaining(Request $request): JsonResponse
     {
         return response()->json(['words' =>  EntityStats::word()->totalCredits(), 'images' =>  EntityStats::image()->totalCredits()]);
     }
@@ -209,7 +211,7 @@ class AIArticleWizardController extends Controller
             $driver = Entity::driver($chatBot);
             $driver->redirectIfNoCreditBalance();
 
-            $responsedText = app(\App\Services\Ai\AiCompletionService::class)->completeUserOnly(
+            $responsedText = app(AiCompletionService::class)->completeUserOnly(
                 "Generate $request->count keywords(simple words or 2 words, not phrase, not person name) about '$request->topic'. Must resut as array json data. in '$request->language' language. Result format is [keyword1, keyword2, ..., keywordn].  Must not write ```json"
             );
             $driver->input($responsedText)->calculateCredit()->decreaseCredit();
@@ -243,7 +245,7 @@ class AIArticleWizardController extends Controller
             if ($request->topic != '') {
                 $prompt = "Generate $request->count titles(Maximum title length is $request->length., Must not be 'title1', 'title2', 'title3', 'title4', 'title5') about Topic: '" . $request->topic . "'. in '$request->language' language. Resut must be array json data. This is result format: [title1, title2, ..., titlen]. Maximum title length is $request->length  Must not write ```json";
             }
-            $responsedText = app(\App\Services\Ai\AiCompletionService::class)->completeUserOnly($prompt);
+            $responsedText = app(AiCompletionService::class)->completeUserOnly($prompt);
             $driver
                 ->input($responsedText)
                 ->calculateCredit()
@@ -270,7 +272,7 @@ class AIArticleWizardController extends Controller
             $driver = Entity::driver($chatBot);
             $driver->redirectIfNoCreditBalance();
 
-            $responsedText = app(\App\Services\Ai\AiCompletionService::class)->completeUserOnly($prompt);
+            $responsedText = app(AiCompletionService::class)->completeUserOnly($prompt);
             $driver->input($responsedText)
                 ->calculateCredit()
                 ->decreaseCredit();

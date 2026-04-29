@@ -12,6 +12,7 @@ use App\Models\Finance\YokassaSubscription;
 use App\Models\Gateways;
 use App\Models\Plan;
 use App\Models\Setting;
+use App\Models\Usage;
 use App\Models\User;
 use App\Models\UserOrder;
 use App\Services\PaymentGateways\Contracts\CreditUpdater;
@@ -175,12 +176,12 @@ class YokassaService
                 $subscription->payment_method_id = $payment_method_id;
 
                 if ($plan->frequency == FrequencyEnum::LIFETIME_MONTHLY->value || $plan->frequency == FrequencyEnum::LIFETIME_YEARLY->value) {
-                    $subscription->next_pay_at = $plan->frequency == FrequencyEnum::LIFETIME_MONTHLY->value ? \Carbon\Carbon::now()->addMonths(1) : \Carbon\Carbon::now()->addYears(1);
+                    $subscription->next_pay_at = $plan->frequency == FrequencyEnum::LIFETIME_MONTHLY->value ? Carbon::now()->addMonths(1) : Carbon::now()->addYears(1);
                     $subscription->auto_renewal = 1;
                     $subscription->subscription_status = 'yokassa_approved';
                 } else {
                     $subscription->subscription_status = 'active';
-                    $subscription->next_pay_at = $plan->trial_days != 0 ? \Carbon\Carbon::now()->addDays($plan->trial_days) : \Carbon\Carbon::now()->addDays(30);
+                    $subscription->next_pay_at = $plan->trial_days != 0 ? Carbon::now()->addDays($plan->trial_days) : Carbon::now()->addDays(30);
                 }
                 $subscription->tax_rate = $gateway->tax;
                 $subscription->tax_value = $taxValue;
@@ -283,7 +284,7 @@ class YokassaService
 
             self::creditIncreaseSubscribePlan($user, $plan);
 
-            \App\Models\Usage::getSingle()->updateSalesCount($total);
+            Usage::getSingle()->updateSalesCount($total);
 
             $activeSub->next_pay_at = Carbon::now()->addMonth();
             $activeSub->save();
@@ -434,7 +435,7 @@ class YokassaService
                 CreateActivity::for($user, __('Purchased'), $plan->name . ' ' . __('Token Pack'));
                 EmailPaymentConfirmation::create($user, $plan)->send();
                 DB::commit();
-                \App\Models\Usage::getSingle()->updateSalesCount($total);
+                Usage::getSingle()->updateSalesCount($total);
 
                 return redirect()->route('dashboard.user.payment.succesful')->with(['message' => __('Thank you for your purchase. Enjoy your remaining words and images.'), 'type' => 'success']);
             }
@@ -454,7 +455,7 @@ class YokassaService
         $userId = Auth::user()->id;
         $activeSub = YokassaSubscription::where([['subscription_status', '=', 'active'], ['user_id', '=', $userId]])->orWhere([['subscription_status', '=', 'yokassa_approved'], ['user_id', '=', $userId]])->first();
         if ($activeSub != null) {
-            return \Carbon\Carbon::now()->diffInDays($activeSub->next_pay_at);
+            return Carbon::now()->diffInDays($activeSub->next_pay_at);
         }
 
         return null;
@@ -492,7 +493,7 @@ class YokassaService
         $userId = Auth::user()->id;
         $activeSub = YokassaSubscription::where([['subscription_status', '=', 'active'], ['user_id', '=', $userId]])->orWhere([['subscription_status', '=', 'yokassa_approved'], ['user_id', '=', $userId]])->first();
         if ($activeSub != null) {
-            return \Carbon\Carbon::createFromTimeStamp($activeSub->next_pay_at)->format('F jS, Y');
+            return Carbon::createFromTimeStamp($activeSub->next_pay_at)->format('F jS, Y');
         }
 
         return null;
@@ -514,7 +515,7 @@ class YokassaService
             }
 
             $activeSub->subscription_status = 'cancelled';
-            $activeSub->next_pay_at = \Carbon\Carbon::now();
+            $activeSub->next_pay_at = Carbon::now();
             $activeSub->save();
 
             return false;

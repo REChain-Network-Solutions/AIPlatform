@@ -3,6 +3,7 @@
 namespace RachidLaasri\LaravelInstaller\Controllers;
 
 use Illuminate\Routing\Controller;
+use Illuminate\View\View;
 use RachidLaasri\LaravelInstaller\Helpers\PermissionsChecker;
 
 class PermissionsController extends Controller
@@ -20,7 +21,7 @@ class PermissionsController extends Controller
     /**
      * Display the permissions check page.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function permissions()
     {

@@ -3,7 +3,7 @@
 
 	$disable_actions = $app_is_demo ?? false;
 	$is_search = $is_search ?? false;
-	$categoryId = isset($category) ? $category->id : null;
+	$categoryId = isset($category) ? $category?->id : null;
 	$website_url = $website_url ?? null;
 	$isChatProImage = ($website_url ?? null) === 'chatpro-image' && MarketplaceHelper::isRegistered('ai-chat-pro-image-chat');
 	$isChatProContext = in_array($website_url, ['chatpro', 'chatpro-temp', 'chatPro', 'chatpro-image', 'social-media-agent'], true);
@@ -220,6 +220,7 @@
 					{{-- Chat Dropdown Menu --}}
 					<x-dropdown.dropdown
 						class="order-last ms-auto shrink-0"
+						class:dropdown-dropdown="before:top-[calc((var(--dropdown-offset)+2rem)*-1)] [&.dropdown-anchor-bottom]:before:bottom-[calc((var(--dropdown-offset)+2rem)*-1)]"
 						offsetY="10px"
 					>
 						<x-slot:trigger

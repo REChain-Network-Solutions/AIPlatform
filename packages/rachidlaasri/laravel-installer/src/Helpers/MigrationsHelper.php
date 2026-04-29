@@ -2,6 +2,7 @@
 
 namespace RachidLaasri\LaravelInstaller\Helpers;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 trait MigrationsHelper
@@ -21,7 +22,7 @@ trait MigrationsHelper
     /**
      * Get the migrations that have already been ran.
      *
-     * @return \Illuminate\Support\Collection List of migrations
+     * @return Collection List of migrations
      */
     public function getExecutedMigrations()
     {

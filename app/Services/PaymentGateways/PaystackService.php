@@ -7,6 +7,7 @@ use App\Actions\EmailPaymentConfirmation;
 use App\Enums\Plan\FrequencyEnum;
 use App\Enums\Plan\TypeEnum;
 use App\Events\PaystackWebhookEvent;
+use App\Extensions\Affilate\System\Events\AffiliateEvent;
 use App\Models\Coupon;
 use App\Models\Currency;
 use App\Models\CustomBilingPlans;
@@ -16,8 +17,10 @@ use App\Models\OldGatewayProducts;
 use App\Models\PaystackPaymentInfo;
 use App\Models\Plan;
 use App\Models\Setting;
+use App\Models\Usage;
 use App\Models\UserOrder;
 use App\Services\PaymentGateways\Contracts\CreditUpdater;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -359,7 +362,7 @@ class PaystackService
                 if ($billingPlanId == 'Not Needed') {
                     $subscription->stripe_id = 'PSLS-' . strtoupper(Str::random(13));
                     $subscription->stripe_price = $product->price_id;
-                    $subscription->ends_at = $plan->frequency == FrequencyEnum::LIFETIME_MONTHLY->value ? \Carbon\Carbon::now()->addMonths(1) : \Carbon\Carbon::now()->addYears(1);
+                    $subscription->ends_at = $plan->frequency == FrequencyEnum::LIFETIME_MONTHLY->value ? Carbon::now()->addMonths(1) : Carbon::now()->addYears(1);
                     $subscription->auto_renewal = 1;
                     $subscription->stripe_status = 'paystack_approved';
                 } else {
@@ -374,7 +377,7 @@ class PaystackService
                     $subscription->stripe_id = $subscription_billing_code;
                     $subscription->stripe_price = $billingPlanId;
                     $subscription->stripe_status = 'active';
-                    $subscription->ends_at = $plan->trial_days != 0 ? \Carbon\Carbon::now()->addDays($plan->trial_days) : \Carbon\Carbon::now()->addDays(30);
+                    $subscription->ends_at = $plan->trial_days != 0 ? Carbon::now()->addDays($plan->trial_days) : Carbon::now()->addDays(30);
                 }
 
                 $subscription->user_id = $user->id;
@@ -395,11 +398,11 @@ class PaystackService
 
                 CreateActivity::for($user, __('Subscribed'), $plan->name . ' ' . __('Plan'));
                 EmailPaymentConfirmation::create($user, $plan)->send();
-                \App\Models\Usage::getSingle()->updateSalesCount($total);
+                Usage::getSingle()->updateSalesCount($total);
                 DB::commit();
 
                 if (class_exists('App\Extensions\Affilate\System\Events\AffiliateEvent')) {
-                    event(new \App\Extensions\Affilate\System\Events\AffiliateEvent($total, $gateway->currency));
+                    event(new AffiliateEvent($total, $gateway->currency));
                 }
 
                 return redirect()->route('dashboard.' . $user->type->value . '.index')->with(['message' => __('Thank you for your purchase. Enjoy your remaining words and images.'), 'type' => 'success']);
@@ -526,7 +529,7 @@ class PaystackService
 
             CreateActivity::for($user, __('Purchased'), $plan->name . ' ' . __('Token Pack'));
             EmailPaymentConfirmation::create($user, $plan)->send();
-            \App\Models\Usage::getSingle()->updateSalesCount($newDiscountedPrice);
+            Usage::getSingle()->updateSalesCount($newDiscountedPrice);
             DB::commit();
 
             return redirect()->route('dashboard.' . $user->type->value . '.index')->with(['message' => __('Thank you for your purchase. Enjoy your remaining words and images.'), 'type' => 'success']);
@@ -564,10 +567,10 @@ class PaystackService
                 }
                 if (isset($reqs['data']['next_payment_date'])) {
                     // return \Carbon\Carbon::parse($reqs['data']['next_payment_date'])->format('F jS, Y');
-                    return \Carbon\Carbon::now()->diffInDays($reqs['data']['next_payment_date']);
+                    return Carbon::now()->diffInDays($reqs['data']['next_payment_date']);
                 }
             } else {
-                return \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($activeSub->ends_at));
+                return Carbon::now()->diffInDays(Carbon::parse($activeSub->ends_at));
             }
         }
 
@@ -598,17 +601,17 @@ class PaystackService
                     return back()->with(['message' => 'Paystack Gateway : ' . json_encode($reqs), 'type' => 'error']);
                 }
                 if (isset($reqs['data']['next_payment_date'])) {
-                    return \Carbon\Carbon::parse($reqs['data']['next_payment_date'])->format('F jS, Y');
+                    return Carbon::parse($reqs['data']['next_payment_date'])->format('F jS, Y');
                 }
 
                 $activeSub->stripe_status = 'cancelled';
-                $activeSub->ends_at = \Carbon\Carbon::now();
+                $activeSub->ends_at = Carbon::now();
                 $activeSub->save();
 
-                return \Carbon\Carbon::now()->format('F jS, Y');
+                return Carbon::now()->format('F jS, Y');
             }
 
-            return \Carbon\Carbon::createFromTimeStamp($activeSub->ends_at)->format('F jS, Y');
+            return Carbon::createFromTimeStamp($activeSub->ends_at)->format('F jS, Y');
         }
 
         return null;
@@ -641,7 +644,7 @@ class PaystackService
                 }
 
                 $activeSub->stripe_status = 'cancelled';
-                $activeSub->ends_at = \Carbon\Carbon::now();
+                $activeSub->ends_at = Carbon::now();
                 $activeSub->save();
 
                 return false;
@@ -685,14 +688,14 @@ class PaystackService
 
                 if ($request['status'] == true && $request['message'] == 'Subscription disabled successfully') {
                     $currentSubscription->stripe_status = 'cancelled';
-                    $currentSubscription->ends_at = \Carbon\Carbon::now();
+                    $currentSubscription->ends_at = Carbon::now();
                     $currentSubscription->save();
 
                     return true;
                 }
             } else {
                 $currentSubscription->stripe_status = 'cancelled';
-                $currentSubscription->ends_at = \Carbon\Carbon::now();
+                $currentSubscription->ends_at = Carbon::now();
                 $currentSubscription->save();
 
                 return true;
@@ -731,7 +734,7 @@ class PaystackService
                 ]);
                 if ($request['status'] == true && $request['message'] == 'Subscription disabled successfully') {
                     $activeSub->stripe_status = 'cancelled';
-                    $activeSub->ends_at = \Carbon\Carbon::now();
+                    $activeSub->ends_at = Carbon::now();
                     $activeSub->save();
 
                     self::creditDecreaseCancelPlan($user, $plan);
@@ -747,7 +750,7 @@ class PaystackService
             }
 
             $activeSub->stripe_status = 'cancelled';
-            $activeSub->ends_at = \Carbon\Carbon::now();
+            $activeSub->ends_at = Carbon::now();
             $activeSub->save();
 
             self::creditDecreaseCancelPlan($user, $plan);

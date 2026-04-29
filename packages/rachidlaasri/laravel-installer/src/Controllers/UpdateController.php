@@ -8,15 +8,16 @@ use Illuminate\View\View;
 use JetBrains\PhpStorm\NoReturn;
 use RachidLaasri\LaravelInstaller\Helpers\DatabaseManager;
 use RachidLaasri\LaravelInstaller\Helpers\InstalledFileManager;
+use RachidLaasri\LaravelInstaller\Helpers\MigrationsHelper;
 
 class UpdateController extends Controller
 {
-    use \RachidLaasri\LaravelInstaller\Helpers\MigrationsHelper;
+    use MigrationsHelper;
 
     /**
      * Display the updater welcome page.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function welcome()
     {
@@ -26,7 +27,7 @@ class UpdateController extends Controller
     /**
      * Display the updater overview page.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function overview()
     {

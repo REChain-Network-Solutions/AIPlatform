@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Setting;
 use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
@@ -9,7 +10,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $frontend_additional_url = \App\Models\Setting::first()->frontend_additional_url ?? null;
+        $frontend_additional_url = Setting::first()->frontend_additional_url ?? null;
         $frontend_type = match (true) {
             str_ends_with($frontend_additional_url, '/chat')         => 'ai-chat-pro',
             str_ends_with($frontend_additional_url, '/ai-image-pro') => 'ai-image-pro',

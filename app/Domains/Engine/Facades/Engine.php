@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domains\Engine\Facades;
 
+use App\Domains\Engine\BaseDriver;
 use Illuminate\Support\Facades\Facade;
 
 /**
  * @mixin \App\Domains\Engine\Engine
- * @mixin \App\Domains\Engine\BaseDriver
+ * @mixin BaseDriver
  */
 class Engine extends Facade
 {

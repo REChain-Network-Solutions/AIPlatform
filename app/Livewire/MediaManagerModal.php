@@ -6,6 +6,7 @@ use App\Extensions\AiVideoPro\System\Models\UserFall;
 use App\Helpers\Classes\MarketplaceHelper;
 use App\Models\ExportedVideo;
 use App\Models\UserOpenai;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
@@ -857,9 +858,9 @@ class MediaManagerModal extends Component
 
                 try {
                     $lastModified = $disk->lastModified($file);
-                    $createdAt = \Carbon\Carbon::createFromTimestamp($lastModified);
+                    $createdAt = Carbon::createFromTimestamp($lastModified);
                 } catch (Exception $e) {
-                    $createdAt = \Carbon\Carbon::now();
+                    $createdAt = Carbon::now();
                 }
 
                 $fileUrl = url('/uploads/' . $file);
@@ -1090,10 +1091,10 @@ class MediaManagerModal extends Component
 
                 try {
                     $lastModified = $disk->lastModified($file);
-                    $createdAt = \Carbon\Carbon::createFromTimestamp($lastModified);
+                    $createdAt = Carbon::createFromTimestamp($lastModified);
                 } catch (Exception $e) {
                     // Fallback to current time if we can't get the file timestamp
-                    $createdAt = \Carbon\Carbon::now();
+                    $createdAt = Carbon::now();
                 }
 
                 $fileUrl = url('/uploads/' . $file);

@@ -55,15 +55,20 @@
             route('chat.pro') === $previousUrl);
 
     $isMultiModelExtensionEnabled = $is_chat_pro && MarketplaceHelper::isRegistered('multi-model') && setting('ai_chat_pro_multi_model_feature', '1') === '1';
+    $isCouncilExtensionEnabled = $is_chat_pro && MarketplaceHelper::isRegistered('model-council') && setting('ai_chat_pro_model_council_feature', '1') === '1';
+    $canMultiModelSelect = $isMultiModelExtensionEnabled && (auth()?->user()?->activePlan()?->multi_model_support ?? false || auth()?->user()?->isAdmin());
+    $canCouncilSelect = $isCouncilExtensionEnabled && (auth()?->user()?->activePlan()?->model_council_support ?? false || auth()?->user()?->isAdmin());
+    $councilMaxModels = max(2, min(5, (int) setting('ai_chat_pro_council_max_models', 5)));
+    $supportsMultiSelection = $isMultiModelExtensionEnabled || $isCouncilExtensionEnabled;
 @endphp
 
 <div x-data="modelList">
     <x-modal
         class:modal="select-ai-model-modal"
         class:modal-body="max-sm:p-3"
-        class:modal-head="gap-1 sticky top-0 z-[100] shrink-0 bg-background p-4"
+        class:modal-head="sticky top-0 z-[100] shrink-0 flex-nowrap gap-1 bg-background p-4 max-lg:items-start"
         class:modal-content="mx-5 container"
-        class:close-btn="!hidden"
+        class:close-btn="lg:!hidden"
         id="openRouterModel"
         disable-focus="true"
     >
@@ -84,7 +89,6 @@
                 />
             </svg>
             <span>
-                @lang('AI Model: ')
                 <span
                     x-text="selectedModelLabel && selectedModelLabel.length > 20
 							 ? selectedModelLabel.slice(0, 20) + '...'
@@ -98,40 +102,93 @@
         </x-slot:trigger>
 
         <x-slot:head-content>
-            <div class="flex flex-wrap justify-between gap-y-3 sm:grow sm:flex-nowrap">
-                <div class="grow">
-                    <h4 class="mb-0">
-                        @lang('AI Models')
-                    </h4>
-                    <p class="mb-0 text-2xs font-normal text-foreground">
+            <div class="flex w-full flex-col gap-y-1 sm:grow">
+                <div class="flex flex-wrap items-center justify-between gap-y-3 lg:flex-nowrap">
+                    <div class="shrink-0">
+                        <h4 class="mb-0 whitespace-nowrap">
+                            @lang('AI Models')
+                        </h4>
+                        <template x-if="selectedModels.length === 0">
+                            <p class="mb-0 text-2xs font-normal text-foreground">
+                                @if ($isMultiModelExtensionEnabled || $isCouncilExtensionEnabled)
+                                    @lang('Choose multiple AI models that best suit your needs.')
+                                @else
+                                    @lang('Choose the AI model that best suits your needs.')
+                                @endif
+                            </p>
+                        </template>
                         @if ($isMultiModelExtensionEnabled)
-                            @lang('Choose multiple AI models that best suit your needs.')
-                        @else
-                            @lang('Choose the AI model that best suits your needs.')
+                            <p class="tmp-alert hidden text-2xs text-blue-400">
+                                <x-tabler-info-circle class="me-1 inline size-4" />
+                                @lang('If you want to select multiple models, please upgrade your plan.')
+                            </p>
                         @endif
-                    </p>
-                    @if ($isMultiModelExtensionEnabled)
-                        <p class="tmp-alert hidden text-2xs text-blue-400">
-                            <x-tabler-info-circle class="me-1 inline size-4" />
-                            @lang('If you want to select multiple models, please upgrade your plan.')
-                        </p>
-                    @endif
+                        @if ($isCouncilExtensionEnabled)
+                            <p class="tmp-alert-council hidden text-2xs text-blue-400">
+                                <x-tabler-info-circle class="me-1 inline size-4" />
+                                @lang('Model Council is not included in your current plan.')
+                            </p>
+                        @endif
+                    </div>
+
+                    <div class="w-full lg:ms-auto">
+                        <div class="flex grow flex-wrap items-center justify-between gap-2 lg:justify-end">
+                            @if ($isCouncilExtensionEnabled)
+                                <x-forms.input
+                                    class="border-foreground/10 dark:checked:border-primary dark:checked:bg-primary"
+                                    type="checkbox"
+                                    name="council_mode"
+                                    :label="__('Council Mode')"
+                                    x-model="councilMode"
+                                    switcher
+                                    @change="toggleCouncilMode()"
+                                />
+                            @endif
+
+                            <form
+                                class="max-sm:w-full"
+                                action="#"
+                            >
+                                <x-forms.input
+                                    class="max-h-9 rounded-full bg-clay ps-8 sm:min-w-64"
+                                    type="search"
+                                    placeholder="{{ __('Search model') }}"
+                                    @input="searchString = $event.target.value"
+                                >
+                                    <x-slot:icon>
+                                        <x-tabler-search class="absolute start-3 top-1/2 size-4 -translate-y-1/2" />
+                                    </x-slot:icon>
+                                </x-forms.input>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="relative z-10 shrink-0 lg:ms-auto" @click.stop>
-                    <form action="#" @submit.prevent>
-                        <x-forms.input
-                            class="max-h-9 rounded-full bg-clay ps-8 sm:min-w-64"
-                            type="search"
-                            placeholder="{{ __('Search model') }}"
-                            @input="searchString = $event.target.value"
+                <template x-if="selectedModels.length > 0">
+                    <div class="flex flex-nowrap items-center gap-1.5 overflow-x-auto">
+                        <span class="shrink-0 text-2xs font-normal text-foreground">@lang('Selected Models:')</span>
+                        <template
+                            x-for="(model, index) in selectedModels"
+                            :key="model.value"
                         >
-                            <x-slot:icon>
-                                <x-tabler-search class="absolute start-3 top-1/2 size-4 -translate-y-1/2 pointer-events-none" />
-                            </x-slot:icon>
-                        </x-forms.input>
-                    </form>
-                </div>
+                            <x-button
+                                class="shrink-0 whitespace-nowrap !py-1 !ps-2.5 pe-1.5 !text-2xs hover:transform-none"
+                                hover-variant="secondary"
+                                variant="outline"
+                                size="none"
+                                @click.prevent.stop="updateSelectedModels(model)"
+                            >
+                                <span
+                                    class="whitespace-nowrap"
+                                    x-text="model.label?.length > 10 ? model.label.slice(0, 10) + '...' : model.label"
+                                ></span>
+                                <span class="inline-grid size-5 place-items-center rounded-full text-foreground/50 transition group-hover:bg-red-500 group-hover:text-white">
+                                    <x-tabler-x class="size-3.5" />
+                                </span>
+                            </x-button>
+                        </template>
+                    </div>
+                </template>
             </div>
         </x-slot:head-content>
 
@@ -165,11 +222,20 @@
                                 >
                                     <div class="w-full">
                                         <div class="mb-6 flex justify-between gap-1.5">
-                                            <figure class="inline-grid size-10 shrink-0 place-content-center rounded-full bg-heading-foreground/5">
-                                               @if($driver->model()?->image)
-                                                    <img src="{{ asset($driver->model()?->image) }}" alt="{{ $driver->model()?->selected_title ?? $model?->value }}" class="size-6 object-contain">
+                                            <figure
+                                                class="{{ $driver->model()?->image ? 'bg-white' : '' }} inline-grid size-10 shrink-0 place-content-center rounded-full bg-heading-foreground/5"
+                                            >
+                                                @if ($driver->model()?->image)
+                                                    <img
+                                                        class="size-6 object-contain"
+                                                        src="{{ asset($driver->model()?->image) }}"
+                                                        alt="{{ $driver->model()?->selected_title ?? $model?->value }}"
+                                                    >
                                                 @else
-                                                    <x-tabler-brand-openai class="size-6" stroke-width="1.5"/>
+                                                    <x-tabler-brand-openai
+                                                        class="size-6"
+                                                        stroke-width="1.5"
+                                                    />
                                                 @endif
                                             </figure>
                                             <div class="text-end">
@@ -212,7 +278,7 @@
                             container-class="hidden"
                             name="chatbot_front_model"
                             type="select"
-                            :multiple="$isMultiModelExtensionEnabled"
+                            :multiple="$supportsMultiSelection"
                             x-ref="modelsSelectElement"
                             x-model="selectedModels.map(model => model?.value)"
                         >
@@ -231,12 +297,18 @@
                                 </option>
                             @endforeach
                         </x-forms.input>
+                        <input
+                            id="chatbot_council_mode"
+                            name="chatbot_council_mode"
+                            type="hidden"
+                            :value="isCouncilEnabled() ? '1' : '0'"
+                        />
 
                         <x-button
                             class="sticky bottom-5 mt-10 w-full backdrop-blur-lg disabled:bg-heading-foreground/30 disabled:text-header-background"
                             type="submit"
                             size="xl"
-                            ::disabled="!selectedModels.length"
+                            ::disabled="!selectedModels.length || (isCouncilEnabled() && selectedModels.length < 2)"
                         >
                             {{ __('Apply') }}
                         </x-button>
@@ -254,10 +326,18 @@
                 Alpine.data('modelList', () => ({
                     selectedModelLabel: '',
                     selectedModels: [],
+                    councilMode: false,
                     fullModels: @json($fullModels),
                     activeModels: @json($activeModels),
                     searchString: '',
                     localStorageKey: 'selectedChatModels',
+                    councilModeStorageKey: 'chatCouncilMode',
+                    councilMaxModels: {{ $councilMaxModels }},
+                    canMultiModelSelect: {{ $canMultiModelSelect ? 'true' : 'false' }},
+                    canCouncilSelect: {{ $canCouncilSelect ? 'true' : 'false' }},
+                    isMultiModelExtensionEnabled: {{ $isMultiModelExtensionEnabled ? 'true' : 'false' }},
+                    isCouncilExtensionEnabled: {{ $isCouncilExtensionEnabled ? 'true' : 'false' }},
+                    isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
 
                     getLocalStorage() {
                         const defaultModelValue = '{{ $selectedModel->enum()?->value }}';
@@ -265,28 +345,129 @@
                         const localStorageLastSelectedModels = localStorage.getItem(this.localStorageKey) ??
                             `[{ "value": "${defaultModelValue}", "label": "${defaultModelLabel}" }]`;
                         const models = JSON.parse(localStorageLastSelectedModels)
-                            .filter(model => this.fullModels.find(m => m === model?.value))
-                            .filter(model => this.activeModels.find(m => m === model?.value));
+                            .filter(model => this.fullModels.find(m => (typeof m === 'string' ? m : m?.value) === model?.value))
+                            .filter(model => this.activeModels.find(m => (typeof m === 'string' ? m : m?.value) === model?.value));
 
-                        @if ($isMultiModelExtensionEnabled)
-                            return models;
+                        let safeModels = models;
+
+                        if (!safeModels.length) {
+                            const isDefaultActive = this.activeModels.some(m => (typeof m === 'string' ? m : m?.value) === defaultModelValue);
+
+                            if (isDefaultActive) {
+                                safeModels = [{
+                                    value: defaultModelValue,
+                                    label: defaultModelLabel,
+                                }];
+                            } else if (this.activeModels.length > 0) {
+                                const firstActive = this.activeModels[0];
+                                const val = typeof firstActive === 'string' ? firstActive : firstActive?.value;
+                                const selectEl = document.getElementById('chatbot_front_model');
+                                const option = selectEl?.querySelector(`option[value="${val}"]`);
+                                safeModels = [{
+                                    value: val,
+                                    label: option?.getAttribute('data-label') ?? val,
+                                }];
+                            }
+                        }
+
+                        @if ($supportsMultiSelection)
+                            return safeModels;
                         @else
-                            return [models[0]];
+                            return safeModels.length ? [safeModels[0]] : [];
                         @endif
                     },
                     setLocalStorage() {
                         localStorage.setItem(this.localStorageKey, JSON.stringify(this.selectedModels));
+                    },
+                    getCouncilModeStorage() {
+                        return localStorage.getItem(this.councilModeStorageKey) === '1';
+                    },
+                    setCouncilModeStorage() {
+                        localStorage.setItem(this.councilModeStorageKey, this.isCouncilEnabled() ? '1' : '0');
+                    },
+                    isCouncilEnabled() {
+                        return this.isCouncilExtensionEnabled && this.councilMode && this.canCouncilSelect;
+                    },
+                    showCouncilPlanAlert() {
+                        const el = document.querySelector('.tmp-alert-council');
+                        if (!el) return;
+
+                        el.classList.remove('hidden');
+                        setTimeout(() => {
+                            el.classList.add('hidden');
+                        }, 3000);
+                    },
+                    toggleCouncilMode() {
+                        if (this.councilMode && !this.canCouncilSelect) {
+                            this.councilMode = false;
+                            if (this.isAuthenticated) {
+                                this.showCouncilPlanAlert();
+                            } else {
+                                toastr.warning('{{ __('Login required to use Council Mode') }}', '{{ __('Login Required') }}');
+                            }
+                            return;
+                        }
+
+                        this.normalizeSelectionByMode();
+                        this.updateSelectionLabel();
+                        this.setLocalStorage();
+                        this.setCouncilModeStorage();
+
+                        if (this.isCouncilEnabled()) {
+                            const deepResearch = Alpine.store('deepResearchStatus');
+                            if (deepResearch?.status) {
+                                deepResearch.status = false;
+                                toastr.info('{{ __('Deep Research has been disabled. Council Mode uses multiple models simultaneously.') }}');
+                            }
+                            toastr.success('{{ __('Council Mode enabled') }}');
+                        } else {
+                            toastr.info('{{ __('Council Mode disabled') }}');
+                        }
+                    },
+                    normalizeSelectionByMode() {
+                        if (this.isCouncilEnabled()) {
+                            if (this.selectedModels.length > this.councilMaxModels) {
+                                this.selectedModels = this.selectedModels.slice(0, this.councilMaxModels);
+                            }
+
+                            return;
+                        }
+
+                        if (this.canMultiModelSelect) {
+                            if (this.selectedModels.length > 2) {
+                                this.selectedModels = this.selectedModels.slice(0, 2);
+                            }
+
+                            return;
+                        }
+
+                        this.selectedModels = this.selectedModels.length ? [this.selectedModels[0]] : [];
                     },
                     updateSelectedModels(modelObj = {
                         value: null,
                         label: null
                     }) {
                         const existingSelectedModels = this.selectedModels;
-                        @php
-                            $canMultiSelect = $isMultiModelExtensionEnabled && (auth()?->user()?->activePlan()?->multi_model_support ?? false || auth()?->user()?->isAdmin());
-                        @endphp
-                        @if ($canMultiSelect)
-                            const existingIndex = this.selectedModels.findIndex(model => model?.value === modelObj?.value);
+                        const existingIndex = this.selectedModels.findIndex(model => model?.value === modelObj?.value);
+
+                        if (this.isCouncilEnabled()) {
+                            if (existingIndex > -1) {
+                                if (this.selectedModels.length > 2) {
+                                    this.selectedModels = this.selectedModels.filter((model, index) => index !== existingIndex);
+                                } else {
+                                    toastr.error('{{ __('Model Council requires at least 2 selected models.') }}');
+                                    this.selectedModels = existingSelectedModels;
+                                }
+                            } else if (this.selectedModels.length >= this.councilMaxModels) {
+                                toastr.error('{{ __('You can select up to') }} ' + this.councilMaxModels + ' {{ __('models in Council mode.') }}');
+                                this.selectedModels = existingSelectedModels;
+                            } else {
+                                this.selectedModels.push({
+                                    value: modelObj?.value,
+                                    label: modelObj?.label,
+                                });
+                            }
+                        } else if (this.canMultiModelSelect) {
                             if (existingIndex > -1) {
                                 if (this.selectedModels.length > 1) {
                                     this.selectedModels = this.selectedModels.filter((model, index) => index !== existingIndex);
@@ -300,61 +481,109 @@
                                     label: modelObj?.label,
                                 });
                             }
-                        @else
-                            @if ($isMultiModelExtensionEnabled)
-                                document.querySelector('.tmp-alert').classList.remove('hidden');
+                        } else {
+                            if (this.isCouncilExtensionEnabled && this.councilMode && !this.canCouncilSelect) {
+                                this.showCouncilPlanAlert();
+                                this.councilMode = false;
+                            } else if (this.isMultiModelExtensionEnabled) {
+                                document.querySelector('.tmp-alert')?.classList.remove('hidden');
                                 setTimeout(() => {
-                                    document.querySelector('.tmp-alert').classList.add('hidden');
+                                    document.querySelector('.tmp-alert')?.classList.add('hidden');
                                 }, 3000);
-                            @endif
+                            }
+
                             this.selectedModels = [modelObj];
-                        @endif
+                        }
 
                         this.updateSelectionLabel();
                         this.setLocalStorage();
                     },
                     updateSelectionLabel() {
-                        @if ($isMultiModelExtensionEnabled)
-                            if (this.selectedModels.length === 0) {
-                                this.selectedModelLabel = '{{ __('None') }}';
-                            } else if (this.selectedModels.length === 1) {
-                                this.selectedModelLabel = this.selectedModels[0].label;
-                            } else {
-                                this.selectedModelLabel = this.selectedModels.length + ' {{ __('models selected') }}';
-                            }
-                        @else
+                        if (this.selectedModels.length === 0) {
+                            this.selectedModelLabel = '{{ __('None') }}';
+                            return;
+                        }
+
+                        if (!this.isCouncilEnabled() && !this.canMultiModelSelect) {
                             this.selectedModelLabel = this.selectedModels[0]?.label ?? '{{ __('None') }}';
-                        @endif
+                            return;
+                        }
+
+                        if (this.selectedModels.length === 1) {
+                            this.selectedModelLabel = this.isCouncilEnabled() ?
+                                '{{ __('Select at least 2 models') }}' :
+                                (this.selectedModels[0]?.label ?? '{{ __('None') }}');
+                            return;
+                        }
+
+                        this.selectedModelLabel = this.selectedModels.length + ' {{ __('Models Selected') }}';
                     },
                     saveChanges() {
+                        if (this.isCouncilEnabled() && this.selectedModels.length < 2) {
+                            toastr.error('{{ __('Please select at least 2 models for Council Mode.') }}');
+                            return;
+                        }
+
                         this.setLocalStorage();
+                        this.setCouncilModeStorage();
+                        this.updateSelectionLabel();
+                    },
+                    onCouncilModeChange(enabled) {
+                        this.councilMode = enabled;
+
+                        this.normalizeSelectionByMode();
+                        this.setCouncilModeStorage();
                         this.updateSelectionLabel();
                     },
                     init() {
                         const localStorageLastSelectedModels = this.getLocalStorage();
+                        this.councilMode = this.getCouncilModeStorage();
+
+                        if (this.councilMode && !this.canCouncilSelect) {
+                            this.councilMode = false;
+                        }
 
                         this.selectedModels = localStorageLastSelectedModels;
+                        this.normalizeSelectionByMode();
                         // set local storage again on init to make sure we're in sync with available and active models
                         this.setLocalStorage();
+                        this.setCouncilModeStorage();
                         this.updateSelectionLabel();
+
+                        window.addEventListener('council-mode-changed', event => this.onCouncilModeChange(event.detail?.enabled ?? false));
 
                         document.addEventListener('chat-model-change', event => {
                             const {
                                 model
                             } = event.detail;
 
-                            if (!model.trim()) return;
+                            if (!model || !model.trim()) return;
+
+                            const selectEl = document.querySelector('#chatbot_front_model');
+                            const matchedOption = Array.from(selectEl?.options || []).find(optionEl => optionEl?.value === model);
 
                             const modelObj = {
                                 value: model,
-                                label: Array.from(document.querySelector('#chatbot_front_model').options).find(optionEl => optionEl?.value === model)
-                                    ?.getAttribute('data-label') ?? ''
+                                label: matchedOption?.getAttribute('data-label') ?? model
                             };
 
+                            // Only persist to localStorage if the model is in the active models list,
+                            // otherwise just update the UI selection without saving (e.g. realtime model
+                            // that isn't in the user's available models list)
+                            const isInActiveModels = this.activeModels.some(m => (typeof m === 'string' ? m : m?.value) === model);
+
+                            this.councilMode = false;
                             this.selectedModels = [modelObj];
-                            this.setLocalStorage();
+
+                            if (isInActiveModels) {
+                                this.setLocalStorage();
+                            }
+
+                            this.setCouncilModeStorage();
                             this.updateSelectionLabel();
-                        })
+                        });
+
+                        Alpine.store('modelList', this);
                     }
                 }))
             })

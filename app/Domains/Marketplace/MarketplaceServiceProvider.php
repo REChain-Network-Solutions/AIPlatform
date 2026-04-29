@@ -8,6 +8,95 @@ use App\Domains\Marketplace\Repositories\Contracts\ExtensionRepositoryInterface;
 use App\Domains\Marketplace\Repositories\ExtensionRepository;
 use App\Domains\Marketplace\Services\ExtensionInstallService;
 use App\Domains\Marketplace\Services\ExtensionUninstallService;
+use App\Extensions\AdvancedImage\System\AdvancedImageServiceProvider;
+use App\Extensions\Affilate\System\AffilateServiceProvider;
+use App\Extensions\AiAvatar\System\AiAvatarServiceProvider;
+use App\Extensions\AIChatPro\System\AIChatProServiceProvider;
+use App\Extensions\AIChatProDeepResearch\System\AIChatProDeepResearchServiceProvider;
+use App\Extensions\AiChatProEntityHighlight\System\AiChatProEntityHighlightServiceProvider;
+use App\Extensions\AIChatProFileChat\System\AIChatProFileChatServiceProvider;
+use App\Extensions\AIChatProFolders\System\AIChatProFoldersServiceProvider;
+use App\Extensions\AiChatProHighlightToAsk\System\AiChatProHighlightToAskServiceProvider;
+use App\Extensions\AiChatProImageChat\System\AiChatProImageChatServiceProvider;
+use App\Extensions\AIChatProMemory\System\AIChatProMemoryServiceProvider;
+use App\Extensions\AIChatProSkills\System\AIChatProSkillsServiceProvider;
+use App\Extensions\AiChatProSmartImage\System\AiChatProSmartImageServiceProvider;
+use App\Extensions\AIImagePro\System\AIImageProServiceProvider;
+use App\Extensions\AiMusic\System\AiMusicServiceProvider;
+use App\Extensions\AiMusicPro\System\AiMusicProServiceProvider;
+use App\Extensions\AiPersona\System\AiPersonaServiceProvider;
+use App\Extensions\AIPlagiarism\System\AIPlagiarismServiceProvider;
+use App\Extensions\AiPresentation\System\AiPresentationServiceProvider;
+use App\Extensions\AIRealtimeImage\System\AIRealtimeImageServiceProvider;
+use App\Extensions\AISocialMedia\System\AISocialMediaServiceProvider;
+use App\Extensions\AiVideoPro\System\AiVideoProServiceProvider;
+use App\Extensions\AIVideoToVideo\System\AIVideoToVideoServiceProvider;
+use App\Extensions\AiViralClips\System\AiViralClipsServiceProvider;
+use App\Extensions\AIVoiceIsolator\System\AIVoiceIsolatorServiceProvider;
+use App\Extensions\AIWebChat\System\AIWebChatServiceProvider;
+use App\Extensions\AIWriterTemplates\System\AIWriterTemplateServiceProvider;
+use App\Extensions\Announcement\System\AnnouncementServiceProvider;
+use App\Extensions\AzureOpenai\System\AzureOpenaiServiceProvider;
+use App\Extensions\AzureTTS\System\AzureTTSServiceProvider;
+use App\Extensions\BlogPilot\System\BlogPilotServiceProvider;
+use App\Extensions\Canvas\System\CanvasServiceProvider;
+use App\Extensions\Chatbot\System\ChatbotServiceProvider;
+use App\Extensions\ChatbotAgent\System\ChatbotAgentServiceProvider;
+use App\Extensions\ChatbotBooking\System\ChatbotBookingServiceProvider;
+use App\Extensions\ChatbotCustomerTag\System\ChatbotCustomerTagServiceProvider;
+use App\Extensions\ChatbotEcommerce\System\ChatbotEcommerceServiceProvider;
+use App\Extensions\ChatbotInstagram\System\ChatbotInstagramServiceProvider;
+use App\Extensions\ChatbotMessenger\System\ChatbotMessengerServiceProvider;
+use App\Extensions\ChatbotReview\System\ChatbotReviewServiceProvider;
+use App\Extensions\ChatbotTelegram\System\ChatbotTelegramServiceProvider;
+use App\Extensions\ChatbotVoice\System\ChatbotVoiceServiceProvider;
+use App\Extensions\ChatbotVoiceCall\System\ChatbotVoiceCallServiceProvider;
+use App\Extensions\ChatbotWhatsapp\System\ChatbotWhatsappServiceProvider;
+use App\Extensions\ChatProTempChat\System\ChatProTempChatServiceProvider;
+use App\Extensions\ChatSetting\System\ChatSettingServiceProvider;
+use App\Extensions\ChatShare\System\ChatShareServiceProvider;
+use App\Extensions\CheckoutRegistration\System\RegistrationServiceProvider;
+use App\Extensions\Cloudflare\System\CloudflareServiceProvider;
+use App\Extensions\ContentManager\System\ContentManagerServiceProvider;
+use App\Extensions\CreativeSuite\System\CreativeSuiteServiceProvider;
+use App\Extensions\Cryptomus\System\CryptomusServiceProvider;
+use App\Extensions\DemoExtension\System\DemoExtensionServiceProvider;
+use App\Extensions\DiscountManager\System\DiscountManagerServiceProvider;
+use App\Extensions\ElevenLabsVoiceChat\System\ElevenLabsVoiceChatServiceProvider;
+use App\Extensions\FashionStudio\System\FashionStudioServiceProvider;
+use App\Extensions\FluxPro\System\FluxProServiceProvider;
+use App\Extensions\FocusMode\System\FocusModeServiceProvider;
+use App\Extensions\FooterMenu\System\FooterMenuServiceProvider;
+use App\Extensions\Hubspot\System\HubspotServiceProvider;
+use App\Extensions\Ideogram\System\IdeogramServiceProvider;
+use App\Extensions\InfluencerAvatar\System\InfluencerAvatarServiceProvider;
+use App\Extensions\LiveCustomizer\System\LiveCustomizerServiceProvider;
+use App\Extensions\Mailchimp\System\MailchimpServiceProvider;
+use App\Extensions\Maintenance\System\MaintenanceServiceProvider;
+use App\Extensions\MarketingBot\System\MarketingBotServiceProvider;
+use App\Extensions\MegaMenu\System\MegaMenuServiceProvider;
+use App\Extensions\Menu\System\MenuServiceProvider;
+use App\Extensions\Midjourney\System\MidjourneyServiceProvider;
+use App\Extensions\Migration\System\MigrationServiceProvider;
+use App\Extensions\ModelCouncil\System\ModelCouncilServiceProvider;
+use App\Extensions\MultiModel\System\MultiModelServiceProvider;
+use App\Extensions\NanoBanana\System\NanoBananaServiceProvider;
+use App\Extensions\Newsletter\System\NewsletterServiceProvider;
+use App\Extensions\Onboarding\System\OnboardingServiceProvider;
+use App\Extensions\OnboardingPro\System\OnboardingProServiceProvider;
+use App\Extensions\OpenAIRealtimeChat\System\OpenAIRealtimeChatServiceProvider;
+use App\Extensions\OpenRouter\System\OpenRouterServiceProvider;
+use App\Extensions\Perplexity\System\PerplexityServiceProvider;
+use App\Extensions\PhotoStudio\System\PhotoStudioServiceProvider;
+use App\Extensions\ProductPhotography\System\ProductPhotographyServiceProvider;
+use App\Extensions\SeeDreamV4\System\SeeDreamV4ServiceProvider;
+use App\Extensions\SEOTool\System\SEOToolServiceProvider;
+use App\Extensions\SocialMedia\System\SocialMediaServiceProvider;
+use App\Extensions\SocialMediaAgent\System\SocialMediaAgentServiceProvider;
+use App\Extensions\SpeechifyTTS\System\SpeechifyServiceProvider;
+use App\Extensions\UrlToVideo\System\UrlToVideoServiceProvider;
+use App\Extensions\Wordpress\System\WordpressServiceProvider;
+use App\Extensions\Xero\System\XeroServiceProvider;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -27,89 +116,95 @@ class MarketplaceServiceProvider extends ServiceProvider
      * @note Do not remove namespaces from the beginning of the class.
      */
     public static array $extensionProviders = [
-        'chatbot'                => \App\Extensions\Chatbot\System\ChatbotServiceProvider::class,
-        'focus-mode'             => \App\Extensions\FocusMode\System\FocusModeServiceProvider::class,
-        'newsletter'             => \App\Extensions\Newsletter\System\NewsletterServiceProvider::class,
-        'photo-studio'           => \App\Extensions\PhotoStudio\System\PhotoStudioServiceProvider::class,
-        'ai-product-shot'        => \App\Extensions\ProductPhotography\System\ProductPhotographyServiceProvider::class,
-        'ai-avatar'              => \App\Extensions\AiAvatar\System\AiAvatarServiceProvider::class,
-        'ai-persona'             => \App\Extensions\AiPersona\System\AiPersonaServiceProvider::class,
-        'ai-music'               => \App\Extensions\AiMusic\System\AiMusicServiceProvider::class,
-        'ai-video-pro'           => \App\Extensions\AiVideoPro\System\AiVideoProServiceProvider::class,
-        'seo-tool'               => \App\Extensions\SEOTool\System\SEOToolServiceProvider::class,
-        'ai-social-media'        => \App\Extensions\AISocialMedia\System\AISocialMediaServiceProvider::class,
-        'webchat'                => \App\Extensions\AIWebChat\System\AIWebChatServiceProvider::class,
-        'onboarding'             => \App\Extensions\Onboarding\System\OnboardingServiceProvider::class,
-        'flux-pro'               => \App\Extensions\FluxPro\System\FluxProServiceProvider::class,
-        'chat-share'             => \App\Extensions\ChatShare\System\ChatShareServiceProvider::class,
-        'voice-isolator'         => \App\Extensions\AIVoiceIsolator\System\AIVoiceIsolatorServiceProvider::class,
-        'chat-setting'           => \App\Extensions\ChatSetting\System\ChatSettingServiceProvider::class,
-        'hubspot'                => \App\Extensions\Hubspot\System\HubspotServiceProvider::class,
-        'menu'                   => \App\Extensions\Menu\System\MenuServiceProvider::class,
-        'azure-tts'              => \App\Extensions\AzureTTS\System\AzureTTSServiceProvider::class,
-        'plagiarism'             => \App\Extensions\AIPlagiarism\System\AIPlagiarismServiceProvider::class,
-        'cloudflare-r2'          => \App\Extensions\Cloudflare\System\CloudflareServiceProvider::class,
-        'wordpress'              => \App\Extensions\Wordpress\System\WordpressServiceProvider::class,
-        'cryptomus'              => \App\Extensions\Cryptomus\System\CryptomusServiceProvider::class,
-        'affilate'               => \App\Extensions\Affilate\System\AffilateServiceProvider::class,
-        'mailchimp-newsletter'   => \App\Extensions\Mailchimp\System\MailchimpServiceProvider::class,
-        'ai-writer-templates'    => \App\Extensions\AIWriterTemplates\System\AIWriterTemplateServiceProvider::class,
-        'maintenance'            => \App\Extensions\Maintenance\System\MaintenanceServiceProvider::class,
-        'open-router'            => \App\Extensions\OpenRouter\System\OpenRouterServiceProvider::class,
-        'advanced-image'         => \App\Extensions\AdvancedImage\System\AdvancedImageServiceProvider::class,
-        'mega-menu'              => \App\Extensions\MegaMenu\System\MegaMenuServiceProvider::class,
-        'onboarding-pro'         => \App\Extensions\OnboardingPro\System\OnboardingProServiceProvider::class,
-        'ideogram'               => \App\Extensions\Ideogram\System\IdeogramServiceProvider::class,
-        'perplexity'             => \App\Extensions\Perplexity\System\PerplexityServiceProvider::class,
-        'checkout-registration'  => \App\Extensions\CheckoutRegistration\System\RegistrationServiceProvider::class,
-        'openai-realtime-chat'   => \App\Extensions\OpenAIRealtimeChat\System\OpenAIRealtimeChatServiceProvider::class,
-        'ai-video-to-video'      => \App\Extensions\AIVideoToVideo\System\AIVideoToVideoServiceProvider::class,
-        'midjourney'             => \App\Extensions\Midjourney\System\MidjourneyServiceProvider::class,
-        'social-media'           => \App\Extensions\SocialMedia\System\SocialMediaServiceProvider::class,
-        'social-media-agent'     => \App\Extensions\SocialMediaAgent\System\SocialMediaAgentServiceProvider::class,
-        'blogpilot'              => \App\Extensions\BlogPilot\System\BlogPilotServiceProvider::class,
-        'chatbot-agent'          => \App\Extensions\ChatbotAgent\System\ChatbotAgentServiceProvider::class,
-        'chatbot-booking'        => \App\Extensions\ChatbotBooking\System\ChatbotBookingServiceProvider::class,
-        'chatbot-ecommerce'      => \App\Extensions\ChatbotEcommerce\System\ChatbotEcommerceServiceProvider::class,
-        'chatbot-customer-tag'   => \App\Extensions\ChatbotCustomerTag\System\ChatbotCustomerTagServiceProvider::class,
-        'chatbot-review'         => \App\Extensions\ChatbotReview\System\ChatbotReviewServiceProvider::class,
-        'xero'                   => \App\Extensions\Xero\System\XeroServiceProvider::class,
-        'speechify-tts'          => \App\Extensions\SpeechifyTTS\System\SpeechifyServiceProvider::class,
-        'ai-chat-pro'            => \App\Extensions\AIChatPro\System\AIChatProServiceProvider::class,
-        'announcement'           => \App\Extensions\Announcement\System\AnnouncementServiceProvider::class,
-        'ai-realtime-image'      => \App\Extensions\AIRealtimeImage\System\AIRealtimeImageServiceProvider::class,
-        'azure-openai'           => \App\Extensions\AzureOpenai\System\AzureOpenaiServiceProvider::class,
-        'chatbot-voice'          => \App\Extensions\ChatbotVoice\System\ChatbotVoiceServiceProvider::class,
-        'chatbot-voice-call'     => \App\Extensions\ChatbotVoiceCall\System\ChatbotVoiceCallServiceProvider::class,
-        'chatbot-telegram'       => \App\Extensions\ChatbotTelegram\System\ChatbotTelegramServiceProvider::class,
-        'chatbot-whatsapp'       => \App\Extensions\ChatbotWhatsapp\System\ChatbotWhatsappServiceProvider::class,
-        'chatbot-messenger'      => \App\Extensions\ChatbotMessenger\System\ChatbotMessengerServiceProvider::class,
-        'chatbot-instagram'      => \App\Extensions\ChatbotInstagram\System\ChatbotInstagramServiceProvider::class,
-        'marketing-bot'          => \App\Extensions\MarketingBot\System\MarketingBotServiceProvider::class,
-        'migration'              => \App\Extensions\Migration\System\MigrationServiceProvider::class,
-        'live-customizer'        => \App\Extensions\LiveCustomizer\System\LiveCustomizerServiceProvider::class,
-        'elevenlabs-voice-chat'  => \App\Extensions\ElevenLabsVoiceChat\System\ElevenLabsVoiceChatServiceProvider::class,
-        'creative-suite'         => \App\Extensions\CreativeSuite\System\CreativeSuiteServiceProvider::class,
-        'url-to-video'           => \App\Extensions\UrlToVideo\System\UrlToVideoServiceProvider::class,
-        'ai-viral-clips'         => \App\Extensions\AiViralClips\System\AiViralClipsServiceProvider::class,
-        'influencer-avatar'      => \App\Extensions\InfluencerAvatar\System\InfluencerAvatarServiceProvider::class,
-        'content-manager'        => \App\Extensions\ContentManager\System\ContentManagerServiceProvider::class,
-        'canvas'                 => \App\Extensions\Canvas\System\CanvasServiceProvider::class,
-        'discount-manager'       => \App\Extensions\DiscountManager\System\DiscountManagerServiceProvider::class,
-        'footer-menu'            => \App\Extensions\FooterMenu\System\FooterMenuServiceProvider::class,
-        'chat-pro-temp-chat'     => \App\Extensions\ChatProTempChat\System\ChatProTempChatServiceProvider::class,
-        'demo-extension'         => \App\Extensions\DemoExtension\System\DemoExtensionServiceProvider::class,
-        'multi-model'            => \App\Extensions\MultiModel\System\MultiModelServiceProvider::class,
-        'nano-banana'            => \App\Extensions\NanoBanana\System\NanoBananaServiceProvider::class,
-        'ai-chat-pro-file-chat'  => \App\Extensions\AIChatProFileChat\System\AIChatProFileChatServiceProvider::class,
-        'ai-music-pro'           => \App\Extensions\AiMusicPro\System\AiMusicProServiceProvider::class,
-        'see-dream-v4'           => \App\Extensions\SeeDreamV4\System\SeeDreamV4ServiceProvider::class,
-        'ai-presentation'        => \App\Extensions\AiPresentation\System\AiPresentationServiceProvider::class,
-        'ai-image-pro'           => \App\Extensions\AIImagePro\System\AIImageProServiceProvider::class,
-        'ai-chat-pro-image-chat' => \App\Extensions\AiChatProImageChat\System\AiChatProImageChatServiceProvider::class,
-        'ai-chat-pro-folders'    => \App\Extensions\AIChatProFolders\System\AIChatProFoldersServiceProvider::class,
-        'ai-chat-pro-memory'     => \App\Extensions\AIChatProMemory\System\AIChatProMemoryServiceProvider::class,
-        'fashion-studio'         => \App\Extensions\FashionStudio\System\FashionStudioServiceProvider::class,
+        'chatbot'                       => ChatbotServiceProvider::class,
+        'focus-mode'                    => FocusModeServiceProvider::class,
+        'newsletter'                    => NewsletterServiceProvider::class,
+        'photo-studio'                  => PhotoStudioServiceProvider::class,
+        'ai-product-shot'               => ProductPhotographyServiceProvider::class,
+        'ai-avatar'                     => AiAvatarServiceProvider::class,
+        'ai-persona'                    => AiPersonaServiceProvider::class,
+        'ai-music'                      => AiMusicServiceProvider::class,
+        'ai-video-pro'                  => AiVideoProServiceProvider::class,
+        'seo-tool'                      => SEOToolServiceProvider::class,
+        'ai-social-media'               => AISocialMediaServiceProvider::class,
+        'webchat'                       => AIWebChatServiceProvider::class,
+        'onboarding'                    => OnboardingServiceProvider::class,
+        'flux-pro'                      => FluxProServiceProvider::class,
+        'chat-share'                    => ChatShareServiceProvider::class,
+        'voice-isolator'                => AIVoiceIsolatorServiceProvider::class,
+        'chat-setting'                  => ChatSettingServiceProvider::class,
+        'hubspot'                       => HubspotServiceProvider::class,
+        'menu'                          => MenuServiceProvider::class,
+        'azure-tts'                     => AzureTTSServiceProvider::class,
+        'plagiarism'                    => AIPlagiarismServiceProvider::class,
+        'cloudflare-r2'                 => CloudflareServiceProvider::class,
+        'wordpress'                     => WordpressServiceProvider::class,
+        'cryptomus'                     => CryptomusServiceProvider::class,
+        'affilate'                      => AffilateServiceProvider::class,
+        'mailchimp-newsletter'          => MailchimpServiceProvider::class,
+        'ai-writer-templates'           => AIWriterTemplateServiceProvider::class,
+        'maintenance'                   => MaintenanceServiceProvider::class,
+        'open-router'                   => OpenRouterServiceProvider::class,
+        'advanced-image'                => AdvancedImageServiceProvider::class,
+        'mega-menu'                     => MegaMenuServiceProvider::class,
+        'onboarding-pro'                => OnboardingProServiceProvider::class,
+        'ideogram'                      => IdeogramServiceProvider::class,
+        'perplexity'                    => PerplexityServiceProvider::class,
+        'checkout-registration'         => RegistrationServiceProvider::class,
+        'openai-realtime-chat'          => OpenAIRealtimeChatServiceProvider::class,
+        'ai-video-to-video'             => AIVideoToVideoServiceProvider::class,
+        'midjourney'                    => MidjourneyServiceProvider::class,
+        'social-media'                  => SocialMediaServiceProvider::class,
+        'social-media-agent'            => SocialMediaAgentServiceProvider::class,
+        'blogpilot'                     => BlogPilotServiceProvider::class,
+        'chatbot-agent'                 => ChatbotAgentServiceProvider::class,
+        'chatbot-booking'               => ChatbotBookingServiceProvider::class,
+        'chatbot-ecommerce'             => ChatbotEcommerceServiceProvider::class,
+        'chatbot-customer-tag'          => ChatbotCustomerTagServiceProvider::class,
+        'chatbot-review'                => ChatbotReviewServiceProvider::class,
+        'xero'                          => XeroServiceProvider::class,
+        'speechify-tts'                 => SpeechifyServiceProvider::class,
+        'ai-chat-pro'                   => AIChatProServiceProvider::class,
+        'announcement'                  => AnnouncementServiceProvider::class,
+        'ai-realtime-image'             => AIRealtimeImageServiceProvider::class,
+        'azure-openai'                  => AzureOpenaiServiceProvider::class,
+        'chatbot-voice'                 => ChatbotVoiceServiceProvider::class,
+        'chatbot-voice-call'            => ChatbotVoiceCallServiceProvider::class,
+        'chatbot-telegram'              => ChatbotTelegramServiceProvider::class,
+        'chatbot-whatsapp'              => ChatbotWhatsappServiceProvider::class,
+        'chatbot-messenger'             => ChatbotMessengerServiceProvider::class,
+        'chatbot-instagram'             => ChatbotInstagramServiceProvider::class,
+        'marketing-bot'                 => MarketingBotServiceProvider::class,
+        'migration'                     => MigrationServiceProvider::class,
+        'live-customizer'               => LiveCustomizerServiceProvider::class,
+        'elevenlabs-voice-chat'         => ElevenLabsVoiceChatServiceProvider::class,
+        'creative-suite'                => CreativeSuiteServiceProvider::class,
+        'url-to-video'                  => UrlToVideoServiceProvider::class,
+        'ai-viral-clips'                => AiViralClipsServiceProvider::class,
+        'influencer-avatar'             => InfluencerAvatarServiceProvider::class,
+        'content-manager'               => ContentManagerServiceProvider::class,
+        'canvas'                        => CanvasServiceProvider::class,
+        'discount-manager'              => DiscountManagerServiceProvider::class,
+        'footer-menu'                   => FooterMenuServiceProvider::class,
+        'chat-pro-temp-chat'            => ChatProTempChatServiceProvider::class,
+        'demo-extension'                => DemoExtensionServiceProvider::class,
+        'multi-model'                   => MultiModelServiceProvider::class,
+        'model-council'                 => ModelCouncilServiceProvider::class,
+        'ai-chat-pro-skills'            => AIChatProSkillsServiceProvider::class,
+        'ai-chat-pro-deep-research'     => AIChatProDeepResearchServiceProvider::class,
+        'nano-banana'                   => NanoBananaServiceProvider::class,
+        'ai-chat-pro-file-chat'         => AIChatProFileChatServiceProvider::class,
+        'ai-music-pro'                  => AiMusicProServiceProvider::class,
+        'see-dream-v4'                  => SeeDreamV4ServiceProvider::class,
+        'ai-presentation'               => AiPresentationServiceProvider::class,
+        'ai-image-pro'                  => AIImageProServiceProvider::class,
+        'ai-chat-pro-image-chat'        => AiChatProImageChatServiceProvider::class,
+        'ai-chat-pro-folders'           => AIChatProFoldersServiceProvider::class,
+        'ai-chat-pro-memory'            => AIChatProMemoryServiceProvider::class,
+        'ai-chat-pro-smart-image'       => AiChatProSmartImageServiceProvider::class,
+        'fashion-studio'                => FashionStudioServiceProvider::class,
+        'ai-chat-pro-entity-highlight'  => AiChatProEntityHighlightServiceProvider::class,
+        'ai-chat-pro-highlight-to-ask'  => AiChatProHighlightToAskServiceProvider::class,
     ];
 
     public function register(): void

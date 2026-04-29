@@ -12,10 +12,7 @@
                         action=""
                         enctype="multipart/form-data"
                     >
-                        <x-card
-                            class="max-md:text-center"
-                            szie="lg"
-                        >
+                        <x-card class="max-md:text-center">
 
                             <div class="mb-[10px]">
                                 <label class="form-label">{{ __('Avatar') }}</label>
@@ -24,7 +21,7 @@
                                     id="avatar"
                                     type="file"
                                     name="avatar"
-									accept="image/*"
+                                    accept="image/*"
                                 >
                             </div>
                             <div class="mb-[10px]">

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\UserOpenaiChat;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,11 +17,11 @@ return new class extends Migration
         });
 
         try {
-            \App\Models\UserOpenaiChat::query()->each(function ($chat) {
+            UserOpenaiChat::query()->each(function ($chat) {
                 $chat->is_empty = $chat->messagesWithoutInitial()->count() === 0;
                 $chat->save();
             });
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
         }
     }
 

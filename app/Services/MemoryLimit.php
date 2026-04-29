@@ -11,7 +11,7 @@ class MemoryLimit extends Check
     {
         $memoryLimit = getServerMemoryLimit();
 
-        $result = \Spatie\Health\Checks\Result::make();
+        $result = Result::make();
 
         if ($memoryLimit == -1) {
             return $result->ok(__('Unlimited'));

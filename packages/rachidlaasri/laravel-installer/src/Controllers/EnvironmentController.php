@@ -3,10 +3,12 @@
 namespace RachidLaasri\LaravelInstaller\Controllers;
 
 use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 use RachidLaasri\LaravelInstaller\Events\EnvironmentSaved;
 use RachidLaasri\LaravelInstaller\Helpers\EnvironmentManager;
 use Validator;
@@ -26,7 +28,7 @@ class EnvironmentController extends Controller
     /**
      * Display the Environment menu page.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function environmentMenu()
     {
@@ -36,7 +38,7 @@ class EnvironmentController extends Controller
     /**
      * Display the Environment page.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function environmentWizard()
     {
@@ -48,7 +50,7 @@ class EnvironmentController extends Controller
     /**
      * Display the Environment page.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function environmentClassic()
     {
@@ -60,7 +62,7 @@ class EnvironmentController extends Controller
     /**
      * Processes the newly saved environment configuration (Classic).
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function saveClassic(Request $input, Redirector $redirect)
     {
@@ -75,7 +77,7 @@ class EnvironmentController extends Controller
     /**
      * Processes the newly saved environment configuration (Form Wizard).
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function saveWizard(Request $request, Redirector $redirect)
     {

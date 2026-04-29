@@ -92,7 +92,7 @@
                     <span class="font-medium text-heading-foreground">{{ __('Total Spending') }}</span>
                     <h3 class="lqd-statistic-change m-0 flex items-center text-2xl sm:text-[30px]">
                         <span
-                            class="text-xl">{{ $currencySymbol }}</span>{{ number_format(setting('total_spend', 0), 1) }}
+                            class="text-xl">{{ $currencySymbol }}</span>{{ number_format( (int) setting('total_spend', 0), 1) }}
                     </h3>
                 </div>
             </x-card>

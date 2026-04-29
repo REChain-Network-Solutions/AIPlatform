@@ -46,7 +46,7 @@ final class HttpTransporter implements TransporterContract
     {
         $request = $payload->toRequest($this->baseUri, $this->headers, $this->queryParams);
 
-        $response = $this->sendRequest(fn (): \Psr\Http\Message\ResponseInterface => $this->client->sendRequest($request));
+        $response = $this->sendRequest(fn (): ResponseInterface => $this->client->sendRequest($request));
 
         $contents = (string) $response->getBody();
 
@@ -73,7 +73,7 @@ final class HttpTransporter implements TransporterContract
     {
         $request = $payload->toRequest($this->baseUri, $this->headers, $this->queryParams);
 
-        $response = $this->sendRequest(fn (): \Psr\Http\Message\ResponseInterface => $this->client->sendRequest($request));
+        $response = $this->sendRequest(fn (): ResponseInterface => $this->client->sendRequest($request));
 
         $contents = (string) $response->getBody();
 

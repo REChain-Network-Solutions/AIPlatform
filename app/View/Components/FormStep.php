@@ -14,6 +14,7 @@ class FormStep extends Component
     public function __construct(
         public string $step = '',
         public string $label = '',
+        public bool $autoIncrement = false,
     ) {
         //
     }

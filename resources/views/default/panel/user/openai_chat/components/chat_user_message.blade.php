@@ -17,7 +17,12 @@
         </div>
         <div
             class="chat-content-container group relative max-w-[calc(100%-64px)] rounded-[2em] bg-secondary text-secondary-foreground dark:bg-zinc-700 dark:text-primary-foreground">
-            <div class="chat-content px-5 py-3.5 max-md:break-all">
+            <div class="chat-content px-5 py-3.5 max-md:break-words">
+                @if (!empty($message->highlight_context) && \App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-chat-pro-highlight-to-ask'))
+                    <blockquote class="mb-3 line-clamp-3 w-full border-s border-foreground/10 ps-2 text-2xs italic">
+                        {{ $message->highlight_context }}
+                    </blockquote>
+                @endif
                 {{ $message->input }}
             </div>
             <div
@@ -78,7 +83,7 @@
                     href="{{ $image }}"
                 >
                     <img
-                        class="img-content rounded-3xl"
+                        class="img-content max-w-40 rounded-xl"
                         loading="lazy"
                         src={{ $image }}
                     />

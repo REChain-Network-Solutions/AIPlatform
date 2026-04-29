@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\Enums\Plan\FrequencyEnum;
 use App\Enums\Roles;
+use App\Extensions\AISocialMedia\System\Models\LinkedinTokens;
+use App\Extensions\AISocialMedia\System\Models\ScheduledPost;
+use App\Extensions\AISocialMedia\System\Models\TwitterSettings;
 use App\Helpers\Classes\Helper;
 use App\Models\Chatbot\Chatbot;
 use App\Models\Concerns\User\HasCredit;
@@ -310,8 +313,8 @@ class User extends Authenticatable
 
     public function twitterSettings()
     {
-        if (class_exists(\App\Extensions\AISocialMedia\System\Models\TwitterSettings::class)) {
-            return $this->hasMany(\App\Extensions\AISocialMedia\System\Models\TwitterSettings::class);
+        if (class_exists(TwitterSettings::class)) {
+            return $this->hasMany(TwitterSettings::class);
         }
 
         return null;
@@ -319,8 +322,8 @@ class User extends Authenticatable
 
     public function linkedinSettings()
     {
-        if (class_exists(\App\Extensions\AISocialMedia\System\Models\LinkedinTokens::class)) {
-            return $this->hasMany(\App\Extensions\AISocialMedia\System\Models\LinkedinTokens::class);
+        if (class_exists(LinkedinTokens::class)) {
+            return $this->hasMany(LinkedinTokens::class);
         }
 
         return null;
@@ -328,8 +331,8 @@ class User extends Authenticatable
 
     public function scheduledPosts()
     {
-        if (class_exists(\App\Extensions\AISocialMedia\System\Models\ScheduledPost::class)) {
-            return $this->hasMany(\App\Extensions\AISocialMedia\System\Models\ScheduledPost::class);
+        if (class_exists(ScheduledPost::class)) {
+            return $this->hasMany(ScheduledPost::class);
         }
 
         return null;

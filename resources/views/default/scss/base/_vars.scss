@@ -214,6 +214,10 @@
 		--scrollbar-thumb-hover: 0 0% 33%;
 	}
 
+	:root:has(body.hide-mobile-bottom-menu) {
+		--bottom-menu-height: 0px;
+	}
+
 	.theme-dark {
 		--primary: 280 60% 50%;
 		--primary-foreground: 0 0% 100%;

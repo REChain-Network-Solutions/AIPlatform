@@ -42,7 +42,7 @@
 
 <script src="{{ custom_theme_url('/assets/js/panel/openai_chat.js?v=' . time()) }}"></script>
 
-@if (count($list) == 0 && $category->slug != 'ai_pdf')
+@if (count($list) == 0 && $category?->slug != 'ai_pdf')
     @php
         $template = null;
         $currentUrl = url()->current();
@@ -63,7 +63,7 @@
     <script>
         window.addEventListener("load", (event) => {
             return startNewChat(
-                {{ $category->id }},
+                {{ $category?->id }},
                 '{{ LaravelLocalization::getCurrentLocale() }}',
                 '{{ $template }}'
             );

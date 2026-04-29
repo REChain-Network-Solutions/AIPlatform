@@ -9,6 +9,7 @@ use App\Models\RecentSearchKey;
 use App\Models\UserOpenai;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -37,10 +38,14 @@ class SearchController extends Controller
                 ->get();
 
             $workbook_search = UserOpenai::where('user_id', $userId)
-                ->where('title', 'like', "%$word%")
-                ->select('id', 'title', 'slug', 'user_id', 'openai_id')
+				->where(function ($query) use ($word) {
+					return $query->where('title', 'like', "%$word%")
+						->orWhere('input', 'like', "%$word%");
+				})
+                ->select('id', 'title', 'slug', 'user_id', 'openai_id', 'input')
                 ->with('generator:id,title,slug,color,image,type')
                 ->get();
+
 
             $ai_chat_search = OpenaiGeneratorChatCategory::whereNotIn('slug', ['ai_webchat', 'ai_vision', 'ai_pdf'])
                 ->where(function ($query) use ($word) {
@@ -63,7 +68,7 @@ class SearchController extends Controller
     /**
      * Optimized version - Single query with upsert
      */
-    public function addSearchKeyOptimized(string $keyword): \Illuminate\Support\Collection
+    public function addSearchKeyOptimized(string $keyword): Collection
     {
         $userId = auth()->id();
 

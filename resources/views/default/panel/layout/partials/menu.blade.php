@@ -33,7 +33,11 @@
 
 	{{-- Render item --}}
 	@if ($childrenCount)
-		@includeIf('default.components.navbar.partials.types.item-dropdown')
+		@if ($type === 'label')
+			@includeIf('default.components.navbar.partials.types.label-collapsible')
+		@else
+			@includeIf('default.components.navbar.partials.types.item-dropdown')
+		@endif
 	@else
 		@includeIf('default.components.navbar.partials.types.' . $type)
 	@endif

@@ -2,8 +2,12 @@
 
 use App\Enums\Plan\FrequencyEnum;
 use App\Enums\Plan\TypeEnum;
+use App\Extensions\DiscountManager\System\Models\ConditionalDiscount;
+use App\Extensions\DiscountManager\System\Services\DiscountService;
 use App\Helpers\Classes\Helper;
+use App\Helpers\Classes\MarketplaceHelper;
 use App\Http\Controllers\Finance\PaymentProcessController;
+use App\Models\ChatBotHistory;
 use App\Models\Coupon;
 use App\Models\Currency;
 use App\Models\Finance\YokassaSubscription;
@@ -11,9 +15,13 @@ use App\Models\Gateways;
 use App\Models\PaymentProof;
 use App\Models\Plan;
 use App\Models\PrivacyTerms;
+use App\Models\Setting;
+use App\Models\UserDocsFavorite;
+use App\Models\UserFavorite;
 use App\Models\UserOrder;
 use App\Services\Chatbot\ParserExcelService;
 use Datlechin\GoogleTranslate\Facades\GoogleTranslate;
+use Illuminate\Database\SQLiteConnection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -22,6 +30,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Smalot\PdfParser\Parser;
 
 function formatSmallNumber($value, $decimals = 10)
 {
@@ -135,8 +144,8 @@ function checkCouponInRequest($code = null)
 
     if (! $coupon) {
         $discountCoupon = null;
-        if (\App\Helpers\Classes\MarketplaceHelper::isRegistered('discount-manager')) {
-            $discountCoupon = \App\Extensions\DiscountManager\System\Services\DiscountService::applyDiscountCoupon();
+        if (MarketplaceHelper::isRegistered('discount-manager')) {
+            $discountCoupon = DiscountService::applyDiscountCoupon();
         }
 
         if (! is_null($discountCoupon)) {
@@ -170,7 +179,7 @@ function displayCurr($symbol, $price, $taxValue = 0, $discountedprice = null, $t
         }
 
         return $symbol . $newPrice;
-    } catch (\Exception $th) {
+    } catch (Exception $th) {
         $discountedprice = (float) str_replace(',', '', $discountedprice);
         $price = (float) str_replace(',', '', $price);
         if (in_array($symbol, config('currency.currencies_with_right_symbols'))) {
@@ -250,7 +259,7 @@ if (! function_exists('custom_theme_url')) {
 if (! function_exists('get_theme')) {
     function get_theme()
     {
-        $theme = \Theme::get();
+        $theme = Theme::get();
         if (! $theme) {
             $theme = 'default';
         }
@@ -393,9 +402,9 @@ function percentageChangeSign($old, $new, int $precision = 2)
 
 function currency()
 {
-    $setting = \App\Models\Setting::getCache();
+    $setting = Setting::getCache();
 
-    $currency = \App\Models\Currency::cacheFromSetting($setting->default_currency);
+    $currency = Currency::cacheFromSetting($setting->default_currency);
 
     if (in_array($currency->code, config('currency.needs_code_with_symbol'), true)) {
         $currency->symbol = $currency->code . ' ' . $currency->symbol;
@@ -454,7 +463,7 @@ function getSubscriptionDaysLeft()
 // Templates favorited
 function isFavorited($template_id)
 {
-    $isFav = \App\Models\UserFavorite::where('user_id', Auth::id())->where('openai_id', $template_id)->exists();
+    $isFav = UserFavorite::where('user_id', Auth::id())->where('openai_id', $template_id)->exists();
 
     return $isFav;
 }
@@ -462,7 +471,7 @@ function isFavorited($template_id)
 // Docs favorited
 function isFavoritedDoc($template_id)
 {
-    $isFav = \App\Models\UserDocsFavorite::where('user_id', Auth::id())->where('user_openai_id', $template_id)->exists();
+    $isFav = UserDocsFavorite::where('user_id', Auth::id())->where('user_openai_id', $template_id)->exists();
 
     return $isFav;
 }
@@ -1050,8 +1059,8 @@ function newPlanDiscountPrice(?Plan $plan)
 
     $price = $plan->price;
 
-    if (\App\Helpers\Classes\MarketplaceHelper::isRegistered('discount-manager')) {
-        $activeDiscounts = \App\Extensions\DiscountManager\System\Models\ConditionalDiscount::where('active', true)
+    if (MarketplaceHelper::isRegistered('discount-manager')) {
+        $activeDiscounts = ConditionalDiscount::where('active', true)
             ->where('scheduled', false)
             ->whereNotNull('coupon_id')
             ->orderBy('amount', 'desc')
@@ -1064,7 +1073,7 @@ function newPlanDiscountPrice(?Plan $plan)
             '-active-gateway-codes'
         );
         foreach ($activeDiscounts as $discount) {
-            if (\App\Extensions\DiscountManager\System\Services\DiscountService::checkDiscountConditionsFor($discount, $planId, $codes)) {
+            if (DiscountService::checkDiscountConditionsFor($discount, $planId, $codes)) {
                 $discounted = $price - ($price * ($discount->amount / 100));
 
                 return $cache[$planId] = $discounted;
@@ -1200,7 +1209,7 @@ function isChatBot($id)
         return false;
     }
 
-    $isChatBot = App\Models\ChatBotHistory::where('user_openai_chat_id', $id)->first();
+    $isChatBot = ChatBotHistory::where('user_openai_chat_id', $id)->first();
 
     if ($isChatBot) {
         return true;
@@ -1515,8 +1524,8 @@ function PurgeThumbImages(): void
     $dst_dir = public_path('uploads/thumbnail/');
 
     try {
-        \Illuminate\Support\Facades\File::deleteDirectory($dst_dir);
-    } catch (\Exception $e) {
+        File::deleteDirectory($dst_dir);
+    } catch (Exception $e) {
         Log::error($e->getMessage());
     }
 }
@@ -1772,7 +1781,7 @@ function generateRandomWords($wordCount): string
 {
     $words = [];
     for ($i = 0; $i < $wordCount; $i++) {
-        $words[] = \Illuminate\Support\Str::random(random_int(2, 5));
+        $words[] = Str::random(random_int(2, 5));
     }
 
     return implode(' ', $words);
@@ -1781,7 +1790,7 @@ function generateRandomWords($wordCount): string
 if (! function_exists('isDBDriverSQLite')) {
     function isDBDriverSQLite(): bool
     {
-        return DB::connection() instanceof \Illuminate\Database\SQLiteConnection;
+        return DB::connection() instanceof SQLiteConnection;
     }
 }
 
@@ -1986,7 +1995,7 @@ if (! function_exists('isFileSecure')) {
 
             switch ($extension) {
                 case 'pdf':
-                    $parser = new \Smalot\PdfParser\Parser;
+                    $parser = new Parser;
                     $text = $parser->parseFile($tempPath)->getText();
 
                     return mb_check_encoding($text, 'UTF-8') ? $text : mb_convert_encoding($text, 'UTF-8', mb_detect_encoding($text));

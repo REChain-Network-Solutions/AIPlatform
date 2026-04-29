@@ -7,6 +7,7 @@ export default {
 		'./resources/views/**/*.js',
 		'./app/Helpers/helpers.php',
 		'./app/Extensions/**/*.blade.php',
+		'./public/themes/default/assets/js/panel/openai_chat.js',
 	],
 	darkMode: [ 'class', '.theme-dark' ],
 	theme: {
@@ -250,9 +251,15 @@ export default {
 				'navbar-link-pe': 'var(--navbar-link-pe)',
 				'navbar-link-pb': 'var(--navbar-link-pb)',
 				'navbar-link-ps': 'var(--navbar-link-ps)',
+				'4.5': '1.125rem', // 18px
+				'5.5': '1.375rem', // 22px
+				'7.5': '1.875rem', // 30px
 			},
 			size: {
 				'navbar-icon': 'var(--navbar-icon-size)',
+				'4.5': '1.125rem', // 18px
+				'5.5': '1.375rem', // 22px
+				'7.5': '1.875rem', // 30px
 			},
 			zIndex: {
 				1: 1,

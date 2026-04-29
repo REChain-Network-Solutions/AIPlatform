@@ -10,6 +10,7 @@ use App\Models\UserOpenai;
 use Carbon\Carbon;
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use RuntimeException;
@@ -216,7 +217,7 @@ class IntegrationController extends Controller
             }
 
             throw new RuntimeException('Error while creating post: ' . json_encode($response));
-        } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+        } catch (GuzzleException $e) {
             return back()->with([
                 'type'    => 'error',
                 'message' => 'Guzzle error: ' . $e->getMessage(),

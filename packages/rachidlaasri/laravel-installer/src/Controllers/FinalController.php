@@ -2,7 +2,9 @@
 
 namespace RachidLaasri\LaravelInstaller\Controllers;
 
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Routing\Controller;
+use Illuminate\View\View;
 use RachidLaasri\LaravelInstaller\Events\LaravelInstallerFinished;
 use RachidLaasri\LaravelInstaller\Helpers\EnvironmentManager;
 use RachidLaasri\LaravelInstaller\Helpers\FinalInstallManager;
@@ -13,7 +15,7 @@ class FinalController extends Controller
     /**
      * Update installed file and display finished view.
      *
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return Factory|View
      */
     public function finish(
         InstalledFileManager $fileManager,

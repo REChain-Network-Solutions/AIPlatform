@@ -8,15 +8,15 @@ use App\Domains\Entity\Facades\Entity;
 use App\Extensions\Chatbot\System\Models\Chatbot;
 use App\Extensions\Chatbot\System\Models\ChatbotConversation;
 use App\Extensions\Chatbot\System\Models\ChatbotHistory;
+use App\Helpers\Classes\MarketplaceHelper;
 use App\Models\Plan;
 use App\Models\Subscriptions;
 use App\Models\User;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 uses()->beforeEach(function () {
-    if (! \App\Helpers\Classes\MarketplaceHelper::isRegistered('chatbot-voice-call')) {
+    if (! MarketplaceHelper::isRegistered('chatbot-voice-call')) {
         $this->markTestSkipped('ChatbotVoiceCall extension is not registered.');
     }
 });
@@ -136,8 +136,15 @@ test('start returns remaining_seconds in demo mode', function () {
 test('start returns 429 in demo mode when limit exceeded', function () {
     config()->set('app.status', 'Demo');
 
-    // Pre-fill demo usage for all possible IPs
-    Cache::put('demo_ai_usage_seconds_127.0.0.1', 31, now()->endOfDay());
+    // Record enough voice call duration to exceed demo limit (default 30s)
+    ChatbotHistory::query()->create([
+        'chatbot_id'          => $this->chatbot->id,
+        'conversation_id'     => $this->conversation->id,
+        'role'                => 'voice-call-ended',
+        'message'             => 'Voice call ended',
+        'voice_call_duration' => 31,
+        'created_at'          => now(),
+    ]);
 
     $response = $this->postJson("{$this->baseUrl}/start");
 

@@ -1,6 +1,41 @@
 <?php
 
+use App\Domains\Engine\EngineServiceProvider;
+use App\Domains\Entity\EntityServiceProvider;
+use App\Domains\Marketplace\MarketplaceServiceProvider;
+use App\Providers\AppServiceProvider;
+use App\Providers\AwsServiceProvider;
+use App\Providers\EventServiceProvider;
+use App\Providers\MacrosServiceProvider;
+use App\Providers\RouteServiceProvider;
+use Barryvdh\DomPDF\ServiceProvider;
+use Elseyyid\LaravelJsonLocationsManager\Providers\LaravelJsonLocationsManagerServiceProvider;
+use Igaster\LaravelTheme\Facades\Theme;
+use Igaster\LaravelTheme\themeServiceProvider;
+use Illuminate\Auth\AuthServiceProvider;
+use Illuminate\Auth\Passwords\PasswordResetServiceProvider;
+use Illuminate\Broadcasting\BroadcastServiceProvider;
+use Illuminate\Bus\BusServiceProvider;
+use Illuminate\Cache\CacheServiceProvider;
+use Illuminate\Cookie\CookieServiceProvider;
+use Illuminate\Database\DatabaseServiceProvider;
+use Illuminate\Encryption\EncryptionServiceProvider;
+use Illuminate\Filesystem\FilesystemServiceProvider;
+use Illuminate\Foundation\Providers\ConsoleSupportServiceProvider;
+use Illuminate\Foundation\Providers\FoundationServiceProvider;
+use Illuminate\Hashing\HashServiceProvider;
+use Illuminate\Mail\MailServiceProvider;
+use Illuminate\Notifications\NotificationServiceProvider;
+use Illuminate\Pagination\PaginationServiceProvider;
+use Illuminate\Pipeline\PipelineServiceProvider;
+use Illuminate\Queue\QueueServiceProvider;
+use Illuminate\Redis\RedisServiceProvider;
+use Illuminate\Session\SessionServiceProvider;
 use Illuminate\Support\Facades\Facade;
+use Illuminate\Translation\TranslationServiceProvider;
+use Illuminate\Validation\ValidationServiceProvider;
+use Illuminate\View\ViewServiceProvider;
+use Spatie\Permission\PermissionServiceProvider;
 
 return [
     /*
@@ -170,29 +205,29 @@ return [
         /*
          * Laravel Framework Service Providers...
          */
-        Illuminate\Auth\AuthServiceProvider::class,
-        Illuminate\Broadcasting\BroadcastServiceProvider::class,
-        Illuminate\Bus\BusServiceProvider::class,
-        Illuminate\Cache\CacheServiceProvider::class,
-        Illuminate\Foundation\Providers\ConsoleSupportServiceProvider::class,
-        Illuminate\Cookie\CookieServiceProvider::class,
-        Illuminate\Database\DatabaseServiceProvider::class,
-        Illuminate\Encryption\EncryptionServiceProvider::class,
-        Illuminate\Filesystem\FilesystemServiceProvider::class,
-        Illuminate\Foundation\Providers\FoundationServiceProvider::class,
-        Illuminate\Hashing\HashServiceProvider::class,
-        Illuminate\Mail\MailServiceProvider::class,
-        Illuminate\Notifications\NotificationServiceProvider::class,
-        Illuminate\Pagination\PaginationServiceProvider::class,
-        Illuminate\Pipeline\PipelineServiceProvider::class,
-        Illuminate\Queue\QueueServiceProvider::class,
-        Illuminate\Redis\RedisServiceProvider::class,
-        Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
-        Illuminate\Session\SessionServiceProvider::class,
-        Illuminate\Translation\TranslationServiceProvider::class,
-        Illuminate\Validation\ValidationServiceProvider::class,
-        Illuminate\View\ViewServiceProvider::class,
-        Spatie\Permission\PermissionServiceProvider::class,
+        AuthServiceProvider::class,
+        BroadcastServiceProvider::class,
+        BusServiceProvider::class,
+        CacheServiceProvider::class,
+        ConsoleSupportServiceProvider::class,
+        CookieServiceProvider::class,
+        DatabaseServiceProvider::class,
+        EncryptionServiceProvider::class,
+        FilesystemServiceProvider::class,
+        FoundationServiceProvider::class,
+        HashServiceProvider::class,
+        MailServiceProvider::class,
+        NotificationServiceProvider::class,
+        PaginationServiceProvider::class,
+        PipelineServiceProvider::class,
+        QueueServiceProvider::class,
+        RedisServiceProvider::class,
+        PasswordResetServiceProvider::class,
+        SessionServiceProvider::class,
+        TranslationServiceProvider::class,
+        ValidationServiceProvider::class,
+        ViewServiceProvider::class,
+        PermissionServiceProvider::class,
         /*
          * Package Service Providers...
          */
@@ -200,24 +235,24 @@ return [
         /*
          * Application Service Providers...
          */
-        App\Providers\AppServiceProvider::class,
+        AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         App\Providers\BroadcastServiceProvider::class,
-        App\Providers\EventServiceProvider::class,
-        App\Providers\RouteServiceProvider::class,
+        EventServiceProvider::class,
+        RouteServiceProvider::class,
         App\Providers\ViewServiceProvider::class,
-        App\Providers\MacrosServiceProvider::class,
-        App\Providers\AwsServiceProvider::class,
-        App\Domains\Entity\EntityServiceProvider::class,
-        App\Domains\Engine\EngineServiceProvider::class,
+        MacrosServiceProvider::class,
+        AwsServiceProvider::class,
+        EntityServiceProvider::class,
+        EngineServiceProvider::class,
 
         /**
          * Laravel Json Localization Manager
          */
-        App\Domains\Marketplace\MarketplaceServiceProvider::class,
-        Elseyyid\LaravelJsonLocationsManager\Providers\LaravelJsonLocationsManagerServiceProvider::class,
-        Barryvdh\DomPDF\ServiceProvider::class,
-        Igaster\LaravelTheme\themeServiceProvider::class,
+        MarketplaceServiceProvider::class,
+        LaravelJsonLocationsManagerServiceProvider::class,
+        ServiceProvider::class,
+        themeServiceProvider::class,
     ],
 
     /*
@@ -234,7 +269,7 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'PDF'   => Barryvdh\DomPDF\Facade::class,
-        'Theme' => Igaster\LaravelTheme\Facades\Theme::class,
+        'Theme' => Theme::class,
     ])->toArray(),
 
 ];

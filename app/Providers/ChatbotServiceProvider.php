@@ -8,8 +8,12 @@ use App\Http\Controllers\AIChatController;
 use App\Http\Controllers\Chatbot\ChatbotAssetsController;
 use App\Http\Controllers\Chatbot\ChatbotEmbedController;
 use App\Http\Controllers\Chatbot\ChatbotTokenController;
+use App\Http\Middleware\ChatbotPreflightMiddleware;
+use App\Http\Middleware\CorsMiddleware;
 use App\Support\Vite;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -39,10 +43,10 @@ class ChatbotServiceProvider extends ServiceProvider
     {
         $this->router()
             ->middlewareGroup('chatbot_api', [
-                \App\Http\Middleware\ChatbotPreflightMiddleware::class,
-                \App\Http\Middleware\CorsMiddleware::class,
-                \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
-                \Illuminate\Routing\Middleware\SubstituteBindings::class,
+                ChatbotPreflightMiddleware::class,
+                CorsMiddleware::class,
+                ThrottleRequests::class . ':api',
+                SubstituteBindings::class,
             ]);
     }
 

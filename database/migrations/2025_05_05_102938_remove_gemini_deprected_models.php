@@ -30,7 +30,7 @@ return new class extends Migration
                     'gemini_default_model' => $newDefault,
                 ])->save();
             }
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
         }
     }
 

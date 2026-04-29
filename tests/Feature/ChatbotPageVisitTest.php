@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Extensions\Chatbot\System\Http\Resources\Admin\ChatbotConversationResource;
 use App\Extensions\Chatbot\System\Models\Chatbot;
 use App\Extensions\Chatbot\System\Models\ChatbotConversation;
 use App\Extensions\Chatbot\System\Models\ChatbotPageVisit;
@@ -132,7 +133,7 @@ test('visited pages appear in conversation resource', function () {
         'left_at'    => now(),
     ]);
 
-    $resource = new \App\Extensions\Chatbot\System\Http\Resources\Admin\ChatbotConversationResource($conversation->load('chatbot'));
+    $resource = new ChatbotConversationResource($conversation->load('chatbot'));
     $data = $resource->toArray(request());
 
     expect($data['visited_pages'])->toHaveCount(2)

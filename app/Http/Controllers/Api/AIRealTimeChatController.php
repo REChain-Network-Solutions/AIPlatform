@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Domains\Entity\Facades\Entity;
 use App\Helpers\Classes\ApiHelper;
 use App\Helpers\Classes\Helper;
+use App\Helpers\Classes\OpenAiParamHelper;
 use App\Http\Controllers\Controller;
 use App\Models\OpenAIGenerator;
 use App\Models\OpenaiGeneratorChatCategory;
@@ -15,6 +16,7 @@ use App\Models\User;
 use App\Models\UserOpenai;
 use App\Models\UserOpenaiChat;
 use App\Models\UserOpenaiChatMessage;
+use App\Services\Ai\AiCompletionService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -85,7 +87,7 @@ class AIRealTimeChatController extends Controller
         $category = OpenaiGeneratorChatCategory::whereSlug($cat_slug)->firstOrFail();
 
         $conversations = UserOpenaiChat::where('user_id', $request->user()->id)
-            ->where('openai_chat_category_id', $category->id)
+            ->where('openai_chat_category_id', $category?->id)
             ->orderBy('updated_at', 'desc')
             ->get();
 
@@ -229,7 +231,7 @@ class AIRealTimeChatController extends Controller
         $category = OpenaiGeneratorChatCategory::where('id', $request->category_id)->firstOrFail();
         $chat = new UserOpenaiChat;
         $chat->user_id = Auth::id();
-        $chat->openai_chat_category_id = $category->id;
+        $chat->openai_chat_category_id = $category?->id;
         $chat->title = $category->name . ' Chat';
         $chat->total_credits = 0;
         $chat->total_words = 0;
@@ -596,12 +598,12 @@ class AIRealTimeChatController extends Controller
 
             return response()->stream(function () use ($conver_id, $message_id, $history, $driver) {
                 try {
-                    $stream = OpenAI::chat()->createStreamed([
+                    $stream = OpenAI::chat()->createStreamed(OpenAiParamHelper::sanitizeChatParams([
                         'model'             => $driver->enum()->value,
                         'messages'          => $history,
                         'presence_penalty'  => 0.6,
                         'frequency_penalty' => 0,
-                    ]);
+                    ]));
                 } catch (Exception $exception) {
                     Log::info($exception);
                     $messageError = 'Error from API call. Please try again. If error persists again please contact system administrator with this message ' . $exception->getMessage();
@@ -1052,7 +1054,7 @@ class AIRealTimeChatController extends Controller
                 . 'User Input: ' . $message->input . "\n\n\n\n\n"
                 . 'Assistant Response: ' . $message->response;
 
-            $newTitle = app(\App\Services\Ai\AiCompletionService::class)->complete(
+            $newTitle = app(AiCompletionService::class)->complete(
                 'You are a chatbot. Generate a title for a chat based on provided conversation. You must return a title only.',
                 $userContent
             );
@@ -1192,7 +1194,7 @@ class AIRealTimeChatController extends Controller
 
                 $chat = new UserOpenaiChat;
                 $chat->user_id = $request->user()->id;
-                $chat->openai_chat_category_id = $category->id;
+                $chat->openai_chat_category_id = $category?->id;
                 $chat->title = 'Flutter Voice Chat - ' . now()->format('M j, Y H:i');
                 $chat->total_credits = 0;
                 $chat->total_words = 0;

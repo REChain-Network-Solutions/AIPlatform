@@ -26,7 +26,7 @@ class FinalInstallManager
     /**
      * Generate New Application Key.
      *
-     * @return \Symfony\Component\Console\Output\BufferedOutput|array
+     * @return BufferedOutput|array
      */
     private static function generateKey(BufferedOutput $outputLog)
     {
@@ -44,7 +44,7 @@ class FinalInstallManager
     /**
      * Publish vendor assets.
      *
-     * @return \Symfony\Component\Console\Output\BufferedOutput|array
+     * @return BufferedOutput|array
      */
     private static function publishVendorAssets(BufferedOutput $outputLog)
     {

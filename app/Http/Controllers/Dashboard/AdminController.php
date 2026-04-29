@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Actions\CreateActivity;
 use App\Actions\EmailConfirmation;
+use App\Domains\Entity\Models\Entity;
 use App\Domains\Marketplace\Repositories\Contracts\ExtensionRepositoryInterface;
 use App\Enums\AccessType;
 use App\Enums\Roles;
@@ -53,6 +54,7 @@ use App\Services\Dashboard\DashboardService;
 use App\Services\UsersExportService;
 use Carbon\Carbon;
 use Exception;
+use Fahlisaputra\Minify\Middleware\MinifyHtml;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -73,7 +75,7 @@ class AdminController extends Controller
         public DashboardService $service,
         public ExtensionRepositoryInterface $extensionRepository
     ) {
-        $this->middleware(\Fahlisaputra\Minify\Middleware\MinifyHtml::class);
+        $this->middleware(MinifyHtml::class);
     }
 
     /**
@@ -902,7 +904,7 @@ class AdminController extends Controller
 
         $openAiList = OpenAIGenerator::query()->get();
 
-        $models = \App\Domains\Entity\Models\Entity::query()
+        $models = Entity::query()
             ->where('is_selected', 1)
             ->whereHas('tokens', function ($query) {
                 $query->where('type', 'word');
@@ -966,7 +968,7 @@ class AdminController extends Controller
 
         $openAiList = OpenAIGenerator::query()->get();
 
-        $models = \App\Domains\Entity\Models\Entity::query()
+        $models = Entity::query()
             ->where('is_selected', 1)
             ->whereHas('tokens', function ($query) {
                 $query->where('type', 'word');
@@ -1716,7 +1718,7 @@ class AdminController extends Controller
             $settings->save();
 
             if (setting('front_theme') === 'social-media-front') {
-                $find = \App\Models\Frontend\FrontendSetting::query()->first();
+                $find = FrontendSetting::query()->first();
                 if ($find) {
                     $find->join_the_ranks = $request->join_the_ranks;
                     $find->save();

@@ -22,7 +22,7 @@ class ExtensionServiceProvider extends ServiceProvider
     private function extensionProviders(): array
     {
         return [
-            \App\Providers\ChatbotServiceProvider::class,
+            ChatbotServiceProvider::class,
         ];
     }
 }

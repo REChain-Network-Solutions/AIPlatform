@@ -6,6 +6,7 @@ use App\Domains\Engine\Enums\EngineEnum;
 use App\Domains\Entity\Enums\EntityEnum;
 use App\Domains\Entity\Models\Entity;
 use App\Enums\AccessType;
+use App\Extensions\Chatbot\System\Helpers\ChatbotHelper;
 use App\Helpers\Classes\Helper;
 use App\Http\Controllers\Finance\PaymentProcessController;
 use App\Livewire\Concerns\WithSteps;
@@ -76,6 +77,7 @@ class SubscriptionPlanCreate extends Component
             'plan.hidden'                                  => 'boolean',
             'plan.max_subscribe'                           => 'integer|min:-1|nullable',
             'plan.multi_model_support'                     => 'nullable',
+            'plan.model_council_support'                   => 'nullable',
             'plan.reset_credits_on_renewal'                => 'boolean',
             'plan.last_date'                               => 'date|nullable',
             'plan.hidden_url'                              => 'nullable',
@@ -84,6 +86,7 @@ class SubscriptionPlanCreate extends Component
             'plan.blogpilot_limits.agents'                 => 'nullable|integer|min:-1',
             'plan.blogpilot_limits.monthly_posts'          => 'nullable|integer|min:-1',
             'plan.voice_call_seconds_limit'                => 'nullable|integer|min:-1',
+            'plan.deep_research_request_limit'             => 'nullable|integer|min:-1',
         ],
             // Step 2
             $this->rulesOfPlanAiTools(),
@@ -282,11 +285,11 @@ class SubscriptionPlanCreate extends Component
 
     private function hydrateChatbotChannels(): void
     {
-        if (! class_exists(\App\Extensions\Chatbot\System\Helpers\ChatbotHelper::class)) {
+        if (! class_exists(ChatbotHelper::class)) {
             return;
         }
 
-        $availableChannels = \App\Extensions\Chatbot\System\Helpers\ChatbotHelper::installedChannelKeys();
+        $availableChannels = ChatbotHelper::installedChannelKeys();
 
         if ($availableChannels === []) {
             return;

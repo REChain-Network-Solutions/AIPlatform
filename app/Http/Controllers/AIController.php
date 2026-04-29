@@ -20,7 +20,9 @@ use App\Models\SettingTwo;
 use App\Models\Usage;
 use App\Models\User;
 use App\Models\UserOpenai;
+use App\Services\Ai\AiCompletionService;
 use App\Services\Ai\OpenAI\Image\CreateImageEditService;
+use App\Services\Ai\OpenAI\Image\CreateImageService;
 use App\Services\Bedrock\BedrockRuntimeService;
 use App\Services\Youtube\YoutubeTranscriptService;
 use Exception;
@@ -42,6 +44,7 @@ use JsonException;
 use OpenAI;
 use OpenAI\Laravel\Facades\OpenAI as FacadesOpenAI;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class AIController extends Controller
@@ -452,7 +455,7 @@ class AIController extends Controller
                 'url' => 'required|url',
             ]);
 
-            $data = (new youtubeTranscriptService)
+            $data = (new YoutubeTranscriptService)
                 ->getTranscript($videoUrl);
             $transcripts = json_decode($data->content(), true);
 
@@ -546,7 +549,7 @@ class AIController extends Controller
     /**
      * @throws Exception
      */
-    public function streamedTextOutput(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function streamedTextOutput(Request $request): StreamedResponse
     {
         $message_id = $request->input('message_id', null);
         $prompt = $request->input('prompt', null);
@@ -791,7 +794,7 @@ class AIController extends Controller
         $driver = Entity::driver();
         $driver->redirectIfNoCreditBalance();
 
-        $output = app(\App\Services\Ai\AiCompletionService::class)->completeUserOnly($prompt);
+        $output = app(AiCompletionService::class)->completeUserOnly($prompt);
 
         $entry = new UserOpenai([
             'team_id'     => $user->team_id,
@@ -838,7 +841,7 @@ class AIController extends Controller
         $history = $request->input('chatHistory');
         $client = OpenAI::factory()
             ->withApiKey($apiKey)
-            ->withHttpClient(new \GuzzleHttp\Client)
+            ->withHttpClient(new Client)
             ->make();
         $completion = $client->chat()->create([
             'model'    => $driver->enum()->value,
@@ -1113,7 +1116,7 @@ class AIController extends Controller
     }
 
     /**
-     * @throws guzzleException
+     * @throws GuzzleException
      *                         this function only for check progress, no need to decrease the credit
      */
     public function checkVideoProgress(Request $request): JsonResponse
@@ -1252,7 +1255,7 @@ class AIController extends Controller
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      * @throws Throwable
      * @throws JsonException
      */
@@ -1447,7 +1450,7 @@ class AIController extends Controller
             return response()->json(['result' => '']);
         }
 
-        $aiService = app(\App\Services\Ai\AiCompletionService::class);
+        $aiService = app(AiCompletionService::class);
 
         $languageCode = $aiService->complete(
             'You are a helpful language detection assistant. Must detect the content language and return it only ' . app()->getLocale() . ' language code. For example: "en_US"',
@@ -1496,7 +1499,7 @@ class AIController extends Controller
     {
         $vidURL = $request->video_url;
 
-        return (new youtubeTranscriptService)->getTranscript($vidURL);
+        return (new YoutubeTranscriptService)->getTranscript($vidURL);
     }
 
     private function getOpenAiApiKey(?User $user): string
@@ -1573,12 +1576,54 @@ class AIController extends Controller
             'quality'     => 'standard',
         ];
 
-        $imageDetails = $this->processOpenAIImage($model, $param);
+        $imageDetails = $this->isGptImageModel($model)
+            ? $this->processGptImageForChat($model, $param)
+            : $this->processOpenAIImage($model, $param);
         Usage::getSingle()->updateImageCounts($driver->calculate());
         $driver->decreaseCredit();
         $savePath = $this->saveImageOutputToStorage($imageDetails);
 
         return '![Image](/' . $savePath . ')';
+    }
+
+    /**
+     * Check if the model is a GPT Image model (gpt-image-1 or gpt-image-1.5).
+     */
+    private function isGptImageModel(?EntityEnum $model): bool
+    {
+        return $model === EntityEnum::GPT_IMAGE_1 || $model === EntityEnum::GPT_IMAGE_1_5;
+    }
+
+    /**
+     * Process GPT Image model generation for chat context.
+     *
+     * Uses CreateImageService directly instead of processOpenAIGptImage1,
+     * which reads from request() and is designed for the image generation page.
+     */
+    private function processGptImageForChat(?EntityEnum $model, array $param): array
+    {
+        $prompt = $param['description'];
+
+        if (is_null($prompt)) {
+            throw new RuntimeException(__('You must provide a prompt'));
+        }
+
+        $imageContent = app(CreateImageService::class)
+            ->setModel($model?->value)
+            ->setPrompt($prompt)
+            ->generateForAi();
+
+        if ($imageContent !== null) {
+            $nameOfImage = Str::random(12) . '-GPT-IMG-' . Str::slug(explode(' ', mb_substr($prompt, 0, 15))[0]) . '.png';
+
+            return [
+                'prompt'       => $prompt,
+                'imageContent' => base64_decode($imageContent),
+                'nameOfImage'  => $nameOfImage,
+            ];
+        }
+
+        throw new RuntimeException(__('Image generation failed'));
     }
 
     /**
@@ -1609,7 +1654,7 @@ class AIController extends Controller
                 ->setPrompt($prompt)
                 ->generateForAi();
         } else {
-            $imageContent = app(\App\Services\Ai\OpenAI\Image\CreateImageService::class)
+            $imageContent = app(CreateImageService::class)
                 ->setModel($model?->value)
                 ->setPrompt($prompt)
                 ->generateForAi();

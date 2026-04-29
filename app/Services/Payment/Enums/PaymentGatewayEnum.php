@@ -5,6 +5,8 @@ namespace App\Services\Payment\Enums;
 use App\Enums\Contracts\WithStringBackedEnum;
 use App\Enums\Traits\EnumTo;
 use App\Enums\Traits\StringBackedEnumTrait;
+use App\Extensions\Cryptomus\System\Services\CryptomusService;
+use App\Services\PaymentGateways\MidtransService;
 
 enum PaymentGatewayEnum: string implements WithStringBackedEnum
 {
@@ -57,8 +59,8 @@ enum PaymentGatewayEnum: string implements WithStringBackedEnum
             // self::Paypal, // Example: Disable PayPal
 
             // add the extension check here to extract gatway if extension not installed
-            ! class_exists(\App\Services\PaymentGateways\MidtransService::class) ? self::Midtrans : null,
-            ! class_exists(\App\Extensions\Cryptomus\System\Services\CryptomusService::class) ? self::CryptoMus : null,
+            ! class_exists(MidtransService::class) ? self::Midtrans : null,
+            ! class_exists(CryptomusService::class) ? self::CryptoMus : null,
         ];
 
         return array_values(array_map(
@@ -175,11 +177,11 @@ enum PaymentGatewayEnum: string implements WithStringBackedEnum
                 'currency' => 0,
             ]),
             // extensions to be added below
-            self::Midtrans => class_exists(\App\Services\PaymentGateways\MidtransService::class)
-                ? array_merge($base, \App\Services\PaymentGateways\MidtransService::gatewayDefinitionArray())
+            self::Midtrans => class_exists(MidtransService::class)
+                ? array_merge($base, MidtransService::gatewayDefinitionArray())
                 : null,
-            self::CryptoMus => class_exists(\App\Extensions\Cryptomus\System\Services\CryptomusService::class)
-                ? array_merge($base, \App\Extensions\Cryptomus\System\Services\CryptomusService::gatewayDefinitionArray())
+            self::CryptoMus => class_exists(CryptomusService::class)
+                ? array_merge($base, CryptomusService::gatewayDefinitionArray())
                 : null,
         };
     }

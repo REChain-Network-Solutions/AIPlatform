@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Frontend\FrontendSetting;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -28,7 +29,7 @@ return new class extends Migration
         });
 
         if (Schema::hasColumn('frontend_footer_settings', 'join_the_ranks')) {
-            $find = \App\Models\Frontend\FrontendSetting::query()->first();
+            $find = FrontendSetting::query()->first();
             if ($find) {
                 $find->join_the_ranks = 'Join the ranks of renowned
                     <svg

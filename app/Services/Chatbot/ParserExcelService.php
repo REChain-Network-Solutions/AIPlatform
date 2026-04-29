@@ -4,6 +4,7 @@ namespace App\Services\Chatbot;
 
 use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ParserExcelService
 {
@@ -13,7 +14,7 @@ class ParserExcelService
 
     public function parse(): string
     {
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load(
+        $spreadsheet = IOFactory::load(
             $this->path
         );
 

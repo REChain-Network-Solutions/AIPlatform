@@ -28,7 +28,7 @@ return new class extends Migration
             foreach ($modelsToBeRemoved as $model) {
                 EntityRemover::removeEntity($model);
             }
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
         }
     }
 

@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use OpenAI\Laravel\Facades\OpenAI;
+use Smalot\PdfParser\Parser;
 
 class ChatPdfController extends Controller
 {
@@ -60,7 +61,7 @@ class ChatPdfController extends Controller
         PdfData::where('chat_id', $chat_id)->delete();
 
         // $text = Pdf::getText('uploads/temp.pdf');
-        $parser = new \Smalot\PdfParser\Parser;
+        $parser = new Parser;
         $text = $parser->parseFile('uploads/temp.pdf')->getText();
 
         $page = $text;

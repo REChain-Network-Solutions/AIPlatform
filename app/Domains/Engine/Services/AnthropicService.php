@@ -21,6 +21,8 @@ class AnthropicService
 
     public ?string $system = null;
 
+    public array $tools = [];
+
     public const ENDPOINT = 'https://api.anthropic.com/v1/messages';
 
     public function stream(): PromiseInterface|Response
@@ -28,6 +30,8 @@ class AnthropicService
         $client = $this->client();
 
         $system = (bool) $this->system;
+
+        $hasTools = ! empty($this->tools);
 
         $body = Helper::arrayMerge($system, [
             'model'      => setting('anthropic_default_model'),
@@ -37,6 +41,10 @@ class AnthropicService
         ], [
             'system' => $this->system,
         ]);
+
+        if ($hasTools) {
+            $body['tools'] = $this->tools;
+        }
 
         return $client->post(self::ENDPOINT, $body);
     }
@@ -90,6 +98,13 @@ class AnthropicService
     public function setSystem(?string $system): self
     {
         $this->system = $system;
+
+        return $this;
+    }
+
+    public function setTools(array $tools): self
+    {
+        $this->tools = $tools;
 
         return $this;
     }

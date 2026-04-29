@@ -5,6 +5,7 @@ namespace MagicAI\Healthy;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use MagicAI\Healthy\Commands\HealthyCommand;
+use MagicAI\Healthy\Http\Controllers\HealthyController;
 use MagicAI\Healthy\Http\Middleware\HealthyMiddleware;
 use MagicAI\Updater\View\Components\Button;
 use MagicAI\Updater\View\Components\Li;
@@ -38,9 +39,9 @@ class HealthyServiceProvider extends PackageServiceProvider
             ->as('healthy.')
             ->middleware(['api'])
             ->group(function (Router $router) {
-                $router->get('check/selected', [\MagicAI\Healthy\Http\Controllers\HealthyController::class, 'checkSelected'])
+                $router->get('check/selected', [HealthyController::class, 'checkSelected'])
                     ->name('check.selected');
-                $router->get('check/all', [\MagicAI\Healthy\Http\Controllers\HealthyController::class, 'checkAll'])
+                $router->get('check/all', [HealthyController::class, 'checkAll'])
                     ->name('check.all');
             });
     }

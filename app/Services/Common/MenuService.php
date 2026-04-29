@@ -4614,7 +4614,7 @@ class MenuService
             'ai_pdf', 'ai_vision', 'ai_speech_to_text', 'photo_studio_extension', 'ai_rewriter', 'ai_editor',
             'ai_code_generator', 'ai_youtube', 'ai_chat_image', 'ai_rss', 'ai_voiceover_clone', 'ai_web_chat_extension', 'ai_presentation', 'ext_fashion_studio_dropdown',
             'ai_realtime_voice_chat', 'ai_social_media_extension', 'ai_detector_extension', 'ai_plagiarism_extension', 'ai_article_wizard', 'ai_voice_isolator', 'ext_chat_bot', 'ext_voice_chatbot', 'ext_social_media_dropdown',
-            'ext_ai_music_pro', 'ai_influencer', 'creative_suite', 'url_to_video', 'viral_clips', 'influencer_avatar', 'brand_voice', 'support', 'ai_chat_pro_image_chat', 'ai_image_pro',
+            'ext_ai_music_pro', 'ai_influencer', 'url_to_video', 'viral_clips', 'influencer_avatar', 'brand_voice', 'support', 'ai_chat_pro_image_chat', 'ai_image_pro',
         ];
 
         $data = (new self)->generate();
@@ -4646,6 +4646,49 @@ class MenuService
                 'label'     => 'AI Voice Call',
                 'data-name' => Introduction::AI_EXT_VOICE_CALL,
                 'icon'      => 'tabler-phone',
+            ];
+        }
+
+        if (MarketplaceHelper::isRegistered('ai-chat-pro-skills')) {
+            $result[] = [
+                'key'   => 'ai_chat_pro_skills',
+                'label' => 'AI Chat Pro Skills',
+                'icon'  => 'tabler-tool',
+            ];
+        }
+        if (MarketplaceHelper::isRegistered('ai-chat-pro-deep-research')) {
+            $result[] = [
+                'key'     => 'deep_research',
+                'label'   => __('Deep Research'),
+                'tooltip' => __('Allow users to use the Deep Research feature inside AI Chat Pro.'),
+                'icon'    => 'tabler-telescope',
+            ];
+        }
+
+        if (MarketplaceHelper::isRegistered('ai-chat-pro-smart-image')) {
+            $result[] = [
+                'key'     => 'ai_chat_pro_smart_image',
+                'label'   => __('Smart Image Display'),
+                'tooltip' => __('Automatically search and display relevant images for visual queries in AI Chat Pro.'),
+                'icon'    => 'tabler-photo-search',
+            ];
+        }
+
+        if (MarketplaceHelper::isRegistered('ai-chat-pro-entity-highlight')) {
+            $result[] = [
+                'key'     => 'ai_chat_pro_entity_highlight',
+                'label'   => __('Entity Highlights'),
+                'tooltip' => __('Highlight notable entities in AI Chat Pro responses with clickable detail drawers.'),
+                'icon'    => 'tabler-highlight',
+            ];
+        }
+
+        if (MarketplaceHelper::isRegistered('ai-chat-pro-highlight-to-ask')) {
+            $result[] = [
+                'key'     => 'ai_chat_pro_highlight_to_ask',
+                'label'   => __('Highlight to Ask'),
+                'tooltip' => __('Highlight text in AI Chat Pro responses to quickly ask follow-up questions.'),
+                'icon'    => 'tabler-message-question',
             ];
         }
 

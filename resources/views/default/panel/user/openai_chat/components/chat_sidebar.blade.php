@@ -18,7 +18,7 @@
                 <x-forms.input
                     class="navbar-search-input peer ps-10"
                     id="chat_search_word"
-                    data-category-id="{{ $category->id }}"
+                    data-category-id="{{ $category?->id }}"
                     data-website-url="{{ $website_url ?? null }}"
                     type="search"
                     onkeydown="return event.key != 'Enter';"
@@ -33,7 +33,7 @@
                 size="sm"
                 hover-variant="danger"
                 href="javascript:void(0);"
-                onclick="{!! $app_is_demo ? 'return toastr.info(\'{{ __('This feature is disabled in Demo version.') }}\')' : 'return deleteAllConv(\'{{ isset($category) ? $category->id : 0 }}\')' !!}"
+                onclick="{!! $app_is_demo ? 'return toastr.info(\'{{ __('This feature is disabled in Demo version.') }}\')' : 'return deleteAllConv(\'{{ isset($category) ? $category?->id : 0 }}\')' !!}"
             >
                 <x-tabler-trash class="size-5" />
             </x-button>
@@ -74,7 +74,7 @@
                         href="javascript:void(0);"
                         onclick="{!! $disable_actions
                             ? 'return toastr.info(\'{{ __('This feature is disabled in Demo version.') }}\')'
-                            : 'return startNewChat(\'{{ $category->id }}\', \'{{ LaravelLocalization::getCurrentLocale() }}\')' !!}"
+                            : 'return startNewChat(\'{{ $category?->id }}\', \'{{ LaravelLocalization::getCurrentLocale() }}\')' !!}"
                     >
                         <x-tabler-plus class="size-4" />
                         {{ __('New Conversation') }}

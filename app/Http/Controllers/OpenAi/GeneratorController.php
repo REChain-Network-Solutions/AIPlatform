@@ -7,6 +7,9 @@ use App\Domains\Entity\Enums\EntityEnum;
 use App\Domains\Entity\Facades\Entity as EntityFacade;
 use App\Domains\Entity\Models\Entity;
 use App\Extensions\AiChatProImageChat\System\Services\AIChatImageService;
+use App\Extensions\AIChatProMemory\System\Models\UserChatInstruction;
+use App\Extensions\AIChatProSkills\System\Models\Skill;
+use App\Extensions\ModelCouncil\System\Services\ModelCouncilService;
 use App\Extensions\SocialMedia\System\Models\SocialMediaPostDailyMetric;
 use App\Extensions\SocialMediaAgent\System\Models\SocialMediaAgent;
 use App\Helpers\Classes\ApiHelper;
@@ -37,6 +40,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use JsonException;
@@ -81,7 +85,9 @@ class GeneratorController extends Controller
         // If the template type is chat, then we will build a chat streamed output or other ai template streamed output
         return match ($template_type) {
             'chatbot', 'vision', 'chatPro', 'chatPro-image', 'socialMediaAgent' => $this->buildChatStreamedOutput($request),
-            default         => $this->buildOtherStreamedOutput($request),
+            'chatPro-council'         => $this->buildCouncilStreamedOutput($request),
+            'chatPro-council-summary' => $this->buildCouncilSummaryStreamedOutput($request),
+            default                   => $this->buildOtherStreamedOutput($request),
         };
     }
 
@@ -116,8 +122,16 @@ class GeneratorController extends Controller
 
         if (
             ! empty($request->shared_message_uuid) &&
-            MarketplaceHelper::isRegistered('multi-model') &&
-            ((bool) setting('ai_chat_pro_multi_model_feature', '1'))
+            (
+                (
+                    MarketplaceHelper::isRegistered('multi-model') &&
+                    ((bool) setting('ai_chat_pro_multi_model_feature', '1'))
+                ) ||
+                (
+                    MarketplaceHelper::isRegistered('model-council') &&
+                    ((bool) setting('ai_chat_pro_model_council_feature', '1'))
+                )
+            )
         ) {
             $chatParams['shared_message_uuid'] = $request->get('shared_message_uuid');
         }
@@ -126,7 +140,7 @@ class GeneratorController extends Controller
         $default_ai_engine = $this->determineAiEngine($chat_bot, $chatParams['chatbot_front_model']);
 
         $message = $this->createChatMessage($user, $chatParams);
-        $history = $this->buildChatHistory($chatParams, $message->user_openai_chat_id, $message->id);
+        $history = $this->buildChatHistory($chatParams, $message->user_openai_chat_id, (int) $message->id);
         $isFileSearch = setting('openai_file_search', 0) && ! empty($chatParams['chat']->openai_vector_id);
 
         if ($this->realtimeCreditsFailed) {
@@ -156,7 +170,115 @@ class GeneratorController extends Controller
             $message,
             $chatParams,
             $default_ai_engine,
-            fileChat: $isFileSearch
+            fileChat: $isFileSearch,
+            tempChatActive: (bool) ($chatParams['temp_chat_button'] ?? false)
+        );
+    }
+
+    public function buildCouncilStreamedOutput(Request $request): StreamedResponse
+    {
+        if (! MarketplaceHelper::isRegistered('model-council')) {
+            return response()->stream(function () {
+                echo "event: message\n";
+                echo "data: 0\n\n";
+
+                echo "event: data\n";
+                echo 'data: ' . __('Model Council is not available.');
+                echo "\n\n";
+                flush();
+
+                echo "event: stop\n";
+                echo "data: [DONE]\n\n";
+                flush();
+            }, 404, [
+                'Cache-Control'     => 'no-cache',
+                'X-Accel-Buffering' => 'no',
+                'Connection'        => 'keep-alive',
+                'Content-Type'      => 'text/event-stream',
+            ]);
+        }
+
+        $chatParams = $this->extractChatParameters($request);
+        if (empty($chatParams)) {
+            return response()->stream(function () {
+                echo "event: message\n";
+                echo "data: 0\n\n";
+
+                echo "event: data\n";
+                echo 'data: ' . __('Chat not found. Please refresh and try again.');
+                echo "\n\n";
+                flush();
+
+                echo "event: stop\n";
+                echo "data: [DONE]\n\n";
+                flush();
+            }, 404, [
+                'Cache-Control'     => 'no-cache',
+                'X-Accel-Buffering' => 'no',
+                'Connection'        => 'keep-alive',
+                'Content-Type'      => 'text/event-stream',
+            ]);
+        }
+
+        $history = $this->buildChatHistory($chatParams, $chatParams['chat_id']);
+
+        return app(ModelCouncilService::class)->streamCouncilResponse(
+            $request,
+            $chatParams,
+            $history,
+            Auth::user(),
+        );
+    }
+
+    public function buildCouncilSummaryStreamedOutput(Request $request): StreamedResponse
+    {
+        if (! MarketplaceHelper::isRegistered('model-council')) {
+            return response()->stream(function () {
+                echo "event: message\n";
+                echo "data: 0\n\n";
+
+                echo "event: data\n";
+                echo 'data: ' . __('Model Council is not available.');
+                echo "\n\n";
+                flush();
+
+                echo "event: stop\n";
+                echo "data: [DONE]\n\n";
+                flush();
+            }, 404, [
+                'Cache-Control'     => 'no-cache',
+                'X-Accel-Buffering' => 'no',
+                'Connection'        => 'keep-alive',
+                'Content-Type'      => 'text/event-stream',
+            ]);
+        }
+
+        $chatParams = $this->extractChatParameters($request);
+        if (empty($chatParams)) {
+            return response()->stream(function () {
+                echo "event: message\n";
+                echo "data: 0\n\n";
+
+                echo "event: data\n";
+                echo 'data: ' . __('Chat not found. Please refresh and try again.');
+                echo "\n\n";
+                flush();
+
+                echo "event: stop\n";
+                echo "data: [DONE]\n\n";
+                flush();
+            }, 404, [
+                'Cache-Control'     => 'no-cache',
+                'X-Accel-Buffering' => 'no',
+                'Connection'        => 'keep-alive',
+                'Content-Type'      => 'text/event-stream',
+            ]);
+        }
+
+        return app(ModelCouncilService::class)->streamCouncilSummaryFromShared(
+            $request,
+            $chatParams,
+            Auth::user(),
         );
     }
 
@@ -182,6 +304,9 @@ class GeneratorController extends Controller
             'pdfpath'             => $request->get('pdfpath', null),
             'assistant'           => $request->get('assistant', null),
             'chatbot_front_model' => $request->get('chatbot_front_model', null),
+            'skill_ids'           => $request->get('skill_ids'),
+            'highlight_context'   => $request->get('highlight_context'),
+            'temp_chat_button'    => $request->get('temp_chat_button', false),
             'chat'                => $chat,
             'openRouter'          => $this->determineOpenRouter($request->get('chatbot_front_model', null)),
             'contain_images'      => false, // Will be determined later
@@ -217,7 +342,7 @@ class GeneratorController extends Controller
         if ($default_ai_engine === EngineEnum::OPEN_AI->value) {
             $chat_bot = $this->settings?->openai_default_model ?: EntityEnum::GPT_5_MINI->value;
         } elseif ($default_ai_engine === EngineEnum::GEMINI->value) {
-            $chat_bot = setting('gemini_default_model', 'gemini-1.5-pro-latest');
+            $chat_bot = setting('gemini_default_model', EntityEnum::GEMINI_1_5_FLASH->value);
         } elseif ($default_ai_engine === EngineEnum::ANTHROPIC->value) {
             $chat_bot = setting('anthropic_default_model', EntityEnum::CLAUDE_3_OPUS->value);
         } elseif ($default_ai_engine === EngineEnum::DEEP_SEEK->value) {
@@ -302,9 +427,14 @@ class GeneratorController extends Controller
             'pdfPath'             => $chatParams['pdfpath'],
         ];
 
+        if (! empty($chatParams['highlight_context']) && Schema::hasColumn('user_openai_chat_messages', 'highlight_context')) {
+            $attributes['highlight_context'] = $chatParams['highlight_context'];
+        }
+
         if (! empty($chatParams['shared_message_uuid'])) {
             $attributes['model_slug'] = $chatParams['chatbot_front_model'];
             $attributes['shared_uuid'] = $chatParams['shared_message_uuid'];
+            $attributes['output'] = null;
         }
 
         return UserOpenaiChatMessage::create($attributes);
@@ -334,8 +464,15 @@ class GeneratorController extends Controller
             $history = $this->appendSocialMediaAgentContext($history, $chatParams, $systemRole);
         }
         $history = $this->addFileOrInstructionsToHistory($history, $category, $chat_id, $chatParams['prompt'], $systemRole);
-        $history = $this->addPreviousMessagesToHistory($history, $chat, $chatParams['assistant']);
+        $history = $this->addPreviousMessagesToHistory(
+            $history,
+            $chat,
+            $chatParams['assistant'],
+            $chatParams['shared_message_uuid'] ?? null,
+            $currentMessageId
+        );
         $history = $this->checkBrandVoice($chatParams['chat_brand_voice'], $chatParams['brand_voice_prod'], $history);
+        $history = $this->checkSkills($chatParams['skill_ids'] ?? null, $history, $systemRole, $chatParams);
 
         return $this->addCurrentPromptToHistory($history, $chatParams, $systemRole);
     }
@@ -575,7 +712,7 @@ class GeneratorController extends Controller
             try {
                 $extra_prompt = (new VectorService)->getMostSimilarText($prompt, $chat_id, 2, $category->chatbot_id);
                 if ($extra_prompt) {
-                    if ($category->slug === 'ai_webchat') {
+                    if ($category?->slug === 'ai_webchat') {
                         $history[] = [
                             'role'    => $systemRole,
                             'content' => "You are a Web Page Analyzer assistant. When referring to content from a specific website or link, please include a brief summary or context of the content. If users inquire about the content or purpose of the website/link, provide assistance professionally without explicitly mentioning the content. Website/link content: \n$extra_prompt",
@@ -609,12 +746,12 @@ class GeneratorController extends Controller
      */
     private function getInstructions($category): ?string
     {
-        $categoryId = $category->id;
+        $categoryId = $category?->id;
 
         if (MarketplaceHelper::isRegistered('ai-chat-pro-memory')) {
             if (Auth::check()) {
                 // Check for user-specific instructions first
-                $userInstructions = \App\Extensions\AIChatProMemory\System\Models\UserChatInstruction::getForUser(
+                $userInstructions = UserChatInstruction::getForUser(
                     Auth::id(),
                     $categoryId
                 );
@@ -625,7 +762,7 @@ class GeneratorController extends Controller
             } else {
                 // Check for guest instructions by IP
                 $ipAddress = request()?->header('CF-Connecting-IP') ?? request()?->ip();
-                $guestInstructions = \App\Extensions\AIChatProMemory\System\Models\UserChatInstruction::getForGuest(
+                $guestInstructions = UserChatInstruction::getForGuest(
                     $ipAddress,
                     $categoryId
                 );
@@ -640,10 +777,25 @@ class GeneratorController extends Controller
         return $category->instructions;
     }
 
-    private function addPreviousMessagesToHistory(array $history, $chat, $assistant): array
-    {
+    private function addPreviousMessagesToHistory(
+        array $history,
+        $chat,
+        $assistant,
+        ?string $sharedMessageUuid = null,
+        ?int $currentMessageId = null
+    ): array {
         $lastThreeMessageQuery = $chat->messages()
-            ->whereNotNull('input')
+            ->whereNotNull('input');
+
+        if ($currentMessageId) {
+            $lastThreeMessageQuery->where('id', '!=', $currentMessageId);
+        }
+
+        if (! empty($sharedMessageUuid)) {
+            $lastThreeMessageQuery->whereNull('shared_uuid');
+        }
+
+        $lastThreeMessageQuery = $lastThreeMessageQuery
             ->orderBy('created_at', 'desc')
             ->take(4)
             ->get()
@@ -654,6 +806,11 @@ class GeneratorController extends Controller
 
         if ($count > 1) {
             foreach ($lastThreeMessageQuery as $threeMessage) {
+                $userInput = $threeMessage->input ?? '';
+                if (Schema::hasColumn('user_openai_chat_messages', 'highlight_context') && ! empty($threeMessage->highlight_context)) {
+                    $userInput = "The user selected the following quote from your previous response and is asking a follow-up question about it.\nQuoted text: \"{$threeMessage->highlight_context}\"\nUser's follow-up question:\n" . $userInput;
+                }
+
                 if ($contain_images) {
                     $history[] = [
                         'role'    => 'user',
@@ -661,18 +818,19 @@ class GeneratorController extends Controller
                             [
                                 [
                                     'type' => 'input_text',
-                                    'text' => $threeMessage->input,
+                                    'text' => $userInput,
                                 ],
                             ],
                             $this->processMessageImages($threeMessage->images, $assistant)
                         ),
                     ];
                 } else {
-                    $history[] = ['role' => 'user', 'content' => $threeMessage->input ?? ''];
+                    $history[] = ['role' => 'user', 'content' => $userInput];
                 }
 
-                if ($threeMessage->output !== null && $threeMessage->output !== '') {
-                    $history[] = ['role' => 'assistant', 'content' => $threeMessage->output];
+                $assistantContent = trim((string) ($threeMessage->response ?? $threeMessage->output ?? ''));
+                if ($assistantContent !== '') {
+                    $history[] = ['role' => 'assistant', 'content' => $assistantContent];
                 }
             }
         }
@@ -686,11 +844,16 @@ class GeneratorController extends Controller
      */
     private function addCurrentPromptToHistory(array $history, array &$chatParams, string $systemRole): array
     {
+        $highlightPrefix = '';
+        if (! empty($chatParams['highlight_context'])) {
+            $highlightPrefix = "The user selected the following quote from your previous response and is asking a follow-up question about it.\nQuoted text: \"{$chatParams['highlight_context']}\"\nUser's follow-up question:\n";
+        }
+
         if (empty($chatParams['images']) && $chatParams['chat']->category->slug !== 'ai_vision') {
             if ($chatParams['realtime']) {
-                $history[] = ['role' => 'user', 'content' => $this->getRealtimeEngine($chatParams) ?? ''];
+                $history[] = ['role' => 'user', 'content' => $highlightPrefix . ($this->getRealtimeEngine($chatParams) ?? '')];
             } else {
-                $history[] = ['role' => 'user', 'content' => $chatParams['prompt'] ?? ''];
+                $history[] = ['role' => 'user', 'content' => $highlightPrefix . ($chatParams['prompt'] ?? '')];
             }
         } else {
             $history = $this->addVisionPromptToHistory($history, $chatParams, $systemRole);
@@ -866,6 +1029,101 @@ class GeneratorController extends Controller
         return $history;
     }
 
+    /**
+     * Inject active skills into the chat history.
+     */
+    /**
+     * Inject active skills into the chat history.
+     *
+     * Manual skills (user-selected via "/" or modal) → inject full instructions directly.
+     * Auto-use skills → passed as tool definitions to StreamService for function calling.
+     */
+    private function checkSkills(?string $skillIds, array $history, string $systemRole, array &$chatParams): array
+    {
+        if (! class_exists(Skill::class)) {
+            return $history;
+        }
+
+        $user = Auth::user();
+        if (! $user) {
+            return $history;
+        }
+
+        // Check if user's plan allows skills (admins bypass)
+        if (! $user->isAdmin()) {
+            $plan = $user->relationPlan;
+            if (! $plan || ! $plan->checkOpenAiItem('ai_chat_pro_skills')) {
+                return $history;
+            }
+        }
+
+        // Collect manually selected skill IDs
+        $manualIds = [];
+        if (! empty($skillIds)) {
+            $manualIds = array_filter(array_map('intval', explode(',', $skillIds)));
+        }
+
+        // Get all user's skill IDs from their collection
+        $userSkillIds = $user->belongsToMany(Skill::class, 'user_skills')
+            ->withPivot('auto_use')
+            ->pluck('auto_use', 'skills.id')
+            ->toArray();
+
+        // Only allow manual IDs that are in the user's collection
+        $manualIds = array_filter($manualIds, fn ($id) => isset($userSkillIds[$id]));
+
+        // Collect auto-use skill IDs from user's pivot
+        $autoUseIds = array_keys(array_filter($userSkillIds, fn ($autoUse) => (bool) $autoUse));
+
+        // Remove auto-use IDs that are also manually selected (manual takes priority)
+        $autoUseIds = array_diff($autoUseIds, $manualIds);
+
+        // Fetch and inject manual skills (full instructions in system prompt)
+        if (! empty($manualIds)) {
+            $manualSkills = Skill::query()
+                ->whereIn('id', $manualIds)
+                ->where('status', 'active')
+                ->get();
+
+            $usedSkills = [];
+            foreach ($manualSkills as $skill) {
+                $injectedContent = "[Skill: {$skill->name}]\n" . rtrim($skill->instructions, " \t\n\r-") . "\n\nIMPORTANT: Do NOT output any JSON blocks such as {\"title\":...}. Do NOT append ---, horizontal rules, follow-up questions, or suggestions at the end. Just deliver the answer and stop.";
+                $history[] = [
+                    'role'    => $systemRole,
+                    'content' => $injectedContent,
+                ];
+                $usedSkills[] = ['name' => $skill->name, 'slug' => $skill->slug];
+            }
+
+            // Track manually selected skills as always "used"
+            $chatParams['used_skills'] = $usedSkills;
+
+            // Skills tell the model not to output title JSON, so disable title buffering
+            $chatParams['is_first_message'] = false;
+        }
+
+        // Fetch auto-use skills and pass to StreamService for function calling
+        if (! empty($autoUseIds)) {
+            $autoSkills = Skill::query()
+                ->whereIn('id', $autoUseIds)
+                ->where('status', 'active')
+                ->get();
+
+            if ($autoSkills->isNotEmpty()) {
+                $chatParams['auto_skills'] = $autoSkills;
+
+                // Instruct the AI about available skill tools
+                $skillList = $autoSkills->map(fn ($s) => "- {$s->name}: {$s->description}")->implode("\n");
+                $history[] = [
+                    'role'    => $systemRole,
+                    'content' => "You have access to specialized skill tools. When the user's request matches a skill's purpose, you MUST call that skill's tool function to load its detailed instructions before responding. The skill tool will return expert instructions that you should follow to generate your response.\n\nAvailable skills:\n{$skillList}\n\nCall the matching use_skill_* function when a skill is relevant to the user's request. If no skill matches, respond normally without calling any tool.",
+                ];
+            }
+        }
+
+        return $history;
+    }
+
     // ai writer template and etc.
     public function buildOtherStreamedOutput(Request $request): StreamedResponse
     {
@@ -968,7 +1226,7 @@ class GeneratorController extends Controller
         return 'Prompt: ' . $realtimePrompt .
             '\n\nWeb search json results: '
             . $searchRes .
-            '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
+            '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text. Never reveal or display search queries, search parameters, or any internal metadata from the search results.';
     }
 
     public function realtimePromptPerplexity($realtimePrompt): string
@@ -999,7 +1257,7 @@ class GeneratorController extends Controller
                 return 'Prompt: ' . $realtimePrompt .
                     '\n\nWeb search results: '
                     . $response .
-                    '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
+                    '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text. Never reveal or display search queries, search parameters, or any internal metadata from the search results.';
 
             }
 

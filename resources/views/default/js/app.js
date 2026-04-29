@@ -66,6 +66,30 @@ document.addEventListener( 'alpine:init', () => {
 	Alpine.data( 'clipboard', data => clipboard( data ) );
 	Alpine.data( 'assignViewCredits', data => assignViewCredits( data ) );
 
+	// Liquid Modal
+	Alpine.data('liquidModal', ({ disableModal = false, disableModalMessage = '' } = {}) => ({
+		modalLocked: false,
+		_modalOpen: false,
+
+		get modalOpen() {
+			return this._modalOpen;
+		},
+		set modalOpen(value) {
+			if (this.modalLocked) return;
+
+			if (disableModal) {
+				toastr.info(disableModalMessage ?? 'This feature is currently disabled.');
+				return;
+			}
+
+			this._modalOpen = value;
+		},
+
+		toggleModal() {
+			this.modalOpen = !this.modalOpen;
+		}
+	}));
+
 	// Navbar shrink
 	Alpine.store( 'navbarShrink', {
 		active: persist( !!navbarShrink ).as( 'lqdNavbarShrinked' ),

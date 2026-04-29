@@ -47,10 +47,10 @@ class RevenueCatService
         $activeSub = getCurrentActiveSubscription($userId);
         if ($activeSub != null) {
             if ($activeSub->stripe_status == 'trialing') {
-                return \Carbon\Carbon::parse($activeSub->trial_ends_at)->diffInDays();
+                return Carbon::parse($activeSub->trial_ends_at)->diffInDays();
             }
 
-            return \Carbon\Carbon::parse($activeSub->ends_at)->diffInDays();
+            return Carbon::parse($activeSub->ends_at)->diffInDays();
         }
 
         return null;
@@ -63,10 +63,10 @@ class RevenueCatService
         $activeSub = getCurrentActiveSubscription($userId);
         if ($activeSub != null) {
             if ($activeSub->stripe_status == 'trialing') {
-                return \Carbon\Carbon::parse($activeSub->trial_ends_at)->format('F jS, Y');
+                return Carbon::parse($activeSub->trial_ends_at)->format('F jS, Y');
             }
 
-            return \Carbon\Carbon::parse($activeSub->ends_at)->format('F jS, Y');
+            return Carbon::parse($activeSub->ends_at)->format('F jS, Y');
         }
 
         return null;

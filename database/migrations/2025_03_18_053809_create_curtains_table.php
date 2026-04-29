@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Frontend\Curtain;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -95,7 +96,7 @@ return new class extends Migration
         ];
 
         foreach ($items as $item) {
-            \App\Models\Frontend\Curtain::create($item);
+            Curtain::create($item);
         }
     }
 

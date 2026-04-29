@@ -35,7 +35,7 @@ class ChatbotTrainingController extends Controller
 
         $id = $request->get('qa_id');
 
-        $chatBotData = ChatBotData::query()->where('id', $id)->first();
+        $chatBotData = ChatbotData::query()->where('id', $id)->first();
 
         if ($chatBotData) {
             $chatBotData->update([
@@ -46,7 +46,7 @@ class ChatbotTrainingController extends Controller
 
             ChatbotDataVector::query()->where('chatbot_data_id', $id)->delete();
         } else {
-            ChatBotData::query()->firstOrCreate([
+            ChatbotData::query()->firstOrCreate([
                 'chatbot_id' => $chatbot->getAttribute('id'),
                 'type'       => 'qa',
                 'type_value' => $request->get('question'),
@@ -84,7 +84,7 @@ class ChatbotTrainingController extends Controller
 
         $id = $request->get('text_id');
 
-        $chatBotData = ChatBotData::query()->where('id', $id)->first();
+        $chatBotData = ChatbotData::query()->where('id', $id)->first();
 
         if ($chatBotData) {
             $chatBotData->update([
@@ -95,7 +95,7 @@ class ChatbotTrainingController extends Controller
 
             ChatbotDataVector::query()->where('chatbot_data_id', $id)->delete();
         } else {
-            ChatBotData::query()->firstOrCreate([
+            ChatbotData::query()->firstOrCreate([
                 'chatbot_id' => $chatbot->getAttribute('id'),
                 'type'       => 'text',
                 'type_value' => $request->get('title'),
@@ -153,7 +153,7 @@ class ChatbotTrainingController extends Controller
             $parser->setPdfPath($storagePath)->parse();
         }
 
-        ChatBotData::query()->firstOrCreate([
+        ChatbotData::query()->firstOrCreate([
             'chatbot_id' => $chatbot->getAttribute('id'),
             'type'       => 'pdf',
             'type_value' => $name,
@@ -209,7 +209,7 @@ class ChatbotTrainingController extends Controller
         }
 
         foreach ($content as $url => $data) {
-            ChatBotData::query()->firstOrCreate([
+            ChatbotData::query()->firstOrCreate([
                 'chatbot_id' => $chatbot->getAttribute('id'),
                 'type'       => 'url',
                 'type_value' => $url,
@@ -289,7 +289,7 @@ class ChatbotTrainingController extends Controller
 
     public function chatbotData(Chatbot $chatbot, ?array $data = null)
     {
-        return ChatBotData::query()
+        return ChatbotData::query()
             ->where('chatbot_id', $chatbot->getAttribute('id'))
             ->where('type', request('type'))
             ->when($data, function ($query) use ($data) {

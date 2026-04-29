@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domains\Entity\Facades;
 
+use App\Domains\Entity\BaseDriver;
+use App\Domains\Entity\EntityManager;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @mixin \App\Domains\Entity\EntityManager
- * @mixin \App\Domains\Entity\BaseDriver
+ * @mixin EntityManager
+ * @mixin BaseDriver
  */
 class Entity extends Facade
 {

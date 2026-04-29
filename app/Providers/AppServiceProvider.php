@@ -41,12 +41,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public array $tables = [];
 
-    public function register(): void
-    {
-        if (class_exists(\SmartCache\Providers\SmartCacheServiceProvider::class)) {
-            $this->app->register(\SmartCache\Providers\SmartCacheServiceProvider::class);
-        }
-    }
+    public function register(): void {}
 
     public function boot(): void
     {

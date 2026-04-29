@@ -1,5 +1,7 @@
 <?php
 
+use Rolandstarke\Thumbnail\Filter\Resize;
+
 return [
 
     /**
@@ -61,7 +63,7 @@ return [
      * Available filters to modify the images.
      */
     'filters' => [
-        Rolandstarke\Thumbnail\Filter\Resize::class,
+        Resize::class,
         // Rolandstarke\Thumbnail\Filter\Blur::class,
         // Rolandstarke\Thumbnail\Filter\Greyscale::class,
     ],

@@ -11,28 +11,25 @@
             enctype="multipart/form-data"
         >
             @csrf
-            <h4 class="mb-0">
-                {{ __('Editing: AI Models') }}
-            </h4>
-            <label>
+            <p>
                 {{ __('Manage available AI models visible to users within AI chat, AI Editor and AI Writer : Control the selection and presentation of AI models accessible to users during chat interactions. Manage the availability of models across different pricing plans.') }}
-            </label>
+            </p>
 
             <x-alert class="rounde">
                 {{ __('Only activated AI models are displayed here. Make sure to add your API Keys to use all AI Models (OpenAI, Gemini or Anthropic).') }}
-                <x-tabler-arrow-up-right class="size-4 inline align-text-bottom"/>
+                <x-tabler-arrow-up-right class="inline size-4 align-text-bottom" />
             </x-alert>
 
             @foreach ($enablesEngines as $aiEngine)
                 @php
                     $entitiesDrivers = \App\Domains\Entity\EntityStats::word()->filterByEngine($aiEngine)->list();
-                    if(count($entitiesDrivers) === 0) {
+                    if (count($entitiesDrivers) === 0) {
                         continue;
                     }
                 @endphp
                 <x-form-step
                     class="-mb-2"
-                    step="{{ $loop->iteration }}"
+                    auto-increment
                     label="{{ $aiEngine->label() }}"
                 />
 
@@ -45,19 +42,22 @@
                         >
                             <x-forms.input
                                 type="text"
-								size="lg"
+                                size="lg"
                                 name="selected_title[{{ $entity->model()->id }}]"
                                 value="{!! $entity->model()->selected_title !!}"
                                 label="{{ __($entity->enum()->value) }}"
                                 tooltip="{{ __($entity->label()) }}"
                             >
 
-                                <x-dropdown.dropdown :teleport="false" class="mt-2 w-full">
+                                <x-dropdown.dropdown
+                                    class="mt-2 w-full"
+                                    :teleport="false"
+                                >
                                     <x-slot:trigger
                                         class="w-full justify-start text-start"
                                     >
-                                        <small>{{__('View Included Pricing Plans')}}</small>
-                                        <x-tabler-arrow-down class="size-3"/>
+                                        <small>{{ __('View Included Pricing Plans') }}</small>
+                                        <x-tabler-arrow-down class="size-3" />
                                     </x-slot:trigger>
 
                                     <x-slot:dropdown
@@ -84,10 +84,10 @@
                                             <x-forms.input
                                                 class:container="h-full bg-input-background mt-2"
                                                 class:label="w-full border h-full rounded px-3 py-4 hover:bg-foreground/5 transition-colors"
-                                                id="ai_model_{{ $entity->enum()->value.'_no_plan_users' }}"
+                                                id="ai_model_{{ $entity->enum()->value . '_no_plan_users' }}"
                                                 :checked="$entity->model(true)->is_selected == 1"
                                                 type="checkbox"
-                                                name="no_plan_users[{{  $entity->model()->id }}]"
+                                                name="no_plan_users[{{ $entity->model()->id }}]"
                                                 value="{{ $entity->model()->id }}"
                                                 label="{{ trans('No Plan Users') }}"
                                                 custom

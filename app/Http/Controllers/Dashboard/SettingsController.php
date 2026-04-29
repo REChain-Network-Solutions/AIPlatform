@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Domains\Engine\Enums\EngineEnum;
+use App\Domains\Engine\Services\GeminiService;
 use App\Domains\Entity\Enums\EntityEnum;
+use App\Extensions\Chatbot\System\Models\Chatbot;
 use App\Extensions\ChatbotVoice\System\Models\ExtVoiceChatbot;
 use App\Extensions\ElevenLabsVoiceChat\System\Models\VoiceChatBot;
 use App\Helpers\Classes\ApiHelper;
@@ -414,7 +416,7 @@ class SettingsController extends Controller
         ];
 
         $randomToken = ApiHelper::setGeminiKey();
-        $client = app(\App\Domains\Engine\Services\GeminiService::class);
+        $client = app(GeminiService::class);
         $response = $client
             ->setHistory($newhistory)
             ->generateContent();
@@ -836,7 +838,7 @@ class SettingsController extends Controller
             ])->save();
 
             if (MarketplaceHelper::isRegistered('chatbot')) {
-                \App\Extensions\Chatbot\System\Models\Chatbot::query()->update([
+                Chatbot::query()->update([
                     'ai_model' => $request->openai_default_model,
                 ]);
             }

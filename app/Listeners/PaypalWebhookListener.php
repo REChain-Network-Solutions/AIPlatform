@@ -159,7 +159,7 @@ class PaypalWebhookListener implements ShouldQueue
                                                             self::creditIncreaseSubscribePlan($user, $plan);
                                                         } else {
                                                             $activeSub->stripe_status = 'cancelled';
-                                                            $activeSub->ends_at = \Carbon\Carbon::now();
+                                                            $activeSub->ends_at = Carbon::now();
                                                             $activeSub->save();
                                                         }
                                                         $newData->status = 'checked';
@@ -198,7 +198,7 @@ class PaypalWebhookListener implements ShouldQueue
                                                             self::creditIncreaseSubscribePlan($user, $plan);
                                                         } else {
                                                             $activeSub->stripe_status = 'cancelled';
-                                                            $activeSub->ends_at = \Carbon\Carbon::now();
+                                                            $activeSub->ends_at = Carbon::now();
                                                             $activeSub->save();
                                                         }
                                                         $newData->status = 'checked';

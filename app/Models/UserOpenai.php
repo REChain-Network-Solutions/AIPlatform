@@ -5,16 +5,18 @@ namespace App\Models;
 use App\Domains\Engine\Enums\EngineEnum;
 use App\Domains\Entity\Enums\EntityEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\HigherOrderBuilderProxy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HigherOrderCollectionProxy;
 use Illuminate\Support\Str;
 
 class UserOpenai extends Model
 {
     /**
-     * @var \Illuminate\Database\Eloquent\HigherOrderBuilderProxy|\Illuminate\Support\HigherOrderCollectionProxy|mixed
+     * @var HigherOrderBuilderProxy|HigherOrderCollectionProxy|mixed
      */
     protected $table = 'user_openai';
 

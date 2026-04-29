@@ -8,6 +8,11 @@
     $sidebarEnabledPages = Theme::getSetting('dashboard.sidebarEnabledPages') ?? [];
     $has_sidebar = in_array(Route::currentRouteName(), $sidebarEnabledPages, true) || (isset($has_sidebar) && $has_sidebar);
     $body_classname = Theme::getSetting('dashboard.bodyClass', '');
+    $disable_navbar = isset($disable_navbar) ? $disable_navbar : false;
+    $disable_header = isset($disable_header) ? $disable_header : false;
+    $disable_titlebar = isset($disable_titlebar) ? $disable_titlebar : false;
+    $disable_footer = isset($disable_footer) ? $disable_footer : false;
+    $disable_mobile_bottom_menu = isset($disable_mobile_bottom_menu) ? $disable_mobile_bottom_menu : false;
 
     if (isset($body_class)) {
         $body_classname .= ' ' . $body_class;
@@ -46,10 +51,11 @@
                 Route::is('dashboard.blog*') ||
                 Route::is('dashboard.page*')),
         'is-auth-page' => Route::is('login', 'register', 'forgot_password'),
-        'hide-navbar' => isset($disable_navbar),
-        'hide-footer' => isset($disable_footer),
-        'hide-header' => isset($disable_header),
-        'hide-titlebar' => isset($disable_titlebar),
+        'hide-navbar' => $disable_navbar,
+        'hide-footer' => $disable_footer,
+        'hide-header' => $disable_header,
+        'hide-titlebar' => $disable_titlebar,
+        'hide-mobile-bottom-menu' => $disable_mobile_bottom_menu,
     ])
 >
     @includeIf('panel.layout.after-body-open-immediate')
@@ -77,17 +83,17 @@
                 }
             @endphp
             @if ($showMenu)
-                @if (!isset($disable_navbar))
+                @if (!$disable_navbar)
                     @include('panel.layout.navbar')
                 @endif
             @endif
             <div class="lqd-page-content-wrap flex grow flex-col overflow-hidden">
                 @if ($good_for_now)
                     @auth
-                        @if (!isset($disable_header))
+                        @if (!$disable_header)
                             @include('panel.layout.header', ['layout_wide', isset($layout_wide) ? $layout_wide : ''])
                         @endif
-                        @if (!isset($disable_titlebar))
+                        @if (!$disable_titlebar)
                             @include('panel.layout.titlebar', ['layout_wide', isset($layout_wide) ? $layout_wide : ''])
                         @endif
                     @endauth
@@ -123,10 +129,10 @@
                     </div>
                 @else
                     @auth
-                        @if (!isset($disable_header))
+                        @if (!$disable_header)
                             @include('panel.layout.header', ['layout_wide', isset($layout_wide) ? $layout_wide : ''])
                         @endif
-                        @if (!isset($disable_titlebar))
+                        @if (!$disable_titlebar)
                             @include('panel.layout.titlebar', ['layout_wide', isset($layout_wide) ? $layout_wide : ''])
                         @endif
                     @endauth
@@ -147,7 +153,7 @@
                 @endif
 
                 @auth
-                    @if (!isset($disable_footer))
+                    @if (!$disable_footer)
                         @include('panel.layout.footer')
                     @endif
 
@@ -163,7 +169,7 @@
         @if (!isset($disable_floating_menu))
             <x-floating-menu />
         @endif
-        @if (!isset($disable_mobile_bottom_menu))
+        @if (!$disable_mobile_bottom_menu)
             <x-bottom-menu />
         @endif
     @endauth
@@ -281,7 +287,7 @@
         <x-demo-switcher themes-type="Dashboard" />
     @endif
 
-	@includeIf('demoextension::switcher')
+    @includeIf('demoextension::switcher')
     @includeIf('content-manager::media-modal')
 </body>
 

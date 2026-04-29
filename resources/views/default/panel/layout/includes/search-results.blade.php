@@ -118,7 +118,8 @@
                             @endif
                         </span>
                     </x-lqd-icon>
-                    {{ $item->title }}
+
+                   {{ $item->title ?: \Illuminate\Support\Str::limit($item->input, 30) }}
                     <small class="ms-auto text-foreground/50">{{ $item->generator->type == 'text' ? __('Document') : __(ucfirst($item->generator->type)) }}</small>
                 </a>
             </li>
@@ -126,7 +127,7 @@
     </ul>
 @endif
 
-@if (isset($result) && ! $result)
+@if ($result === 'null')
     <div class="p-6 text-center font-medium text-heading-foreground">
         <h3 class="mb-2">{{ __('No results.') }}</h3>
         <p class="opacity-70">{{ __('Please try with another word.') }}</p>

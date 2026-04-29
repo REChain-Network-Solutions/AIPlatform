@@ -7,6 +7,7 @@ use App\Actions\EmailPaymentConfirmation;
 use App\Enums\Plan\FrequencyEnum;
 use App\Enums\Plan\TypeEnum;
 use App\Events\PaypalWebhookEvent;
+use App\Extensions\Affilate\System\Events\AffiliateEvent;
 use App\Models\Coupon;
 use App\Models\Currency;
 use App\Models\CustomBilingPlans;
@@ -15,6 +16,7 @@ use App\Models\Gateways;
 use App\Models\OldGatewayProducts;
 use App\Models\Plan;
 use App\Models\Setting;
+use App\Models\Usage;
 use App\Models\UserOrder;
 use App\Services\PaymentGateways\Contracts\CreditUpdater;
 use Carbon\Carbon;
@@ -338,8 +340,8 @@ class PayPalService
                 $subscription->stripe_id = $paypalSubscriptionID;
                 $subscription->stripe_price = $billingPlanId;
                 $subscription->stripe_status = 'active';
-                $subscription->ends_at = $plan->trial_days != 0 ? \Carbon\Carbon::now()->addDays($plan->trial_days) : \Carbon\Carbon::now()->addDays(30);
-                $subscription->trial_ends_at = $plan->trial_days != 0 ? \Carbon\Carbon::now()->addDays($plan->trial_days) : null;
+                $subscription->ends_at = $plan->trial_days != 0 ? Carbon::now()->addDays($plan->trial_days) : Carbon::now()->addDays(30);
+                $subscription->trial_ends_at = $plan->trial_days != 0 ? Carbon::now()->addDays($plan->trial_days) : null;
             }
             $subscription->user_id = $user->id;
             $subscription->name = $planID;
@@ -379,12 +381,12 @@ class PayPalService
 
             CreateActivity::for($user, __('Subscribed'), $plan->name . ' ' . __('Plan'));
             EmailPaymentConfirmation::create($user, $plan)->send();
-            \App\Models\Usage::getSingle()->updateSalesCount($total);
+            Usage::getSingle()->updateSalesCount($total);
 
             DB::commit();
 
             if (class_exists('App\Extensions\Affilate\System\Events\AffiliateEvent')) {
-                event(new \App\Extensions\Affilate\System\Events\AffiliateEvent($total, $gateway->currency));
+                event(new AffiliateEvent($total, $gateway->currency));
             }
 
             return ['result' => 'OK'];
@@ -494,7 +496,7 @@ class PayPalService
 
             CreateActivity::for($user, __('Purchased'), $plan->name . ' ' . __('Plan'));
             EmailPaymentConfirmation::create($user, $plan)->send();
-            \App\Models\Usage::getSingle()->updateSalesCount($total);
+            Usage::getSingle()->updateSalesCount($total);
             DB::commit();
 
             return ['result' => 'OK'];
@@ -528,7 +530,7 @@ class PayPalService
             $response = $provider->cancelSubscription($subscription->stripe_id, 'Plan deleted by admin.');
             if ($response == '') {
                 $subscription->stripe_status = 'cancelled';
-                $subscription->ends_at = \Carbon\Carbon::now();
+                $subscription->ends_at = Carbon::now();
                 $subscription->save();
 
                 self::creditDecreaseCancelPlan($user, $plan);
@@ -547,7 +549,7 @@ class PayPalService
         $activeSub = getCurrentActiveSubscription($userId);
         if ($activeSub != null) {
             if ($activeSub->stripe_status == 'paypal_approved') {
-                return \Carbon\Carbon::createFromTimeStamp($activeSub->ends_at)->format('F jS, Y');
+                return Carbon::createFromTimeStamp($activeSub->ends_at)->format('F jS, Y');
             }
 
             $subscription = $provider->showSubscriptionDetails($activeSub->stripe_id);
@@ -557,14 +559,14 @@ class PayPalService
                 return back()->with(['message' => 'PayPal Gateway : ' . $subscription['error']['message'], 'type' => 'error']);
             }
             if ($subscription['billing_info']['next_billing_time']) {
-                return \Carbon\Carbon::parse($subscription['billing_info']['next_billing_time'])->format('F jS, Y');
+                return Carbon::parse($subscription['billing_info']['next_billing_time'])->format('F jS, Y');
             }
 
             $activeSub->stripe_status = 'cancelled';
-            $activeSub->ends_at = \Carbon\Carbon::now();
+            $activeSub->ends_at = Carbon::now();
             $activeSub->save();
 
-            return \Carbon\Carbon::now()->format('F jS, Y');
+            return Carbon::now()->format('F jS, Y');
         }
 
         return null;
@@ -620,7 +622,7 @@ class PayPalService
             $response = $provider->cancelSubscription($activeSub->stripe_id, 'Not satisfied with the service');
             if ($response == '') {
                 $activeSub->stripe_status = 'cancelled';
-                $activeSub->ends_at = \Carbon\Carbon::now();
+                $activeSub->ends_at = Carbon::now();
                 $activeSub->save();
 
                 self::creditDecreaseCancelPlan($user, $plan);
@@ -659,14 +661,14 @@ class PayPalService
                     }
 
                     if (isset($subscription['billing_info']['next_billing_time'])) {
-                        return \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($subscription['billing_info']['next_billing_time']));
+                        return Carbon::now()->diffInDays(Carbon::parse($subscription['billing_info']['next_billing_time']));
                     }
 
                     $activeSub->stripe_status = 'cancelled';
-                    $activeSub->ends_at = \Carbon\Carbon::now();
+                    $activeSub->ends_at = Carbon::now();
                     $activeSub->save();
 
-                    return \Carbon\Carbon::now()->format('F jS, Y');
+                    return Carbon::now()->format('F jS, Y');
                 }
             } else {
                 Log::error("PayPalService::getSubscriptionDaysLeft() :\n" . json_encode($subscription));
@@ -699,7 +701,7 @@ class PayPalService
             }
 
             $activeSub->stripe_status = 'cancelled';
-            $activeSub->ends_at = \Carbon\Carbon::now();
+            $activeSub->ends_at = Carbon::now();
             $activeSub->save();
 
             return false;
@@ -926,7 +928,7 @@ class PayPalService
             // Retrieve the JSON payload
             $payload = $request->getContent();
             // Fire the event with the payload
-            event(new PayPalWebhookEvent($payload));
+            event(new PaypalWebhookEvent($payload));
 
             return response()->json(['success' => true]);
         }
@@ -1057,7 +1059,7 @@ class PayPalService
                         $response = $provider->cancelSubscription($orderId, 'New plan created by admin.');
                         // cancel subscription from our database
                         $sub->stripe_status = 'cancelled';
-                        $sub->ends_at = \Carbon\Carbon::now();
+                        $sub->ends_at = Carbon::now();
                         $sub->save();
                     }
                 }

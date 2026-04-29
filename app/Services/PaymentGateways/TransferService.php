@@ -12,9 +12,12 @@ use App\Models\PaymentProof;
 use App\Models\Plan;
 // use App\Models\SubscriptionItems;
 use App\Models\Setting;
+use App\Models\Usage;
 use App\Models\User;
 use App\Models\UserOrder;
+use App\Services\Common\MenuService;
 use App\Services\PaymentGateways\Contracts\CreditUpdater;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -191,25 +194,25 @@ class TransferService
             $subscription->trial_ends_at = null;
             switch ($plan->frequency) {
                 case FrequencyEnum::MONTHLY->value:
-                    $subscription->ends_at = \Carbon\Carbon::now()->addMonths(1);
+                    $subscription->ends_at = Carbon::now()->addMonths(1);
 
                     break;
                 case FrequencyEnum::YEARLY->value:
-                    $subscription->ends_at = \Carbon\Carbon::now()->addYears(1);
+                    $subscription->ends_at = Carbon::now()->addYears(1);
 
                     break;
                 case FrequencyEnum::LIFETIME_MONTHLY->value:
-                    $subscription->ends_at = \Carbon\Carbon::now()->addMonths(1); // ends each month but auto renewing without payment reqs
+                    $subscription->ends_at = Carbon::now()->addMonths(1); // ends each month but auto renewing without payment reqs
                     $subscription->auto_renewal = 1;
 
                     break;
                 case FrequencyEnum::LIFETIME_YEARLY->value:
-                    $subscription->ends_at = \Carbon\Carbon::now()->addYears(1); // ends each year but auto renewing without payment reqs
+                    $subscription->ends_at = Carbon::now()->addYears(1); // ends each year but auto renewing without payment reqs
                     $subscription->auto_renewal = 1;
 
                     break;
                 default:
-                    $subscription->ends_at = \Carbon\Carbon::now()->addDays(30);
+                    $subscription->ends_at = Carbon::now()->addDays(30);
 
                     break;
             }
@@ -243,7 +246,7 @@ class TransferService
             $paymentProof->proof_image = $filename;
             $paymentProof->save();
             $request->file('proof_image')?->move(public_path('proofs'), $filename);
-            \App\Models\Usage::getSingle()->updateSalesCount($total);
+            Usage::getSingle()->updateSalesCount($total);
             CreateActivity::for($user, __('initiated a subscription approval-awaiting bank transaction.'), $plan->name . ' ' . __('Plan'));
 
         } catch (Exception $th) {
@@ -253,7 +256,7 @@ class TransferService
             return back()->with(['message' => Str::before($th->getMessage(), ':'), 'type' => 'error']);
         }
         DB::commit();
-        app(\App\Services\Common\MenuService::class)->regenerate();
+        app(MenuService::class)->regenerate();
 
         return redirect()->route('dashboard.user.payment.succesful')->with([
             'message' => __('Thank you for your purchase. You will be notified once the payment transaction is accepted.'),
@@ -332,7 +335,7 @@ class TransferService
             $order->tax_rate = $gateway->tax;
             $order->tax_value = taxToVal($plan->price, $gateway->tax);
             $order->save();
-            \App\Models\Usage::getSingle()->updateSalesCount($total);
+            Usage::getSingle()->updateSalesCount($total);
             CreateActivity::for($user, __('initiated a prepaid pack approval-awaiting bank transaction.'), $plan->name . ' ' . __('Plan'));
 
         } catch (Exception $th) {
@@ -371,7 +374,7 @@ class TransferService
         $currency = Currency::where('id', $gateway->currency)->first()->code;
         $sub = getCurrentActiveSubscription($user->id);
         if ($sub) {
-            return \Carbon\Carbon::now()->diffInDays($sub->ends_at);
+            return Carbon::now()->diffInDays($sub->ends_at);
         }
 
         Log::error('getSubscriptionDaysLeft()');
@@ -413,7 +416,7 @@ class TransferService
         $user = Auth::user();
         $activeSub = getCurrentActiveSubscription($user->id);
 
-        return \Carbon\Carbon::parse($activeSub->ends_at)->format('F jS, Y');
+        return Carbon::parse($activeSub->ends_at)->format('F jS, Y');
     }
 
     public static function cancelSubscribedPlan($subscription, $planId)

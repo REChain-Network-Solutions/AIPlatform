@@ -6,11 +6,12 @@ use App\Extensions\Chatbot\System\Models\Chatbot;
 use App\Extensions\Chatbot\System\Models\ChatbotChannel;
 use App\Extensions\Chatbot\System\Models\ChatbotConversation;
 use App\Extensions\ChatbotInstagram\System\Services\InstagramConversationService;
+use App\Helpers\Classes\MarketplaceHelper;
 use App\Models\User;
 use Illuminate\Support\Str;
 
 uses()->beforeEach(function () {
-    if (! \App\Helpers\Classes\MarketplaceHelper::isRegistered('chatbot-instagram')) {
+    if (! MarketplaceHelper::isRegistered('chatbot-instagram')) {
         $this->markTestSkipped('ChatbotInstagram extension is not registered.');
     }
 });

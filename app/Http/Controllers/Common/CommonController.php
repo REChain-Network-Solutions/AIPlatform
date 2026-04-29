@@ -7,9 +7,12 @@ use App\Helpers\Classes\Localization;
 use App\Helpers\Classes\MarketplaceHelper;
 use App\Http\Controllers\Controller;
 use App\Models\SettingTwo;
+use Elseyyid\LaravelJsonLocationsManager\Models\Strings;
 use Exception;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\File;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -48,7 +51,7 @@ class CommonController extends Controller
 
     public function setLocale(Request $request): RedirectResponse
     {
-        $settings_two = \App\Models\SettingTwo::getCache();
+        $settings_two = SettingTwo::getCache();
         $settings_two->languages_default = $request->setLocale;
         $settings_two->save();
         Localization::setLocale($request->setLocale);
@@ -67,15 +70,15 @@ class CommonController extends Controller
         $column_name = $request->get('lang');
         foreach ($json as $code => $column_value) {
             if (! empty($column_value)) {
-                $test = \Elseyyid\LaravelJsonLocationsManager\Models\Strings::where('code', '=', $code)->update([$column_name => $column_value]);
+                $test = Strings::where('code', '=', $code)->update([$column_name => $column_value]);
             }
         }
 
         $lang = $column_name;
-        $list = \Elseyyid\LaravelJsonLocationsManager\Models\Strings::pluck($lang, 'en');
+        $list = Strings::pluck($lang, 'en');
 
         $new_json = json_encode_prettify($list);
-        $filesystem = new \Illuminate\Filesystem\Filesystem;
+        $filesystem = new Filesystem;
         $filesystem->put(base_path('lang/' . $lang . '.json'), $new_json);
 
         if ($column_name == 'edit') {
@@ -110,7 +113,7 @@ class CommonController extends Controller
             return response()->json(['code' => 403, 'message' => __('This feature is disabled in demo mode.')], 403);
         }
 
-        $settings_two = \App\Models\SettingTwo::getCache();
+        $settings_two = SettingTwo::getCache();
         $codes = explode(',', $settings_two->languages);
 
         if ($request->state) {
@@ -170,7 +173,7 @@ class CommonController extends Controller
         return response()->json(['path' => $paths]);
     }
 
-    public function filesUpload(Request $request): \Illuminate\Http\JsonResponse
+    public function filesUpload(Request $request): JsonResponse
     {
         $contentManagerActive = MarketplaceHelper::isRegistered('content-manager')
             && setting('content_manager_enabled', '1');

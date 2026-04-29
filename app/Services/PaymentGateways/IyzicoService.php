@@ -17,6 +17,7 @@ use App\Models\OldGatewayProducts;
 use App\Models\Plan;
 // use App\Models\SubscriptionItems;
 use App\Models\Setting;
+use App\Models\Usage;
 use App\Models\User;
 use App\Models\UserOrder;
 use App\Services\PaymentGateways\Contracts\CreditUpdater;
@@ -31,7 +32,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Iyzipay\Model\CheckoutFormInitialize;
 use Iyzipay\Model\Locale;
+use Iyzipay\Model\Subscription\RetrieveSubscriptionCheckoutForm;
+use Iyzipay\Model\Subscription\SubscriptionCreateCheckoutForm;
+use Iyzipay\Request\CreateCheckoutFormInitializeRequest;
+use Iyzipay\Request\Subscription\RetrieveSubscriptionCreateCheckoutFormRequest;
+use Iyzipay\Request\Subscription\SubscriptionCreateCheckoutFormRequest;
 use JsonException;
 use Laravel\Cashier\Subscription as Subscriptions;
 
@@ -400,7 +407,7 @@ class IyzicoService
                 ]));
 
                 // create checkout form for one time payment with paymentRequest
-                $requestOneTimePayment = new \Iyzipay\Request\CreateCheckoutFormInitializeRequest;
+                $requestOneTimePayment = new CreateCheckoutFormInitializeRequest;
                 $requestOneTimePayment->setPrice($newDiscountedPrice);
                 $requestOneTimePayment->setPaidPrice($newDiscountedPrice);
                 $requestOneTimePayment->setCallbackUrl(route('dashboard.user.payment.iyzico.subscribe.callback'));
@@ -410,7 +417,7 @@ class IyzicoService
                 $requestOneTimePayment->setBillingAddress($address);
                 $requestOneTimePayment->setBasketItems([$basketItem_0]);
 
-                $checkoutform = \Iyzipay\Model\CheckoutFormInitialize::create($requestOneTimePayment, $iyzipayActions->getConfig());
+                $checkoutform = CheckoutFormInitialize::create($requestOneTimePayment, $iyzipayActions->getConfig());
                 if ($checkoutform->getStatus() === 'failure') {
                     $errorCode = $checkoutform->getErrorCode();
                     $errorMessage = $checkoutform->getErrorMessage();
@@ -517,14 +524,14 @@ class IyzicoService
                         $newDPriceID = $subscriptionPricingPlan->getReferenceCode();
                     }
                 }
-                $checkoutFormRequest = new \Iyzipay\Request\Subscription\SubscriptionCreateCheckoutFormRequest;
+                $checkoutFormRequest = new SubscriptionCreateCheckoutFormRequest;
                 $checkoutFormRequest->setConversationId($iyzipayActions->generateRandomNumber());
                 $checkoutFormRequest->setLocale($iyzipayActions->getLocale());
                 $checkoutFormRequest->setPricingPlanReferenceCode($newDPriceID);
                 $checkoutFormRequest->setSubscriptionInitialStatus('ACTIVE');
                 $checkoutFormRequest->setCallbackUrl(route('dashboard.user.payment.iyzico.subscribe.callback'));
                 $checkoutFormRequest->setCustomer($customer);
-                $checkoutform = \Iyzipay\Model\Subscription\SubscriptionCreateCheckoutForm::create($checkoutFormRequest, $iyzipayActions->getConfig());
+                $checkoutform = SubscriptionCreateCheckoutForm::create($checkoutFormRequest, $iyzipayActions->getConfig());
                 if ($checkoutform->getStatus() === 'failure') {
                     $errorCode = $checkoutform->getErrorCode();
                     $errorMessage = $checkoutform->getErrorMessage();
@@ -577,9 +584,9 @@ class IyzicoService
             $iyzipayActions = self::retrieveGatewaySettings();
 
             // retrieve subscription result
-            $checkoutresultrequest = new \Iyzipay\Request\Subscription\RetrieveSubscriptionCreateCheckoutFormRequest;
+            $checkoutresultrequest = new RetrieveSubscriptionCreateCheckoutFormRequest;
             $checkoutresultrequest->setCheckoutFormToken(strval($request->token));
-            $checkoutresult = \Iyzipay\Model\Subscription\RetrieveSubscriptionCheckoutForm::retrieve($checkoutresultrequest, $iyzipayActions->getConfig());
+            $checkoutresult = RetrieveSubscriptionCheckoutForm::retrieve($checkoutresultrequest, $iyzipayActions->getConfig());
             if ($checkoutresult->getStatus() == 'success' && ($checkoutresult->getSubscriptionStatus() == 'ACTIVE' || $checkoutresult->getSubscriptionStatus() == 'active')) {
                 // Since we could not transfer anything except token id to callback page we must use a middle step
                 // We saved token id to CustomSettings table and retrieve it now
@@ -666,7 +673,7 @@ class IyzicoService
 
                 // delete custom settings since we do not need it anymore
                 $customSettings->delete();
-                \App\Models\Usage::getSingle()->updateSalesCount($newDiscountedPrice);
+                Usage::getSingle()->updateSalesCount($newDiscountedPrice);
                 CreateActivity::for($user, __('Subscribed'), $plan->name . ' ' . __('Plan'));
                 EmailPaymentConfirmation::create($user, $plan)->send();
             } else {
@@ -764,7 +771,7 @@ class IyzicoService
                         self::creditIncreaseSubscribePlan($user, $plan);
                         // delete custom settings since we do not need it anymore
                         $customSettings->delete();
-                        \App\Models\Usage::getSingle()->updateSalesCount($newDiscountedPrice);
+                        Usage::getSingle()->updateSalesCount($newDiscountedPrice);
                         CreateActivity::for($user, __('Subscribed'), $plan->name . ' ' . __('Plan'));
                         EmailPaymentConfirmation::create($user, $plan)->send();
                     }
@@ -920,7 +927,7 @@ class IyzicoService
             ], JSON_THROW_ON_ERROR), false, 512, JSON_THROW_ON_ERROR);
 
             // create checkout form for one time payment with paymentRequest
-            $requestOneTimePayment = new \Iyzipay\Request\CreateCheckoutFormInitializeRequest;
+            $requestOneTimePayment = new CreateCheckoutFormInitializeRequest;
             $requestOneTimePayment->setPrice($newDiscountedPrice);
             $requestOneTimePayment->setPaidPrice($newDiscountedPrice);
             $requestOneTimePayment->setCallbackUrl(route('dashboard.user.payment.iyzico.prepaid.callback'));
@@ -930,7 +937,7 @@ class IyzicoService
             $requestOneTimePayment->setBillingAddress($address);
             $requestOneTimePayment->setBasketItems([$basketItem_0]);
 
-            $checkoutform = \Iyzipay\Model\CheckoutFormInitialize::create($requestOneTimePayment, $iyzipayActions->getConfig());
+            $checkoutform = CheckoutFormInitialize::create($requestOneTimePayment, $iyzipayActions->getConfig());
             if ($checkoutform->getStatus() === 'failure') {
                 $errorCode = $checkoutform->getErrorCode();
                 $errorMessage = $checkoutform->getErrorMessage();
@@ -1037,7 +1044,7 @@ class IyzicoService
                 self::creditIncreaseSubscribePlan($user, $plan);
                 // delete custom settings since we do not need it anymore
                 $customSettings->delete();
-                \App\Models\Usage::getSingle()->updateSalesCount($newDiscountedPrice);
+                Usage::getSingle()->updateSalesCount($newDiscountedPrice);
                 CreateActivity::for($user, __('Purchased'), $plan->name . ' ' . __('Token Pack'));
                 EmailPaymentConfirmation::create($user, $plan)->send();
             }

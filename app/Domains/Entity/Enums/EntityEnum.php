@@ -155,6 +155,11 @@ enum EntityEnum: string
 
     case GPT_5_4 = 'gpt-5.4';
 
+    case GPT_5_4_MINI = 'gpt-5.4-mini';
+    case GPT_5_4_NANO = 'gpt-5.4-nano';
+    case O3_DEEP_RESEARCH = 'o3-deep-research';
+    case O4_MINI_DEEP_RESEARCH = 'o4-mini-deep-research';
+
     case SORA_2 = 'sora-2';
 
     case SORA_2_PRO = 'sora-2-pro';
@@ -200,6 +205,7 @@ enum EntityEnum: string
     case GEMINI_3_PRO_PREVIEW = 'gemini-3-pro-preview';
     case GEMINI_3_1_PRO_PREVIEW = 'gemini-3.1-pro-preview';
     case GEMINI_2_5_PRO = 'gemini-2.5-pro';
+    case GEMINI_DEEP_RESEARCH = 'gemini-deep-research';
     case GEMINI_2_0_FLASH = 'gemini-2.0-flash';
     case GEMINI_2_0_FLASH_LITE = 'gemini-2.0-flash-lite';
     case GEMINI_1_5_PRO = 'gemini-1.5-pro';
@@ -438,9 +444,27 @@ enum EntityEnum: string
             self::GPT_5_MINI,
             self::GPT_5_NANO,
             self::GPT_5_3_CHAT,
-            self::GPT_5_4    => true,
-            default          => false,
+            self::GPT_5_4,
+            self::GPT_5_4_MINI,
+            self::GPT_5_4_NANO    => true,
+            default               => false,
         };
+    }
+
+    public function isOSeriesModel(): bool
+    {
+        return match ($this) {
+            self::GPT_O_1,
+            self::GPT_O_4_MINI,
+            self::GPT_O_3,
+            self::GPT_O_03_mini => true,
+            default             => false,
+        };
+    }
+
+    public function requiresMaxCompletionTokens(): bool
+    {
+        return $this->isReasoningModel();
     }
 
     public function creditBy(): self
@@ -521,6 +545,11 @@ enum EntityEnum: string
             self::GPT_5_2_PRO                 => __('GPT-5.2 Pro (Aug 31, 2025 knowledge cutoff, 128k max output tokens.)'),
             self::GPT_5_3_CHAT                => __('GPT-5.3 Instant (Aug 31, 2025 knowledge cutoff, 16k max output tokens.)'),
             self::GPT_5_4                     => __('GPT-5.4 (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)'),
+            self::GPT_5_4_MINI                => __('GPT-5.4 Mini (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)'),
+            self::GPT_5_4_NANO                => __('GPT-5.4 Nano (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)'),
+
+            self::O3_DEEP_RESEARCH             => __('o3 Deep Research (Multi-step web research with detailed reports)'),
+            self::O4_MINI_DEEP_RESEARCH        => __('o4-mini Deep Research (Fast multi-step web research with reports)'),
 
             self::SORA_2                      => __('Sora 2 (Flagship video generation with synced audio)'),
             self::SORA_2_PRO                  => __('Sora 2 Pro (Most advanced synced-audio video generation)'),
@@ -556,6 +585,7 @@ enum EntityEnum: string
             self::GEMINI_3_1_PRO_PREVIEW           => __('Gemini 3.1 Pro Preview Refined performance and reliability, thinking, multimodal, function calling, structured outputs.'),
             self::GEMINI_2_5_FLASH_PREVIEW_05_20   => __('Gemini 2.5 Flash Preview 05-20 Adaptive thinking, cost efficiency'),
             self::GEMINI_2_5_PRO                   => __('Gemini 2.5 Pro Preview Enhanced thinking and reasoning, multimodal understanding, advanced coding, and more'),
+            self::GEMINI_DEEP_RESEARCH             => __('Gemini Deep Research (Multi-step web research with detailed reports)'),
             self::GEMINI_2_0_FLASH                 => __('Gemini 2.0 Flash Next generation features, speed, thinking, realtime streaming, and multimodal generation'),
             self::GEMINI_2_0_FLASH_LITE            => __('Gemini 2.0 Flash-Lite Cost efficiency and low latency'),
             self::GEMINI_1_5_PRO                   => __('Gemini 1.5 Pro Complex reasoning tasks requiring more intelligence'),
@@ -779,6 +809,10 @@ enum EntityEnum: string
             self::GPT_5_2_PRO,
             self::GPT_5_3_CHAT,
             self::GPT_5_4,
+            self::GPT_5_4_MINI,
+            self::GPT_5_4_NANO,
+            self::O3_DEEP_RESEARCH,
+            self::O4_MINI_DEEP_RESEARCH,
             self::SORA_2,
             self::SORA_2_PRO,
             self::GPT_O_4_MINI => EngineEnum::OPEN_AI,
@@ -823,6 +857,7 @@ enum EntityEnum: string
             self::GEMINI_3_1_PRO_PREVIEW,
             self::GEMINI_2_5_FLASH_PREVIEW_05_20,
             self::GEMINI_2_5_PRO,
+            self::GEMINI_DEEP_RESEARCH,
             self::GEMINI_2_0_FLASH,
             self::GEMINI_2_0_FLASH_LITE,
             self::GEMINI_1_5_PRO,
@@ -975,6 +1010,10 @@ enum EntityEnum: string
             self::GPT_5_2_PRO                 => OpenAI\GPT52ProDriver::class,
             self::GPT_5_3_CHAT                => OpenAI\GPT53ChatDriver::class,
             self::GPT_5_4                     => OpenAI\GPT54Driver::class,
+            self::GPT_5_4_MINI                => OpenAI\GPT54MiniDriver::class,
+            self::GPT_5_4_NANO                => OpenAI\GPT54NanoDriver::class,
+            self::O3_DEEP_RESEARCH            => OpenAI\O3DeepResearchDriver::class,
+            self::O4_MINI_DEEP_RESEARCH       => OpenAI\O4MiniDeepResearchDriver::class,
             self::SORA_2                      => OpenAI\Sora2Driver::class,
             self::SORA_2_PRO                  => OpenAI\Sora2ProDriver::class,
 
@@ -1003,6 +1042,7 @@ enum EntityEnum: string
             self::GEMINI_3_1_PRO_PREVIEW           => Gemini\Gemini31ProPreviewDriver::class,
             self::GEMINI_2_5_FLASH_PREVIEW_05_20   => Gemini\Gemini25FlashPreview0417Driver::class,
             self::GEMINI_2_5_PRO                   => Gemini\Gemini25ProExp0325Driver::class,
+            self::GEMINI_DEEP_RESEARCH             => Gemini\GeminiDeepResearchDriver::class,
             self::GEMINI_2_0_FLASH                 => Gemini\Gemini20FlashDriver::class,
             self::GEMINI_2_0_FLASH_LITE            => Gemini\Gemini20FlashLiteDriver::class,
             self::GEMINI_1_5_PRO                   => Gemini\Gemini15ProDriver::class,
@@ -1206,6 +1246,10 @@ enum EntityEnum: string
             self::GPT_5_2_PRO                 => 0.021,
             self::GPT_5_3_CHAT                => 0.000014,
             self::GPT_5_4                     => 0.025,
+            self::GPT_5_4_MINI                => 0.00250,
+            self::GPT_5_4_NANO                => 0.000500,
+            self::O3_DEEP_RESEARCH            => 0.0000665,
+            self::O4_MINI_DEEP_RESEARCH       => 0.000005852,
             self::SORA_2                      => 0.10,
             self::SORA_2_PRO                  => 0.50,
 
@@ -1238,6 +1282,7 @@ enum EntityEnum: string
             self::GEMINI_3_1_PRO_PREVIEW           => 0.0001197,
             self::GEMINI_2_5_FLASH_PREVIEW_05_20   => 0.00000333,
             self::GEMINI_2_5_PRO                   => 0.00001333,
+            self::GEMINI_DEEP_RESEARCH             => 0.00001333,
             self::GEMINI_2_0_FLASH                 => 0.00000053,
             self::GEMINI_2_0_FLASH_LITE            => 0.00000040,
             self::GEMINI_1_5_PRO                   => 0.00001333,
@@ -1525,6 +1570,27 @@ enum EntityEnum: string
         ]);
     }
 
+    public function isDeprecated(): bool
+    {
+        return in_array($this, [
+            // OpenAI deprecated models
+            self::DAVINCI,
+            self::TEXT_DAVINCI_003,
+            self::GPT_3_5_TURBO,
+            self::GPT_3_5_TURBO_0125,
+            self::GPT_3_5_TURBO_1106,
+            self::GPT_4_1106_PREVIEW,
+            self::GPT_4_0125_PREVIEW,
+            self::GPT_4_O1_PREVIEW,
+            self::GPT_4_O1_MINI,
+            self::GPT_4_O_REALTIME_PREVIEW,
+            self::DALL_E_2,
+            self::DALL_E_3,
+            self::SORA_2,
+            self::SORA_2_PRO,
+        ]);
+    }
+
     public static function reWriterModels(EngineEnum $engineEnum): array
     {
         return match ($engineEnum) {
@@ -1561,6 +1627,8 @@ enum EntityEnum: string
                 self::GPT_5_2_PRO,
                 self::GPT_5_3_CHAT,
                 self::GPT_5_4,
+                self::GPT_5_4_MINI,
+                self::GPT_5_4_NANO,
                 self::DEEPSEEK_CHAT,
                 self::DEEPSEEK_REASONER,
             ]

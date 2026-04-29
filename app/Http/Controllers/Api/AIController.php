@@ -18,6 +18,7 @@ use App\Models\SettingTwo;
 use App\Models\Usage;
 use App\Models\User;
 use App\Models\UserOpenai;
+use App\Services\Ai\AiCompletionService;
 use App\Services\Bedrock\BedrockRuntimeService;
 use App\Services\Youtube\YoutubeTranscriptService;
 use Exception;
@@ -521,7 +522,7 @@ class AIController extends Controller
 
             $videoUrl = $request->url;
 
-            $data = (new youtubeTranscriptService)
+            $data = (new YoutubeTranscriptService)
                 ->getTranscript($videoUrl);
             $transcripts = json_decode($data->content(), true);
 
@@ -664,7 +665,7 @@ class AIController extends Controller
         $driver = Entity::driver();
         $driver->redirectIfNoCreditBalance();
 
-        $output = app(\App\Services\Ai\AiCompletionService::class)->completeUserOnly($prompt);
+        $output = app(AiCompletionService::class)->completeUserOnly($prompt);
 
         $entry = new UserOpenai([
             'team_id'     => $user->team_id,
@@ -1409,7 +1410,7 @@ class AIController extends Controller
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      * @throws Throwable
      * @throws JsonException
      */

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use Datlechin\GoogleTranslate\Facades\GoogleTranslate;
+use Elseyyid\LaravelJsonLocationsManager\Models\Strings;
 use Throwable;
 
 class TranslateController extends Controller
@@ -85,7 +86,7 @@ class TranslateController extends Controller
 
                 // Update the Strings model based on the translation
                 $column_name = $lang;
-                $query = \Elseyyid\LaravelJsonLocationsManager\Models\Strings::query();
+                $query = Strings::query();
 
                 if ($column_name == 'edit') {
                     // Logic for handling 'edit' column

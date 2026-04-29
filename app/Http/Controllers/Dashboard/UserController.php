@@ -49,6 +49,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -462,11 +463,11 @@ class UserController extends Controller
 
             $category = OpenaiGeneratorChatCategory::whereSlug($slug)->firstOrFail();
 
-            if ($isPaid == false && $category->plan == 'premium' && auth()->user()->type !== 'admin') {
+            if ($isPaid == false && $category?->plan == 'premium' && auth()->user()->type !== 'admin') {
                 return redirect()->back()->with(['message' => __('Needs a Premium access'), 'type' => 'error']);
             }
 
-            $list = UserOpenaiChat::where('user_id', Auth::id())->where('openai_chat_category_id', $category->id)->orderBy('is_pinned', 'desc')->orderBy('updated_at', 'desc');
+            $list = UserOpenaiChat::where('user_id', Auth::id())->where('openai_chat_category_id', $category?->id)->orderBy('is_pinned', 'desc')->orderBy('updated_at', 'desc');
             $list = $list->get();
             $chat = $list->first();
             $aiList = OpenaiGeneratorChatCategory::all();
@@ -828,7 +829,7 @@ class UserController extends Controller
         };
     }
 
-    protected function getUserVideos($folderID = null): \Illuminate\Support\Collection
+    protected function getUserVideos($folderID = null): Collection
     {
         $user = Auth::user();
         $query = UserOpenai::query()
@@ -886,7 +887,7 @@ class UserController extends Controller
         return $dbVideos->merge($userFallVideos)->sortByDesc('created_at');
     }
 
-    protected function getUserAiImageProImages($folderID = null): \Illuminate\Support\Collection
+    protected function getUserAiImageProImages($folderID = null): Collection
     {
         if (
             $folderID !== null || ! MarketplaceHelper::isRegistered('ai-image-pro')
@@ -934,7 +935,7 @@ class UserController extends Controller
         return $items->sortByDesc('created_at')->values();
     }
 
-    protected function getUserAiChatProImageChatImages($folderID = null): \Illuminate\Support\Collection
+    protected function getUserAiChatProImageChatImages($folderID = null): Collection
     {
         if (
             $folderID !== null || ! MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')
@@ -982,7 +983,7 @@ class UserController extends Controller
         return $items->sortByDesc('created_at')->values();
     }
 
-    private function getExternalFavoriteSlugLookup(string $slugPrefix): \Illuminate\Support\Collection
+    private function getExternalFavoriteSlugLookup(string $slugPrefix): Collection
     {
         return UserOpenai::query()
             ->where('user_id', auth()->id())

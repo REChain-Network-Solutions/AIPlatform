@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Actions\EmailConfirmation;
+use App\Classes\PapAffiliate;
 use App\Events\UsersActivityEvent;
+use App\Extensions\Hubspot\System\Services\HubspotService;
 use App\Helpers\Classes\MarketplaceHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
@@ -310,7 +312,7 @@ class AuthenticationController extends Controller
         // External API Integrations (PapAffiliate, Mailchimp, Hubspot)
         if (class_exists('App\Classes\PapAffiliate')) {
             try {
-                (new \App\Classes\PapAffiliate)->addAffiliate([
+                (new PapAffiliate)->addAffiliate([
                     'email'        => $user->email,
                     'firstname'    => $request->input('name'),
                     'lastname'     => $request->input('surname'),
@@ -339,7 +341,7 @@ class AuthenticationController extends Controller
 
         // Hubspot integration (if configured)
         if (MarketplaceHelper::isRegistered('hubspot') && setting('hubspot_crm_contact_register') === 1) {
-            (new \App\Extensions\Hubspot\System\Services\HubspotService)
+            (new HubspotService)
                 ->createCrmContacts($request->email, $request->input('name'), $request->input('surname'));
         }
 

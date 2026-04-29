@@ -8,13 +8,13 @@
         @keyup.escape="promptLibraryShow = false"
     >
         <div
-            class="lqd-modal-backdrop fixed inset-0 bg-black/5 backdrop-blur-sm"
+            class="lqd-modal-backdrop fixed inset-0 bg-black/50 backdrop-blur-sm"
             @click="promptLibraryShow = false"
         ></div>
 
         <div class="container max-w-[1025px]">
             <div
-                class="lqd-modal-content relative z-50 max-h-[95vh] min-h-[550px] min-w-[min(calc(100%-2rem),1025px)] overflow-y-auto overscroll-contain rounded-xl bg-background shadow-2xl shadow-black/10">
+                class="lqd-modal-content relative z-50 mx-auto h-[min(95vh,550px)] w-[min(calc(100%-2rem),1025px)] overflow-y-auto overscroll-contain rounded-xl bg-background shadow-2xl shadow-black/10">
                 <div
                     class="lqd-modal-body p-4"
                     x-trap.inert="promptLibraryShow"
@@ -24,75 +24,92 @@
                             {{ __('Prompt Library') }}
                         </h4>
 
-                        <x-modal
-                            class:modal-backdrop="backdrop-blur-none bg-foreground/15"
-                            type="inline"
-                            anchor="end"
-                        >
-                            <x-slot:trigger
-                                class="gap-1 font-bold text-primary"
-                                variant="link"
-                                disable-modal="{{ $app_is_demo }}"
-                                disable-modal-message="{{ __('This feature is disabled in Demo version.') }}"
+                        <div class="flex items-center gap-1.5">
+                            <x-modal
+                                class:modal-backdrop="backdrop-blur-none bg-black/10"
+                                class:modal-body="p-7"
+                                type="inline"
+                                anchor="end"
                             >
-                                {{ __('Add') }}
-                                <x-tabler-plus
-                                    class="size-3"
-                                    stroke-width="3"
-                                />
-                            </x-slot:trigger>
-
-                            <x-slot:modal
-                                x-data="{}"
-                            >
-                                <form
-                                    class="flex flex-col gap-4"
-                                    action='/dashboard/user/openai/chat/add-prompt'
-                                    method="POST"
-                                    x-init
-                                    x-target="lqd-prompt-list"
-                                    @submit="modalOpen = false;"
+                                <x-slot:trigger
+                                    class="gap-1 font-bold text-primary"
+                                    variant="link"
+                                    disable-modal="{{ $app_is_demo }}"
+                                    disable-modal-message="{{ __('This feature is disabled in Demo version.') }}"
                                 >
-                                    <x-forms.input
-                                        name="title"
-                                        size="lg"
-                                        placeholder="{{ __('Add Title') }}"
+                                    {{ __('Add Prompt') }}
+                                    <x-tabler-plus
+                                        class="size-3"
+                                        stroke-width="3"
                                     />
-                                    <x-forms.input
-                                        name="prompt"
-                                        type="textarea"
-                                        rows=6
-                                        placeholder="{{ __('Add custom prompt') }}"
-                                    />
-                                    @if (auth()->user()?->isAdmin())
+                                </x-slot:trigger>
+
+                                <x-slot:modal
+                                    x-data="{}"
+                                >
+                                    <form
+                                        class="flex flex-col gap-4"
+                                        action='/dashboard/user/openai/chat/add-prompt'
+                                        method="POST"
+                                        x-init
+                                        x-target="lqd-prompt-list"
+                                        @submit="modalOpen = false;"
+                                    >
                                         <x-forms.input
-                                            class:container="mb-2"
-                                            id="show_for_all"
-                                            name="show_for_all"
-                                            type="checkbox"
-                                            label="{{ __('Show this prompt for all users') }}"
-                                            switcher
+                                            name="title"
+                                            size="lg"
+                                            placeholder="{{ __('Add Title') }}"
                                         />
-                                    @endif
-                                    <div class="flex gap-4 border-t pt-3 text-end">
-                                        <x-button
-                                            class="grow basis-1/2"
-                                            @click.prevent="modalOpen = false"
-                                            variant="outline"
-                                        >
-                                            {{ __('Cancel') }}
-                                        </x-button>
-                                        <x-button
-                                            class="grow basis-1/2"
-                                            tag="button"
-                                            type="submit"
-                                        >
-                                            {{ __('Add') }}
-                                        </x-button>
-                                    </div>
-                                </form>
-                            </x-slot:modal>
-                        </x-modal>
+                                        <x-forms.input
+                                            name="prompt"
+                                            type="textarea"
+                                            rows=6
+                                            placeholder="{{ __('Add custom prompt') }}"
+                                        />
+                                        @if (auth()->user()?->isAdmin())
+                                            <x-forms.input
+                                                class="border-foreground/10"
+                                                class:container="mb-2"
+                                                id="show_for_all"
+                                                name="show_for_all"
+                                                type="checkbox"
+                                                label="{{ __('Show this prompt for all users') }}"
+                                                switcher
+                                            />
+                                        @endif
+                                        <div class="flex gap-4 border-t pt-3 text-end">
+                                            <x-button
+                                                class="grow basis-1/2"
+                                                @click.prevent="modalOpen = false"
+                                                variant="outline"
+                                            >
+                                                {{ __('Cancel') }}
+                                            </x-button>
+                                            <x-button
+                                                class="grow basis-1/2"
+                                                tag="button"
+                                                type="submit"
+                                            >
+                                                {{ __('Add') }}
+                                            </x-button>
+                                        </div>
+                                    </form>
+                                </x-slot:modal>
+                            </x-modal>
+
+                            <div class="contents lg:hidden">
+                                <div class="ms-1 inline-block h-4 w-px bg-border"></div>
+
+                                <button
+                                    class="inline-grid size-6 place-items-center rounded-button transition hover:bg-red-500 hover:text-white"
+                                    type="button"
+                                    @click.prevent="promptLibraryShow = false"
+                                    title="{{ __('Close') }}"
+                                >
+                                    <x-tabler-x class="size-4" />
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="mb-6 flex flex-wrap items-center justify-between gap-4 py-3 sm:flex-nowrap">

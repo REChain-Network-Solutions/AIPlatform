@@ -4,10 +4,14 @@ namespace MagicAI\Updater\Controllers;
 
 use App\Helpers\Classes\InstallationHelper;
 use Exception;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Validation\ValidationException;
 use MagicAI\Updater\Facades\Updater;
@@ -38,7 +42,7 @@ class UpdaterController
         ]);
     }
 
-    public function backup(Request $request): \Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|View|\Illuminate\View\View|RedirectResponse|\Illuminate\Contracts\Foundation\Application
+    public function backup(Request $request): Factory|Application|View|\Illuminate\View\View|RedirectResponse|\Illuminate\Contracts\Foundation\Application
     {
         $data = Updater::backupView();
 
@@ -67,7 +71,7 @@ class UpdaterController
         ]);
     }
 
-    public function upgrade(Request $request): \Illuminate\Foundation\Application|\Illuminate\Http\Response|\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory
+    public function upgrade(Request $request): Application|Response|\Illuminate\Contracts\Foundation\Application|ResponseFactory
     {
         $backupFileName = Updater::findLastBackup();
 
@@ -87,7 +91,7 @@ class UpdaterController
         ], 422);
     }
 
-    public function downloadStep(): \Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|View|\Illuminate\View\View|RedirectResponse|\Illuminate\Contracts\Foundation\Application
+    public function downloadStep(): Factory|Application|View|\Illuminate\View\View|RedirectResponse|\Illuminate\Contracts\Foundation\Application
     {
         $data = Updater::downloadView();
 

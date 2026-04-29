@@ -1,5 +1,5 @@
 @php
-    $isOtherCategories = isset($category) && ($category->slug == 'ai_vision' || $category->slug == 'ai_pdf' || $category->slug == 'ai_chat_image');
+    $isOtherCategories = isset($category) && ($category?->slug == 'ai_vision' || $category?->slug == 'ai_pdf' || $category?->slug == 'ai_chat_image');
     $disable_actions = $app_is_demo && $isOtherCategories;
 @endphp
 
@@ -13,16 +13,16 @@
             'ai_realtime_voice_chat' => __('AI Realtime Voice Chat'),
         ];
 
-        $title = $titles[$category->slug] ?? __('AI Chat');
+        $title = $titles[$category?->slug] ?? __('AI Chat');
     @endphp
     {{ $title }}
 @endsection
 @section('titlebar_subtitle')
-    @if ($category->slug == 'ai_vision')
+    @if ($category?->slug == 'ai_vision')
         {{ __('Seamlessly upload any image you want to explore and get insightful conversations.') }}
-    @elseif ($category->slug == 'ai_pdf')
+    @elseif ($category?->slug == 'ai_pdf')
         {{ __('Simply upload a PDF, find specific information. extract key insights or summarize the entire document.') }}
-    @elseif ($category->slug == 'ai_chat_image')
+    @elseif ($category?->slug == 'ai_chat_image')
         {{ __('Seamlessly generate and craft a diverse array of images without ever leaving your chat environment.') }}
     @endif
 @endsection
@@ -36,7 +36,7 @@
 @endsection
 
 @section('content')
-    @if ($category->slug == 'ai_webchat' && count($list) == 0)
+    @if ($category?->slug == 'ai_webchat' && count($list) == 0)
         <input
             id="createChatUrl"
             type="hidden"
@@ -56,24 +56,7 @@
             class="chats-wrap relative h-[calc(100vh-7rem)] md:grid md:h-[75vh] md:grid-flow-col md:[grid-template-columns:25%_75%]"
             id="user_chat_area"
             :class="{ 'chats-sidebar-hidden': $store.focusMode.active && sidebarHidden }"
-            x-data="{
-                mobileOptionsShow: false,
-                mobileSidebarShow: false,
-                sidebarHidden: false,
-                realtimeStatus: 'idle',
-                toggleMobileOptions() {
-                    this.mobileOptionsShow = !this.mobileOptionsShow
-                },
-                toggleMobileSidebar() {
-                    this.mobileSidebarShow = !this.mobileSidebarShow
-                },
-                toggleSidebarHidden() {
-                    this.sidebarHidden = !this.sidebarHidden
-                },
-                setRealtimeStatus(status) {
-                    this.realtimeStatus = status
-                }
-            }"
+            x-data="liquidChat"
         >
             <div
                 class="chats-sidebar-wrap relative flex h-[inherit] w-full transition-all max-md:absolute max-md:start-0 max-md:top-20 max-md:h-0 [&.active]:h-[calc(100%-80px)]"
@@ -183,7 +166,7 @@
             </span>
             <div
                 class="chat-content-container group relative max-w-[calc(100%-64px)] rounded-[2em] bg-secondary text-secondary-foreground dark:bg-zinc-700 dark:text-primary-foreground">
-                <div class="chat-content px-5 py-3.5 max-md:break-all"></div>
+                <div class="chat-content px-5 py-3.5 max-md:break-words"></div>
                 <div
                     class="lqd-chat-actions-wrap pointer-events-auto invisible absolute -start-5 bottom-0 flex flex-col gap-2 leading-5 opacity-0 transition-all group-hover:!visible group-hover:!opacity-100">
                     <div class="lqd-clipboard-copy-wrap group/copy-wrap flex flex-col gap-2 transition-all">
@@ -251,6 +234,90 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </template>
+
+    <template id="chat_ai_council_bubble">
+        <div
+            class="lqd-chat-ai-bubble model-council-bubble group mb-2 flex max-w-full content-start items-start gap-2"
+            data-message-id=""
+            data-title=""
+        >
+            <span
+                class="lqd-chat-avatar inline-block size-6 shrink-0 rounded-full bg-cover bg-center"
+                style="background-image: url('{{ !empty($chat->category->image) ? custom_theme_url($chat->category->image, true) : url(custom_theme_url('/assets/img/auth/default-avatar.png')) }}')"
+            >
+                <span class="sr-only">
+                    {{ __($chat?->category?->name ?? 'AI Assistant') }}
+                </span>
+            </span>
+            <div
+                class="chat-content-container group relative min-h-12 min-w-12 max-w-[calc(100%-64px)] rounded-3xl text-heading-foreground before:absolute before:inset-0 before:inline-block before:rounded-3xl before:bg-clay dark:text-heading-foreground dark:before:bg-white/[2%]">
+                <div class="model-council-summary-thinking mb-4 hidden">
+                    <x-shimmar>{{ __('Thinking...') }}</x-shimmar>
+                </div>
+
+                <div class="model-council-final-sections hidden">
+                    <p class="model-council-meta-line mb-4 hidden text-2xs text-heading-foreground/60">
+                        <span class="model-council-responded-models"></span>
+                        <span
+                            class="model-council-meta-sep mx-1 hidden"
+                            aria-hidden="true"
+                        >•</span>
+                        <span class="model-council-confidence"></span>
+                    </p>
+
+                    <h4 class="model-council-title-final-answer mb-2 text-sm font-semibold"></h4>
+                    <div class="model-council-final-answer chat-content prose mb-4 w-full max-w-none text-xs leading-6 text-current [word-break:break-word] [&_*]:text-current">
+                    </div>
+
+                    <div class="mb-4 overflow-hidden rounded-xl border border-heading-foreground/10">
+                        <div class="grid grid-cols-2 border-b border-heading-foreground/10 bg-heading-foreground/[0.03] px-4 py-2 text-2xs font-semibold">
+                            <span class="model-council-title-agreement-level"></span>
+                            <span class="model-council-title-confidence-impact"></span>
+                        </div>
+                        <div class="model-council-agreement-rows"></div>
+                    </div>
+
+                    <div class="mb-4 space-y-4 text-xs">
+                        <div>
+                            <h5 class="model-council-title-agreement-analysis mb-1 text-xs font-semibold"></h5>
+                            <ul class="model-council-agreement-analysis m-0 space-y-1 text-heading-foreground/80"></ul>
+                        </div>
+                        <div>
+                            <h5 class="model-council-title-disagreements mb-1 text-xs font-semibold"></h5>
+                            <ul class="model-council-disagreements m-0 space-y-1 text-heading-foreground/80"></ul>
+                        </div>
+                        <div>
+                            <h5 class="model-council-title-discoveries mb-1 text-xs font-semibold"></h5>
+                            <ul class="model-council-discoveries m-0 space-y-1 text-heading-foreground/80"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 w-full">
+                    <h5 class="model-council-title-model-replies mb-4 text-sm font-semibold empty:hidden"></h5>
+                    <div class="model-council-replies w-full space-y-4"></div>
+                </div>
+                <div
+                    class="lqd-chat-actions-wrap pointer-events-auto invisible absolute -end-5 bottom-0 flex flex-col gap-2 opacity-0 transition-all group-hover:!visible group-hover:!opacity-100">
+                    <div class="lqd-clipboard-copy-wrap group/copy-wrap flex flex-col gap-2 transition-all">
+                        <button
+                            class="lqd-clipboard-copy group/btn relative inline-flex size-10 items-center justify-center rounded-full border-none bg-white p-0 text-[12px] text-black shadow-lg transition-all hover:-translate-y-[2px] hover:scale-110"
+                            data-copy-options='{ "content": ".chat-content", "contentIn": "<.chat-content-container" }'
+                            title="{{ __('Copy to clipboard') }}"
+                        >
+                            <span
+                                class="pointer-events-none absolute end-full top-1/2 me-1 inline-block -translate-y-1/2 translate-x-1 whitespace-nowrap rounded-full bg-white px-3 py-1 font-medium leading-5 opacity-0 shadow-lg transition-all group-hover/btn:translate-x-0 group-hover/btn:opacity-100"
+                            >
+                                {{ __('Copy to clipboard') }}
+                            </span>
+                            <x-tabler-copy class="size-4" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </template>
 
     <template id="prompt_image">
@@ -434,6 +501,7 @@
         >
     @endif
 @endsection
+
 @push('script')
     <link
         rel="stylesheet"
@@ -455,4 +523,55 @@
     <script src="{{ custom_theme_url('/assets/libs/vscode-markdown-it-katex/index.js') }}"></script>
 
     @include('panel.user.openai_chat.components.chat_js')
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('liquidChat', () => ({
+                mobileOptionsShow: false,
+                mobileSidebarShow: false,
+                mobileHeaderMoreOptionsShow: false,
+                sidebarHidden: false,
+                realtimeStatus: 'idle',
+                toggleMobileOptions() {
+                    this.mobileOptionsShow = !this.mobileOptionsShow;
+                    if (this.mobileOptionsShow) {
+                        this.mobileSidebarShow = false;
+                        this.mobileHeaderMoreOptionsShow = false;
+                    }
+                },
+                toggleMobileSidebar() {
+                    this.mobileSidebarShow = !this.mobileSidebarShow;
+                    if (this.mobileSidebarShow) {
+                        this.mobileOptionsShow = false;
+                        this.mobileHeaderMoreOptionsShow = false;
+                    }
+                },
+                toggleMobileHeaderMoreOptions() {
+                    this.mobileHeaderMoreOptionsShow = !this.mobileHeaderMoreOptionsShow;
+                    if (this.mobileHeaderMoreOptionsShow) {
+                        this.mobileSidebarShow = false;
+                        this.mobileOptionsShow = false;
+                    }
+                },
+                toggleSidebarHidden() {
+                    this.sidebarHidden = !this.sidebarHidden;
+                },
+                setRealtimeStatus(status) {
+                    this.realtimeStatus = status
+                },
+
+                isShowRecent(element) {
+                    let el = element;
+
+                    do {
+                        if (el && el.id && el.id == 'show-recent-btn') {
+                            return true;
+                        }
+                    } while (el = el.parentElement);
+
+                    return false;
+                }
+            }));
+        });
+    </script>
 @endpush

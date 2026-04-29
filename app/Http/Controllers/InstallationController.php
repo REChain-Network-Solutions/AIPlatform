@@ -16,6 +16,7 @@ use App\Services\Theme\ThemeService;
 use Database\Seeders\EngineSeeder;
 use Database\Seeders\EntitySeeder;
 use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -194,7 +195,7 @@ class InstallationController extends Controller
 
     public function updateManual(Request $request)
     {
-        $version = '10.40';
+        $version = '10.50';
 
         Artisan::call('migrate', [
             '--force' => true,
@@ -313,7 +314,7 @@ class InstallationController extends Controller
         }
     }
 
-    public function menuClearCache(): \Illuminate\Http\RedirectResponse
+    public function menuClearCache(): RedirectResponse
     {
         app(MenuService::class)->regenerate();
         Artisan::call('optimize:clear');

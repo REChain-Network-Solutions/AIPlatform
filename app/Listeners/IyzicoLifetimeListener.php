@@ -7,6 +7,7 @@ use App\Enums\Plan\FrequencyEnum;
 use App\Events\IyzicoLifetimeEvent;
 use App\Models\UserOrder;
 use App\Services\PaymentGateways\Contracts\CreditUpdater;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -46,18 +47,18 @@ class IyzicoLifetimeListener implements ShouldQueue
                 foreach ($orders as $order) {
                     switch ($order->plan->frequency) {
                         case FrequencyEnum::LIFETIME_MONTHLY->value :
-                            Subscriptions::where('stripe_id', $order->order_id)->update(['stripe_status' => $status, 'ends_at' => \Carbon\Carbon::now()->addMonths(1)]);
+                            Subscriptions::where('stripe_id', $order->order_id)->update(['stripe_status' => $status, 'ends_at' => Carbon::now()->addMonths(1)]);
                             $msg = __('Subscription renewed for 1 month.');
 
                             break;
                         case FrequencyEnum::LIFETIME_YEARLY->value :
-                            Subscriptions::where('stripe_id', $order->order_id)->update(['stripe_status' => $status, 'ends_at' => \Carbon\Carbon::now()->addYears(1)]);
+                            Subscriptions::where('stripe_id', $order->order_id)->update(['stripe_status' => $status, 'ends_at' => Carbon::now()->addYears(1)]);
                             $msg = __('Subscription renewed for 1 year.');
 
                             break;
                         default:
                             // FrequencyEnum::LIFETIME_MONTHLY->value
-                            Subscriptions::where('stripe_id', $order->order_id)->update(['stripe_status' => $status, 'ends_at' => \Carbon\Carbon::now()->addMonths(1)]);
+                            Subscriptions::where('stripe_id', $order->order_id)->update(['stripe_status' => $status, 'ends_at' => Carbon::now()->addMonths(1)]);
                             $msg = __('Subscription renewed for 1 month.');
 
                             break;

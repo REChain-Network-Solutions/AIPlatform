@@ -1,5 +1,6 @@
 <?php
 
+use App\SpatiePermissionConfig;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $config = App\SpatiePermissionConfig::config();
+        $config = SpatiePermissionConfig::config();
 
         $teams = $config['teams'];
         $tableNames = $config['table_names'];
@@ -22,10 +23,10 @@ return new class extends Migration
         $permissionTesting = $config['testing'] ?? null;
 
         if (empty($tableNames)) {
-            throw new \Exception('Error: config/permission.php not loaded. Run [php artisan config:clear] and try again.');
+            throw new Exception('Error: config/permission.php not loaded. Run [php artisan config:clear] and try again.');
         }
         if ($teams && empty($columnNames['team_foreign_key'] ?? null)) {
-            throw new \Exception('Error: team_foreign_key on config/permission.php not loaded. Run [php artisan config:clear] and try again.');
+            throw new Exception('Error: team_foreign_key on config/permission.php not loaded. Run [php artisan config:clear] and try again.');
         }
 
         Schema::create($tableNames['permissions'], function (Blueprint $table) {
@@ -132,12 +133,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $config = App\SpatiePermissionConfig::config();
+        $config = SpatiePermissionConfig::config();
 
         $tableNames = $config['table_names'];
 
         if (empty($tableNames)) {
-            throw new \Exception('Error: config/permission.php not found and defaults could not be merged. Please publish the package configuration before proceeding, or drop the tables manually.');
+            throw new Exception('Error: config/permission.php not found and defaults could not be merged. Please publish the package configuration before proceeding, or drop the tables manually.');
         }
 
         Schema::drop($tableNames['role_has_permissions']);

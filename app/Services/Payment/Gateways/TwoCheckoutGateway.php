@@ -11,6 +11,7 @@ use App\Jobs\ProcessGatewayCustomerJob;
 use App\Models\GatewayProducts;
 use App\Models\Plan;
 use App\Models\Setting;
+use App\Models\Usage;
 use App\Models\User;
 use App\Models\UserOrder;
 use App\Services\Payment\Contracts\AbstractPaymentGateway;
@@ -33,6 +34,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Subscription as Subscriptions;
 use RuntimeException;
+use Stripe\Exception\InvalidRequestException;
 
 class TwoCheckoutGateway extends AbstractPaymentGateway implements PaymentGatewayInterface
 {
@@ -334,7 +336,7 @@ class TwoCheckoutGateway extends AbstractPaymentGateway implements PaymentGatewa
 
                 CreateActivity::for($user, __('Subscribed to'), $plan->name . ' ' . __('Plan'));
                 EmailPaymentConfirmation::create($user, $plan)->send();
-                \App\Models\Usage::getSingle()->updateSalesCount($plan->price);
+                Usage::getSingle()->updateSalesCount($plan->price);
 
                 DB::commit();
 
@@ -415,7 +417,7 @@ class TwoCheckoutGateway extends AbstractPaymentGateway implements PaymentGatewa
                 self::creditIncreaseSubscribePlan($user, $plan);
                 CreateActivity::for($user, __('Purchased'), $plan->name . ' ' . __('Plan'));
                 EmailPaymentConfirmation::create($user, $plan)->send();
-                \App\Models\Usage::getSingle()->updateSalesCount($plan->price);
+                Usage::getSingle()->updateSalesCount($plan->price);
 
                 DB::commit();
 
@@ -531,7 +533,7 @@ class TwoCheckoutGateway extends AbstractPaymentGateway implements PaymentGatewa
                 // Customer doesn't exist, create a new customer
                 $this->createCustomer($user);
             }
-        } catch (\Stripe\Exception\InvalidRequestException $e) {
+        } catch (InvalidRequestException $e) {
             // Customer doesn't exist, create a new customer
             $this->createCustomer($user);
         }

@@ -18,7 +18,7 @@
 @extends('panel.layout.app')
 
 @section('content')
-    <div class="lqd-page-settings py-10">
+    <div class="lqd-page-settings lqd-form-step-num-setter py-10">
         <div class="{{ $col_class }}">
             <x-card
                 class="lqd-settings-card"

@@ -1,0 +1,11 @@
+.lqd-form-step-num-setter {
+	counter-reset: step;
+}
+
+.lqd-form-step-num-auto {
+
+	&:before {
+		content: counter(step);
+		counter-increment: step;
+	}
+}

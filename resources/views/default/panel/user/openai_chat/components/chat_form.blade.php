@@ -28,14 +28,19 @@
         <input
             id="category_id"
             type="hidden"
-            value="{{ $category->id }}"
+            value="{{ $category?->id }}"
         />
         <input
             id="chat_id"
             type="hidden"
             value="{{ isset($chat) ? $chat->id : null }}"
         />
-        <div class="lqd-chat-form-inputs-container flex min-h-[52px] w-full flex-col rounded-[26px] border border-input-border max-md:min-h-[45px]">
+        <input
+            id="selected_skill_ids"
+            type="hidden"
+            value=""
+        />
+        <div class="lqd-chat-form-inputs-container relative flex min-h-[52px] w-full flex-col rounded-[26px] border border-input-border max-md:min-h-[45px]">
             <div
                 class="hidden max-h-32 w-full flex-wrap gap-5 overflow-y-auto p-2.5 [&.active]:flex"
                 id="chat-attachment-previews"
@@ -140,6 +145,7 @@
                                 </x-button>
                             </div>
                         @endif
+
                         {{-- Brand Voice --}}
                         <div class="pointer-events-auto flex items-center max-md:flex-col max-md:items-start max-md:gap-4 max-md:pb-4">
                             <x-modal
@@ -264,7 +270,7 @@
         <input
             id="category_id"
             type="hidden"
-            value="{{ $category->id }}"
+            value="{{ $category?->id }}"
         />
         <input
             id="chat_id"

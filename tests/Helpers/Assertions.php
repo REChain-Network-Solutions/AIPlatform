@@ -3,12 +3,14 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\HtmlString;
 use Illuminate\Testing\Constraints\SeeInOrder;
+use Illuminate\View\View;
 use PHPUnit\Framework\Assert as PHPUnit;
 
 function assertSeeHtml($actual, $values): void
 {
-    if ($actual instanceof \Illuminate\View\View) {
+    if ($actual instanceof View) {
         $actual = $actual->toHtml();
     }
     $actual = preg_replace('/\s+/', ' ', (string) $actual);
@@ -22,7 +24,7 @@ function assertSeeHtml($actual, $values): void
 }
 function assertDontSeeHtml($actual, $values): void
 {
-    if ($actual instanceof \Illuminate\Support\HtmlString) {
+    if ($actual instanceof HtmlString) {
         $actual = $actual->toHtml();
     }
     foreach (Arr::wrap($values) as $value) {
@@ -35,7 +37,7 @@ function assertDontSeeHtml($actual, $values): void
 
 function assertSeeHtmlInOrder($actual, array $values): void
 {
-    if ($actual instanceof \Illuminate\Support\HtmlString) {
+    if ($actual instanceof HtmlString) {
         $actual = $actual->toHtml();
     }
     PHPUnit::assertThat(

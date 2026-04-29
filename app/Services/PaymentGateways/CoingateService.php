@@ -10,11 +10,13 @@ use App\Models\GatewayProducts;
 use App\Models\Gateways;
 use App\Models\OldGatewayProducts;
 use App\Models\Plan;
+use App\Models\Usage;
 use App\Models\User;
 use App\Models\UserOrder;
 use App\Services\Contracts\BaseGatewayService;
 use App\Services\PaymentGateways\Contracts\CreditUpdater;
 use Carbon\Carbon;
+use CoinGate\Client;
 use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -255,7 +257,7 @@ class CoingateService implements BaseGatewayService
                             // sent mail if required here later
                             CreateActivity::for($order->user, __('Purchased'), $order->plan->name . ' ' . __('Plan') . ' ' . __('For free'));
                             EmailPaymentConfirmation::create($user, $plan)->send();
-                            \App\Models\Usage::getSingle()->updateSalesCount($total);
+                            Usage::getSingle()->updateSalesCount($total);
 
                             return redirect($payment_url);
                         } catch (Exception $th) {
@@ -368,7 +370,7 @@ class CoingateService implements BaseGatewayService
             $id = $response['id'];
 
             $order->update(['order_id' => $id]);
-            \App\Models\Usage::getSingle()->updateSalesCount($plan->price);
+            Usage::getSingle()->updateSalesCount($plan->price);
 
             return redirect(data_get($request, 'payment_url'));
         }
@@ -418,7 +420,7 @@ class CoingateService implements BaseGatewayService
 
         if ($status == 'canceled') {
             $activeSub->stripe_status = $status;
-            $activeSub->ends_at = \Carbon\Carbon::now();
+            $activeSub->ends_at = Carbon::now();
             $activeSub->save();
 
             self::creditDecreaseCancelPlan($user, $plan);
@@ -542,7 +544,7 @@ class CoingateService implements BaseGatewayService
                 if ($subscription->getAttribute('created_at') < Carbon::now()->subHours(2)) {
                     $subscription->update([
                         'stripe_status' => 'cancelled',
-                        'ends_at'       => \Carbon\Carbon::now(),
+                        'ends_at'       => Carbon::now(),
                     ]);
                 }
 
@@ -551,7 +553,7 @@ class CoingateService implements BaseGatewayService
                 if ($subscription->getAttribute('created_at') < Carbon::now()->subHours(2)) {
                     $subscription->update([
                         'stripe_status' => 'cancelled',
-                        'ends_at'       => \Carbon\Carbon::now(),
+                        'ends_at'       => Carbon::now(),
                     ]);
                 }
 
@@ -616,7 +618,7 @@ class CoingateService implements BaseGatewayService
             ? $gateway->getAttribute('sandbox_client_secret')
             : $gateway->getAttribute('live_client_secret');
 
-        return new \CoinGate\Client($secret, $mode);
+        return new Client($secret, $mode);
     }
 
     public static function geteway(): Model|Builder|null

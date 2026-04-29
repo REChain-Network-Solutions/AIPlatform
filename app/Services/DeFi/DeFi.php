@@ -10,11 +10,12 @@ use App\Http\Controllers\DeFi\DeFiNewsController;
 use App\Http\Controllers\DeFi\DeFiSettingController;
 use App\Http\Controllers\DeFi\DeFiSolutionController;
 use App\Http\Controllers\DeFi\DeFiSynapseBridgeController;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 
 class DeFi
 {
-    public static function routes(): \Illuminate\Routing\Router
+    public static function routes(): Router
     {
         return Route::group([
             'as'     => 'de-fi.',

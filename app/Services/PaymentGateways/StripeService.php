@@ -7,6 +7,7 @@ use App\Actions\EmailPaymentConfirmation;
 use App\Enums\Plan\FrequencyEnum;
 use App\Enums\Plan\TypeEnum;
 use App\Events\StripeWebhookEvent;
+use App\Extensions\Affilate\System\Events\AffiliateEvent;
 use App\Helpers\Classes\Helper;
 use App\Jobs\CancelAwaitingPaymentSubscriptions;
 use App\Jobs\ProcessStripeCustomerJob;
@@ -19,6 +20,7 @@ use App\Models\Gateways;
 use App\Models\OldGatewayProducts;
 use App\Models\Plan;
 use App\Models\Setting;
+use App\Models\Usage;
 use App\Models\User;
 use App\Models\UserOrder;
 use App\Services\PaymentGateways\Contracts\CreditUpdater;
@@ -38,9 +40,11 @@ use Stripe\Exception\ApiErrorException;
 use Stripe\Exception\AuthenticationException;
 use Stripe\Exception\InvalidArgumentException;
 use Stripe\Exception\InvalidRequestException;
+use Stripe\Exception\SignatureVerificationException;
 use Stripe\PaymentIntent;
 use Stripe\Stripe;
 use Stripe\StripeClient;
+use Stripe\Webhook;
 use Throwable;
 use UnexpectedValueException;
 
@@ -314,7 +318,7 @@ class StripeService
                     $user->stripe_id = $stripeCustomer->id;
                     $user->save();
                 }
-            } catch (\Stripe\Exception\InvalidRequestException $e) {
+            } catch (InvalidRequestException $e) {
                 // Customer doesn't exist, create a new customer
                 $userData = self::userDataFormatter($user);
                 $stripeCustomer = $stripe->customers->create($userData);
@@ -343,7 +347,7 @@ class StripeService
                         ]);
                         $tax_rate_id = $new_tax->id ?? null;
                     }
-                } catch (\Stripe\Exception\InvalidRequestException $e) {
+                } catch (InvalidRequestException $e) {
                     $new_tax = $stripe->taxRates->create([
                         'percentage'   => $taxRate,
                         'display_name' => Str::random(13),
@@ -505,7 +509,7 @@ class StripeService
                         if ($new_coupon == null) {
                             $new_coupon = $stripe->coupons->create($data);
                         }
-                    } catch (\Stripe\Exception\InvalidRequestException $e) {
+                    } catch (InvalidRequestException $e) {
                         $new_coupon = $stripe->coupons->create($data);
                     }
                     $subscriptionInfo['coupon'] = $new_coupon->id ?? null;
@@ -690,7 +694,7 @@ class StripeService
                 // inform the admin
                 CreateActivity::for($user, __('Subscribed to'), $plan->name . ' ' . __('Plan'));
                 EmailPaymentConfirmation::create($user, $plan)->send();
-                \App\Models\Usage::getSingle()->updateSalesCount($total);
+                Usage::getSingle()->updateSalesCount($total);
             } else {
                 Log::error("StripeController::subscribeCheckout() - Invalid $intentType");
                 DB::rollBack();
@@ -700,7 +704,7 @@ class StripeService
             DB::commit();
 
             if (class_exists('App\Extensions\Affilate\System\Events\AffiliateEvent')) {
-                event(new \App\Extensions\Affilate\System\Events\AffiliateEvent($total, $gateway->currency));
+                event(new AffiliateEvent($total, $gateway->currency));
             }
 
             return redirect()->route('dashboard.user.payment.succesful')->with([
@@ -736,7 +740,7 @@ class StripeService
                     $user->stripe_id = $stripeCustomer->id;
                     $user->save();
                 }
-            } catch (\Stripe\Exception\InvalidRequestException $e) {
+            } catch (InvalidRequestException $e) {
                 // Customer doesn't exist, create a new customer
                 $userData = self::userDataFormatter($user);
 
@@ -924,7 +928,7 @@ class StripeService
                 }
                 CreateActivity::for($user, __('Purchased'), $plan->name . ' ' . __('Plan'));
                 EmailPaymentConfirmation::create($user, $plan)->send();
-                \App\Models\Usage::getSingle()->updateSalesCount($total);
+                Usage::getSingle()->updateSalesCount($total);
             } catch (Exception $th) {
                 DB::rollBack();
                 Log::error(self::$GATEWAY_CODE . '-> prepaidCheckout(): ' . $th->getMessage());
@@ -1215,7 +1219,7 @@ class StripeService
                 $event = null;
 
                 try {
-                    $event = \Stripe\Webhook::constructEvent(
+                    $event = Webhook::constructEvent(
                         $payload, $sig_header, $endpoint_secret
                     );
 
@@ -1225,7 +1229,7 @@ class StripeService
                     Log::error('(Webhooks) StripeController::verifyIncomingJson() -> Invalid payload : ' . $payload);
 
                     return null;
-                } catch (\Stripe\Exception\SignatureVerificationException $e) {
+                } catch (SignatureVerificationException $e) {
                     // Invalid signature
                     Log::error('(Webhooks) StripeController::verifyIncomingJson() -> Invalid signature : ' . $payload);
 

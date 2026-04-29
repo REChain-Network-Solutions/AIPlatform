@@ -67,6 +67,6 @@ class TopviewService
      */
     public function videoAvatar(): VideoAvatar
     {
-        return new videoAvatar($this->client);
+        return new VideoAvatar($this->client);
     }
 }

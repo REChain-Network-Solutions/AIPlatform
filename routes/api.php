@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\HealthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,8 @@ use Illuminate\Support\Facades\Route;
 | destroy   DELETE
 |
 */
+
+Route::get('health', HealthController::class);
 
 Route::prefix('auth')
     ->group(function () {

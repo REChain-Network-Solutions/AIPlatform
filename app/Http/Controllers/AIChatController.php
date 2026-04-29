@@ -7,11 +7,14 @@ use App\Domains\Engine\Services\AnthropicService;
 use App\Domains\Entity\Enums\EntityEnum;
 use App\Domains\Entity\Facades\Entity as EntityFacade;
 use App\Domains\Entity\Models\Entity;
+use App\Enums\AccessType;
+use App\Enums\AiImageStatusEnum;
 use App\Enums\BedrockEngine;
 use App\Extensions\ElevenLabsVoiceChat\System\Services\ElevenLabsVoiceChatService;
 use App\Helpers\Classes\ApiHelper;
 use App\Helpers\Classes\Helper;
 use App\Helpers\Classes\MarketplaceHelper;
+use App\Helpers\Classes\OpenAiParamHelper;
 use App\Models\Chatbot\Chatbot;
 use App\Models\ChatBotHistory;
 use App\Models\ChatCategory;
@@ -25,6 +28,7 @@ use App\Models\Usage;
 use App\Models\User;
 use App\Models\UserOpenaiChat;
 use App\Models\UserOpenaiChatMessage;
+use App\Services\Ai\AiCompletionService;
 use App\Services\Ai\OpenAI\FileSearchService;
 use App\Services\Assistant\AssistantService;
 use App\Services\Bedrock\BedrockRuntimeService;
@@ -40,10 +44,12 @@ use Illuminate\Http\File;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -219,7 +225,7 @@ class AIChatController extends Controller
     /**
      * Build thumbnail URLs for image-pro chat items.
      *
-     * @param  \Illuminate\Support\Collection<int, int>  $chatIds
+     * @param  Collection<int, int>  $chatIds
      *
      * @return array<int, string>
      */
@@ -228,7 +234,7 @@ class AIChatController extends Controller
         $latestImageIdsByChat = DB::table('ai_chat_pro_image as ai')
             ->join('user_openai_chat_messages as msg', 'msg.id', '=', 'ai.message_id')
             ->whereIn('msg.user_openai_chat_id', $chatIds)
-            ->where('ai.status', \App\Enums\AiImageStatusEnum::COMPLETED->value)
+            ->where('ai.status', AiImageStatusEnum::COMPLETED->value)
             ->whereNotNull('ai.generated_images')
             ->selectRaw('msg.user_openai_chat_id as chat_id, MAX(ai.id) as latest_ai_id')
             ->groupBy('msg.user_openai_chat_id');
@@ -339,17 +345,17 @@ class AIChatController extends Controller
         }
 
         $category = $this->firstOpenaiGeneratorChatCategory($slug);
-        $requiredType = \App\Enums\AccessType::tryFrom($category->plan) ?? \App\Enums\AccessType::REGULAR;
+        $requiredType = AccessType::tryFrom($category?->plan) ?? AccessType::REGULAR;
         $user = auth()->user();
         // If the category requires a non-regular plan
-        if ($requiredType !== \App\Enums\AccessType::REGULAR && ! $user?->isAdmin()) {
+        if ($requiredType !== AccessType::REGULAR && ! $user?->isAdmin()) {
 
             // Check if the user has an active plan
             $activePlan = $user?->activePlan();
 
             $userPlanType = $activePlan
-                ? (\App\Enums\AccessType::tryFrom($activePlan->plan_type) ?? \App\Enums\AccessType::REGULAR)
-                : \App\Enums\AccessType::REGULAR;
+                ? (AccessType::tryFrom($activePlan->plan_type) ?? AccessType::REGULAR)
+                : AccessType::REGULAR;
 
             // Deny access if user plan does not match the required type
             if ($userPlanType !== $requiredType) {
@@ -361,7 +367,7 @@ class AIChatController extends Controller
         }
 
         $list = $this->openai(\request())
-            ->where('openai_chat_category_id', $category->id)
+            ->where('openai_chat_category_id', $category?->id)
             ->where('is_chatbot', 0)
             ->orderBy('is_pinned', 'desc')
             ->orderBy('updated_at', 'desc')
@@ -616,7 +622,7 @@ class AIChatController extends Controller
         $chat->user_id = $user?->id;
         $chat->team_id = $user?->team_id;
         $chat->chatbot_id = $category->chatbot_id;
-        $chat->openai_chat_category_id = $category->id;
+        $chat->openai_chat_category_id = $category?->id;
         $chat->title = $category->name . ' Chat';
         $chat->total_credits = 0;
         $chat->total_words = 0;
@@ -627,7 +633,7 @@ class AIChatController extends Controller
         $message->user_openai_chat_id = $chat?->id;
         $message->user_id = $user?->id;
         $message->response = 'First Initiation';
-        if ($category->slug !== 'ai_vision' || $category->slug !== 'ai_pdf') {
+        if ($category?->slug !== 'ai_vision' || $category?->slug !== 'ai_pdf') {
             if ($category->role === 'default') {
                 $output = __('Hi! I am') . ' ' . $category->name . __(', and I\'m here to answer all your questions');
             } else {
@@ -682,7 +688,7 @@ class AIChatController extends Controller
             ->get();
         $list = UserOpenaiChat::query()
             ->where('user_id', $user?->id)
-            ->where('openai_chat_category_id', $category->id)
+            ->where('openai_chat_category_id', $category?->id)
             ->where('is_chatbot', 0)
             ->orderBy('updated_at', 'desc')
             ->limit($this->sidebarHistoryLimit());
@@ -759,7 +765,7 @@ class AIChatController extends Controller
         $chat = new UserOpenaiChat;
         $chat->user_id = Auth::id();
         $chat->team_id = Auth::user()->team_id;
-        $chat->openai_chat_category_id = $category->id;
+        $chat->openai_chat_category_id = $category?->id;
         $chat->title = $category->name . ' Chat';
         $chat->total_credits = 0;
         $chat->total_words = 0;
@@ -776,7 +782,7 @@ class AIChatController extends Controller
             $message->user_openai_chat_id = $chat?->id;
             $message->user_id = Auth::id();
             $message->response = 'First Initiation';
-            if ($category->slug !== 'ai_vision' || $category->slug !== 'ai_pdf') {
+            if ($category?->slug !== 'ai_vision' || $category?->slug !== 'ai_pdf') {
                 if ($category->role === 'default') {
                     $output = __('Hi! I am') . ' ' . $category->name . __(', and I\'m here to answer all your questions');
                 } else {
@@ -808,7 +814,7 @@ class AIChatController extends Controller
             }
 
             $list = UserOpenaiChat::where('user_id', Auth::id())
-                ->where('openai_chat_category_id', $category->id)
+                ->where('openai_chat_category_id', $category?->id)
                 ->where('is_chatbot', 0)
                 ->orderBy('updated_at', 'desc')
                 ->limit($this->sidebarHistoryLimit())
@@ -849,7 +855,7 @@ class AIChatController extends Controller
         $chat = new UserOpenaiChat;
         $chat->user_id = $user?->id;
         $chat->team_id = $user?->team_id;
-        $chat->openai_chat_category_id = $category->id;
+        $chat->openai_chat_category_id = $category?->id;
         $chat->title = $category->name . ' Chat';
         $chat->total_credits = 0;
         $chat->total_words = 0;
@@ -877,7 +883,7 @@ class AIChatController extends Controller
             $message->user_openai_chat_id = $chat?->id;
             $message->user_id = Auth::id();
             $message->response = 'First Initiation';
-            if ($category->slug !== 'ai_vision' || $category->slug !== 'ai_pdf') {
+            if ($category?->slug !== 'ai_vision' || $category?->slug !== 'ai_pdf') {
                 if ($category->role === 'default') {
                     $output = __('Hi! I am') . ' ' . $category->name . __(', and I\'m here to answer all your questions');
                 } else {
@@ -909,7 +915,7 @@ class AIChatController extends Controller
             }
 
             $list = UserOpenaiChat::where('user_id', Auth::id())
-                ->where('openai_chat_category_id', $category->id)
+                ->where('openai_chat_category_id', $category?->id)
                 ->where('is_chatbot', 0)
                 ->orderBy('updated_at', 'desc')
                 ->limit($this->sidebarHistoryLimit())
@@ -1010,7 +1016,7 @@ class AIChatController extends Controller
         $chat = new UserOpenaiChat;
         $chat->user_id = Auth::id();
         $chat->chatbot_id = $chatbot->id;
-        //        $chat->openai_chat_category_id = $category->id;
+        //        $chat->openai_chat_category_id = $category?->id;
         $chat->title = 'ChatBot';
         $chat->total_credits = 0;
         $chat->total_words = 0;
@@ -1033,7 +1039,7 @@ class AIChatController extends Controller
         $chatbot_history->user_id = Auth::id();
         $chatbot_history->ip = isset($_SERVER['HTTP_CF_CONNECTING_IP']) ? $_SERVER['HTTP_CF_CONNECTING_IP'] : request()?->ip();
         $chatbot_history->user_openai_chat_id = $chat->id;
-        $chatbot_history->openai_chat_category_id = $category->id;
+        $chatbot_history->openai_chat_category_id = $category?->id;
         $chatbot_history->save();
 
         $html = view('panel.user.openai_chat.components.chat_area', compact('chat', 'category'))->render();
@@ -1069,7 +1075,11 @@ class AIChatController extends Controller
             return $query->where('chat_type', 'social-media-agent');
         }
 
-        return $query;
+        // Normal chat: exclude extension-specific chat types
+        return $query->where(function ($q) {
+            $q->whereNull('chat_type')
+                ->orWhere('chat_type', '');
+        });
     }
 
     /**
@@ -1093,6 +1103,9 @@ class AIChatController extends Controller
             $entry->user_id = $user?->id;
             $entry->user_openai_chat_id = $chat->id;
             $entry->input = $prompt;
+            if ($request->get('highlight_context') && Schema::hasColumn('user_openai_chat_messages', 'highlight_context')) {
+                $entry->highlight_context = $request->get('highlight_context');
+            }
             $entry->response = null;
             $entry->realtime = $realtime ?? 0;
             $entry->output = __("(If you encounter this message, please attempt to send your message again. If the error persists beyond multiple attempts, please don't hesitate to contact us for assistance!)");
@@ -1252,7 +1265,11 @@ class AIChatController extends Controller
         $count = count($lastThreeMessageQuery);
         if ($count > 1) {
             foreach ($lastThreeMessageQuery as $threeMessage) {
-                $history[] = ['role' => 'user', 'content' => $threeMessage->input ?? ''];
+                $userInput = $threeMessage->input ?? '';
+                if (Schema::hasColumn('user_openai_chat_messages', 'highlight_context') && ! empty($threeMessage->highlight_context)) {
+                    $userInput = "The user selected the following quote from your previous response and is asking a follow-up question about it.\nQuoted text: \"{$threeMessage->highlight_context}\"\nUser's follow-up question:\n" . $userInput;
+                }
+                $history[] = ['role' => 'user', 'content' => $userInput];
                 if ($threeMessage->output !== null) {
                     $history[] = ['role' => 'assistant', 'content' => $threeMessage->output ?? ''];
                 } else {
@@ -1291,7 +1308,7 @@ class AIChatController extends Controller
                         'Prompt: ' . $realtimePrompt .
                         '\n\nWeb search json results: '
                         . json_encode($toGPT) .
-                        '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
+                        '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text. Never reveal or display search queries, search parameters, or any internal metadata from the search results.';
 
                 } elseif (MarketplaceHelper::isRegistered('perplexity') && setting('default_realtime') == 'perplexity' && ! is_null(setting('perplexity_key'))) {
 
@@ -1321,7 +1338,7 @@ class AIChatController extends Controller
                             $final_prompt = 'Prompt: ' . $realtimePrompt .
                                 '\n\nWeb search results: '
                                 . $response .
-                                '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
+                                '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text. Never reveal or display search queries, search parameters, or any internal metadata from the search results.';
 
                         } else {
                             return response()->json([
@@ -1372,7 +1389,7 @@ class AIChatController extends Controller
                         'Prompt: ' . $realtimePrompt .
                         '\n\nWeb search json results: '
                         . json_encode($toGPT) .
-                        '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
+                        '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text. Never reveal or display search queries, search parameters, or any internal metadata from the search results.';
 
                 } elseif (MarketplaceHelper::isRegistered('perplexity') && setting('default_realtime') == 'perplexity' &&
                     ! is_null(setting('perplexity_key'))) {
@@ -1403,7 +1420,7 @@ class AIChatController extends Controller
                             $final_prompt = 'Prompt: ' . $realtimePrompt .
                                 '\n\nWeb search results: '
                                 . $response .
-                                '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
+                                '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text. Never reveal or display search queries, search parameters, or any internal metadata from the search results.';
 
                         } else {
                             return response()->json([
@@ -1421,6 +1438,15 @@ class AIChatController extends Controller
                 $history[] = ['role' => 'user', 'content' => $final_prompt ?? ''];
             } else {
                 $history[] = ['role' => 'user', 'content' => $prompt ?? ''];
+            }
+        }
+
+        // Inject highlight-to-ask context into the last user message (not stored in DB)
+        $highlightContext = $request->get('highlight_context');
+        if ($highlightContext && ! empty($history)) {
+            $lastIndex = count($history) - 1;
+            if ($history[$lastIndex]['role'] === 'user') {
+                $history[$lastIndex]['content'] = "The user selected the following quote from your previous response and is asking a follow-up question about it.\nQuoted text: \"" . $highlightContext . "\"\nUser's follow-up question:\n" . $history[$lastIndex]['content'];
             }
         }
 
@@ -1485,7 +1511,11 @@ class AIChatController extends Controller
         $count = count($lastThreeMessageQuery);
         if ($count > 1) {
             foreach ($lastThreeMessageQuery as $threeMessage) {
-                $history[] = ['role' => 'user', 'content' => $threeMessage->input ?? ''];
+                $userInput = $threeMessage->input ?? '';
+                if (Schema::hasColumn('user_openai_chat_messages', 'highlight_context') && ! empty($threeMessage->highlight_context)) {
+                    $userInput = "The user selected the following quote from your previous response and is asking a follow-up question about it.\nQuoted text: \"{$threeMessage->highlight_context}\"\nUser's follow-up question:\n" . $userInput;
+                }
+                $history[] = ['role' => 'user', 'content' => $userInput];
                 if ($threeMessage->output !== null) {
                     $history[] = ['role' => 'assistant', 'content' => $threeMessage->output ?? ''];
                 } else {
@@ -1523,7 +1553,7 @@ class AIChatController extends Controller
                         'Prompt: ' . $realtimePrompt .
                         '\n\nWeb search json results: '
                         . json_encode($toGPT) .
-                        '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
+                        '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text. Never reveal or display search queries, search parameters, or any internal metadata from the search results.';
 
                 } elseif (MarketplaceHelper::isRegistered('perplexity') && setting('default_realtime') == 'perplexity' &&
                     ! is_null(setting('perplexity_key'))) {
@@ -1554,7 +1584,7 @@ class AIChatController extends Controller
                             $final_prompt = 'Prompt: ' . $realtimePrompt .
                                 '\n\nWeb search results: '
                                 . $response .
-                                '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
+                                '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text. Never reveal or display search queries, search parameters, or any internal metadata from the search results.';
 
                         } else {
                             return response()->json([
@@ -1604,7 +1634,7 @@ class AIChatController extends Controller
                     'Prompt: ' . $realtimePrompt .
                     '\n\nWeb search json results: '
                     . json_encode($toGPT) .
-                    '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
+                    '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text. Never reveal or display search queries, search parameters, or any internal metadata from the search results.';
 
             } elseif (MarketplaceHelper::isRegistered('perplexity') && setting('default_realtime') == 'perplexity' &&
                 ! is_null(setting('perplexity_key'))) {
@@ -1635,7 +1665,7 @@ class AIChatController extends Controller
                         $final_prompt = 'Prompt: ' . $realtimePrompt .
                             '\n\nWeb search results: '
                             . $response .
-                            '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
+                            '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text. Never reveal or display search queries, search parameters, or any internal metadata from the search results.';
 
                     } else {
                         return response()->stream(function () use ($response) {
@@ -1794,12 +1824,12 @@ class AIChatController extends Controller
 
                     $postData = [
                         'headers' => $headers,
-                        'json'    => [
+                        'json'    => OpenAiParamHelper::sanitizeChatParams([
                             'model'      => $driver->enum()->value,
                             'messages'   => $history,
                             'max_tokens' => $ai_max_tokens,
                             'stream'     => true,
-                        ],
+                        ]),
                     ];
 
                     $response = $gclient->post($url, $postData);
@@ -1920,12 +1950,12 @@ class AIChatController extends Controller
                     }
                 }
             } elseif ($openaiUse) {
-                $stream = OpenAI::chat()->createStreamed([
+                $stream = OpenAI::chat()->createStreamed(OpenAiParamHelper::sanitizeChatParams([
                     'model'             => $driver->enum()->value,
                     'messages'          => $history,
                     'presence_penalty'  => 0.6,
                     'frequency_penalty' => 0,
-                ]);
+                ]));
                 $total_used_tokens = 0;
                 $output = '';
                 $responsedText = '';
@@ -2152,7 +2182,7 @@ class AIChatController extends Controller
                             'Prompt: ' . $realtimePrompt .
                             '\n\nWeb search json results: '
                             . json_encode($toGPT) .
-                            '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
+                            '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text. Never reveal or display search queries, search parameters, or any internal metadata from the search results.';
 
                     } elseif (MarketplaceHelper::isRegistered('perplexity') && setting('default_realtime') == 'perplexity' &&
                         ! is_null(setting('perplexity_key'))) {
@@ -2183,7 +2213,7 @@ class AIChatController extends Controller
                                 $final_prompt = 'Prompt: ' . $realtimePrompt .
                                     '\n\nWeb search results: '
                                     . $response .
-                                    '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text.';
+                                    '\n\nInstructions: Based on the Prompt generate a proper response with help of Web search results(if the Web search results in the same context). Only if the prompt require links: (make curated list of links and descriptions using only the <a target="_blank">, write links with using <a target="_blank"> with mrgin Top of <a> tag is 5px and start order as number and write link first and then write description). Must not write links if its not necessary. Must not mention anything about the prompt text. Never reveal or display search queries, search parameters, or any internal metadata from the search results.';
 
                             } else {
                                 return response()->json([
@@ -2224,12 +2254,12 @@ class AIChatController extends Controller
                 }
                 if ($type === 'chat') {
                     try {
-                        $stream = OpenAI::chat()->createStreamed([
+                        $stream = OpenAI::chat()->createStreamed(OpenAiParamHelper::sanitizeChatParams([
                             'model'             => $driver->enum()->value,
                             'messages'          => $history,
                             'presence_penalty'  => 0.6,
                             'frequency_penalty' => 0,
-                        ]);
+                        ]));
                         $total_used_tokens = 0;
                         $output = '';
                         $responsedText = '';
@@ -2281,7 +2311,7 @@ class AIChatController extends Controller
                                 'headers' => [
                                     'Authorization' => 'Bearer ' . $openaiApiKey,
                                 ],
-                                'json' => [
+                                'json' => OpenAiParamHelper::sanitizeChatParams([
                                     'model'    => $driver->enum()->value,
                                     'messages' => [
                                         [
@@ -2313,7 +2343,7 @@ class AIChatController extends Controller
                                     ],
                                     'max_tokens' => 2000,
                                     'stream'     => true,
-                                ],
+                                ]),
                             ],
                         );
                     } catch (Exception $exception) {
@@ -2605,7 +2635,7 @@ class AIChatController extends Controller
                     . 'User Input: ' . $message->input . "\n\n\n\n\n"
                     . 'Assistant Response: ' . $message->response;
 
-                $newTitle = app(\App\Services\Ai\AiCompletionService::class)->complete($systemPrompt, $userContent);
+                $newTitle = app(AiCompletionService::class)->complete($systemPrompt, $userContent);
                 $chat->title = $newTitle;
                 $chat->save();
                 $changed = true;

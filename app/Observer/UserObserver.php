@@ -2,9 +2,11 @@
 
 namespace App\Observer;
 
+use App\Extensions\Hubspot\System\Services\HubspotService;
 use App\Helpers\Classes\MarketplaceHelper;
 use App\Models\Usage;
 use App\Models\User;
+use Dcblogdev\Xero\Facades\Xero;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 use Spatie\Newsletter\Facades\Newsletter;
@@ -31,7 +33,7 @@ class UserObserver
 
         if (MarketplaceHelper::isRegistered('hubspot') && (((int) setting('hubspot_crm_contact_register', '0')) === 1)) {
             try {
-                (new \App\Extensions\Hubspot\System\Services\HubspotService)->createCrmContacts($user->email, $user->name, $user->surname);
+                (new HubspotService)->createCrmContacts($user->email, $user->name, $user->surname);
             } catch (Exception $e) {
             }
         }
@@ -44,7 +46,7 @@ class UserObserver
                     'xero.redirectUri'  => setting('XERO_REDIRECT_URI'),
                     'xero.landingUri'   => setting('XERO_LANDING_URL'),
                 ]);
-                $response = \Dcblogdev\Xero\Facades\Xero::contacts()->store([
+                $response = Xero::contacts()->store([
                     'Name' => $user->name,
                 ]);
                 $user->xero_account_id = $response['ContactID'] ?? null;
