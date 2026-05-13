@@ -5,7 +5,12 @@ import { debounce, defer, difference, throttle } from 'lodash';
  * @type {import('alpinejs').AlpineComponent}
  */
 export default ({ assetsUrl = '' }) => {
+	const csAiTemplatePlugin = window.__csAiTemplatePlugin || {};
+	const csAnnotationsPlugin = window.__csAnnotationsPlugin || {};
+
 	return ({
+		...(csAiTemplatePlugin.data || {}),
+		...(csAnnotationsPlugin.data || {}),
 		stage: null,
 		layer: null,
 		selectionTransformer: null,
@@ -63,6 +68,10 @@ export default ({ assetsUrl = '' }) => {
 		reachedMinZoom: false,
 		reachedMaxZoom: false,
 		activeTooltipDropdown: null,
+		framesWrapper: null,
+		referenceFrame: null,
+		activeFrame: 'canvas',
+		showReferenceFrame: true,
 		guidelineOffset: 5,
 		placeholderImage: `${assetsUrl}/img/misc/placeholder-1.jpg`,
 		templatesList: [],
@@ -533,6 +542,22 @@ export default ({ assetsUrl = '' }) => {
 
 			this._fillTabFromSelection = false;
 
+			// Re-center when reference image appears or disappears
+			this.$watch('[lastGeneratedReferenceImage, showReferenceFrame]', () => {
+				if ( this.stageInitiated && !this.showWelcomeScreen ) {
+					this.$nextTick(() => this.fitToScreen());
+				}
+			});
+
+			// Run plugin init hooks (e.g., CreativeSuiteAITemplate extension,
+			// CreativeSuiteAnnotations extension).
+			if ( csAiTemplatePlugin.init ) {
+				csAiTemplatePlugin.init.call(this, this);
+			}
+			if ( csAnnotationsPlugin.init ) {
+				csAnnotationsPlugin.init.call(this, this);
+			}
+
 			this.$watch('activeFillTab', (tab, prevTab) => {
 				if (!this.selectedNodes.length) return;
 
@@ -574,6 +599,10 @@ export default ({ assetsUrl = '' }) => {
 						this.activeFillTab = 'image';
 					} else {
 						this.activeFillTab = 'color';
+					}
+
+					if ( [ 'Text', 'TextPath' ].includes(nodeType) ) {
+						this.selectedFont = node.fontFamily() || '';
 					}
 				}
 			});
@@ -650,9 +679,13 @@ export default ({ assetsUrl = '' }) => {
 			this.container = this.stage.container();
 
 			this.konvajsContent = this.container.querySelector('.konvajs-content');
+			this.framesWrapper = this.$refs.framesWrapper;
+			this.referenceFrame = this.$refs.referenceFrame;
+
+			this.konvajsContent.setAttribute('data-lqd-skeleton-el', true);
 
 			this.container.tabIndex = 1;
-			this.container.focus();
+			this.container.focus({ preventScroll: true });
 
 			this.setContainerDimensions();
 
@@ -678,11 +711,13 @@ export default ({ assetsUrl = '' }) => {
 		},
 
 		setContainerDimensions() {
+			const viewport = this.$refs.canvasViewport || this.container;
+
 			this.containerDimensions = {
-				x: this.container.offsetLeft,
-				y: this.container.offsetTop,
-				width: this.container.clientWidth,
-				height: this.container.offsetHeight,
+				x: viewport.offsetLeft,
+				y: viewport.offsetTop,
+				width: viewport.clientWidth,
+				height: viewport.offsetHeight,
 			};
 
 			this.konvajsContentDimensions = {
@@ -716,6 +751,7 @@ export default ({ assetsUrl = '' }) => {
 
 			this.stage.on('mousedown', event => {
 				if ( this.isPanning || this.isSpacePressed || event.touches?.length >= 2 ) return;
+				if ( this.annotationMode ) return;
 
 				const node = event.target;
 
@@ -745,6 +781,7 @@ export default ({ assetsUrl = '' }) => {
 				if (!this.selectionRectangle.visible() || this.isPanning || this.isSpacePressed || event.touches?.length >= 2) {
 					return;
 				}
+				if ( this.annotationMode ) return;
 
 				x2 = this.stage.getPointerPosition().x;
 				y2 = this.stage.getPointerPosition().y;
@@ -761,6 +798,8 @@ export default ({ assetsUrl = '' }) => {
 			window.addEventListener('mouseup', onMouseUp.bind(this));
 
 			this.stage.on('dblclick dbltap', event => {
+				if ( this.annotationMode ) return;
+
 				let target = event.target;
 
 				if ( target._id === this.stage._id ) {
@@ -781,6 +820,8 @@ export default ({ assetsUrl = '' }) => {
 			});
 
 			this.stage.on('click tap', event => {
+				if ( this.annotationMode ) return;
+
 				const node = event.target;
 				const shiftKey = event.evt.shiftKey;
 
@@ -809,7 +850,7 @@ export default ({ assetsUrl = '' }) => {
 			this.container.addEventListener('keydown', event => {
 				const key = event.key;
 
-				if ( !key || this.editingTextNode ) return;
+				if ( !key || this.editingTextNode || this.annotationMode ) return;
 
 				const metaPressed = event.ctrlKey || event.metaKey;
 				const shiftPressed = event.shiftKey;
@@ -1212,10 +1253,12 @@ export default ({ assetsUrl = '' }) => {
 				this.selectionTransformer.hide();
 
 				this.editingTextarea = document.createElement('textarea');
-				this.container.insertAdjacentElement('afterend', this.editingTextarea);
+				// Insert into the viewport (outside the transformed frames wrapper) so fixed positioning works correctly
+				(this.$refs.canvasViewport || this.container.parentElement).appendChild(this.editingTextarea);
 
 				this.editingTextarea.classList.add(
-					'absolute',
+					'fixed',
+					'z-[9999]',
 					'border-none',
 					'p-0',
 					'm-0',
@@ -1369,7 +1412,7 @@ export default ({ assetsUrl = '' }) => {
 
 			this.$nextTick(() => {
 				this.editingTextarea.style.width = ((isTextPath ? this.stage.width() : this.editingTextNode.width()) * zoom) + 'px';
-				this.editingTextarea.style.height = (this.editingTextarea.scrollHeight + (this.editingTextNode.fontSize() * this.editingTextNode.lineHeight())) + 'px';
+				this.editingTextarea.style.height = (this.editingTextarea.scrollHeight + (this.editingTextNode.fontSize() * (isTextPath ? 1 : this.editingTextNode.lineHeight()))) + 'px';
 			});
 
 			if (rotation && !isTextPath) {
@@ -2232,14 +2275,16 @@ export default ({ assetsUrl = '' }) => {
 		async loadGoogleFontFull(font) {
 			const fontUrl = `https://fonts.googleapis.com/css2?family=${font.replaceAll(/ /g, '+')}:wght@400;500;600;700;800;900&display=swap`;
 
-			this.createFontLink(fontUrl);
+			const link = this.createFontLink(fontUrl);
 
-			document.fonts.ready.finally(() => {
-				// const fontLoaded = document.fonts.check(`1em ${font}`);
+			link.addEventListener('load', () => {
+				document.fonts.ready.then(() => {
+					this.layer?.batchDraw();
 
-				if (this.selectedNodes.find(n => [ 'Text', 'TextPath' ].includes(n.getClassName()))) {
-					this.selectionTransformer.forceUpdate();
-				}
+					if (this.selectedNodes.find(n => [ 'Text', 'TextPath' ].includes(n.getClassName()))) {
+						this.selectionTransformer.forceUpdate();
+					}
+				});
 			});
 		},
 
@@ -2251,6 +2296,8 @@ export default ({ assetsUrl = '' }) => {
 			link.type = 'text/css';
 
 			document.head.appendChild(link);
+
+			return link;
 		},
 
 		handleStageResize({ width, height, preserveAspectRatio = false }) {
@@ -2377,8 +2424,9 @@ export default ({ assetsUrl = '' }) => {
 			const zoomPadding = this.getZoomPadding();
 			const canvasWidth = this.stage.width();
 			const canvasHeight = this.stage.height();
-			const w = (this.container.clientWidth - zoomPadding.x) / canvasWidth;
-			const h = (this.container.clientHeight - zoomPadding.y) / canvasHeight;
+			const viewport = this.$refs.canvasViewport || this.container;
+			const w = (viewport.clientWidth - zoomPadding.x) / canvasWidth;
+			const h = (viewport.clientHeight - zoomPadding.y) / canvasHeight;
 			const zoom = Math.min(w, h) * 100;
 			const fitZoom = Math.max(this.minZoom, Math.min(this.maxZoom, zoom));
 
@@ -2397,13 +2445,60 @@ export default ({ assetsUrl = '' }) => {
 		},
 		fitToScreen() {
 			const fitZoom = this.getFitToScreenZoom();
-
 			this.setZoomLevel(fitZoom);
 
-			const zoomPadding = this.getZoomPadding();
+			const viewport = this.$refs.canvasViewport || this.container;
+			const zoom = fitZoom / 100;
+			const stageW = this.stage.width();
+			const stageH = this.stage.height();
 
-			this.zoomOffsetX = zoomPadding.x / 2;
-			this.zoomOffsetY = zoomPadding.y / 2;
+			// Canvas center in world coords (within the frames wrapper)
+			let canvasWorldX = stageW / 2;
+
+			if ( this.lastGeneratedReferenceImage && this.showReferenceFrame && this.referenceFrame && !this.showWelcomeScreen ) {
+				const refWidth = this.referenceFrame.offsetWidth || 0;
+				const gap = 64; // gap-16
+				canvasWorldX += refWidth + gap;
+			}
+
+			const canvasWorldY = stageH / 2;
+
+			// CSS: screen = world * zoom + offset → offset = screenCenter - worldCenter * zoom
+			this.zoomOffsetX = (viewport.clientWidth / 2) - canvasWorldX * zoom;
+			this.zoomOffsetY = (viewport.clientHeight / 2) - canvasWorldY * zoom;
+			this.activeFrame = 'canvas';
+		},
+
+		focusOnFrame(frame = 'canvas') {
+			if ( frame === 'canvas' ) {
+				this.fitToScreen();
+				return;
+			}
+
+			if ( frame === 'reference' && this.referenceFrame && this.lastGeneratedReferenceImage ) {
+				const viewport = this.$refs.canvasViewport || this.container;
+				const zoomPadding = this.getZoomPadding();
+
+				const refImg = this.referenceFrame.querySelector('img');
+				const refWidth = refImg?.naturalWidth || this.referenceFrame.offsetWidth || 400;
+				const refHeight = refImg?.naturalHeight || this.referenceFrame.offsetHeight || 720;
+
+				const w = (viewport.clientWidth - zoomPadding.x) / refWidth;
+				const h = (viewport.clientHeight - zoomPadding.y) / refHeight;
+				const fitZoom = Math.max(this.minZoom, Math.min(this.maxZoom, Math.min(w, h) * 100));
+				const zoom = fitZoom / 100;
+
+				this.setZoomLevel(fitZoom);
+
+				// Reference center in world coords (first element in flex, so starts at x=0)
+				const refWorldCenterX = refWidth / 2;
+				const refWorldCenterY = refHeight / 2;
+
+				// CSS: screen = world * zoom + offset → offset = screenCenter - worldCenter * zoom
+				this.zoomOffsetX = (viewport.clientWidth / 2) - refWorldCenterX * zoom;
+				this.zoomOffsetY = (viewport.clientHeight / 2) - refWorldCenterY * zoom;
+				this.activeFrame = 'reference';
+			}
 		},
 
 		positionTooltip() {
@@ -2452,37 +2547,29 @@ export default ({ assetsUrl = '' }) => {
 
 				e.preventDefault();
 
-				const rect = this.konvajsContent.getBoundingClientRect();
-				const mouseX = e.clientX - rect.left;
-				const mouseY = e.clientY - rect.top;
-
 				if (e.metaKey || e.ctrlKey) {
-					const zoomDirection = e.deltaY < 0 ? 1 : -1;
-					const zoomDelta = zoomDirection * 2;
-					const newZoomLevel = Math.max(
-						this.minZoom,
-						Math.min(this.maxZoom, this.zoomLevel + zoomDelta)
-					);
+					// Zoom toward cursor position
+					// CSS: translate(tx,ty) scale(s) → screenPos = worldPos * zoom + offset
+					// To keep worldPoint under cursor: offset_new = cursor * (1 - r) + offset_old * r, where r = newZoom/oldZoom
+					const viewport = this.$refs.canvasViewport || this.container;
+					const viewportRect = viewport.getBoundingClientRect();
+					const cursorX = e.clientX - viewportRect.left;
+					const cursorY = e.clientY - viewportRect.top;
 
-					const zoomFactor = newZoomLevel / this.zoomLevel;
+					const zoomIntensity = 0.008;
+					const delta = -e.deltaY * zoomIntensity;
+					const oldZoom = this.zoomLevel / 100;
+					const newZoomLevel = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoomLevel * (1 + delta)));
+					const newZoom = newZoomLevel / 100;
+					const r = newZoom / oldZoom;
+
+					this.zoomOffsetX = cursorX * (1 - r) + this.zoomOffsetX * r;
+					this.zoomOffsetY = cursorY * (1 - r) + this.zoomOffsetY * r;
 					this.setZoomLevel(newZoomLevel);
-
-					const viewportCenter = {
-						x: rect.width / 2,
-						y: rect.height / 2
-					};
-
-					const mouseOffset = {
-						x: (mouseX - viewportCenter.x) / this.zoomLevel,
-						y: (mouseY - viewportCenter.y) / this.zoomLevel
-					};
-
-					this.zoomOffsetX -= mouseOffset.x * (zoomFactor - 1);
-					this.zoomOffsetY -= mouseOffset.y * (zoomFactor - 1);
 				} else {
-					const panSpeed = this.zoomLevel / 15;
-					this.zoomOffsetX -= e.deltaX / panSpeed;
-					this.zoomOffsetY -= e.deltaY / panSpeed;
+					// Pan — offset is in screen space (post-scale), so add screen deltas directly
+					this.zoomOffsetX -= e.deltaX;
+					this.zoomOffsetY -= e.deltaY;
 				}
 			};
 
@@ -2492,12 +2579,12 @@ export default ({ assetsUrl = '' }) => {
 				if (e.code === 'Space' && !e.repeat && !this.isSpacePressed && !this.showWelcomeScreen) {
 					this.isSpacePressed = true;
 					document.body.classList.add('is-panning');
-					this.container.classList.add('is-panning');
+					(this.$refs.canvasViewport || this.container).classList.add('is-panning');
 
 					if (document.activeElement && document.activeElement !== document.body) {
 						document.activeElement.blur();
 					}
-					this.container.focus();
+					this.container.focus({ preventScroll: true });
 					e.preventDefault();
 				}
 			};
@@ -2509,7 +2596,7 @@ export default ({ assetsUrl = '' }) => {
 					this.isSpacePressed = false;
 					this.isPanning = false;
 					document.body.classList.remove('is-panning', 'is-panning-active');
-					this.container.classList.remove('is-panning', 'is-panning-active');
+					(this.$refs.canvasViewport || this.container).classList.remove('is-panning', 'is-panning-active');
 				}
 			};
 
@@ -2520,12 +2607,12 @@ export default ({ assetsUrl = '' }) => {
 					this.isPanning = true;
 					lastMousePosition = { x: e.clientX, y: e.clientY };
 					document.body.classList.add('is-panning-active');
-					this.container.classList.add('is-panning-active');
+					(this.$refs.canvasViewport || this.container).classList.add('is-panning-active');
 
 					if (document.activeElement && document.activeElement !== document.body) {
 						document.activeElement.blur();
 					}
-					this.container.focus();
+					this.container.focus({ preventScroll: true });
 					e.stopPropagation();
 					e.preventDefault();
 				}
@@ -2540,8 +2627,9 @@ export default ({ assetsUrl = '' }) => {
 
 					lastMousePosition = { x: e.clientX, y: e.clientY };
 
-					this.zoomOffsetX += dx / (this.zoomLevel / 15);
-					this.zoomOffsetY += dy / (this.zoomLevel / 15);
+					// Offset is in screen space (post-scale), add screen deltas directly
+					this.zoomOffsetX += dx;
+					this.zoomOffsetY += dy;
 
 					e.preventDefault();
 					e.stopPropagation();
@@ -2554,7 +2642,7 @@ export default ({ assetsUrl = '' }) => {
 				if (this.isPanning) {
 					this.isPanning = false;
 					document.body.classList.remove('is-panning-active');
-					this.container.classList.remove('is-panning-active');
+					(this.$refs.canvasViewport || this.container).classList.remove('is-panning-active');
 				}
 			};
 
@@ -2564,7 +2652,7 @@ export default ({ assetsUrl = '' }) => {
 				if (this.isPanning) {
 					this.isPanning = false;
 					document.body.classList.remove('is-panning-active');
-					this.container.classList.remove('is-panning-active');
+					(this.$refs.canvasViewport || this.container).classList.remove('is-panning-active');
 				}
 			};
 
@@ -2585,10 +2673,10 @@ export default ({ assetsUrl = '' }) => {
 					touch2.clientY - touch1.clientY
 				);
 
-				const rect = this.konvajsContent.getBoundingClientRect();
+				const viewportRect = (this.$refs.canvasViewport || this.container).getBoundingClientRect();
 				lastTouchCenter = {
-					x: ((touch1.clientX + touch2.clientX) / 2) - rect.left,
-					y: ((touch1.clientY + touch2.clientY) / 2) - rect.top
+					x: ((touch1.clientX + touch2.clientX) / 2) - viewportRect.left,
+					y: ((touch1.clientY + touch2.clientY) / 2) - viewportRect.top
 				};
 
 				touchPanStartPosition = {
@@ -2617,8 +2705,8 @@ export default ({ assetsUrl = '' }) => {
 						const dx = currentTouchCenter.x - touchPanStartPosition.x;
 						const dy = currentTouchCenter.y - touchPanStartPosition.y;
 
-						this.zoomOffsetX = touchPanStartOffset.x + dx / (this.zoomLevel / 15);
-						this.zoomOffsetY = touchPanStartOffset.y + dy / (this.zoomLevel / 15);
+						this.zoomOffsetX = touchPanStartOffset.x + dx;
+						this.zoomOffsetY = touchPanStartOffset.y + dy;
 
 						const currentDistance = Math.hypot(
 							touch2.clientX - touch1.clientX,
@@ -2628,30 +2716,22 @@ export default ({ assetsUrl = '' }) => {
 						const scaleFactor = currentDistance / lastTouchDistance;
 
 						if (lastTouchDistance > 0 && scaleFactor !== 1) {
-							const rect = this.konvajsContent.getBoundingClientRect();
-							const currentCenter = {
-								x: ((touch1.clientX + touch2.clientX) / 2) - rect.left,
-								y: ((touch1.clientY + touch2.clientY) / 2) - rect.top
-							};
+							const viewportRect = (this.$refs.canvasViewport || this.container).getBoundingClientRect();
+							const cursorX = ((touch1.clientX + touch2.clientX) / 2) - viewportRect.left;
+							const cursorY = ((touch1.clientY + touch2.clientY) / 2) - viewportRect.top;
 
 							const newZoomLevel = Math.max(this.minZoom, Math.min(
 								this.maxZoom,
 								this.zoomLevel * scaleFactor
 							));
 
-							const oldZoom = this.zoomLevel;
-							const newZoom = newZoomLevel;
-							const zoomFactor = newZoom / oldZoom;
+							const oldZoom = this.zoomLevel / 100;
+							const newZoom = newZoomLevel / 100;
+							const r = newZoom / oldZoom;
 
+							this.zoomOffsetX = cursorX * (1 - r) + this.zoomOffsetX * r;
+							this.zoomOffsetY = cursorY * (1 - r) + this.zoomOffsetY * r;
 							this.setZoomLevel(newZoomLevel);
-
-							const viewportCenterX = rect.width / 2;
-							const viewportCenterY = rect.height / 2;
-							const touchOffsetX = (lastTouchCenter.x - viewportCenterX) / oldZoom;
-							const touchOffsetY = (lastTouchCenter.y - viewportCenterY) / oldZoom;
-
-							this.zoomOffsetX -= touchOffsetX * (zoomFactor - 1);
-							this.zoomOffsetY -= touchOffsetY * (zoomFactor - 1);
 
 							lastTouchDistance = currentDistance;
 							lastTouchCenter = currentCenter;
@@ -2669,12 +2749,14 @@ export default ({ assetsUrl = '' }) => {
 				this.stage.draggable(true);
 			};
 
-			this.container.addEventListener('wheel', handleWheel, { passive: false });
-			this.container.addEventListener('mousedown', handleMouseDown);
-			this.container.addEventListener('touchstart', handleTouchStart);
-			this.container.addEventListener('touchmove', handleTouchMove);
-			this.container.addEventListener('touchend', handleTouchEnd);
-			this.container.addEventListener('touchcancel', handleTouchEnd);
+			const panZoomTarget = this.$refs.canvasViewport || this.container;
+
+			panZoomTarget.addEventListener('wheel', handleWheel, { passive: false });
+			panZoomTarget.addEventListener('mousedown', handleMouseDown);
+			panZoomTarget.addEventListener('touchstart', handleTouchStart);
+			panZoomTarget.addEventListener('touchmove', handleTouchMove);
+			panZoomTarget.addEventListener('touchend', handleTouchEnd);
+			panZoomTarget.addEventListener('touchcancel', handleTouchEnd);
 
 			document.addEventListener('keydown', handleKeyDown);
 			document.addEventListener('keyup', handleKeyUp);
@@ -3008,7 +3090,40 @@ export default ({ assetsUrl = '' }) => {
 				try {
 					const tempNode = Konva.Node.create(nodeData);
 					const className = tempNode.getClassName();
-					const attrs = tempNode.getAttrs();
+					const attrs = {
+						// Always include x/y — Konva omits defaults (0) from toJSON/getAttrs,
+						// which causes createNode to apply its center-position defaults.
+						x: tempNode.x(),
+						y: tempNode.y(),
+						...tempNode.getAttrs(),
+					};
+
+					// Sanitize gradient color stops: Konva may store colors as RGBA arrays [r,g,b,a] (0-1 range)
+					// instead of CSS strings, which breaks canvas addColorStop().
+					[ 'fillLinearGradientColorStops', 'fillRadialGradientColorStops' ].forEach(key => {
+						if ( Array.isArray(attrs[key]) ) {
+							attrs[key] = attrs[key].map((val, i) => {
+								if ( i % 2 === 0 ) return val; // offset — keep as-is
+								if ( typeof val === 'string' ) return val; // already a CSS color
+								if ( Array.isArray(val) ) {
+									// RGBA array [r, g, b, a] in 0-1 range
+									const r = Math.round((val[0] ?? 0) * 255);
+									const g = Math.round((val[1] ?? 0) * 255);
+									const b = Math.round((val[2] ?? 0) * 255);
+									const a = val[3] ?? 1;
+									return `rgba(${r},${g},${b},${a})`;
+								}
+								if ( typeof val === 'object' && val !== null ) {
+									const r = Math.round((val.r ?? 0) * 255);
+									const g = Math.round((val.g ?? 0) * 255);
+									const b = Math.round((val.b ?? 0) * 255);
+									const a = val.a ?? 1;
+									return `rgba(${r},${g},${b},${a})`;
+								}
+								return '#000000';
+							});
+						}
+					});
 
 					this.addNodeToStage({
 						type: className,
@@ -3091,6 +3206,8 @@ export default ({ assetsUrl = '' }) => {
 				this.fitToScreen();
 				this.currentDocId = null;
 				this.currentDocName = null;
+				this.lastGeneratedReferenceImage = null;
+				this.showReferenceFrame = true;
 			}
 		},
 
@@ -3145,14 +3262,20 @@ export default ({ assetsUrl = '' }) => {
 		getExportData() {
 			const nodesToExport = this.nodes.map(node => node.toJSON());
 
-			return {
+			const data = {
 				name: this.currentDocName || 'Untitled Document',
 				stage: {
 					width: this.stage.width(),
 					height: this.stage.height(),
 				},
-				nodes: nodesToExport
+				nodes: nodesToExport,
 			};
+
+			if ( this.lastGeneratedReferenceImage ) {
+				data.referenceImage = this.lastGeneratedReferenceImage;
+			}
+
+			return data;
 		},
 
 		handleImport() {
@@ -3194,8 +3317,11 @@ export default ({ assetsUrl = '' }) => {
 				throw new Error('Invalid file format');
 			}
 
+			const isSameDoc = docId && docId === this.currentDocId;
+
 			if (
 				!this.nodes.length ||
+				isSameDoc ||
 				(
 					this.nodes.length &&
 					confirm(magicai_localize['all_your_current_edits_will_be_lost__are_you_sure_'])
@@ -3206,6 +3332,10 @@ export default ({ assetsUrl = '' }) => {
 				if ( data.name ) {
 					this.currentDocName = data.name;
 				}
+
+				// Restore or clear reference image
+				this.lastGeneratedReferenceImage = data.referenceImage || null;
+				this.showReferenceFrame = !!data.referenceImage;
 
 				if (data.stage) {
 					this.handleStageResize({
@@ -3218,7 +3348,11 @@ export default ({ assetsUrl = '' }) => {
 					try {
 						const tempNode = Konva.Node.create(nodeData);
 						const className = tempNode.getClassName();
-						const attrs = tempNode.getAttrs();
+						const attrs = {
+							x: tempNode.x(),
+							y: tempNode.y(),
+							...tempNode.getAttrs(),
+						};
 
 						this.addNodeToStage({
 							type: className,
@@ -3446,6 +3580,12 @@ export default ({ assetsUrl = '' }) => {
 
 		async loadDocument(docId) {
 			if ( !docId ) return;
+
+			// Already editing this document — just switch to editor view
+			if ( docId === this.currentDocId ) {
+				this.currentView !== 'editor' && this.switchView('editor');
+				return;
+			}
 
 			try {
 				const response = await fetch(`/dashboard/user/creative-suite/document/${docId}`);
@@ -3735,5 +3875,8 @@ export default ({ assetsUrl = '' }) => {
 				this.dropdownOpen = true;
 			});
 		},
+
+		...(csAiTemplatePlugin.methods || {}),
+		...(csAnnotationsPlugin.methods || {}),
 	});
 };

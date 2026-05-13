@@ -57,6 +57,7 @@ class Plan extends Model
         'plan_features',
         'social_media_agent_limits',
         'blogpilot_limits',
+        'social_media_automation_limits',
         'reset_credits_on_renewal',
         'default_ai_model',
         'ai_models',
@@ -115,6 +116,7 @@ class Plan extends Model
         'chatbot_human_agent'       => 'boolean',
         'social_media_agent_limits' => 'array',
         'blogpilot_limits'          => 'array',
+        'social_media_automation_limits' => 'array',
     ];
 
     protected static function boot(): void
@@ -383,6 +385,9 @@ class Plan extends Model
             'blogpilot_limits'              => [
                 'agents'        => -1,
                 'monthly_posts' => -1,
+            ],
+			'social_media_automation_limits' => [
+                'automations' => -1,
             ],
             'default_ai_model'                  => Helper::defaultWordModel()->slug(),
             'ai_models'                         => EngineEnum::getNestedPlanLimits(),

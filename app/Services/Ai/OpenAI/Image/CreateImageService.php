@@ -3,6 +3,7 @@
 namespace App\Services\Ai\OpenAI\Image;
 
 use App\Helpers\Classes\Helper;
+use App\Services\Ai\OpenAI\Image\Support\GptImageParamNormalizer;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -108,16 +109,17 @@ class CreateImageService
 
     public function requestData(): array
     {
-        return [
-            'model'           => $this->getModel(),
-            'prompt'          => $this->getPrompt(),
-            'size'            => $this->getSize(),
-            'n'               => 1,
-            //            'response_format' => 'b64_json',
-            'output_format'   => $this->getOutputFormat(),
-            'quality'         => $this->getQuality(),
-            'background'      => $this->getBackground(),
+        $data = [
+            'model'         => $this->getModel(),
+            'prompt'        => $this->getPrompt(),
+            'size'          => $this->getSize(),
+            'n'             => 1,
+            'output_format' => $this->getOutputFormat(),
+            'quality'       => $this->getQuality(),
+            'background'    => $this->getBackground(),
         ];
+
+        return GptImageParamNormalizer::normalize($data);
     }
 
     public function setModel(string $model): CreateImageService

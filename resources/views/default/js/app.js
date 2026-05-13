@@ -11,7 +11,7 @@ import clipboard from './components/clipboard';
 import assignViewCredits from './components/assignViewCredits';
 import openaiRealtime from './components/realtime-frontend/openaiRealtime';
 import advancedImageEditor from './components/advancedImageEditor';
-import { debounce, throttle } from 'lodash';
+import { debounce, throttle, defer } from 'lodash';
 import creativeSuite from './components/creative-suite/creativeSuite';
 import { lqdCustomizer, lqdCustomizerFontPicker } from './components/customizer';
 import { lqdSidedrawer } from './components/sidedrawer';
@@ -871,8 +871,7 @@ document.addEventListener( 'alpine:init', () => {
 			},
 		},
 		trigger: {
-			// .stop to prevent bubbling event when the dropdown is inside another trigger. for example in chat pro folders
-			[ '@click.prevent.stop' ]() {
+			[ '@click.prevent' ]() {
 				// we need to be able to toggle dropdown when focus/enter key is pressed
 				// if (this.triggerType !== 'click') return;
 

@@ -20,6 +20,7 @@ class OpenAIImageService implements ImageGeneratorInterface
         $imageReference = $options['image_reference'] ?? null;
         $background = $options['background'] ?? null;
         $size = $options['aspect_ratio'] ?? null;
+        $quality = $options['quality'] ?? null;
 
         // Build the full prompt with attributes
         $fullPrompt = $this->buildPrompt($prompt, $options);
@@ -36,6 +37,10 @@ class OpenAIImageService implements ImageGeneratorInterface
 
         if ($background) {
             $data['background'] = $background;
+        }
+
+        if ($quality) {
+            $data['quality'] = $quality;
         }
 
         return $this->generateImages($model, $prompt, $data, $imageReference);
@@ -76,15 +81,19 @@ class OpenAIImageService implements ImageGeneratorInterface
         $images = [];
 
         ApiHelper::setOpenAiKey();
-        if ($model === EntityEnum::GPT_IMAGE_1 || ($model === EntityEnum::DALL_E_2 && $imageRef)) {
+        $isGptImage = in_array($model, [EntityEnum::GPT_IMAGE_1, EntityEnum::GPT_IMAGE_1_5, EntityEnum::GPT_IMAGE_2], true);
+
+        if ($isGptImage || ($model === EntityEnum::DALL_E_2 && $imageRef)) {
 
             if ($imageRef) {
                 $imagesToSet = is_array($imageRef) ? $imageRef : [$imageRef];
                 $service = app(CreateImageEditService::class)
                     ->setImages($imagesToSet)
+                    ->setModel($model->value)
                     ->setPrompt($prompt);
             } else {
                 $service = app(CreateImageService::class)
+                    ->setModel($model->value)
                     ->setPrompt($prompt);
             }
 
@@ -94,6 +103,10 @@ class OpenAIImageService implements ImageGeneratorInterface
 
             if (isset($data['background'])) {
                 $service->setBackground($data['background']);
+            }
+
+            if (isset($data['quality'])) {
+                $service->setQuality($data['quality']);
             }
 
             $base64 = $service->generateForAi();

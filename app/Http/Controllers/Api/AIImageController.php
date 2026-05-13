@@ -221,9 +221,11 @@ class AIImageController extends Controller
             EntityEnum::GROK_IMAGINE_IMAGE_EDIT->value => EngineEnum::FAL_AI->value,
             EntityEnum::GPT_IMAGE_1->value,
             EntityEnum::GPT_IMAGE_1_5->value,
+            EntityEnum::GPT_IMAGE_2->value,
             'gpt-image-1',
             'gpt-image-1.5',
             'gpt-image-1-5',
+            'gpt-image-2',
             'dall-e' => EngineEnum::OPEN_AI->value,
             default  => $imageGenerator ?? EngineEnum::OPEN_AI->value,
         };
@@ -246,7 +248,8 @@ class AIImageController extends Controller
             'ideogram'                                 => EntityEnum::IDEOGRAM,
             'gpt-image-1'                              => EntityEnum::GPT_IMAGE_1,
             'gpt-image-1.5', 'gpt-image-1-5' => EntityEnum::GPT_IMAGE_1_5,
-            default => $this->getDefaultModel($engine),
+            'gpt-image-2'                    => EntityEnum::GPT_IMAGE_2,
+            default                          => $this->getDefaultModel($engine),
         };
     }
 
@@ -833,6 +836,9 @@ class AIImageController extends Controller
             ->where('openai_id', $openai->id)
             ->when(Schema::hasColumn('user_openai', 'is_fashion_studio'), function ($query) {
                 $query->where('is_fashion_studio', false);
+            })
+            ->when(Schema::hasColumn('user_openai', 'is_ai_photo_studio'), function ($query) {
+                $query->where('is_ai_photo_studio', false);
             })
             ->latest('created_at')
             ->take(10)

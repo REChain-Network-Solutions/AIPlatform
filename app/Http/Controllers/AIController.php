@@ -905,7 +905,7 @@ class AIController extends Controller
         $engineCheck = match ($param['image_generator']) {
             'flux-pro', 'flux-2-flex', 'flux-2-flex/edit', 'ideogram', 'ideogram-v2', 'flux-pro-kontext', 'flux-pro/kontext/text-to-image', 'nano-banana', 'nano-banana-pro', 'nano-banana-2', 'seedream/v4/text-to-image', 'flux/schnell', 'flux-pro/v1.1', 'flux-realism', 'imagen4', 'fal-ai', 'xai/grok-imagine-image', 'xai/grok-imagine-image/edit' => EngineEnum::FAL_AI->value,
             EntityEnum::MIDJOURNEY->value  => EngineEnum::PI_API->value,
-            EntityEnum::GPT_IMAGE_1->value, EntityEnum::GPT_IMAGE_1_5->value => EngineEnum::OPEN_AI->value,
+            EntityEnum::GPT_IMAGE_1->value, EntityEnum::GPT_IMAGE_1_5->value, EntityEnum::GPT_IMAGE_2->value => EngineEnum::OPEN_AI->value,
             'stable_diffusion'             => EngineEnum::STABLE_DIFFUSION->value,
             default                        => $param['image_generator'] ?? EngineEnum::OPEN_AI->value,
         };
@@ -960,6 +960,10 @@ class AIController extends Controller
 
             if ($param['image_generator'] === 'gpt-image-1.5' || $param['image_generator'] === 'gpt-image-1-5') {
                 $model = EntityEnum::GPT_IMAGE_1_5;
+            }
+
+            if ($param['image_generator'] === 'gpt-image-2') {
+                $model = EntityEnum::GPT_IMAGE_2;
             }
 
             $driver = Entity::driver($model)->inputImageCount($number_of_images)->calculateCredit();
@@ -1411,6 +1415,9 @@ class AIController extends Controller
             ->where('openai_id', $post->id)
             ->when($post_type === 'ai_image_generator' && Schema::hasColumn('user_openai', 'is_fashion_studio'), function ($query) {
                 $query->where('is_fashion_studio', false);
+            })
+            ->when($post_type === 'ai_image_generator' && Schema::hasColumn('user_openai', 'is_ai_photo_studio'), function ($query) {
+                $query->where('is_ai_photo_studio', false);
             });
 
         $all_images_count = $all_images->count();
@@ -1541,13 +1548,13 @@ class AIController extends Controller
             $engine === EngineEnum::FAL_AI && $model === EntityEnum::SEEDREAM_4 => $this->processFalAISeeDreamV4Image($model, $param),
             $engine === EngineEnum::FAL_AI && $model === EntityEnum::NANO_BANANA,
             $engine === EngineEnum::FAL_AI && $model === EntityEnum::NANO_BANANA_PRO,
-            $engine === EngineEnum::FAL_AI && $model === EntityEnum::NANO_BANANA_2                                          => $this->processFalAINanoBananaImage($model, $param),
-            $engine === EngineEnum::OPEN_AI && ($model === EntityEnum::GPT_IMAGE_1 || $model === EntityEnum::GPT_IMAGE_1_5) => $this->processOpenAIGptImage1($model, $param),
-            $engine === EngineEnum::OPEN_AI                                                                                 => $this->processOpenAIImage($model, $param),
-            $engine === EngineEnum::STABLE_DIFFUSION                                                                        => $this->processStableDiffusionImage($model, $param),
-            $engine === EngineEnum::FAL_AI                                                                                  => $this->processFalAIImage($model, $param),
-            $engine === EngineEnum::PI_API                                                                                  => $this->processPiAPIImage($model, $param),
-            default                                                                                                         => throw new Exception(__('Invalid AI Engine')),
+            $engine === EngineEnum::FAL_AI && $model === EntityEnum::NANO_BANANA_2                                                                                => $this->processFalAINanoBananaImage($model, $param),
+            $engine === EngineEnum::OPEN_AI && ($model === EntityEnum::GPT_IMAGE_1 || $model === EntityEnum::GPT_IMAGE_1_5 || $model === EntityEnum::GPT_IMAGE_2) => $this->processOpenAIGptImage1($model, $param),
+            $engine === EngineEnum::OPEN_AI                                                                                                                       => $this->processOpenAIImage($model, $param),
+            $engine === EngineEnum::STABLE_DIFFUSION                                                                                                              => $this->processStableDiffusionImage($model, $param),
+            $engine === EngineEnum::FAL_AI                                                                                                                        => $this->processFalAIImage($model, $param),
+            $engine === EngineEnum::PI_API                                                                                                                        => $this->processPiAPIImage($model, $param),
+            default                                                                                                                                               => throw new Exception(__('Invalid AI Engine')),
         };
     }
 
@@ -1587,11 +1594,11 @@ class AIController extends Controller
     }
 
     /**
-     * Check if the model is a GPT Image model (gpt-image-1 or gpt-image-1.5).
+     * Check if the model is a GPT Image model (gpt-image-1, gpt-image-1.5, or gpt-image-2).
      */
     private function isGptImageModel(?EntityEnum $model): bool
     {
-        return $model === EntityEnum::GPT_IMAGE_1 || $model === EntityEnum::GPT_IMAGE_1_5;
+        return $model === EntityEnum::GPT_IMAGE_1 || $model === EntityEnum::GPT_IMAGE_1_5 || $model === EntityEnum::GPT_IMAGE_2;
     }
 
     /**

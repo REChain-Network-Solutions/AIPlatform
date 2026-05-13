@@ -10,7 +10,7 @@
     'xModel' => null,
 ])
 <label
-    {{ $attributes->withoutTwMergeClasses()->twMerge('form-check form-switch flex items-center gap-2 mb-0') }}
+    {{ $attributes->withoutTwMergeClasses()->whereDoesntStartWith(['wire:', 'value'])->twMerge('form-check form-switch flex items-center gap-2 mb-0') }}
     :for="$id('text-input')"
 >
     @if ($position === 'left')

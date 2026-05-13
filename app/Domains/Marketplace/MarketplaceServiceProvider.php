@@ -25,6 +25,7 @@ use App\Extensions\AIImagePro\System\AIImageProServiceProvider;
 use App\Extensions\AiMusic\System\AiMusicServiceProvider;
 use App\Extensions\AiMusicPro\System\AiMusicProServiceProvider;
 use App\Extensions\AiPersona\System\AiPersonaServiceProvider;
+use App\Extensions\AIPhotoshoot\System\AIPhotoshootServiceProvider;
 use App\Extensions\AIPlagiarism\System\AIPlagiarismServiceProvider;
 use App\Extensions\AiPresentation\System\AiPresentationServiceProvider;
 use App\Extensions\AIRealtimeImage\System\AIRealtimeImageServiceProvider;
@@ -59,6 +60,7 @@ use App\Extensions\CheckoutRegistration\System\RegistrationServiceProvider;
 use App\Extensions\Cloudflare\System\CloudflareServiceProvider;
 use App\Extensions\ContentManager\System\ContentManagerServiceProvider;
 use App\Extensions\CreativeSuite\System\CreativeSuiteServiceProvider;
+use App\Extensions\CreativeSuiteAnnotations\System\CreativeSuiteAnnotationsServiceProvider;
 use App\Extensions\Cryptomus\System\CryptomusServiceProvider;
 use App\Extensions\DemoExtension\System\DemoExtensionServiceProvider;
 use App\Extensions\DiscountManager\System\DiscountManagerServiceProvider;
@@ -156,6 +158,7 @@ class MarketplaceServiceProvider extends ServiceProvider
         'midjourney'                    => MidjourneyServiceProvider::class,
         'social-media'                  => SocialMediaServiceProvider::class,
         'social-media-agent'            => SocialMediaAgentServiceProvider::class,
+		'social-media-automation'       => \App\Extensions\SocialMediaAutomation\System\SocialMediaAutomationServiceProvider::class,
         'blogpilot'                     => BlogPilotServiceProvider::class,
         'chatbot-agent'                 => ChatbotAgentServiceProvider::class,
         'chatbot-booking'               => ChatbotBookingServiceProvider::class,
@@ -179,6 +182,7 @@ class MarketplaceServiceProvider extends ServiceProvider
         'live-customizer'               => LiveCustomizerServiceProvider::class,
         'elevenlabs-voice-chat'         => ElevenLabsVoiceChatServiceProvider::class,
         'creative-suite'                => CreativeSuiteServiceProvider::class,
+        'creative-suite-annotations'    => CreativeSuiteAnnotationsServiceProvider::class,
         'url-to-video'                  => UrlToVideoServiceProvider::class,
         'ai-viral-clips'                => AiViralClipsServiceProvider::class,
         'influencer-avatar'             => InfluencerAvatarServiceProvider::class,
@@ -203,6 +207,8 @@ class MarketplaceServiceProvider extends ServiceProvider
         'ai-chat-pro-memory'            => AIChatProMemoryServiceProvider::class,
         'ai-chat-pro-smart-image'       => AiChatProSmartImageServiceProvider::class,
         'fashion-studio'                => FashionStudioServiceProvider::class,
+        'creative-suite-ai-template'    => \App\Extensions\CreativeSuiteAITemplate\System\CreativeSuiteAITemplateServiceProvider::class,
+        'ai-photoshoot'                 => AIPhotoshootServiceProvider::class,
         'ai-chat-pro-entity-highlight'  => AiChatProEntityHighlightServiceProvider::class,
         'ai-chat-pro-highlight-to-ask'  => AiChatProHighlightToAskServiceProvider::class,
     ];

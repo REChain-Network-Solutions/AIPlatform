@@ -11,6 +11,7 @@ use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -1130,6 +1131,12 @@ class MediaManagerModal extends Component
             ->whereHas('generator', function ($q) {
                 $q->where('type', 'image');
             })
+            ->when(Schema::hasColumn('user_openai', 'is_fashion_studio'), function ($q) {
+                $q->where('is_fashion_studio', false);
+            })
+            ->when(Schema::hasColumn('user_openai', 'is_ai_photo_studio'), function ($q) {
+                $q->where('is_ai_photo_studio', false);
+            })
             ->with(['generator' => function ($q) {
                 $q->select('id', 'type', 'title');
             }]);
@@ -1243,6 +1250,12 @@ class MediaManagerModal extends Component
                 ->where('output', '!=', '')
                 ->whereHas('generator', function ($q) {
                     $q->where('type', 'video');
+                })
+                ->when(Schema::hasColumn('user_openai', 'is_fashion_studio'), function ($q) {
+                    $q->where('is_fashion_studio', false);
+                })
+                ->when(Schema::hasColumn('user_openai', 'is_ai_photo_studio'), function ($q) {
+                    $q->where('is_ai_photo_studio', false);
                 })
                 ->with(['generator' => function ($q) {
                     $q->select('id', 'type', 'title');

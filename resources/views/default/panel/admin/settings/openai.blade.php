@@ -87,46 +87,6 @@
                     </div>
                 </div>
             @endif
-			<div class="col-md-12">
-				<div class="mb-3">
-					<x-card
-						class="w-full"
-						size="sm"
-					>
-						<label class="form-label">{{ __('Reasoning Models Effort') }}
-							<x-badge
-								class="ms-2 text-2xs"
-								variant="secondary"
-							>
-								@lang('New')
-							</x-badge>
-						</label>
-						<select
-							class="form-select"
-							id="openai_reasoning_models_effort"
-							type="text"
-							name="openai_reasoning_models_effort"
-							required
-						>
-							<option
-								value="low"
-								{{ setting('openai_reasoning_models_effort', 'low') === 'low' ? 'selected' : '' }}
-							>
-								{{ __('Low') }}</option>
-							<option
-								value="medium"
-								{{ setting('openai_reasoning_models_effort', 'low') === 'medium' ? 'selected' : '' }}
-							>
-								{{ __('Medium') }}</option>
-							<option
-								value="high"
-								{{ setting('openai_reasoning_models_effort', 'low') === 'high' ? 'selected' : '' }}
-							>
-								{{ __('High') }}</option>
-						</select>
-					</x-card>
-				</div>
-			</div>
             <div class="col-md-12">
                 <div class="mb-3">
                     <x-card
@@ -146,10 +106,11 @@
                 </div>
             </div>
 
-			@includeIf('ai-video-pro::sora-setting')
+            @includeIf('ai-video-pro::sora-setting')
             @includeIf('openai-realtime-chat::setting')
             @include('panel.admin.settings.particles.gpt-image-1')
-			@include('panel.admin.settings.particles.gpt-image-1-5')
+            @include('panel.admin.settings.particles.gpt-image-1-5')
+            @include('panel.admin.settings.particles.gpt-image-2')
 
             <div class="col-md-12">
                 <div class="mb-3">
@@ -200,6 +161,60 @@
                     :drivers="$openaiWordDrivers"
                 />
             </div>
+
+            <div class="col-md-12 mb-3">
+                <x-card
+                    class="w-full"
+                    size="sm"
+                >
+                    <x-forms.input
+                        class:label-extra="m-0 order-3"
+                        id="openai_reasoning_models_effort"
+                        size="lg"
+                        type="select"
+                        name="openai_reasoning_models_effort"
+                        label="{{ __('Reasoning Models Effort') }}"
+                        tooltip="{{ __('Higher effort = deeper reasoning but slower. If the selected model does not accept your choice (e.g. None on GPT-5 original, Minimal on o-series), it is auto-downgraded to the closest supported value.') }}"
+                        required
+                    >
+                        <x-slot:label-extra>
+                            <x-badge
+                                class="ms-2 text-2xs"
+                                variant="secondary"
+                            >
+                                @lang('New')
+                            </x-badge>
+                        </x-slot:label-extra>
+
+                        <option
+                            value="none"
+                            {{ setting('openai_reasoning_models_effort', 'low') === 'none' ? 'selected' : '' }}
+                        >
+                            {{ __('None (no reasoning, fastest)') }}</option>
+                        <option
+                            value="minimal"
+                            {{ setting('openai_reasoning_models_effort', 'low') === 'minimal' ? 'selected' : '' }}
+                        >
+                            {{ __('Minimal (near-zero reasoning, very fast)') }}</option>
+                        <option
+                            value="low"
+                            {{ setting('openai_reasoning_models_effort', 'low') === 'low' ? 'selected' : '' }}
+                        >
+                            {{ __('Low') }}</option>
+                        <option
+                            value="medium"
+                            {{ setting('openai_reasoning_models_effort', 'low') === 'medium' ? 'selected' : '' }}
+                        >
+                            {{ __('Medium') }}</option>
+                        <option
+                            value="high"
+                            {{ setting('openai_reasoning_models_effort', 'low') === 'high' ? 'selected' : '' }}
+                        >
+                            {{ __('High') }}</option>
+                    </x-forms.input>
+                </x-card>
+            </div>
+
             <div class="col-md-6">
                 <div class="mb-3">
                     <x-card

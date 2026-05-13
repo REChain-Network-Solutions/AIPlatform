@@ -243,6 +243,7 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
                 EntityEnum::GPT_4_O_MINI_SEARCH_PREVIEW,
                 EntityEnum::GPT_IMAGE_1,
                 EntityEnum::GPT_IMAGE_1_5,
+                EntityEnum::GPT_IMAGE_2,
                 EntityEnum::SORA_2,
                 EntityEnum::SORA_2_PRO,
             ],
@@ -254,8 +255,11 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
             self::OPEN_ROUTER      => [EntityEnum::fromSlug(setting('default_open_router_model', EntityEnum::PERPLEXITY_LLAMA_31_SONAR_8B->slug()))],
             self::GEMINI           => [
                 EntityEnum::fromSlug(setting('gemini_default_model', EntityEnum::GEMINI_3_FLASH->slug())),
+                EntityEnum::LYRIA_3_CLIP,
+                EntityEnum::LYRIA_3_PRO,
                 EntityEnum::GEMINI_EMBEDDING_EXP,
                 EntityEnum::GEMINI_TEXT_EMBEDDING_004,
+                EntityEnum::GEMINI_3_1_FLASH_LIVE_PREVIEW,
             ],
             self::DEEP_SEEK        => [EntityEnum::fromSlug(setting('deepseek_default_model', EntityEnum::DEEPSEEK_CHAT->slug()))],
             self::ELEVENLABS       => [

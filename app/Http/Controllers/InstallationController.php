@@ -195,7 +195,7 @@ class InstallationController extends Controller
 
     public function updateManual(Request $request)
     {
-        $version = '10.50';
+        $version = '10.60';
 
         Artisan::call('migrate', [
             '--force' => true,

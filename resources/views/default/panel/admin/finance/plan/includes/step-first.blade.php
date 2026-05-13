@@ -434,4 +434,5 @@
 
 	@includeIf('social-media-agent::admin.plan.social-media-agent-limits')
 	@includeIf('blogpilot::admin.plan.blogpilot-limits')
+	@includeIf('social-media-automation::admin.plan.social-media-automation-limits')
 </div>

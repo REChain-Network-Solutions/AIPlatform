@@ -83,7 +83,8 @@ class SubscriptionPlanCreate extends Component
             'plan.hidden_url'                              => 'nullable',
             'plan.social_media_agent_limits.agents'        => 'nullable|integer|min:-1',
             'plan.social_media_agent_limits.monthly_posts' => 'nullable|integer|min:-1',
-            'plan.blogpilot_limits.agents'                 => 'nullable|integer|min:-1',
+			'plan.social_media_automation_limits.automations' => 'nullable|integer|min:-1',
+			'plan.blogpilot_limits.agents'                 => 'nullable|integer|min:-1',
             'plan.blogpilot_limits.monthly_posts'          => 'nullable|integer|min:-1',
             'plan.voice_call_seconds_limit'                => 'nullable|integer|min:-1',
             'plan.deep_research_request_limit'             => 'nullable|integer|min:-1',
@@ -164,6 +165,7 @@ class SubscriptionPlanCreate extends Component
         $this->changePlanValuesWithSuppliedEntities();
         $this->normalizeSocialMediaAgentLimits();
         $this->normalizeBlogPilotLimits();
+        $this->normalizeSocialMediaAutomationLimits();
         $this->plan->save();
         if ($isSensitiveDataChanged) {
             PaymentProcessController::saveGatewayProducts($this->plan, $this->gatewaysToCreatePriceIds);
@@ -255,6 +257,22 @@ class SubscriptionPlanCreate extends Component
         }
 
         $this->plan->blogpilot_limits = $limits;
+    }
+
+    private function normalizeSocialMediaAutomationLimits(): void
+    {
+        $limits = (array) ($this->plan->social_media_automation_limits ?? []);
+        foreach (['automations'] as $key) {
+            $value = $limits[$key] ?? null;
+            if ($value === null || $value === '') {
+                $limits[$key] = -1;
+
+                continue;
+            }
+            $limits[$key] = max(-1, (int) $value);
+        }
+
+        $this->plan->social_media_automation_limits = $limits;
     }
 
     private function isSensitiveDataChanged(): bool

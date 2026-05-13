@@ -44,8 +44,9 @@
 @endphp
 
 @foreach ($messages ?? [] as $messageIndex => $message)
-    {{-- to prevent showing first 'Hi, ...' message on ai vision chat --}}
+    {{-- to prevent showing first 'Hi, ...' message on ai vision chat or in demo mode --}}
     @continue(isset($category) && ($category?->slug == 'ai_vision' || $category?->slug === 'ai_realtime_voice_chat') && count($chat?->messages) === 1)
+    @continue($app_is_demo && $is_chat_pro && $message->response === 'First Initiation')
 
     @php
         $is_multi_model_message = $is_chat_pro && isset($message->shared_uuid) && !empty($message->shared_uuid);

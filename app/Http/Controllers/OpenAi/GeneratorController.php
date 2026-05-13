@@ -99,16 +99,8 @@ class GeneratorController extends Controller
         $chatParams = $this->extractChatParameters($request);
         if (empty($chatParams)) {
             return response()->stream(function () {
-                echo "event: message\n";
-                echo 'data: 0' . "\n\n";
-
-                echo "event: data\n";
-                echo 'data: ' . __('Chat not found. Please refresh and try again.');
-                echo "\n\n";
-                flush();
-                echo "event: stop\n";
-                echo 'data: [DONE]';
-                echo "\n\n";
+                echo "event: chat_not_found\n";
+                echo "data: {}\n\n";
                 flush();
             }, 200, [
                 'Cache-Control'     => 'no-cache',
@@ -138,6 +130,11 @@ class GeneratorController extends Controller
 
         $chat_bot = $this->determineChatBot($chatParams['chatbot_front_model']);
         $default_ai_engine = $this->determineAiEngine($chat_bot, $chatParams['chatbot_front_model']);
+
+        if (! empty($chatParams['realtime']) && setting('default_realtime') === 'openai') {
+            $chat_bot = setting('openai_realtime_model', EntityEnum::GPT_4_O_SEARCH_PREVIEW->value);
+            $default_ai_engine = $this->determineAiEngine($chat_bot, $chat_bot);
+        }
 
         $message = $this->createChatMessage($user, $chatParams);
         $history = $this->buildChatHistory($chatParams, $message->user_openai_chat_id, (int) $message->id);
@@ -201,18 +198,10 @@ class GeneratorController extends Controller
         $chatParams = $this->extractChatParameters($request);
         if (empty($chatParams)) {
             return response()->stream(function () {
-                echo "event: message\n";
-                echo "data: 0\n\n";
-
-                echo "event: data\n";
-                echo 'data: ' . __('Chat not found. Please refresh and try again.');
-                echo "\n\n";
+                echo "event: chat_not_found\n";
+                echo "data: {}\n\n";
                 flush();
-
-                echo "event: stop\n";
-                echo "data: [DONE]\n\n";
-                flush();
-            }, 404, [
+            }, 200, [
                 'Cache-Control'     => 'no-cache',
                 'X-Accel-Buffering' => 'no',
                 'Connection'        => 'keep-alive',
@@ -256,18 +245,10 @@ class GeneratorController extends Controller
         $chatParams = $this->extractChatParameters($request);
         if (empty($chatParams)) {
             return response()->stream(function () {
-                echo "event: message\n";
-                echo "data: 0\n\n";
-
-                echo "event: data\n";
-                echo 'data: ' . __('Chat not found. Please refresh and try again.');
-                echo "\n\n";
+                echo "event: chat_not_found\n";
+                echo "data: {}\n\n";
                 flush();
-
-                echo "event: stop\n";
-                echo "data: [DONE]\n\n";
-                flush();
-            }, 404, [
+            }, 200, [
                 'Cache-Control'     => 'no-cache',
                 'X-Accel-Buffering' => 'no',
                 'Connection'        => 'keep-alive',
@@ -444,7 +425,7 @@ class GeneratorController extends Controller
     {
         $chat = $chatParams['chat'];
         $category = $chat->category;
-        $systemRole = EntityEnum::fromSlug($this->determineChatBot($chatParams['chatbot_front_model']))->isBetaEntity() ? 'system' : 'user';
+        $systemRole = 'system';
 
         $previousMessageCount = $chat->messages()
             ->whereNotNull('input')
@@ -464,6 +445,8 @@ class GeneratorController extends Controller
             $history = $this->appendSocialMediaAgentContext($history, $chatParams, $systemRole);
         }
         $history = $this->addFileOrInstructionsToHistory($history, $category, $chat_id, $chatParams['prompt'], $systemRole);
+        $history = $this->checkBrandVoice($chatParams['chat_brand_voice'], $chatParams['brand_voice_prod'], $history);
+        $history = $this->checkSkills($chatParams['skill_ids'] ?? null, $history, $systemRole, $chatParams);
         $history = $this->addPreviousMessagesToHistory(
             $history,
             $chat,
@@ -471,8 +454,6 @@ class GeneratorController extends Controller
             $chatParams['shared_message_uuid'] ?? null,
             $currentMessageId
         );
-        $history = $this->checkBrandVoice($chatParams['chat_brand_voice'], $chatParams['brand_voice_prod'], $history);
-        $history = $this->checkSkills($chatParams['skill_ids'] ?? null, $history, $systemRole, $chatParams);
 
         return $this->addCurrentPromptToHistory($history, $chatParams, $systemRole);
     }
@@ -797,14 +778,14 @@ class GeneratorController extends Controller
 
         $lastThreeMessageQuery = $lastThreeMessageQuery
             ->orderBy('created_at', 'desc')
-            ->take(4)
+            ->take((int) setting('chat_history_limit', 4))
             ->get()
             ->reverse();
 
         $contain_images = $this->checkIfHistoryContainsImages($lastThreeMessageQuery);
         $count = count($lastThreeMessageQuery);
 
-        if ($count > 1) {
+        if ($count >= 1) {
             foreach ($lastThreeMessageQuery as $threeMessage) {
                 $userInput = $threeMessage->input ?? '';
                 if (Schema::hasColumn('user_openai_chat_messages', 'highlight_context') && ! empty($threeMessage->highlight_context)) {
@@ -1041,6 +1022,10 @@ class GeneratorController extends Controller
     private function checkSkills(?string $skillIds, array $history, string $systemRole, array &$chatParams): array
     {
         if (! class_exists(Skill::class)) {
+            return $history;
+        }
+
+        if (! (bool) setting('ai_chat_pro_skills_enabled', '0')) {
             return $history;
         }
 

@@ -364,6 +364,9 @@ class UserController extends Controller
             ->when($slug === 'ai_image_generator' && Schema::hasColumn('user_openai', 'is_fashion_studio'), function ($query) {
                 $query->where('is_fashion_studio', false);
             })
+            ->when($slug === 'ai_image_generator' && Schema::hasColumn('user_openai', 'is_ai_photo_studio'), function ($query) {
+                $query->where('is_ai_photo_studio', false);
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(5);
 

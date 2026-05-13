@@ -113,6 +113,12 @@
         window.pusherConfig = @json(\Illuminate\Support\Arr::except(config('broadcasting.connections.pusher'), ['secret', 'app_id']));
     </script>
 
+    {{-- Plugin scripts that must execute before the main app bundle.
+         Multiple module scripts in the same document execute in DOM order
+         after the document is parsed, so anything pushed here runs before
+         Alpine boots from the main app.js entry below. --}}
+    @stack('script-before')
+
     @vite(\App\Helpers\Classes\ThemeHelper::appJsPath())
 
     @if (setting('additional_custom_css') != null)

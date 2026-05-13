@@ -14,7 +14,7 @@
                         name="image_thumbnail"
                         type="checkbox"
                         onchange="updateSetting(this.checked ? 1 : 0 );"
-                        {{ setting('image_thumbnail') == 1 ? 'checked' : '' }}
+                        {{ setting('image_thumbnail', 1) == 1 ? 'checked' : '' }}
                     >
                     <span class="form-check-label">{{ __('Enable Thumbnail System') }}</span>
                 </label>

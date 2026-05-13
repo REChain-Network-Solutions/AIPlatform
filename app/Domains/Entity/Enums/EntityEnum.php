@@ -71,6 +71,7 @@ enum EntityEnum: string
     case CLAUDE_3_5_SONNET_V2 = 'claude-3-5-sonnet-20241022';
     case CLAUDE_3_5_SONNET = 'claude-3-5-sonnet-20240620';
     case CLAUDE_3_SONNET = 'claude-3-sonnet-20240229';
+    case CLAUDE_OPUS_4_7 = 'claude-opus-4-7';
     case CLAUDE_OPUS_4_6 = 'claude-opus-4-6';
     case CLAUDE_OPUS_4_5 = 'claude-opus-4-5-20251101';
     case CLAUDE_OPUS_4_1 = 'claude-opus-4-1-20250805';
@@ -157,6 +158,8 @@ enum EntityEnum: string
 
     case GPT_5_4_MINI = 'gpt-5.4-mini';
     case GPT_5_4_NANO = 'gpt-5.4-nano';
+
+    case GPT_5_5 = 'gpt-5.5';
     case O3_DEEP_RESEARCH = 'o3-deep-research';
     case O4_MINI_DEEP_RESEARCH = 'o4-mini-deep-research';
 
@@ -212,6 +215,7 @@ enum EntityEnum: string
     case GEMINI_EMBEDDING_EXP = 'gemini-embedding-exp';
     case GEMINI_1_5_FLASH = 'gemini-1.5-flash';
     case GEMINI_3_FLASH = 'gemini-3-flash-preview';
+    case GEMINI_3_1_FLASH_LIVE_PREVIEW = 'gemini-3.1-flash-live-preview';
     case GEMINI_TEXT_EMBEDDING_004 = 'text-embedding-004';
 
     case CLIPDROP = 'clipdrop';
@@ -247,6 +251,10 @@ enum EntityEnum: string
 
     case ELEVENLABS_AI_MUSIC = 'elevenlabs-ai-music';
 
+    case LYRIA_3_CLIP = 'lyria-3-clip';
+
+    case LYRIA_3_PRO = 'lyria-3-pro';
+
     case GOOGLE = 'google';
 
     case AZURE = 'azure';
@@ -267,6 +275,7 @@ enum EntityEnum: string
 
     case GPT_IMAGE_1 = 'gpt-image-1';
     case GPT_IMAGE_1_5 = 'gpt-image-1.5';
+    case GPT_IMAGE_2 = 'gpt-image-2';
 
     case TTS_1 = 'tts-1';
     case TTS_1_HD = 'tts-1-hd';
@@ -446,7 +455,8 @@ enum EntityEnum: string
             self::GPT_5_3_CHAT,
             self::GPT_5_4,
             self::GPT_5_4_MINI,
-            self::GPT_5_4_NANO    => true,
+            self::GPT_5_4_NANO,
+            self::GPT_5_5         => true,
             default               => false,
         };
     }
@@ -460,6 +470,83 @@ enum EntityEnum: string
             self::GPT_O_03_mini => true,
             default             => false,
         };
+    }
+
+    /**
+     * The reasoning.effort values this model accepts, in ascending order
+     * (fastest first). Empty for non-reasoning models.
+     *
+     * @return array<int, string>
+     */
+    public function supportedReasoningEfforts(): array
+    {
+        return match ($this) {
+            // GPT-5 original family: minimal, low, medium, high.
+            self::GPT_5,
+            self::GPT_5_CHAT,
+            self::GPT_5_MINI,
+            self::GPT_5_NANO      => ['minimal', 'low', 'medium', 'high'],
+
+            // GPT-5.1+ family: none (default), low, medium, high.
+            self::GPT_5_1,
+            self::GPT_5_2,
+            self::GPT_5_3_CHAT,
+            self::GPT_5_4,
+            self::GPT_5_4_MINI,
+            self::GPT_5_4_NANO    => ['none', 'low', 'medium', 'high'],
+
+            // Pro models: medium, high, xhigh.
+            self::GPT_5_PRO,
+            self::GPT_5_2_PRO     => ['medium', 'high', 'xhigh'],
+
+            // GPT-5.5: none (default), low, medium, high, xhigh.
+            self::GPT_5_5         => ['none', 'low', 'medium', 'high', 'xhigh'],
+
+            // O-series: low, medium, high.
+            self::GPT_O_1,
+            self::GPT_O_4_MINI,
+            self::GPT_O_3,
+            self::GPT_O_03_mini   => ['low', 'medium', 'high'],
+
+            default               => [],
+        };
+    }
+
+    /**
+     * Resolve a configured reasoning effort to the closest value this model accepts.
+     * If the configured value is supported, it's returned as-is. Otherwise the
+     * nearest supported value (by ordered-effort distance) is chosen.
+     */
+    public function resolveReasoningEffort(string $configured): string
+    {
+        $supported = $this->supportedReasoningEfforts();
+
+        if (empty($supported)) {
+            return $configured;
+        }
+
+        if (in_array($configured, $supported, true)) {
+            return $configured;
+        }
+
+        $order = ['none', 'minimal', 'low', 'medium', 'high', 'xhigh'];
+        $configuredIdx = array_search($configured, $order, true);
+        if ($configuredIdx === false) {
+            return $supported[0];
+        }
+
+        $bestEffort = $supported[0];
+        $bestDistance = PHP_INT_MAX;
+        foreach ($supported as $candidate) {
+            $idx = array_search($candidate, $order, true);
+            $distance = abs($idx - $configuredIdx);
+            if ($distance < $bestDistance) {
+                $bestDistance = $distance;
+                $bestEffort = $candidate;
+            }
+        }
+
+        return $bestEffort;
     }
 
     public function requiresMaxCompletionTokens(): bool
@@ -518,6 +605,7 @@ enum EntityEnum: string
             self::DALL_E_3                    => __('DALL-E 3 The latest DALL·E model released in Nov 2023.'),
             self::GPT_IMAGE_1                 => __('GPT-IMAGE-1 The latest image model released in Nov 2025.'),
             self::GPT_IMAGE_1_5               => __('GPT-IMAGE-1.5 The latest image model released in Dec 2025.'),
+            self::GPT_IMAGE_2                 => __('GPT-IMAGE-2 The latest image model with flexible resolutions and high-fidelity inputs.'),
             self::TTS_1                       => __('TTS 1 The latest text to speech model, optimized for speed.'),
             self::TTS_1_HD                    => __('TTS 1 HD The latest text to speech model, optimized for quality.'),
             self::GPT_4_O                     => __('GPT-4o Most advanced works for Vision, multimodal flagship model that’s cheaper and faster than GPT-4 Turbo.  (Updated Knowleddge cutoff of Oct 2023, 128k)'),
@@ -547,6 +635,7 @@ enum EntityEnum: string
             self::GPT_5_4                     => __('GPT-5.4 (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)'),
             self::GPT_5_4_MINI                => __('GPT-5.4 Mini (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)'),
             self::GPT_5_4_NANO                => __('GPT-5.4 Nano (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)'),
+            self::GPT_5_5                     => __('GPT-5.5 (Dec 01, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)'),
 
             self::O3_DEEP_RESEARCH             => __('o3 Deep Research (Multi-step web research with detailed reports)'),
             self::O4_MINI_DEEP_RESEARCH        => __('o4-mini Deep Research (Fast multi-step web research with reports)'),
@@ -556,6 +645,7 @@ enum EntityEnum: string
             // Anthropic
             self::CLAUDE_SONNET_4_5    => __('Claude Sonnet 4.5'),
             self::CLAUDE_SONNET_4_6    => __('Claude Sonnet 4.6'),
+            self::CLAUDE_OPUS_4_7      => __('Claude Opus 4.7'),
             self::CLAUDE_OPUS_4_6      => __('Claude Opus 4.6'),
             self::CLAUDE_OPUS_4_5      => __('Claude Opus 4.5'),
             self::CLAUDE_OPUS_4_1      => __('Claude Opus 4.1'),
@@ -591,6 +681,7 @@ enum EntityEnum: string
             self::GEMINI_1_5_PRO                   => __('Gemini 1.5 Pro Complex reasoning tasks requiring more intelligence'),
             self::GEMINI_1_5_FLASH                 => __('Gemini 1.5 Flash Fast and versatile performance across a diverse variety of tasks'),
             self::GEMINI_3_FLASH                   => __('Gemini 3 Flash Advanced reasoning, coding, and multimodal capabilities with high speed'),
+            self::GEMINI_3_1_FLASH_LIVE_PREVIEW    => __('Gemini 3.1 Flash Live Preview Low-latency audio-to-audio model for real-time dialogue'),
             self::GEMINI_EMBEDDING_EXP             => __('Gemini Embedding Measuring the relatedness of text strings'),
             self::GEMINI_TEXT_EMBEDDING_004        => __('Gemini Text Embeding 004'),
             // Deepseek
@@ -608,6 +699,9 @@ enum EntityEnum: string
             self::ELEVENLABS_VOICE_CHATBOT => __('Elevenlabs Voice Chatbots'),
             self::ISOLATOR                 => __('Voice Isolator (1 word = 5 used characters of elevenlabs) X 1 token'),
             self::ELEVENLABS_AI_MUSIC      => __('Elevenlabs for AI Music Pro'),
+            // Lyria (Google Gemini)
+            self::LYRIA_3_CLIP             => __('Google Lyria 3 Clip for AI Music Pro'),
+            self::LYRIA_3_PRO              => __('Google Lyria 3 Pro for AI Music Pro'),
             // Google
             self::GOOGLE => __('Google for TTS'),
             // Azure
@@ -783,6 +877,7 @@ enum EntityEnum: string
             self::DALL_E_3,
             self::GPT_IMAGE_1,
             self::GPT_IMAGE_1_5,
+            self::GPT_IMAGE_2,
             self::TTS_1,
             self::TTS_1_HD,
             self::GPT_4_O,
@@ -811,6 +906,7 @@ enum EntityEnum: string
             self::GPT_5_4,
             self::GPT_5_4_MINI,
             self::GPT_5_4_NANO,
+            self::GPT_5_5,
             self::O3_DEEP_RESEARCH,
             self::O4_MINI_DEEP_RESEARCH,
             self::SORA_2,
@@ -819,6 +915,7 @@ enum EntityEnum: string
             // Anthropic
             self::CLAUDE_SONNET_4_5,
             self::CLAUDE_SONNET_4_6,
+            self::CLAUDE_OPUS_4_7,
             self::CLAUDE_OPUS_4_6,
             self::CLAUDE_OPUS_4_5,
             self::CLAUDE_OPUS_4_1,
@@ -863,8 +960,12 @@ enum EntityEnum: string
             self::GEMINI_1_5_PRO,
             self::GEMINI_1_5_FLASH,
             self::GEMINI_3_FLASH,
+            self::GEMINI_3_1_FLASH_LIVE_PREVIEW,
             self::GEMINI_EMBEDDING_EXP,
-            self::GEMINI_TEXT_EMBEDDING_004 => EngineEnum::GEMINI,
+            self::GEMINI_TEXT_EMBEDDING_004,
+            // Lyria (Google Gemini)
+            self::LYRIA_3_CLIP,
+            self::LYRIA_3_PRO => EngineEnum::GEMINI,
             // Unsplash
             self::UNSPLASH => EngineEnum::UNSPLASH,
             // Pexels
@@ -983,6 +1084,7 @@ enum EntityEnum: string
             self::DALL_E_3                    => OpenAI\DallE3Driver::class,
             self::GPT_IMAGE_1                 => OpenAI\GptImage1Driver::class,
             self::GPT_IMAGE_1_5               => OpenAI\GptImage15Driver::class,
+            self::GPT_IMAGE_2                 => OpenAI\GptImage2Driver::class,
             self::TTS_1                       => OpenAI\TTS1Driver::class,
             self::TTS_1_HD                    => OpenAI\TTS1HDDriver::class,
             self::GPT_4_O                     => OpenAI\GPT4ODriver::class,
@@ -1012,6 +1114,7 @@ enum EntityEnum: string
             self::GPT_5_4                     => OpenAI\GPT54Driver::class,
             self::GPT_5_4_MINI                => OpenAI\GPT54MiniDriver::class,
             self::GPT_5_4_NANO                => OpenAI\GPT54NanoDriver::class,
+            self::GPT_5_5                     => OpenAI\GPT55Driver::class,
             self::O3_DEEP_RESEARCH            => OpenAI\O3DeepResearchDriver::class,
             self::O4_MINI_DEEP_RESEARCH       => OpenAI\O4MiniDeepResearchDriver::class,
             self::SORA_2                      => OpenAI\Sora2Driver::class,
@@ -1020,6 +1123,7 @@ enum EntityEnum: string
             // Anthropic
             self::CLAUDE_SONNET_4_5    => Anthropic\ClaudeSonnet45Driver::class,
             self::CLAUDE_SONNET_4_6    => Anthropic\ClaudeSonnet46Driver::class,
+            self::CLAUDE_OPUS_4_7      => Anthropic\ClaudeOpus47Driver::class,
             self::CLAUDE_OPUS_4_6      => Anthropic\ClaudeOpus46Driver::class,
             self::CLAUDE_OPUS_4_5      => Anthropic\ClaudeOpus45Driver::class,
             self::CLAUDE_OPUS_4_1      => Anthropic\ClaudeOpus41Driver::class,
@@ -1048,8 +1152,12 @@ enum EntityEnum: string
             self::GEMINI_1_5_PRO                   => Gemini\Gemini15ProDriver::class,
             self::GEMINI_1_5_FLASH                 => Gemini\Gemini15FlashDriver::class,
             self::GEMINI_3_FLASH                   => Gemini\Gemini3FlashDriver::class,
+            self::GEMINI_3_1_FLASH_LIVE_PREVIEW    => Gemini\Gemini31FlashLivePreviewDriver::class,
             self::GEMINI_EMBEDDING_EXP             => Gemini\GeminiEmbeddingExpDriver::class,
             self::GEMINI_TEXT_EMBEDDING_004        => Gemini\GeminiTextEmbeding004Driver::class,
+            // Lyria (Google Gemini)
+            self::LYRIA_3_CLIP                    => Gemini\Lyria3ClipDriver::class,
+            self::LYRIA_3_PRO                     => Gemini\Lyria3ProDriver::class,
             // Deepseek
             self::DEEPSEEK_CHAT     => Deepseek\DeepseekChatDriver::class,
             self::DEEPSEEK_REASONER => Deepseek\DeepseekReasonerDriver::class,
@@ -1221,6 +1329,7 @@ enum EntityEnum: string
             self::DALL_E_3               => 0.08,
             self::GPT_IMAGE_1            => 0.042,
             self::GPT_IMAGE_1_5          => 0.20,
+            self::GPT_IMAGE_2            => 0.211,
             self::TTS_1, self::GPT_4_O => 0.00001995,
             self::GPT_4_O_MINI                => 0.000000798,
             self::GPT_4_O_SEARCH_PREVIEW      => 0.0000133,
@@ -1248,13 +1357,14 @@ enum EntityEnum: string
             self::GPT_5_4                     => 0.025,
             self::GPT_5_4_MINI                => 0.00250,
             self::GPT_5_4_NANO                => 0.000500,
+            self::GPT_5_5                     => 0.000040,
             self::O3_DEEP_RESEARCH            => 0.0000665,
             self::O4_MINI_DEEP_RESEARCH       => 0.000005852,
             self::SORA_2                      => 0.10,
             self::SORA_2_PRO                  => 0.50,
 
             // Anthropic
-            self::CLAUDE_SONNET_4_5, self::CLAUDE_SONNET_4_6, self::CLAUDE_OPUS_4_6, self::CLAUDE_OPUS_4_1, self::CLAUDE_OPUS_4_5, self::CLAUDE_OPUS_4, self::CLAUDE_SONNET_4, self::CLAUDE_3_7_SONNET, self::CLAUDE_3_5_SONNET_V2, self::CLAUDE_3_5_SONNET, self::CLAUDE_3_SONNET => 0.000015,
+            self::CLAUDE_SONNET_4_5, self::CLAUDE_SONNET_4_6, self::CLAUDE_OPUS_4_7, self::CLAUDE_OPUS_4_6, self::CLAUDE_OPUS_4_1, self::CLAUDE_OPUS_4_5, self::CLAUDE_OPUS_4, self::CLAUDE_SONNET_4, self::CLAUDE_3_7_SONNET, self::CLAUDE_3_5_SONNET_V2, self::CLAUDE_3_5_SONNET, self::CLAUDE_3_SONNET => 0.000015,
             self::CLAUDE_3_5_HAIKU => 0.000003,
             self::CLAUDE_3_OPUS    => 0.000015,
             self::CLAUDE_3_HAIKU   => 0.000003,
@@ -1289,7 +1399,12 @@ enum EntityEnum: string
             self::GEMINI_EMBEDDING_EXP             => 0.00001,
             self::GEMINI_1_5_FLASH                 => 0.00000051,
             self::GEMINI_3_FLASH                   => 0.00000266,
+            self::GEMINI_3_1_FLASH_LIVE_PREVIEW    => 0.00000266,
             self::GEMINI_TEXT_EMBEDDING_004        => 0.00001,
+
+            // Lyria (Google Gemini) - per song pricing
+            self::LYRIA_3_CLIP => 0.04,
+            self::LYRIA_3_PRO  => 0.08,
 
             // Unsplash
             self::UNSPLASH, self::PEXELS, self::PIXABAY => 0.01,
@@ -1629,6 +1744,7 @@ enum EntityEnum: string
                 self::GPT_5_4,
                 self::GPT_5_4_MINI,
                 self::GPT_5_4_NANO,
+                self::GPT_5_5,
                 self::DEEPSEEK_CHAT,
                 self::DEEPSEEK_REASONER,
             ]

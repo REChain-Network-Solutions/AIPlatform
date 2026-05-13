@@ -113,6 +113,12 @@
     {{-- <script async src='https://r.wdfl.co/rw.js' data-rewardful='API_KEY'></script> --}}
     {{-- Rewordfull end --}}
 
+    {{-- Plugin scripts that must execute before the main app bundle.
+         Multiple module scripts in the same document execute in DOM order
+         after the document is parsed, so anything pushed here runs before
+         Alpine boots from the main app.js entry below. --}}
+    @stack('script-before')
+
     @vite(\App\Helpers\Classes\ThemeHelper::appJsPath())
 
     @stack('css')

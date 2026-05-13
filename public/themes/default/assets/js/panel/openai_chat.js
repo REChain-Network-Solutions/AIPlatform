@@ -690,6 +690,7 @@ function formatString(string, options = {}) {
 			'lqd-chat-image-grid',
 			'smart-images',
 			'entity-highlights',
+			'meta',
 		];
 
 		containers.forEach(container => {
@@ -707,7 +708,7 @@ function formatString(string, options = {}) {
 				};
 			}
 
-			if ( container === 'entity-highlights' ) {
+			if ( container === 'entity-highlights' || container === 'meta' ) {
 				options = {
 					render: function (tokens, idx) {
 						if (tokens[idx].nesting === 1) {
@@ -1439,7 +1440,7 @@ function onWordAnimationFinish(responseObj, el) {
 
 		_.defer(() => {
 			unwrapWords(responseObj.chatContentEl);
-			// Apply entity highlights AFTER words are unwrapped (text nodes are now plain)
+			responseObj.chatContentEl.normalize();
 			if (responseObj.entityHighlights) {
 				applyEntityHighlights(responseObj.bubbleEl, responseObj.entityHighlights);
 			}
@@ -1498,8 +1499,7 @@ function onAiResponse(responseObj) {
 	responseString = cleanEntityAnnotations(cleanSmartImageLeaks(responseString))
 		.replace(/\[search_images\([\s\S]*$/g, '')
 		.replace(/search_images\{[\s\S]*$/g, '')
-		.replace(/\s*(?:<br\s*\/?>|\n)*\s*\{[\s\n]*(?:<br\s*\/?>|\n)*\s*"suggestions"\s*:\s*\[[\s\S]*$/i, '')
-		.replace(/[\s\n]*(?:<br\s*\/?>|\n)*[\s\n]*(?:#{1,3}\s*)?(?:\*{0,2})Entit(?:y|ies)\s*:?\s*(?:\*{0,2})[\s\S]*$/i, '');
+		.replace(/\s*(?:<br\s*\/?>|\n)*\s*\{[\s\n]*(?:<br\s*\/?>|\n)*\s*"suggestions"\s*:\s*\[[\s\S]*$/i, '');
 
 	let formattedResponse = formatString(responseString, {
 		readyForAnimation: true
@@ -1956,13 +1956,9 @@ function cleanSmartImageLeaks(text) {
 }
 
 function cleanEntityAnnotations(text) {
-	// Strip :::entity-highlights blocks (complete and partial, with or without <br/> between markers)
-	text = text.replace(/:::(?:\s*(?:<br\s*\/?>|\n)\s*)?entity-highlights(?:<br\s*\/?>|\n)[\s\S]*?(?:<br\s*\/?>|\n):::/g, '');
-	text = text.replace(/:::(?:\s*(?:<br\s*\/?>|\n)\s*)?entity-highlights(?:<br\s*\/?>|\n)[\s\S]*$/g, '');
-
-	// Strip bare "entity-highlights" text or partial ::: blocks with entity JSON at end
-	text = text.replace(/\s*(?:<br\s*\/?>|\n)*\s*:::?\s*(?:<br\s*\/?>|\n)*\s*\[?\s*\{[\s\S]*?"text"\s*:\s*"[\s\S]*?(?::::\s*)?$/i, '');
-	text = text.replace(/\s*(?:<br\s*\/?>|\n)*\s*entity[- ]?highlights?\s*(?:<br\s*\/?>|\n)*\s*(?:\[?\{[\s\S]*)?$/i, '');
+	// Strip everything from :::meta or :::entity-highlights to end of text.
+	// The metadata block is always the last thing in the response — one simple cut.
+	text = text.replace(/\s*(?:<br\s*\/?>|\n)*\s*:::\s*(?:meta|entity[- ]?highlights?)[\s\S]*$/i, '');
 
 	// Clean up trailing <br/> whitespace left after removal
 	text = text.replace(/(?:<br\s*\/?>)+\s*$/, '');
@@ -1984,38 +1980,24 @@ function waitForUnwrapThenHighlight(responseObj) {
 	const entities = responseObj.entityHighlights;
 	if (!bubbleEl || !entities?.length) return;
 
-	let attempts = 0;
-	const maxAttempts = 50; // 50 x 200ms = 10s max wait
-
 	function tryApply() {
-		attempts++;
 		const chatContentEl = bubbleEl.querySelector('.chat-content');
 		if (!chatContentEl) {
-
-			if (attempts < maxAttempts) setTimeout(tryApply, 200);
+			setTimeout(tryApply, 100);
 			return;
 		}
 
-		// Check if animated-el spans are still present (words not yet unwrapped)
-		const hasAnimatedSpans = chatContentEl.querySelector('span.animated-el') !== null;
-
-		if (hasAnimatedSpans && attempts < maxAttempts) {
-			// Words still wrapped — wait more
-			setTimeout(tryApply, 200);
-			return;
+		// Force unwrap any animated spans and normalize text nodes
+		if (chatContentEl.querySelector('span.animated-el')) {
+			unwrapWords(chatContentEl);
 		}
-
-		if (hasAnimatedSpans) {
-
-		} else {
-
-		}
+		chatContentEl.normalize();
 
 		applyEntityHighlights(bubbleEl, entities);
 	}
 
-	// Start checking after a short initial delay
-	setTimeout(tryApply, 300);
+	// Short delay to let the stream fully flush, then apply immediately
+	setTimeout(tryApply, 200);
 }
 
 function applyEntityHighlights(bubbleEl, entities) {
@@ -2058,7 +2040,8 @@ function _highlightEntityInTextNodes(container, entity, caseInsensitive) {
 			acceptNode: function(node) {
 				const parent = node.parentElement;
 				if (!parent) return NodeFilter.FILTER_REJECT;
-				if (parent.closest('code, pre, a, .lqd-entity-highlight')) {
+				// Skip code blocks, links, and existing highlights — but allow the .chat-content <pre> itself
+				if (parent.closest('code, pre:not(.chat-content), a, .lqd-entity-highlight')) {
 					return NodeFilter.FILTER_REJECT;
 				}
 				return NodeFilter.FILTER_ACCEPT;
@@ -2322,6 +2305,7 @@ function sendCouncilModelRequest(type, modelSlug, sharedMessageUUID, councilResp
 				signal: abortController.signal,
 				onmessage: async e => {
 					if (done) return;
+					if (e.event === 'chat_not_found') { window.location.reload(); return; }
 					if (!receivedMessageId && e.event === 'message') { receivedMessageId = true; return; }
 					if (!receivedMessageId) return;
 					const txt = e.data;
@@ -2824,6 +2808,12 @@ function sendRequest(type, images, responseObj, sharedMessageUUID = null, reques
 		onmessage: async e => {
 			const txt = e.data;
 
+			if (e.event === 'chat_not_found') {
+				// Chat was deleted (e.g. empty chat cleanup) — silently reload to generate a new chat
+				window.location.reload();
+				return;
+			}
+
 			if (e.event === 'clear_content') {
 				// Clear streamed AI text when a tool call replaces it (e.g. post generation)
 				responseObj.response = [];
@@ -2961,7 +2951,7 @@ function sendRequest(type, images, responseObj, sharedMessageUUID = null, reques
 					const skillsData = JSON.parse(txt);
 					if (skillsData?.skills?.length) {
 						responseObj._usedSkills = skillsData.skills;
-						renderUsedSkillsBadges(responseObj);
+						throttledOnAiResponse(responseObj);
 					}
 				} catch (err) {}
 				return;
@@ -2973,8 +2963,7 @@ function sendRequest(type, images, responseObj, sharedMessageUUID = null, reques
 					if (Array.isArray(entities) && entities.length > 0) {
 						responseObj.entityHighlights = entities;
 					}
-				} catch (err) {
-				}
+				} catch (err) {}
 				return;
 			}
 
@@ -3099,6 +3088,12 @@ function sendRequest(type, images, responseObj, sharedMessageUUID = null, reques
 					responseObj.response.push(txt);
 					throttledOnAiResponse(responseObj);
 				}
+				return;
+			}
+
+			// Only append content from data events — ignore any unhandled event types
+			// (e.g. title, suggestions, skills_used) so their payloads never leak into the bubble.
+			if (e.event && e.event !== 'data' && e.event !== 'message') {
 				return;
 			}
 
@@ -3954,21 +3949,22 @@ function initChat() {
 				aiChatBubble.querySelectorAll('[data-copy-options],[data-copy-type]').forEach(el => el.remove());
 			}
 
-			_.defer(() => {
+			requestAnimationFrame(() => {
 				const councilReplieContents = aiChatBubble.querySelectorAll('.model-council-reply-content');
-				const entityHighlights = document.querySelectorAll('[data-entity-highlights]');
-
 				councilReplieContents.forEach(councilReplyContent => councilReplyContent.innerHTML = formatString(councilReplyContent.innerHTML.trim()) );
-				entityHighlights.forEach(messageEl => {
+
+				// Apply entity highlights scoped to this bubble only
+				// Apply entity highlights scoped to this bubble only
+				if (aiChatBubble.dataset.entityHighlights) {
 					try {
-						const entities = JSON.parse(messageEl.dataset.entityHighlights);
+						const entities = JSON.parse(aiChatBubble.dataset.entityHighlights);
 						if (entities?.length) {
-							applyEntityHighlights(messageEl, entities);
+							applyEntityHighlights(aiChatBubble, entities);
 						}
 					} catch (e) {
 						// Silent fail
 					}
-				});
+				}
 			});
 		});
 
@@ -4206,7 +4202,7 @@ function openChatAreaContainer(chat_id, website_url = null) {
 			}, 750);
 
 			// Re-apply entity highlights to the newly loaded messages
-			_.defer(function () {
+			requestAnimationFrame(function () {
 				document.querySelectorAll('[data-entity-highlights]').forEach(function (messageEl) {
 					try {
 						var entities = JSON.parse(messageEl.dataset.entityHighlights);
@@ -4293,6 +4289,8 @@ function startNewChat(category_id, local, website_url = null) {
 					promptEl.dispatchEvent(new Event('input', { bubbles: true }));
 				}
 			}, 0);
+
+			document.dispatchEvent(new CustomEvent('chat-created', { bubbles: true, detail: { chatId: data.chat.id } }));
 		},
 		error: function (data) {
 			var err = data.responseJSON.errors;
@@ -4898,18 +4896,12 @@ function stripTitleFromBubble(responseObj) {
 	}
 }
 
-function renderUsedSkillsBadges(responseObj) {
-	// Skills data stored — onAiResponse will prepend the badge on next render cycle
-}
-
 function stripSuggestionsFromBubble(responseObj) {
 	if (!responseObj.response || !responseObj.response.length) return;
 
 	const combined = responseObj.response.join('');
 	const cleaned = combined
 		.replace(/\s*(<br\s*\/?>)*\s*(```[\w]*\s*(<br\s*\/?>|\s)*)?\{[\s\n]*"suggestions"\s*:\s*\[[\s\S]*?\]\s*\}\s*(```\s*)?(<br\s*\/?>|\s)*$/i, '')
-		.replace(/\s*(<br\s*\/?>|\n)*\s*\{\s*"[^"]{2,60}"\s*,\s*"[^"]{2,60}"[\s\S]*?\}\s*$/i, '')
-		.replace(/(?:^[\s\n]*|[\s\n]*(<br\s*\/?>|\n)+[\s\n]*)(#{1,3}\s*)?(\*{0,2})Entit(?:y|ies)\s*:?\s*(\*{0,2})[\s\S]*$/i, '')
 		.trimEnd();
 
 	if (cleaned !== combined) {

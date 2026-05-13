@@ -1180,8 +1180,9 @@ class AIChatController extends Controller
         // follow the context of the last 5 messages
         $lastThreeMessageQuery = $chat->messages()
             ->whereNotNull('input')
+            ->where('id', '!=', $message_id)
             ->orderBy('created_at', 'desc')
-            ->take(4)
+            ->take((int) setting('chat_history_limit', 4))
             ->get()
             ->reverse();
 
@@ -1189,7 +1190,7 @@ class AIChatController extends Controller
 
         $extra_prompt = $vectorService->getMostSimilarText($prompt, $chat_id, 5, $chat->chatbot_id);
         $count = count($lastThreeMessageQuery);
-        if ($count > 1) {
+        if ($count >= 1) {
             $lastThreeMessageQuery[$count - 1]->input = "'this file' means file content. Must not reference previous chats if user asking about pdf. Must reference file content if only user is asking about file content. Else just response as an assistant shortly and professionaly without must not referencing file content. \n\n\n\n\nUser qusetion: $prompt \n\n\n\n\n Document Content: \n $extra_prompt";
             foreach ($lastThreeMessageQuery as $threeMessage) {
                 $history[] = ['role' => 'user', 'content' => $threeMessage->input ?? ''];
@@ -1223,6 +1224,9 @@ class AIChatController extends Controller
 
         $realtime = $request->get('realtime');
         $chat_bot = EntityEnum::fromSlug($this->settings?->openai_default_model);
+        if ($realtime && setting('default_realtime') === 'openai') {
+            $chat_bot = EntityEnum::fromSlug(setting('openai_realtime_model', EntityEnum::GPT_4_O_SEARCH_PREVIEW->value));
+        }
         $history = [];
         $realtimePrompt = $prompt;
         $chat = UserOpenaiChat::whereId($chat_id)->first();
@@ -1257,13 +1261,14 @@ class AIChatController extends Controller
         // follow the context of the last 5 messages
         $lastThreeMessageQuery = $chat->messages()
             ->whereNotNull('input')
+            ->where('id', '!=', $message_id)
             ->orderBy('created_at', 'desc')
-            ->take(4)
+            ->take((int) setting('chat_history_limit', 4))
             ->get()
             ->reverse();
 
         $count = count($lastThreeMessageQuery);
-        if ($count > 1) {
+        if ($count >= 1) {
             foreach ($lastThreeMessageQuery as $threeMessage) {
                 $userInput = $threeMessage->input ?? '';
                 if (Schema::hasColumn('user_openai_chat_messages', 'highlight_context') && ! empty($threeMessage->highlight_context)) {
@@ -1353,7 +1358,10 @@ class AIChatController extends Controller
                         ], 500);
                     }
                 }
-                $history[] = ['role' => 'user', 'content' => $final_prompt ?? ''];
+                if (! empty($final_prompt)) {
+                    $history[] = ['role' => 'system', 'content' => $final_prompt];
+                }
+                $history[] = ['role' => 'user', 'content' => $prompt ?? ''];
             } else {
                 $history[] = ['role' => 'user', 'content' => $prompt ?? ''];
             }
@@ -1435,7 +1443,10 @@ class AIChatController extends Controller
                         ], 500);
                     }
                 }
-                $history[] = ['role' => 'user', 'content' => $final_prompt ?? ''];
+                if (! empty($final_prompt)) {
+                    $history[] = ['role' => 'system', 'content' => $final_prompt];
+                }
+                $history[] = ['role' => 'user', 'content' => $prompt ?? ''];
             } else {
                 $history[] = ['role' => 'user', 'content' => $prompt ?? ''];
             }
@@ -1470,6 +1481,9 @@ class AIChatController extends Controller
         $prompt = $message->input;
         $realtime = $request->get('realtime');
         $chat_bot = $this->settings?->openai_default_model;
+        if ($realtime && setting('default_realtime') === 'openai') {
+            $chat_bot = setting('openai_realtime_model', EntityEnum::GPT_4_O_SEARCH_PREVIEW->value);
+        }
         $history = [];
         $realtimePrompt = $prompt;
 
@@ -1503,13 +1517,14 @@ class AIChatController extends Controller
         // follow the context of the last 5 messages
         $lastThreeMessageQuery = $chat->messages()
             ->whereNotNull('input')
+            ->where('id', '!=', $message_id)
             ->orderBy('created_at', 'desc')
-            ->take(4)
+            ->take((int) setting('chat_history_limit', 4))
             ->get()
             ->reverse();
 
         $count = count($lastThreeMessageQuery);
-        if ($count > 1) {
+        if ($count >= 1) {
             foreach ($lastThreeMessageQuery as $threeMessage) {
                 $userInput = $threeMessage->input ?? '';
                 if (Schema::hasColumn('user_openai_chat_messages', 'highlight_context') && ! empty($threeMessage->highlight_context)) {
@@ -1599,7 +1614,10 @@ class AIChatController extends Controller
                         ], 500);
                     }
                 }
-                $history[] = ['role' => 'user', 'content' => $final_prompt ?? ''];
+                if (! empty($final_prompt)) {
+                    $history[] = ['role' => 'system', 'content' => $final_prompt];
+                }
+                $history[] = ['role' => 'user', 'content' => $prompt ?? ''];
             } else {
                 $history[] = ['role' => 'user', 'content' => $prompt ?? ''];
             }
@@ -1688,7 +1706,10 @@ class AIChatController extends Controller
                     });
                 }
             }
-            $history[] = ['role' => 'user', 'content' => $final_prompt ?? ''];
+            if (! empty($final_prompt)) {
+                $history[] = ['role' => 'system', 'content' => $final_prompt];
+            }
+            $history[] = ['role' => 'user', 'content' => $prompt ?? ''];
         } else {
             $history[] = ['role' => 'user', 'content' => $prompt ?? ''];
         }
@@ -1715,13 +1736,14 @@ class AIChatController extends Controller
         ];
         $lastThreeMessageQuery = $chat->messages()
             ->whereNotNull('input')
+            ->where('id', '!=', $message_id)
             ->orderBy('created_at', 'desc')
-            ->take(4)
+            ->take((int) setting('chat_history_limit', 4))
             ->get()
             ->reverse();
         $images = explode(',', $request->images);
         $count = count($lastThreeMessageQuery);
-        if ($count > 1) {
+        if ($count >= 1) {
             foreach ($lastThreeMessageQuery as $threeMessage) {
                 $history[] = [
                     'role'    => 'user',
@@ -2116,13 +2138,16 @@ class AIChatController extends Controller
             $message = UserOpenaiChatMessage::whereId($message_id)->first();
             $prompt = $message->input;
             $realtime = $message->realtime;
+            if ($realtime && setting('default_realtime') === 'openai') {
+                $model = setting('openai_realtime_model', EntityEnum::GPT_4_O_SEARCH_PREVIEW->value);
+            }
             $realtimePrompt = $prompt;
             $chat = UserOpenaiChat::whereId($chat_id)->first();
 
             $lastThreeMessageQuery = $chat->messages()
                 ->whereNotNull('input')
                 ->orderBy('created_at', 'desc')
-                ->take(4)
+                ->take((int) setting('chat_history_limit', 4))
                 ->get()
                 ->reverse();
             $i = 0;
@@ -2228,7 +2253,10 @@ class AIChatController extends Controller
                             ], 500);
                         }
                     }
-                    $history[] = ['role' => 'user', 'content' => $final_prompt ?? ''];
+                    if (! empty($final_prompt)) {
+                        $history[] = ['role' => 'system', 'content' => $final_prompt];
+                    }
+                    $history[] = ['role' => 'user', 'content' => $prompt ?? ''];
                 } else {
                     $history[] = ['role' => 'user', 'content' => $prompt ?? ''];
                 }

@@ -34,7 +34,7 @@ trait HasApiKeys
     // set klap api key
     public static function setKlapApiKey(): string
     {
-        return setting('klap_api_key');
+        return setting('klap_api_key') ?? '';
     }
 
     // set vizard api key

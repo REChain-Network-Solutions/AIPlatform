@@ -459,6 +459,10 @@
 		--surface-foreground: 0 0% 100%;
 		--card-border: var(--border);
 		--button-border: var(--border);
+
+		.chat-content {
+			--tw-prose-hr: hsl(var(--foreground) / 10%);
+		}
 	}
 
 	html[dir=rtl] & {

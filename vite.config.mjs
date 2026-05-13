@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import react from '@vitejs/plugin-react-swc';
 import fs from 'fs';
 import path, { resolve } from 'path';
 import { homedir } from 'os';
@@ -100,9 +101,21 @@ if ( fs.existsSync( 'app/Extensions/ChatbotVoice/resources/assets/scss/external-
 	laravelInputs.push( 'app/Extensions/ChatbotVoice/resources/assets/scss/external-chatbot-voice.scss' );
 }
 
+const automationBuilderEntry = 'app/Extensions/SocialMediaAutomation/resources/assets/js/automation-builder.jsx';
+if ( fs.existsSync( automationBuilderEntry ) ) {
+	laravelInputs.push( automationBuilderEntry );
+}
+
+const csAnnotationsEntry = 'app/Extensions/CreativeSuiteAnnotations/resources/assets/js/creative-suite-annotations.js';
+if ( fs.existsSync( csAnnotationsEntry ) ) {
+	laravelInputs.push( csAnnotationsEntry );
+}
+
 if ( process.env.NODE_ENV === 'development' ) {
 	plugins.push( mkcert() );
 }
+
+plugins.push( react() );
 
 plugins.push(
 	laravel( {
@@ -134,6 +147,7 @@ export default ( { mode } ) => {
 		resolve: {
 			alias: {
 				'@': '/resources/js',
+				'@automation': '/app/Extensions/SocialMediaAutomation/resources/assets/js',
 				'@public': '/public',
 				'@themeAssets': '/public/themes',
 				'~nodeModules': path.resolve( __dirname, 'node_modules' ),

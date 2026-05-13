@@ -8,6 +8,7 @@ export default {
 		'./app/Helpers/helpers.php',
 		'./app/Extensions/**/*.blade.php',
 		'./public/themes/default/assets/js/panel/openai_chat.js',
+		'./app/Extensions/SocialMediaAutomation/resources/assets/**/*.{js,jsx}',
 	],
 	darkMode: [ 'class', '.theme-dark' ],
 	theme: {

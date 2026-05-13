@@ -78,13 +78,6 @@ export default () => ( {
 		this.processAudioRecordingBuffer = this.processAudioRecordingBuffer.bind( this );
 	},
 	async start() {
-		this.checkBalanceRealtime( true ).then( result => {
-			if ( result.shouldStop ) {
-				toastr.error( result.errorMsg );
-				this.stop();
-			}
-		} );
-
 		if ( Alpine.store( 'realtimeChatStatus' ).isActive ) return;
 
 		Alpine.store( 'realtimeChatStatus' ).setActive( true );
@@ -103,8 +96,10 @@ export default () => ( {
 			} );
 
 			if ( !tokenResponse.ok ) {
+				const errorBody = await tokenResponse.json().catch( () => ( {} ) );
+				const errorMsg = errorBody?.error || '[Error]: Unable to start voice chat session. Please try again.';
 				this.stop();
-				this.appendToChatBubble( 'ai', '[Error]: Unable to start voice chat session. Please try again.' );
+				toastr.error( errorMsg );
 				return;
 			}
 
@@ -270,8 +265,14 @@ export default () => ( {
 				}
 				case 'conversation.item.input_audio_transcription.completed':
 					if ( message.transcript ) {
-						this.lastUserQuestion += message.transcript;
-						this.appendToChatBubble( 'user', message.transcript );
+						this.lastUserQuestion = message.transcript;
+						if ( this.lastUserBubble ) {
+							this.lastUserBubble.textContent = message.transcript;
+							this.scrollConversationAreaToBottom();
+						} else {
+							this.createChatBubble( 'user' );
+							this.appendToChatBubble( 'user', message.transcript );
+						}
 					}
 					break;
 				case 'conversation.item.input_audio_transcription.delta':

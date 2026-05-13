@@ -245,66 +245,12 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('realtimeToggle', () => ({
-                isRealtimeOpenAI: "{{ setting('default_realtime') === 'openai' }}" === "1",
-                defaultOpenAIRealtimeModel: "{{ setting('openai_realtime_model', EntityEnum::GPT_4_O_SEARCH_PREVIEW->value) }}",
-                previousModel: null,
                 init() {},
                 handleRealtimeChange(event) {
-                    const isChecked = event.target.checked;
-
-                    if (isChecked) {
-                        if (this.isRealtimeOpenAI) {
-                            // Store current model before switching
-                            const localStorageKey = 'selectedChatModels';
-                            const storedModels = localStorage.getItem(localStorageKey);
-
-                            if (storedModels) {
-                                try {
-                                    const models = JSON.parse(storedModels);
-                                    if (Array.isArray(models) && models.length && models[0]?.value) {
-                                        this.previousModel = models[0].value;
-                                    }
-                                } catch (e) {
-                                    this.previousModel = null;
-                                }
-                            }
-
-                            this.switchToRealtimeModel();
-                            toastr.success('{{ __('Real-Time data activated') }}');
-                        } else {
-                            toastr.success('{{ __('Real-Time data activated') }}');
-                        }
+                    if (event.target.checked) {
+                        toastr.success('{{ __('Real-Time data activated') }}');
                     } else {
-                        if (this.isRealtimeOpenAI) {
-                            this.revertToPreviousModel();
-                        }
                         toastr.warning('{{ __('Real-Time data deactivated') }}');
-                    }
-                },
-                switchToRealtimeModel() {
-                    // Dispatch event to change model
-                    document.dispatchEvent(new CustomEvent('chat-model-change', {
-                        detail: {
-                            model: this.defaultOpenAIRealtimeModel
-                        }
-                    }));
-                },
-                revertToPreviousModel() {
-                    if (this.previousModel) {
-                        document.dispatchEvent(new CustomEvent('chat-model-change', {
-                            detail: {
-                                model: this.previousModel
-                            }
-                        }));
-                        this.previousModel = null;
-                    } else {
-                        // No previous model saved — restore from localStorage which still has the
-                        // original model (realtime model wasn't persisted if not in active list)
-                        const store = Alpine.store('modelList');
-                        if (store) {
-                            store.selectedModels = store.getLocalStorage();
-                            store.updateSelectionLabel();
-                        }
                     }
                 }
             }));

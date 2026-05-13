@@ -1221,7 +1221,7 @@ function isChatBot($id)
 
 function ThumbImage($source_file, $max_width = 800, $max_height = 800, $quality = 80, $convert_to_webp = true)
 {
-    if (setting('image_thumbnail') == 0 || Str::contains($source_file, 'http') || Str::contains($source_file, 'loading.svg')) {
+    if (setting('image_thumbnail', 1) == 0 || Str::contains($source_file, 'http') || Str::contains($source_file, 'loading.svg')) {
         return $source_file;
     }
 

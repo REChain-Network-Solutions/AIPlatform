@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Enums\AiImageStatusEnum;
+use App\Extensions\AiChatProImageChat\System\Models\AiChatProImageModel;
+use App\Extensions\AIImagePro\System\Models\AiImageProModel;
+use App\Extensions\AiVideoPro\System\Models\UserFall;
+use App\Helpers\Classes\MarketplaceHelper;
 use App\Http\Controllers\Controller;
 use App\Models\OpenAIGenerator;
 use App\Models\OpenaiGeneratorChatCategory;
@@ -21,6 +26,9 @@ class SearchController extends Controller
         $word = $request->search;
         $result = '';
         $keywords = null;
+        $video_search = collect();
+        $ai_image_pro_search = collect();
+        $ai_chat_pro_image_search = collect();
 
         if ($word == 'delete') {
             $template_search = [];
@@ -38,14 +46,15 @@ class SearchController extends Controller
                 ->get();
 
             $workbook_search = UserOpenai::where('user_id', $userId)
-				->where(function ($query) use ($word) {
-					return $query->where('title', 'like', "%$word%")
-						->orWhere('input', 'like', "%$word%");
-				})
-                ->select('id', 'title', 'slug', 'user_id', 'openai_id', 'input')
+                ->where(function ($query) use ($word) {
+                    return $query->where('title', 'like', "%$word%")
+                        ->orWhere('output', 'like', "%$word%")
+                        ->orWhere('response', 'like', "%$word%")
+                        ->orWhere('input', 'like', "%$word%");
+                })
+                ->select('id', 'title', 'slug', 'user_id', 'openai_id', 'input', 'output', 'response')
                 ->with('generator:id,title,slug,color,image,type')
                 ->get();
-
 
             $ai_chat_search = OpenaiGeneratorChatCategory::whereNotIn('slug', ['ai_webchat', 'ai_vision', 'ai_pdf'])
                 ->where(function ($query) use ($word) {
@@ -55,14 +64,48 @@ class SearchController extends Controller
                 ->select('id', 'name', 'slug', 'short_name', 'description', 'color')
                 ->get();
 
-            if ($template_search->isEmpty() && $workbook_search->isEmpty() && $ai_chat_search->isEmpty()) {
+            // AI Video Pro search
+            if (class_exists(UserFall::class)) {
+                $video_search = UserFall::where('user_id', $userId)
+                    ->where('status', 'complete')
+                    ->whereNotNull('video_url')
+                    ->where('video_url', '!=', '')
+                    ->where('prompt', 'like', "%$word%")
+                    ->select('id', 'prompt', 'video_url', 'model', 'created_at')
+                    ->limit(10)
+                    ->get();
+            }
+
+            // AI Image Pro search
+            if (class_exists(AiImageProModel::class) && MarketplaceHelper::isRegistered('ai-image-pro')) {
+                $ai_image_pro_search = AiImageProModel::where('user_id', $userId)
+                    ->where('status', AiImageStatusEnum::COMPLETED->value)
+                    ->whereNotNull('generated_images')
+                    ->where('prompt', 'like', "%$word%")
+                    ->select('id', 'prompt', 'generated_images', 'created_at')
+                    ->limit(10)
+                    ->get();
+            }
+
+            // AI Chat Pro Image Chat search
+            if (class_exists(AiChatProImageModel::class) && MarketplaceHelper::isRegistered('ai-chat-pro-image-chat')) {
+                $ai_chat_pro_image_search = AiChatProImageModel::where('user_id', $userId)
+                    ->where('status', AiImageStatusEnum::COMPLETED->value)
+                    ->whereNotNull('generated_images')
+                    ->where('prompt', 'like', "%$word%")
+                    ->select('id', 'prompt', 'generated_images', 'created_at')
+                    ->limit(10)
+                    ->get();
+            }
+
+            if ($template_search->isEmpty() && $workbook_search->isEmpty() && $ai_chat_search->isEmpty() && $video_search->isEmpty() && $ai_image_pro_search->isEmpty() && $ai_chat_pro_image_search->isEmpty()) {
                 $result = 'null';
             }
         }
 
-        $html = view('panel.layout.includes.search-results', compact('template_search', 'workbook_search', 'ai_chat_search', 'result'))->render();
+        $html = view('panel.layout.includes.search-results', compact('template_search', 'workbook_search', 'ai_chat_search', 'video_search', 'ai_image_pro_search', 'ai_chat_pro_image_search', 'result'))->render();
 
-        return response()->json(compact('html', 'keywords'));
+        return response()->json(compact('html', 'keywords', 'workbook_search'));
     }
 
     /**

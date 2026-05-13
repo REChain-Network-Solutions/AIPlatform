@@ -112,8 +112,7 @@
                     }
 
                     // Strip entity annotation blocks and suggestions JSON to prevent raw flash on page load
-                    $output = preg_replace('/\s*:::entity-highlights[\s\S]*?:::\s*/i', '', $output ?? '');
-                    $output = preg_replace('/\s*:::entity-highlights[\s\S]*$/i', '', $output ?? '');
+                    $output = preg_replace('/\s*:::[\s]*ent[\s\S]*$/i', '', $output ?? '');
                     $output = preg_replace('/\s*\{[\s\n]*"suggestions"\s*:\s*\[[\s\S]*?\]\s*\}\s*$/i', '', $output ?? '');
                     $output = rtrim($output);
                 @endphp

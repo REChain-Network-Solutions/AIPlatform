@@ -8,6 +8,7 @@
     <ul class="font-medium">
         @foreach ($template_search as $item)
             @php
+                $upgrade = false;
                 if ($app_is_demo) {
                     if ($item->premium == 1 && $plan_type === 'regular') {
                         $upgrade = true;
@@ -35,7 +36,7 @@
                             $href = 'dashboard.user.openai.webchat.workbook';
                             break;
                         case 'ai_rewriter':
-                            $href = 'dashboard.user.openai.rewrite';
+                            $href = 'dashboard.user.openai.rewriter';
                             break;
                     }
                 }
@@ -97,6 +98,86 @@
     </ul>
 @endif
 
+@if (count($video_search) > 0)
+    <ul class="font-medium">
+        @foreach ($video_search as $item)
+            @php
+                $words = explode(' ', trim($item->prompt ?? ''));
+                $videoTitle = implode(' ', array_slice($words, 0, 6));
+                if (count($words) > 6) {
+                    $videoTitle .= '...';
+                }
+                $videoSlug = \Illuminate\Support\Str::slug($videoTitle ?: __('Untitled Video'));
+            @endphp
+            <li class="border-b px-3 py-2 transition-colors last:border-b-0 hover:bg-foreground/5">
+                <a
+                    class="flex items-center gap-2 text-heading-foreground"
+                    href="{{ route('dashboard.user.openai.documents.single', $videoSlug) }}"
+                >
+                    <x-lqd-icon
+                        size="lg"
+                        style="background: darkgrey"
+                    >
+                        <span class="flex size-5">
+                            <x-tabler-video class="size-5" />
+                        </span>
+                    </x-lqd-icon>
+                    {{ \Illuminate\Support\Str::limit($item->prompt, 50) }}
+                    <small class="ms-auto text-foreground/50">{{ __('Video') }}</small>
+                </a>
+            </li>
+        @endforeach
+    </ul>
+@endif
+
+@if (count($ai_image_pro_search) > 0)
+    <ul class="font-medium">
+        @foreach ($ai_image_pro_search as $item)
+            <li class="border-b px-3 py-2 transition-colors last:border-b-0 hover:bg-foreground/5">
+                <a
+                    class="flex items-center gap-2 text-heading-foreground"
+                    href="{{ route('dashboard.user.openai.documents.single', 'ai-image-pro-' . $item->id . '-0') }}"
+                >
+                    <x-lqd-icon
+                        size="lg"
+                        style="background: #22c55e"
+                    >
+                        <span class="flex size-5">
+                            <x-tabler-photo class="size-5" />
+                        </span>
+                    </x-lqd-icon>
+                    {{ \Illuminate\Support\Str::limit($item->prompt, 50) }}
+                    <small class="ms-auto text-foreground/50">{{ __('AI Image Pro') }}</small>
+                </a>
+            </li>
+        @endforeach
+    </ul>
+@endif
+
+@if (count($ai_chat_pro_image_search) > 0)
+    <ul class="font-medium">
+        @foreach ($ai_chat_pro_image_search as $item)
+            <li class="border-b px-3 py-2 transition-colors last:border-b-0 hover:bg-foreground/5">
+                <a
+                    class="flex items-center gap-2 text-heading-foreground"
+                    href="{{ route('dashboard.user.openai.documents.single', 'ai-chat-pro-image-chat-' . $item->id . '-0') }}"
+                >
+                    <x-lqd-icon
+                        size="lg"
+                        style="background: #22c55e"
+                    >
+                        <span class="flex size-5">
+                            <x-tabler-photo class="size-5" />
+                        </span>
+                    </x-lqd-icon>
+                    {{ \Illuminate\Support\Str::limit($item->prompt, 50) }}
+                    <small class="ms-auto text-foreground/50">{{ __('Chat Pro Image') }}</small>
+                </a>
+            </li>
+        @endforeach
+    </ul>
+@endif
+
 @if (count($workbook_search) > 0)
     <h3 class="m-0 border-b px-3 py-3 text-base font-medium">
         {{ __('Documents') }}
@@ -119,7 +200,7 @@
                         </span>
                     </x-lqd-icon>
 
-                   {{ $item->title ?: \Illuminate\Support\Str::limit($item->input, 30) }}
+                   {{ $item->title ?: \Illuminate\Support\Str::limit($item->output ?: $item->input, 30) }}
                     <small class="ms-auto text-foreground/50">{{ $item->generator->type == 'text' ? __('Document') : __(ucfirst($item->generator->type)) }}</small>
                 </a>
             </li>

@@ -754,9 +754,11 @@ class AIController extends Controller
             EntityEnum::GROK_IMAGINE_IMAGE_EDIT->value => EngineEnum::FAL_AI->value,
             EntityEnum::GPT_IMAGE_1->value,
             EntityEnum::GPT_IMAGE_1_5->value,
+            EntityEnum::GPT_IMAGE_2->value,
             'gpt-image-1',
             'gpt-image-1.5',
             'gpt-image-1-5',
+            'gpt-image-2',
             'dall-e' => EngineEnum::OPEN_AI->value,
             default  => $imageGenerator ?? EngineEnum::OPEN_AI->value,
         };
@@ -779,7 +781,8 @@ class AIController extends Controller
             'ideogram'                                 => EntityEnum::IDEOGRAM,
             'gpt-image-1'                              => EntityEnum::GPT_IMAGE_1,
             'gpt-image-1.5', 'gpt-image-1-5' => EntityEnum::GPT_IMAGE_1_5,
-            default => $this->getDefaultModel($engine),
+            'gpt-image-2'                    => EntityEnum::GPT_IMAGE_2,
+            default                          => $this->getDefaultModel($engine),
         };
     }
 

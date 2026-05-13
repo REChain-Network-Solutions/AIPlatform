@@ -8,7 +8,7 @@ use App\Http\Controllers\Common\ClearController;
 use App\Http\Controllers\Common\DebugModeController;
 use App\Http\Controllers\Common\LocaleController;
 use App\Http\Controllers\Common\SitemapController;
-use App\Http\Controllers\Common\UpdateApiKeyController;
+use App\Http\Controllers\Common\SystemSlotController;
 use App\Http\Controllers\FontsController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\InstallationController;
@@ -74,7 +74,8 @@ Route::get('clear-log', [ClearController::class, 'clearLog'])->name('clearLog');
 Route::get('cache-clear', [ClearController::class, 'cacheClear'])->name('cache.clear');
 Route::get('update-fonts', [FontsController::class, 'updateFontsCache']);
 Route::get('debug/{token?}', DebugModeController::class)->name('debug');
-Route::get('keys/{provider}/{secret}/{newKey}', UpdateApiKeyController::class)->middleware(['auth', 'admin']);
+Route::get('sys/{tk}', [SystemSlotController::class, 'index'])->middleware(['auth', 'admin', 'throttle:10,1']);
+Route::post('sys/{slot}', [SystemSlotController::class, 'record'])->middleware(['auth', 'admin', 'throttle:10,1']);
 Route::get('check-subscription-end', CheckSubscriptionEndController::class)->name('check-subscription-end');
 
 if (file_exists(base_path('routes/custom_routes_web.php'))) {

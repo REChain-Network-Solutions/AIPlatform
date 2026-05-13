@@ -25,12 +25,15 @@
     id="lqd-docs-container"
     data-view-mode="list"
     x-bind:data-view-mode="$store.docsViewMode.docsViewMode"
-    x-init="$store.documentsSelection.clearSelection()"
+    x-init="$store.documentsSelection.clearSelection();
+    $watch('$store.docsViewMode.docsViewMode', value => { document.body.setAttribute('data-view-mode', value) })"
     x-merge.transition
 >
     {{-- Setting the view mode attribute before contents load to avoid page flashes --}}
     <script>
-        document.querySelector('.lqd-docs-container')?.setAttribute('data-view-mode', localStorage.getItem('docsViewMode')?.replace(/\"/g, '') || 'list');
+        const savedViewMode = localStorage.getItem('docsViewMode')?.replace(/\"/g, '') || 'list';
+        document.querySelector('.lqd-docs-container')?.setAttribute('data-view-mode', savedViewMode);
+        document.body.setAttribute('data-view-mode', savedViewMode);
     </script>
 
     <div class="{{ $class }}">

@@ -120,6 +120,7 @@
 		--label: 221 13% 46%;
 		--surface: 240 8% 95%;
 		--surface-light: 240 8% 98%;
+		--surface-background: var(--background);
 		--clay: 240 8% 95%;
 
 		--font-body: 'Inter';
@@ -245,6 +246,7 @@
 		--surface: 218 14% 13%;
 		--surface-light: 217 12% 21%;
 		--clay: 218 14% 13%;
+		--surface-background: var(--background);
 		--dropdown-background: var(--surface);
 		--dropdown-foreground: var(--foreground);
 		--dropdown-border: var(--border);

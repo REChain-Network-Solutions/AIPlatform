@@ -125,10 +125,10 @@
 
 								@php
 									if (\App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-chat-pro')) {
-										$currentUrl = url()->current();
-										if (Str::is('*/chat/pro/*', $currentUrl)) {
+										$currentPath = request()->path();
+										if (Str::is('*/chat/pro/*', $currentPath)) {
 											$route = 'dashboard.user.openai.chat.pro.index';
-										} elseif (Str::is('*/chat/*', $currentUrl) || Str::is('*/chat', $currentUrl)) {
+										} elseif ($currentPath === 'chat' || Str::is('chat/*', $currentPath)) {
 											$route = 'chat.pro';
 										} else {
 											$route = 'dashboard.user.openai.chat.chat';

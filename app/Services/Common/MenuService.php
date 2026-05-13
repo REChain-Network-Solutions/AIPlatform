@@ -108,6 +108,18 @@ class MenuService
             return $this->merge($items);
         });
 
+        if (Helper::appIsDemo() && isset($data['api_keys'], $data['more'])) {
+            $apiKeysItem = $data['api_keys'];
+            $apiKeysItem['parent_key'] = 'more';
+            unset($data['api_keys']);
+
+            if (! isset($data['more']['children']) || ! is_array($data['more']['children'])) {
+                $data['more']['children'] = [];
+            }
+
+            $data['more']['children']['api_keys'] = $apiKeysItem;
+        }
+
         if (setting('dash_theme') === 'oupi') {
             $menuHelper = app(MenuHelper::class);
 
@@ -617,6 +629,133 @@ class MenuService
                 ],
                 'show_condition' => Route::has('dashboard.chatbot-agent.index'),
             ],
+            'ext_ai_photo_studio_dropdown' => [
+                'parent_key'       => null,
+                'key'              => 'ext_ai_photo_studio_dropdown',
+                'route'            => 'dashboard.user.ai-photoshoot.index',
+                'label'            => 'AI Photoshoot',
+                'data-name'        => null,
+                'icon'             => 'tabler-camera',
+                'svg'              => null,
+                'order'            => 5,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.ai-photoshoot.*',
+                ],
+                'show_condition'   => MarketplaceHelper::isRegistered('ai-photoshoot'),
+                'tooltip'          => __('AI Photoshoot uses the existing image credit system. Each generation, edit, and background replacement consumes credits from the image credits pool.'),
+            ],
+            'ext_ai_photo_studio' => [
+                'parent_key'       => 'ext_ai_photo_studio_dropdown',
+                'key'              => 'ext_ai_photo_studio',
+                'route'            => 'dashboard.user.ai-photoshoot.index',
+                'label'            => 'Dashboard',
+                'data-name'        => null,
+                'icon'             => 'tabler-layout-dashboard',
+                'svg'              => null,
+                'order'            => 1,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.ai-photoshoot.index',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ai-photoshoot'),
+            ],
+            'ext_ai_photo_studio_custom' => [
+                'parent_key'       => 'ext_ai_photo_studio_dropdown',
+                'key'              => 'ext_ai_photo_studio_custom',
+                'route'            => 'dashboard.user.ai-photoshoot.custom.index',
+                'label'            => 'Custom Photoshoot',
+                'data-name'        => null,
+                'icon'             => 'tabler-wand',
+                'svg'              => null,
+                'order'            => 2,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.ai-photoshoot.custom.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ai-photoshoot'),
+            ],
+            'ext_ai_photo_studio_templates' => [
+                'parent_key'       => 'ext_ai_photo_studio_dropdown',
+                'key'              => 'ext_ai_photo_studio_templates',
+                'route'            => 'dashboard.user.ai-photoshoot.templates.index',
+                'label'            => 'Template Photoshoot',
+                'data-name'        => null,
+                'icon'             => 'tabler-template',
+                'svg'              => null,
+                'order'            => 3,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.ai-photoshoot.templates.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ai-photoshoot'),
+            ],
+            'ext_ai_photo_studio_replace_background' => [
+                'parent_key'       => 'ext_ai_photo_studio_dropdown',
+                'key'              => 'ext_ai_photo_studio_replace_background',
+                'route'            => 'dashboard.user.ai-photoshoot.replace-background.index',
+                'label'            => 'Replace Background',
+                'data-name'        => null,
+                'icon'             => 'tabler-replace',
+                'svg'              => null,
+                'order'            => 4,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.ai-photoshoot.replace-background.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ai-photoshoot'),
+            ],
+            'ext_ai_photo_studio_edit_image' => [
+                'parent_key'       => 'ext_ai_photo_studio_dropdown',
+                'key'              => 'ext_ai_photo_studio_edit_image',
+                'route'            => 'dashboard.user.ai-photoshoot.edit_image.index',
+                'label'            => 'Edit Image',
+                'data-name'        => null,
+                'icon'             => 'tabler-pencil',
+                'svg'              => null,
+                'order'            => 5,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.ai-photoshoot.edit_image.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ai-photoshoot'),
+            ],
+            'ext_ai_photo_studio_my_photoshoots' => [
+                'parent_key'       => 'ext_ai_photo_studio_dropdown',
+                'key'              => 'ext_ai_photo_studio_my_photoshoots',
+                'route'            => 'dashboard.user.ai-photoshoot.photo_shoots.my',
+                'label'            => 'My Photoshoots',
+                'data-name'        => null,
+                'icon'             => 'tabler-photo',
+                'svg'              => null,
+                'order'            => 6,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.ai-photoshoot.photo_shoots.*',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ai-photoshoot'),
+            ],
             'ext_fashion_studio_dropdown' => [
                 'parent_key'       => null,
                 'key'              => 'ext_fashion_studio_dropdown',
@@ -925,6 +1064,25 @@ class MenuService
                     'dashboard.user.social-media.calendar',
                 ],
                 'show_condition' => Route::has('dashboard.user.social-media.calendar'),
+            ],
+            'ext_social_media_automation' => [
+                'parent_key'       => 'ext_social_media_dropdown',
+                'key'              => 'ext_social_media_automation',
+                'route'            => 'dashboard.user.social-media.automation.index',
+                'label'            => 'Automation',
+                'data-name'        => null,
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 4,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.social-media.automation.*',
+                ],
+                'show_condition' => Route::has('dashboard.user.social-media.automation.index'),
+                'badge'          => 'new',
             ],
             'ext_social_media_agent_dropdown' => [
                 'parent_key'       => null,
@@ -4182,6 +4340,23 @@ class MenuService
                 ],
                 'show_condition' => Route::has('dashboard.admin.openai.chat.pro.settings'),
             ],
+            'ai_music_pro_settings_extension' => [
+                'parent_key'       => 'settings',
+                'key'              => 'ai_music_pro_settings_extension',
+                'route'            => 'dashboard.admin.ai-music-pro.settings',
+                'label'            => 'AI Music Pro Settings',
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 79,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.admin.ai-music-pro.settings',
+                ],
+                'show_condition' => Route::has('dashboard.admin.ai-music-pro.settings'),
+            ],
             'ai_chat_pro_image_chat_settings_extension' => [
                 'parent_key'       => 'settings',
                 'key'              => 'ai_chat_pro_image_chat_settings_extension',
@@ -4392,7 +4567,7 @@ class MenuService
                 'parent_key'       => null,
                 'key'              => 'photo_studio_extension',
                 'route'            => 'dashboard.user.photo-studio.index',
-                'label'            => 'AI Photo Studio',
+                'label'            => 'AI Photoshoot',
                 'icon'             => 'tabler-device-laptop',
                 'svg'              => null,
                 'order'            => 8,
@@ -4455,6 +4630,25 @@ class MenuService
                     'dashboard.admin.settings.clipdrop',
                 ],
                 'show_condition' => Route::has('dashboard.admin.settings.clipdrop'),
+            ],
+            'creative_suite_settings' => [
+                'parent_key'       => 'settings',
+                'key'              => 'creative_suite_settings',
+                'route'            => 'dashboard.admin.creative-suite.settings',
+                'label'            => 'Creative Suite Settings',
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 70,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.admin.creative-suite.settings',
+                    'dashboard.admin.creative-suite-annotations.settings.*',
+                ],
+                'show_condition' => Route::has('dashboard.admin.creative-suite.settings'),
+                'is_admin'       => true,
             ],
             'novita_extension' => [
                 'parent_key'       => 'api_integration',
@@ -4559,6 +4753,25 @@ class MenuService
                 ],
                 'show_condition' => MarketplaceHelper::isRegistered('checkout-registration'),
             ],
+            'ext_ai_photo_studio_settings' => [
+                'parent_key'       => 'settings',
+                'key'              => 'ext_ai_photo_studio_settings',
+                'route'            => 'dashboard.admin.ai-photoshoot.settings',
+                'label'            => 'AI Photoshoot Settings',
+                'data-name'        => null,
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 78,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.admin.ai-photoshoot.settings',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ai-photoshoot'),
+                'is_admin'       => true,
+            ],
             'ext_fashion_studio_settings' => [
                 'parent_key'       => 'settings',
                 'key'              => 'ext_fashion_studio_settings',
@@ -4612,9 +4825,10 @@ class MenuService
         $keys = [
             'ai_product_shot', 'ai_writer', 'ai_chat_all', 'ai_image_generator', 'ai_video', 'seo_tool_extension', 'ai_voiceover',
             'ai_pdf', 'ai_vision', 'ai_speech_to_text', 'photo_studio_extension', 'ai_rewriter', 'ai_editor',
-            'ai_code_generator', 'ai_youtube', 'ai_chat_image', 'ai_rss', 'ai_voiceover_clone', 'ai_web_chat_extension', 'ai_presentation', 'ext_fashion_studio_dropdown',
+            'ai_code_generator', 'ai_youtube', 'ai_chat_image', 'ai_rss', 'ai_voiceover_clone', 'ai_web_chat_extension', 'ai_presentation', 'ext_fashion_studio_dropdown', 'ext_ai_photo_studio_dropdown',
             'ai_realtime_voice_chat', 'ai_social_media_extension', 'ai_detector_extension', 'ai_plagiarism_extension', 'ai_article_wizard', 'ai_voice_isolator', 'ext_chat_bot', 'ext_voice_chatbot', 'ext_social_media_dropdown',
             'ext_ai_music_pro', 'ai_influencer', 'url_to_video', 'viral_clips', 'influencer_avatar', 'brand_voice', 'support', 'ai_chat_pro_image_chat', 'ai_image_pro',
+            'ext_social_media_automation',
         ];
 
         $data = (new self)->generate();
@@ -4689,6 +4903,15 @@ class MenuService
                 'label'   => __('Highlight to Ask'),
                 'tooltip' => __('Highlight text in AI Chat Pro responses to quickly ask follow-up questions.'),
                 'icon'    => 'tabler-message-question',
+            ];
+        }
+
+        if (MarketplaceHelper::isRegistered('creative-suite-annotations')) {
+            $result[] = [
+                'key'     => 'creative_suite_annotations',
+                'label'   => __('Creative Suite Annotations'),
+                'tooltip' => __('Allow users on this plan to use Creative Suite annotation tools (comment, region, replace text).'),
+                'icon'    => 'tabler-pencil',
             ];
         }
 

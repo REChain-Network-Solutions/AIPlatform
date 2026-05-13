@@ -102,7 +102,8 @@ class StreamService
             ob_implicit_flush(true);
         }
 
-        while (ob_get_level() > 0) {
+        $minLevel = config('octane.enabled') ? 1 : 0;
+        while (ob_get_level() > $minLevel) {
             if (! @ob_end_flush()) {
                 break;
             }
@@ -161,37 +162,18 @@ class StreamService
             }
         }
 
-        // Once we've entered an entity block (:::entity-highlights), suppress ALL chunks
-        // until the closing ::: arrives, then continue suppressing through suggestions JSON.
+        // Entity block tail suppression: once triggered, swallow ALL remaining chunks.
+        // The entity block is always the LAST thing before [DONE], so no exit conditions needed.
         if ($this->entityBlockSuppressed) {
-            $this->suggestionsBuffer .= $messageFix;
-
-            // Check for closing ::: followed by suggestions JSON completing
-            if (preg_match('/:::[^:]*\{[^{]*"suggestions"\s*:.*\}\s*$/s', $this->suggestionsBuffer)) {
-                $this->suggestionsBuffer = '';
-                $this->entityBlockSuppressed = false;
-
-                return;
-            }
-
-            // Check for closing ::: with no more content expected (no suggestions)
-            if (! $this->shouldGenerateSuggestions && preg_match('/\]\s*(<br\s*\/?>|\n)*\s*:::\s*(<br\s*\/?>|\s)*$/s', $this->suggestionsBuffer)) {
-                $this->suggestionsBuffer = '';
-                $this->entityBlockSuppressed = false;
-
-                return;
-            }
-
             return;
         }
 
         if ($this->shouldGenerateSuggestions || $this->entityHighlightsEnabled) {
-            // Buffer content that might be a suggestions heading or JSON block.
             $this->suggestionsBuffer .= $messageFix;
 
-            // Check if buffer contains ::: entity-highlights marker — enter suppression mode
-            if (str_contains($this->suggestionsBuffer, ':::') && (str_contains($this->suggestionsBuffer, 'entity') || preg_match('/"text"\s*:/', $this->suggestionsBuffer))) {
-                $clean = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*:::[\s\S]*$/si', '', $this->suggestionsBuffer);
+            // Detect :::meta (or legacy :::entity-highlights) marker — suppress all remaining output
+            if ($this->entityHighlightsEnabled && str_contains($this->suggestionsBuffer, ':::') && preg_match('/:::\s*(?:meta|entity[- ]?highlights?)/i', $this->suggestionsBuffer)) {
+                $clean = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*:::\s*(?:meta|entity[- ]?highlights?)[\s\S]*$/si', '', $this->suggestionsBuffer);
                 $this->entityBlockSuppressed = true;
                 $this->suggestionsBuffer = '';
                 if ($clean === '') {
@@ -199,8 +181,8 @@ class StreamService
                 }
                 $messageFix = $clean;
             }
-            // Check if buffer contains a complete JSON-like block ending with } — strip it
-            elseif (preg_match('/\{\s*"[^"]+"/s', $this->suggestionsBuffer) && str_contains($this->suggestionsBuffer, '}')) {
+            // Check if buffer contains a complete suggestions JSON block ending with } — strip it
+            elseif ($this->shouldGenerateSuggestions && preg_match('/\{\s*"[^"]+"/s', $this->suggestionsBuffer) && str_contains($this->suggestionsBuffer, '}')) {
                 $clean = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*,*\s*(```[\w]*\s*(<br\s*\/?>|\s)*)?\[?\s*\{[\s\S]*\}\s*\]?\s*,*\s*(```\s*)?(<br\s*\/?>|\s)*$/si', '', $this->suggestionsBuffer);
                 $this->suggestionsBuffer = '';
                 if ($clean === '') {
@@ -208,16 +190,13 @@ class StreamService
                 }
                 $messageFix = $clean;
             }
-            // Check if buffer ends with potential suggestions/entities heading, partial JSON, or ::: block — keep buffering
-            elseif (preg_match('/(?:^|<br\s*\/?>|\n)\s*(?:#{1,3}\s*)?(?:\*{0,2})Entit(?:y|ies)\s*\S*\s*$/i', $this->suggestionsBuffer)
-                || preg_match('/\{\s*"?\s*$/s', $this->suggestionsBuffer)
-                || preg_match('/\[\s*"?\s*$/s', $this->suggestionsBuffer)
-                || preg_match('/:::\s*$/s', $this->suggestionsBuffer)
-                || (str_contains($this->suggestionsBuffer, '{"') && ! str_contains($this->suggestionsBuffer, '}'))
-                || preg_match('/:::(?!.*:::)[\s\S]{0,500}$/s', $this->suggestionsBuffer)) {
+            // Check if buffer ends with partial patterns worth waiting for — keep buffering
+            elseif (preg_match('/:::\s*$/s', $this->suggestionsBuffer)
+                || ($this->shouldGenerateSuggestions && preg_match('/\{\s*"?\s*$/s', $this->suggestionsBuffer))
+                || ($this->shouldGenerateSuggestions && str_contains($this->suggestionsBuffer, '{"') && ! str_contains($this->suggestionsBuffer, '}'))) {
                 return;
             }
-            // No suggestions pattern detected — flush buffer as normal content
+            // No pattern detected — flush buffer as normal content
             else {
                 $messageFix = $this->suggestionsBuffer;
                 $this->suggestionsBuffer = '';
@@ -305,7 +284,15 @@ class StreamService
             && ! $this->tempChatActive
             && ! $isCouncilSubRequest;
 
-        if ($this->shouldGenerateSuggestions) {
+        $entityHighlightActive = $chat_type === 'chatPro'
+            && ! $isCouncilSubRequest
+            && MarketplaceHelper::isRegistered('ai-chat-pro-entity-highlight')
+            && EntityHighlightService::isEnabled();
+
+        // When the entity highlight extension is active, suggestions are emitted
+        // inside the same :::meta block — skip the standalone suggestions prompt to
+        // avoid two competing "tail blocks" that the model often resolves by dropping one.
+        if ($this->shouldGenerateSuggestions && ! $entityHighlightActive) {
             $history = $this->injectSuggestionsInstruction($history);
         }
 
@@ -318,12 +305,10 @@ class StreamService
             $history = $this->injectSmartImageInstruction($history);
         }
 
-        // Inject entity highlight system prompt when feature is enabled
-        if ($chat_type === 'chatPro'
-            && ! $isCouncilSubRequest
-            && MarketplaceHelper::isRegistered('ai-chat-pro-entity-highlight')
-            && EntityHighlightService::isEnabled()) {
-            $history = $this->injectEntityHighlightInstruction($history);
+        // Inject entity highlight system prompt when feature is enabled. When suggestions
+        // would also be active, fold them into the same metadata block.
+        if ($entityHighlightActive) {
+            $history = $this->injectEntityHighlightInstruction($history, $this->shouldGenerateSuggestions);
             $this->entityHighlightsEnabled = true;
         }
 
@@ -1305,6 +1290,18 @@ class StreamService
 
     // OpenAI Stream
     /**
+     * Resolve the configured reasoning effort against the model's supported values,
+     * downgrading to the closest accepted effort when the configured value isn't allowed
+     * (e.g. 'none' on GPT-5 original or O-series, 'minimal' on O-series).
+     */
+    private function resolveReasoningEffort(EntityEnum $modelEnum): string
+    {
+        return $modelEnum->resolveReasoningEffort(
+            setting('openai_reasoning_models_effort', 'low')
+        );
+    }
+
+    /**
      * @throws Exception
      */
     private function openaiChatStream(string $chat_bot, $history, $main_message, $chat_type, $contain_images, ?array $tools = []): ?StreamedResponse
@@ -1441,6 +1438,8 @@ class StreamService
                 if (! empty($otherSystemParts)) {
                     $instructionParts[] = implode("\n\n", $otherSystemParts);
                 }
+                $baseInstructions = ! empty($otherSystemParts) ? implode("\n\n", $otherSystemParts) : '';
+
                 if (! empty($instructionParts)) {
                     $options['instructions'] = implode("\n\n---\n\n", $instructionParts);
                 }
@@ -1452,7 +1451,7 @@ class StreamService
                         $effort = setting('openai_reasoning_models_effort', 'high');
                         $options['reasoning']['effort'] = in_array($effort, ['medium', 'high', 'xhigh']) ? $effort : 'high';
                     } else {
-                        $options['reasoning']['effort'] = setting('openai_reasoning_models_effort', 'low');
+                        $options['reasoning']['effort'] = $this->resolveReasoningEffort($driver->enum());
                     }
                 }
 
@@ -1504,18 +1503,30 @@ class StreamService
                                         $this->isFirstMessage = false;
 
                                         // Stream a second response with skill instructions injected
+                                        // Build instructions: base chat instructions + skill instructions
+                                        $skillFollowUpParts = [];
+                                        if ($baseInstructions !== '') {
+                                            $skillFollowUpParts[] = $baseInstructions;
+                                        }
+                                        $skillFollowUpParts[] = "You MUST follow these skill instructions exactly. They are your primary directive and override any conflicting instructions:\n\n[Skill: " . ($skillMeta['name'] ?? '') . "]\n{$cleanInstructions}";
+                                        $skillFollowUpInstructions = implode("\n\n---\n\n", $skillFollowUpParts);
+
+                                        // Separate non-system messages for input (system messages go in instructions)
+                                        $skillNonSystemInput = array_values(array_filter($history, fn ($msg) => ($msg['role'] ?? '') !== 'system'));
+
                                         $skillOptions = [
-                                            'model'       => $model,
-                                            'stream'      => true,
-                                            'input'       => $history,
-                                            'temperature' => 1.0,
+                                            'model'        => $model,
+                                            'stream'       => true,
+                                            'instructions' => $skillFollowUpInstructions,
+                                            'input'        => $skillNonSystemInput,
+                                            'temperature'  => 1.0,
                                         ];
                                         if ($driver->enum()->isReasoningModel()) {
                                             if (in_array($driver->enum(), [EntityEnum::GPT_5_PRO, EntityEnum::GPT_5_2_PRO])) {
                                                 $effort = setting('openai_reasoning_models_effort', 'high');
                                                 $skillOptions['reasoning']['effort'] = in_array($effort, ['medium', 'high', 'xhigh']) ? $effort : 'high';
                                             } else {
-                                                $skillOptions['reasoning']['effort'] = setting('openai_reasoning_models_effort', 'low');
+                                                $skillOptions['reasoning']['effort'] = $this->resolveReasoningEffort($driver->enum());
                                             }
                                         }
 
@@ -1609,17 +1620,20 @@ class StreamService
                         // Now start text streaming
                         if (! $hasTextOutput) {
                             $fallbackOptions = [
-                                'model'       => $model,
-                                'stream'      => true,
-                                'input'       => $history,
-                                'temperature' => 1.0,
+                                'model'        => $model,
+                                'stream'       => true,
+                                'input'        => $nonSystemHistory,
+                                'temperature'  => 1.0,
                             ];
+                            if ($baseInstructions !== '') {
+                                $fallbackOptions['instructions'] = $baseInstructions;
+                            }
                             if ($driver->enum()->isReasoningModel()) {
                                 if (in_array($driver->enum(), [EntityEnum::GPT_5_PRO, EntityEnum::GPT_5_2_PRO])) {
                                     $effort = setting('openai_reasoning_models_effort', 'high');
                                     $fallbackOptions['reasoning']['effort'] = in_array($effort, ['medium', 'high', 'xhigh']) ? $effort : 'high';
                                 } else {
-                                    $fallbackOptions['reasoning']['effort'] = setting('openai_reasoning_models_effort', 'low');
+                                    $fallbackOptions['reasoning']['effort'] = $this->resolveReasoningEffort($driver->enum());
                                 }
                             }
 
@@ -1824,7 +1838,7 @@ class StreamService
                     $effort = setting('openai_reasoning_models_effort', 'high');
                     $reasoningOptions['reasoning']['effort'] = in_array($effort, ['medium', 'high', 'xhigh']) ? $effort : 'high';
                 } else {
-                    $reasoningOptions['reasoning']['effort'] = setting('openai_reasoning_models_effort', 'low');
+                    $reasoningOptions['reasoning']['effort'] = $this->resolveReasoningEffort($driver->enum());
                 }
             }
 
@@ -1905,10 +1919,11 @@ class StreamService
                 $historyMessages = array_filter($history, function ($item) {
                     return $item['role'] !== 'system';
                 });
-                $system = Arr::first(array_filter($history, function ($item) {
-                    return $item['role'] === 'system';
-                }));
-                $system = data_get($system, 'content');
+                $systemParts = array_map(
+                    fn ($item) => $item['content'] ?? '',
+                    array_filter($history, fn ($item) => ($item['role'] ?? '') === 'system')
+                );
+                $system = implode("\n\n", array_filter($systemParts)) ?: null;
 
                 if (setting('anthropic_default_model') === BedrockEngine::BEDROCK->value) {
                     $bedrockService = new BedrockRuntimeService([
@@ -2696,9 +2711,12 @@ class StreamService
      */
     private function injectTitleInstruction(array $history): array
     {
-        $instruction = 'IMPORTANT: You must begin your reply with EXACTLY one raw JSON line in this format: {"title":"short descriptive title based on the user message"}'
-            . "\n" . 'The title must summarize what the user is asking about. Then write one blank line, then your full answer.'
-            . "\n" . 'Do NOT wrap the JSON in code fences, backticks, or markdown. Do not wrap the answer in JSON. Only the first line must be raw JSON.';
+        $instruction = 'RESPONSE FORMAT — your reply has TWO parts:'
+            . "\n" . '1. FIRST LINE: one raw JSON object on a single line: {"title":"short descriptive title based on the user message"}'
+            . "\n" . '2. BLANK LINE, then your FULL ANSWER to the user. The answer is the main content of your reply and MUST ALWAYS be written — it is never optional and never empty.'
+            . "\n"
+            . "\n" . 'The title JSON is metadata only; it does NOT replace the answer. Even for simple, casual, or ambiguous messages, you must still write a normal helpful answer after the title line.'
+            . "\n" . 'Do NOT wrap the JSON in code fences, backticks, or markdown. Do not wrap the answer in JSON. Only the first line is raw JSON.';
 
         foreach ($history as $index => $message) {
             if (in_array($message['role'], ['system', 'user']) && is_string($message['content'] ?? null)) {
@@ -2763,9 +2781,9 @@ class StreamService
         return $history;
     }
 
-    private function injectEntityHighlightInstruction(array $history): array
+    private function injectEntityHighlightInstruction(array $history, bool $withSuggestions = false): array
     {
-        $instruction = EntityHighlightService::systemPromptAddition();
+        $instruction = EntityHighlightService::systemPromptAddition($withSuggestions);
 
         foreach ($history as $index => $message) {
             if (in_array($message['role'], ['system', 'user']) && is_string($message['content'] ?? null)) {
@@ -2787,36 +2805,55 @@ class StreamService
             return $output;
         }
 
-        $entities = EntityHighlightService::parseAnnotations($output);
+        try {
+            $entities = EntityHighlightService::parseAnnotations($output);
 
-        if (! empty($entities)) {
-            EntityHighlightService::saveForMessage(
-                $userId,
-                $messageId,
-                $entities
-            );
+            if (! empty($entities)) {
+                EntityHighlightService::saveForMessage(
+                    $userId,
+                    $messageId,
+                    $entities
+                );
 
-            // Emit entity highlights as SSE event so frontend can apply them
-            echo PHP_EOL;
-            echo "event: entity_highlights\n";
-            echo 'data: ' . json_encode($entities);
-            echo "\n\n";
-            $this->safeFlush();
+                // Emit entity highlights as SSE event so frontend can apply them
+                echo PHP_EOL;
+                echo "event: entity_highlights\n";
+                echo 'data: ' . json_encode($entities);
+                echo "\n\n";
+                $this->safeFlush();
+            }
+        } catch (Throwable $e) {
+            // Don't let entity highlight failures break stream completion
         }
 
-        return EntityHighlightService::stripAnnotationBlock($output);
+        try {
+            return EntityHighlightService::stripAnnotationBlock($output);
+        } catch (Throwable $e) {
+            return $output;
+        }
     }
 
     private function injectSuggestionsInstruction(array $history): array
     {
-        $instruction = 'REQUIRED METADATA — follow these rules exactly:'
-            . "\n" . 'After your complete answer, you MUST append a blank line then one raw JSON line in this exact format:'
+        $instruction = 'FOLLOW-UP SUGGESTIONS METADATA:'
+            . "\n" . 'Your PRIMARY task is to write a full, helpful answer to the user. The answer is the main content and MUST ALWAYS be written — never skip it, never leave it empty, never replace it with the JSON block below.'
+            . "\n"
+            . "\n" . 'AFTER you have finished writing your complete answer, append a blank line then ONE raw JSON object on a single line:'
             . "\n" . '{"suggestions":["2-6 word item","2-6 word item","2-6 word item","2-6 word item"]}'
             . "\n" . 'The 4 items should be diverse, actionable follow-up prompts related to the topic.'
+            . "\n" . 'If the final sentences contains any suggestions, make sure to include them as well.'
             . "\n"
-            . "\n" . 'Skip the JSON ONLY if the last user message is trivial (greetings, ok, thanks, yes/no, bye, short reactions).'
+            . "\n" . 'STRICT FORMAT RULES:'
+            . "\n" . '- The JSON block comes LAST, after the full answer. It is metadata, not a replacement for the answer.'
+            . "\n" . '- The JSON MUST start with {"suggestions": and end with }.'
+            . "\n" . '- The line immediately before the JSON must be a BLANK LINE — nothing else.'
+            . "\n" . '- Do NOT write ANY preamble, heading, label, or introductory text before the JSON. Forbidden examples (never output these): "Suggestions for next steps:", "Here are some suggestions:", "Follow-ups:", "Next steps:", "You might also try:", "Related:", or any similar phrase.'
+            . "\n" . '- Do NOT output a bare array [...], bullet points, or any other format — only the raw JSON object.'
+            . "\n" . '- Do NOT wrap in code fences, backticks.'
+            . "\n" . '- Do NOT mention, reference, announce, or acknowledge the suggestions/JSON/metadata anywhere in your visible answer. The answer must read as if the JSON does not exist — the JSON is handled invisibly by the system.'
+            . "\n" . '- Do NOT mention the title JSON either. Never write phrases like "Title:", "Here is the title", or refer to it in any way.'
             . "\n"
-            . "\n" . 'This JSON is machine-parsed metadata. Your visible answer must NOT mention, introduce, or reference it in any way. End your answer naturally, then blank line, then the raw JSON with no headings, labels, or code fences around it.';
+            . "\n" . 'Skip ONLY the JSON block (still write the answer!) if the last user message is trivial (greetings, ok, thanks, yes/no, bye, short reactions).';
 
         foreach ($history as $index => $message) {
             if (in_array($message['role'], ['system', 'user']) && is_string($message['content'] ?? null)) {
@@ -2886,23 +2923,25 @@ class StreamService
 
     public function saveStreamResponse($main_message, $chat, $responsedText, $output, $total_used_tokens, $driver): void
     {
-        if ($this->titleBuffer !== '') {
-            echo PHP_EOL;
-            echo "event: data\n";
-            echo 'data: ' . $this->titleBuffer;
-            echo "\n\n";
-            $this->safeFlush();
-            $this->titleBuffer = '';
-        }
-
         if ($this->isFirstMessage && $chat) {
-            [$title, $cleanText] = $this->parseTitleFromBuffer($responsedText);
+            $bufferedContent = $this->titleBuffer;
+            $this->titleBuffer = '';
+
+            // Try to extract a title JSON from the full response text
+            $fullText = ($bufferedContent !== '' ? strip_tags(str_replace('<br/>', "\n", $bufferedContent)) : '') . $responsedText;
+            [$title, $cleanText] = $this->parseTitleFromBuffer($fullText);
 
             if ($title !== null) {
                 $responsedText = $cleanText;
                 $output = (string) preg_replace('/^\s*(```[\w]*\s*(<br\s*\/?>|\s)*)?\{"title"\s*:\s*"[^"]*"[^}]*\}\s*(```\s*)?(<br\s*\/?>|\s)*/i', '', $output);
-
                 $this->emitChatTitle($chat, $title);
+            } elseif ($bufferedContent !== '') {
+                // No title found — flush the buffered content as data so it appears in the bubble
+                echo PHP_EOL;
+                echo "event: data\n";
+                echo 'data: ' . $bufferedContent;
+                echo "\n\n";
+                $this->safeFlush();
             }
 
             $this->isFirstMessage = false;
@@ -2917,7 +2956,8 @@ class StreamService
         // Flush any remaining suggestions buffer content (strip headings/JSON/entity blocks, emit clean text)
         if ($this->suggestionsBuffer !== '') {
             $buffered = (string) preg_replace('/\s*(<br\s*\/?>)*\s*,*\s*(```[\w]*\s*(<br\s*\/?>|\s)*)?\[?\s*\{[\s\S]*\}\s*\]?\s*,*\s*(```\s*)?(<br\s*\/?>|\s)*$/si', '', $this->suggestionsBuffer);
-            // Strip entity-highlights blocks or bare entity text
+            // Strip :::meta / :::entity-highlights blocks or bare label text
+            $buffered = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*:::\s*(meta|entity[- ]?highlights?)[\s\S]*$/i', '', $buffered);
             $buffered = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*:::?\s*(<br\s*\/?>|\n)*\s*(entity[- ]?highlights?\s*(<br\s*\/?>|\n)*\s*)?(\[?\{[\s\S]*"text"\s*:[\s\S]*)?$/i', '', $buffered);
             $buffered = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*entity[- ]?highlights?\s*$/i', '', $buffered);
             $buffered = rtrim($buffered);
@@ -2932,12 +2972,27 @@ class StreamService
         }
 
         if ($this->shouldGenerateSuggestions) {
-            [$suggestionsPayload, $cleanText] = $this->parseSuggestionsFromBuffer($responsedText);
+            $suggestionsPayload = null;
+
+            // When entity highlight is active, suggestions come from inside the :::meta block.
+            if ($this->entityHighlightsEnabled) {
+                $metaSuggestions = EntityHighlightService::parseSuggestions($output);
+                if (is_array($metaSuggestions) && ! empty($metaSuggestions)) {
+                    $suggestionsPayload = ['suggestions' => $metaSuggestions];
+                }
+            }
+
+            // Fallback: standalone {"suggestions":[...]} JSON at the end of the response.
+            if ($suggestionsPayload === null) {
+                [$parsed, $cleanText] = $this->parseSuggestionsFromBuffer($responsedText);
+                if ($parsed !== null) {
+                    $responsedText = $cleanText;
+                    $output = (string) preg_replace('/\s*(<br\s*\/?>)*\s*(```[\w]*\s*(<br\s*\/?>|\s)*)?\{"suggestions"\s*:\s*\[.*\]\s*\}\s*(```\s*)?(<br\s*\/?>|\s)*$/si', '', $output);
+                    $suggestionsPayload = $parsed;
+                }
+            }
 
             if ($suggestionsPayload !== null) {
-                $responsedText = $cleanText;
-                $output = (string) preg_replace('/\s*(<br\s*\/?>)*\s*(```[\w]*\s*(<br\s*\/?>|\s)*)?\{"suggestions"\s*:\s*\[.*\]\s*\}\s*(```\s*)?(<br\s*\/?>|\s)*$/si', '', $output);
-
                 $this->emitSuggestions($suggestionsPayload, $main_message);
             }
 

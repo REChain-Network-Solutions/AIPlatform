@@ -646,6 +646,10 @@ function openaiSettingsSave() {
 		formData.append('enabled_gpt_image_1_5', $("#enabled_gpt_image_1_5").is(":checked") ? 1 : 0);
 	}
 
+	if ($('#enabled_gpt_image_2')) {
+		formData.append('enabled_gpt_image_2', $("#enabled_gpt_image_2").is(":checked") ? 1 : 0);
+	}
+
     $.ajax({
         type: "post",
         url: "/dashboard/admin/settings/openai-save",

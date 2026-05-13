@@ -3,7 +3,9 @@
 namespace App\Services\Ai\OpenAI\Image;
 
 use App\Helpers\Classes\Helper;
+use App\Services\Ai\OpenAI\Image\Support\GptImageParamNormalizer;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use OpenAI;
@@ -13,7 +15,7 @@ class CreateImageEditService
     private string $generateURL = 'https://api.openai.com/v1/images/edits';
 
     /**
-     * Supported models: dall-e-2, gpt-image-1, gpt-image-1.5
+     * Supported models: dall-e-2, gpt-image-1, gpt-image-1.5, gpt-image-2
      */
     private string $model = 'gpt-image-1';
 
@@ -120,14 +122,16 @@ class CreateImageEditService
         }
 
         $form = [
-            'image'           => $dataImage,
-            'model'           => $this->getModel(),
-            'prompt'          => $this->getPrompt(),
-            'n'               => 1,
-            'size'            => $this->getSize(),
-            'quality'         => $this->getQuality(),
-            'background'      => $this->getBackground(),
+            'image'      => $dataImage,
+            'model'      => $this->getModel(),
+            'prompt'     => $this->getPrompt(),
+            'n'          => 1,
+            'size'       => $this->getSize(),
+            'quality'    => $this->getQuality(),
+            'background' => $this->getBackground(),
         ];
+
+        $form = GptImageParamNormalizer::normalize($form);
 
         $mask = $this->resolveMask();
         if ($mask) {
@@ -143,6 +147,11 @@ class CreateImageEditService
     private function resolveImage(string $image): mixed
     {
         if (filter_var($image, FILTER_VALIDATE_URL)) {
+            $localHandle = $this->resolveSameOriginUrl($image);
+            if ($localHandle !== null) {
+                return $localHandle;
+            }
+
             return $this->downloadToTemp($image);
         }
 
@@ -168,6 +177,11 @@ class CreateImageEditService
         }
 
         if (filter_var($this->mask, FILTER_VALIDATE_URL)) {
+            $localHandle = $this->resolveSameOriginUrl($this->mask);
+            if ($localHandle !== null) {
+                return $localHandle;
+            }
+
             return $this->downloadToTemp($this->mask);
         }
 
@@ -186,6 +200,27 @@ class CreateImageEditService
     }
 
     /**
+     * If the URL points back to this same app, return a file handle on the
+     * local file instead of fetching over HTTP (avoids SSL issues on local certs).
+     *
+     * @return resource|null
+     */
+    private function resolveSameOriginUrl(string $url): mixed
+    {
+        $urlHost = parse_url($url, PHP_URL_HOST);
+        $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+
+        if (! $urlHost || ! $appHost || $urlHost !== $appHost) {
+            return null;
+        }
+
+        $path = parse_url($url, PHP_URL_PATH) ?: '';
+        $localPath = public_path(ltrim($path, '/'));
+
+        return file_exists($localPath) ? fopen($localPath, 'r') : null;
+    }
+
+    /**
      * Download a remote image to a temporary file and return a file handle.
      *
      * @return resource
@@ -195,7 +230,7 @@ class CreateImageEditService
         $extension = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'png';
         $tempFile = sys_get_temp_dir() . '/' . uniqid('img_') . '.' . $extension;
 
-        $contents = file_get_contents($url);
+        $contents = Http::timeout(60)->get($url)->body();
         file_put_contents($tempFile, $contents);
 
         return fopen($tempFile, 'r');

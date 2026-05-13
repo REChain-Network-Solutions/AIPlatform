@@ -11,6 +11,7 @@
 		"@angular-eslint/template-parser": "^17.2.1",
 		"@tailwindcss/forms": "^0.5.7",
 		"@tailwindcss/typography": "^0.5.12",
+		"@vitejs/plugin-react-swc": "^4.3.0",
 		"autoprefixer": "^10.4.14",
 		"axios": "^1.8.4",
 		"blade-formatter": "^1.42.2",
@@ -50,11 +51,15 @@
 		"@tiptap/extension-image": "^3.2.0",
 		"@tiptap/pm": "^3.2.0",
 		"@tiptap/starter-kit": "^3.2.0",
+		"@xyflow/react": "^12.10.2",
 		"lowlight": "^3.3.0",
 		"picmo": "^5.8.5",
 		"rampensau": "^2.0.3",
+		"react": "^19.2.5",
+		"react-dom": "^19.2.5",
 		"rt-client": "file:./rt-client-0.4.7.tgz",
 		"sortablejs": "^1.15.6",
-		"typed.js": "^2.1.0"
+		"typed.js": "^2.1.0",
+		"zustand": "^5.0.12"
 	}
 }

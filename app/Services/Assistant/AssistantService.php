@@ -345,6 +345,7 @@ class AssistantService
                 'gpt-5',
                 'gpt-image-1',
                 'gpt-image-1.5',
+                'gpt-image-2',
                 'gpt-3.5-turbo-instruct',
                 'gpt-3.5-turbo-instruct-0914',
             ];
