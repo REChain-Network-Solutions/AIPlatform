@@ -12,8 +12,8 @@
         @click.prevent="sidedrawerOpen = false"
     ></div>
     <div
-        {{ $attributes->twMergeFor('content-wrap', 'lqd-sidedrawer-content-wrap fixed bottom-0 end-0 top-0 z-[100] w-[min(420px,85vw)] translate-x-full overflow-hidden border-s bg-background transition duration-300 ease-out overscroll-contain') }}
-        :class="{ 'translate-x-0 shadow-lg shadow-black/5': sidedrawerOpen, 'translate-x-full shadow-none': !sidedrawerOpen }"
+        {{ $attributes->twMergeFor('content-wrap', 'lqd-sidedrawer-content-wrap fixed bottom-0 end-0 top-0 z-[100] w-[min(420px,85vw)] translate-x-full overflow-hidden overscroll-contain border-s bg-background transition duration-300 ease-out rtl:-translate-x-full') }}
+        :class="{ 'translate-x-0 shadow-lg shadow-black/5 rtl:translate-x-0': sidedrawerOpen, 'translate-x-full shadow-none rtl:-translate-x-full': !sidedrawerOpen }"
     >
         <div {{ $attributes->twMergeFor('content', 'lqd-sidedrawer-content h-full w-full overflow-y-auto overscroll-contain') }}>
             {{ $slot }}

@@ -938,6 +938,82 @@ class MenuService
                 'show_condition' => MarketplaceHelper::isRegistered('fashion-studio'),
             ],
 
+            'ext_ugc_dropdown' => [
+                'parent_key'       => null,
+                'key'              => 'ext_ugc_dropdown',
+                'route'            => 'dashboard.user.ugc-studio.index',
+                'label'            => 'UGC',
+                'data-name'        => null,
+                'icon'             => 'tabler-video',
+                'svg'              => null,
+                'order'            => 6,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.ugc-studio.*',
+                    'dashboard.user.ugc-factory.*',
+                    'dashboard.user.ugc-creator.*',
+                ],
+                'show_condition'   => MarketplaceHelper::isRegistered('ugc-factory')
+                    || MarketplaceHelper::isRegistered('ugc-creator'),
+            ],
+            'ext_ugc_studio' => [
+                'parent_key'       => 'ext_ugc_dropdown',
+                'key'              => 'ext_ugc_studio',
+                'route'            => 'dashboard.user.ugc-studio.index',
+                'label'            => 'Studio',
+                'data-name'        => null,
+                'icon'             => 'tabler-layout-dashboard',
+                'svg'              => null,
+                'order'            => 1,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.ugc-studio.*',
+                ],
+                'show_condition'   => Route::has('dashboard.user.ugc-studio.index'),
+            ],
+            'ext_ugc_factory' => [
+                'parent_key'       => 'ext_ugc_dropdown',
+                'key'              => 'ext_ugc_factory',
+                'route'            => 'dashboard.user.ugc-factory.index',
+                'label'            => 'Factory',
+                'data-name'        => null,
+                'icon'             => 'tabler-wand',
+                'svg'              => null,
+                'order'            => 2,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.ugc-factory.*',
+                ],
+                'show_condition'   => MarketplaceHelper::isRegistered('ugc-factory'),
+            ],
+            'ext_ugc_creator' => [
+                'parent_key'       => 'ext_ugc_dropdown',
+                'key'              => 'ext_ugc_creator',
+                'route'            => 'dashboard.user.ugc-creator.index',
+                'label'            => 'Creator',
+                'data-name'        => null,
+                'icon'             => 'tabler-movie',
+                'svg'              => null,
+                'order'            => 3,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.user.ugc-creator.*',
+                ],
+                'show_condition'   => MarketplaceHelper::isRegistered('ugc-creator'),
+            ],
+
             'ext_chatbot_customer_tag' => [
                 'parent_key'       => null,
                 'key'              => 'ext_chatbot_customer_tag',
@@ -2028,6 +2104,28 @@ class MenuService
                 'active_condition' => null,
                 'show_condition'   => Route::has('dashboard.user.ai-persona.index'),
             ],
+            'video_studio' => [
+                'parent_key'       => null,
+                'key'              => 'video_studio',
+                'route'            => 'dashboard.user.video-studio.index',
+                'route_slug'       => null,
+                'label'            => 'Video Studio',
+                'data-name'        => null,
+                'icon'             => 'tabler-layout-dashboard',
+                'svg'              => null,
+                'order'            => 19,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => false,
+                'active_condition' => null,
+                'show_condition'   => Route::has('dashboard.user.video-studio.index') && (
+                    Route::has('dashboard.user.ai-video-pro.index')
+                    || Route::has('dashboard.user.video-editor.index')
+                    || Route::has('dashboard.user.video-dubbing.index')
+                    || Route::has('dashboard.user.ai-captions.index')
+                ),
+            ],
             'ai_video_pro' => [
                 'parent_key'       => null,
                 'key'              => 'ai_video_pro',
@@ -2044,6 +2142,40 @@ class MenuService
                 'extension'        => true,
                 'active_condition' => false,
                 'show_condition'   => Route::has('dashboard.user.ai-video-pro.index'),
+            ],
+            'video_dubbing' => [
+                'parent_key'       => null,
+                'key'              => 'video_dubbing',
+                'route'            => 'dashboard.user.video-dubbing.index',
+                'route_slug'       => null,
+                'label'            => 'Video Dubbing',
+                'data-name'        => Introduction::AI_VIDEO_DUBBING,
+                'icon'             => 'tabler-language',
+                'svg'              => null,
+                'order'            => 20,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => false,
+                'show_condition'   => Route::has('dashboard.user.video-dubbing.index'),
+            ],
+            'ai_captions' => [
+                'parent_key'       => null,
+                'key'              => 'ai_captions',
+                'route'            => 'dashboard.user.ai-captions.index',
+                'route_slug'       => null,
+                'label'            => 'AI Captions',
+                'data-name'        => Introduction::AI_CAPTIONS,
+                'icon'             => 'tabler-quote',
+                'svg'              => null,
+                'order'            => 20,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => false,
+                'show_condition'   => Route::has('dashboard.user.ai-captions.index'),
             ],
             'ai_music' => [
                 'parent_key'       => null,
@@ -4340,6 +4472,40 @@ class MenuService
                 ],
                 'show_condition' => Route::has('dashboard.admin.openai.chat.pro.settings'),
             ],
+            'video_dubbing_settings_extension' => [
+                'parent_key'       => 'settings',
+                'key'              => 'video_dubbing_settings_extension',
+                'route'            => 'dashboard.admin.video-dubbing.settings',
+                'label'            => 'Video Dubbing Settings',
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 78,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.admin.video-dubbing.settings',
+                ],
+                'show_condition' => Route::has('dashboard.admin.video-dubbing.settings'),
+            ],
+            'ai_captions_settings_extension' => [
+                'parent_key'       => 'api_integration',
+                'key'              => 'ai_captions_settings_extension',
+                'route'            => 'dashboard.admin.ai-captions.settings',
+                'label'            => 'AI Captions',
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 78,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.admin.ai-captions.settings',
+                ],
+                'show_condition' => Route::has('dashboard.admin.ai-captions.settings'),
+            ],
             'ai_music_pro_settings_extension' => [
                 'parent_key'       => 'settings',
                 'key'              => 'ai_music_pro_settings_extension',
@@ -4791,6 +4957,44 @@ class MenuService
                 'show_condition' => MarketplaceHelper::isRegistered('fashion-studio'),
                 'is_admin'       => true,
             ],
+            'ext_ugc_factory_settings' => [
+                'parent_key'       => 'settings',
+                'key'              => 'ext_ugc_factory_settings',
+                'route'            => 'dashboard.admin.ugc-factory.settings',
+                'label'            => 'UGC Factory Settings',
+                'data-name'        => null,
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 80,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.admin.ugc-factory.settings',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ugc-factory'),
+                'is_admin'       => true,
+            ],
+            'ext_ugc_creator_settings' => [
+                'parent_key'       => 'settings',
+                'key'              => 'ext_ugc_creator_settings',
+                'route'            => 'dashboard.admin.ugc-creator.settings',
+                'label'            => 'UGC Creator Settings',
+                'data-name'        => null,
+                'icon'             => null,
+                'svg'              => null,
+                'order'            => 81,
+                'is_active'        => true,
+                'params'           => [],
+                'type'             => 'item',
+                'extension'        => true,
+                'active_condition' => [
+                    'dashboard.admin.ugc-creator.settings',
+                ],
+                'show_condition' => MarketplaceHelper::isRegistered('ugc-creator'),
+                'is_admin'       => true,
+            ],
         ]);
 
         return $menu;
@@ -4827,8 +5031,8 @@ class MenuService
             'ai_pdf', 'ai_vision', 'ai_speech_to_text', 'photo_studio_extension', 'ai_rewriter', 'ai_editor',
             'ai_code_generator', 'ai_youtube', 'ai_chat_image', 'ai_rss', 'ai_voiceover_clone', 'ai_web_chat_extension', 'ai_presentation', 'ext_fashion_studio_dropdown', 'ext_ai_photo_studio_dropdown',
             'ai_realtime_voice_chat', 'ai_social_media_extension', 'ai_detector_extension', 'ai_plagiarism_extension', 'ai_article_wizard', 'ai_voice_isolator', 'ext_chat_bot', 'ext_voice_chatbot', 'ext_social_media_dropdown',
-            'ext_ai_music_pro', 'ai_influencer', 'url_to_video', 'viral_clips', 'influencer_avatar', 'brand_voice', 'support', 'ai_chat_pro_image_chat', 'ai_image_pro',
-            'ext_social_media_automation',
+            'ext_ai_music_pro', 'ai_influencer', 'creative_suite', 'url_to_video', 'viral_clips', 'influencer_avatar', 'brand_voice', 'support', 'ai_chat_pro_image_chat', 'ai_image_pro', 'video_dubbing',
+            'ext_social_media_automation', 'ai_captions',
         ];
 
         $data = (new self)->generate();
@@ -4912,6 +5116,33 @@ class MenuService
                 'label'   => __('Creative Suite Annotations'),
                 'tooltip' => __('Allow users on this plan to use Creative Suite annotation tools (comment, region, replace text).'),
                 'icon'    => 'tabler-pencil',
+            ];
+        }
+
+        if (MarketplaceHelper::isRegistered('ugc-factory')) {
+            $result[] = [
+                'key'     => 'ugc_factory',
+                'label'   => __('UGC Factory'),
+                'tooltip' => __('Allow users on this plan to generate UGC-style lip-synced videos via UGC Factory.'),
+                'icon'    => 'tabler-wand',
+            ];
+        }
+
+        if (MarketplaceHelper::isRegistered('ugc-creator')) {
+            $result[] = [
+                'key'     => 'ugc_creator',
+                'label'   => __('UGC Creator'),
+                'tooltip' => __('Allow users on this plan to generate UGC-style videos from prompts and references via UGC Creator.'),
+                'icon'    => 'tabler-movie',
+            ];
+        }
+
+        if (MarketplaceHelper::isRegistered('video-editor')) {
+            $result[] = [
+                'key'     => 'video_editor',
+                'label'   => __('Video Editor'),
+                'tooltip' => __('Allow users on this plan to use the Video Editor.'),
+                'icon'    => 'tabler-video',
             ];
         }
 

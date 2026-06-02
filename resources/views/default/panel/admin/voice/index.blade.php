@@ -2,10 +2,12 @@
 
 @section('title', __('AI Voice Clone'))
 @section('titlebar_actions')
-    <x-button href="{{  (route('dashboard.user.voice.create')) }}">
-        <x-tabler-plus class="size-4" />
-        {{ __('Add New') }}
-    </x-button>
+    <div class="flex items-center gap-2">
+        <x-button href="{{  (route('dashboard.user.voice.create')) }}">
+            <x-tabler-plus class="size-4" />
+            {{ __('Add New') }}
+        </x-button>
+    </div>
 @endsection
 @section('content')
     <div class="py-10">

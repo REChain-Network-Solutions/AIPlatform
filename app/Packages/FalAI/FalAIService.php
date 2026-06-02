@@ -11,9 +11,11 @@ use App\Packages\FalAI\Models\Kling;
 use App\Packages\FalAI\Models\Kling25Turbo;
 use App\Packages\FalAI\Models\Kling26Pro;
 use App\Packages\FalAI\Models\KlingV3;
+use App\Packages\FalAI\Models\Seedance2;
 use App\Packages\FalAI\Models\Veed;
 use App\Packages\FalAI\Models\Veo3;
 use App\Packages\FalAI\Models\Veo31;
+use App\Packages\FalAI\Models\VideoBackgroundRemoval;
 use InvalidArgumentException;
 
 class FalAIService
@@ -46,6 +48,9 @@ class FalAIService
             EntityEnum::VEO_3_1_FIRST_LAST_FRAME_TO_VIDEO,
             EntityEnum::VEO_3_1_FIRST_LAST_FRAME_TO_VIDEO_FAST,
             EntityEnum::VEO_3_1_REFERENCE_TO_VIDEO => new Veo31($this->client),
+            EntityEnum::VEO_3_1_LITE_TEXT_TO_VIDEO,
+            EntityEnum::VEO_3_1_LITE_IMAGE_TO_VIDEO,
+            EntityEnum::VEO_3_1_LITE_FIRST_LAST_FRAME_TO_VIDEO => new Veo31($this->client),
             EntityEnum::KLING_2_5_TURBO_PRO_TTV,
             EntityEnum::KLING_2_5_TURBO_STANDARD_ITV,
             EntityEnum::KLING_2_5_TURBO_PRO_ITV    => new Kling25Turbo($this->client, $model),
@@ -59,6 +64,13 @@ class FalAIService
             EntityEnum::KLING_3_STANDARD_ITV       => new KlingV3($this->client, $model),
             EntityEnum::GROK_IMAGINE_VIDEO_TTV,
             EntityEnum::GROK_IMAGINE_VIDEO_ITV     => new GrokImagineVideo($this->client, $model),
+            EntityEnum::SEEDANCE_2_TTV,
+            EntityEnum::SEEDANCE_2_ITV,
+            EntityEnum::SEEDANCE_2_RTV,
+            EntityEnum::SEEDANCE_2_FAST_TTV,
+            EntityEnum::SEEDANCE_2_FAST_ITV,
+            EntityEnum::SEEDANCE_2_FAST_RTV        => new Seedance2($this->client, $model),
+            EntityEnum::VIDEO_BACKGROUND_REMOVAL   => new VideoBackgroundRemoval($this->client),
             default                                => throw new InvalidArgumentException("Model {$model->value} is not supported."),
 
         };

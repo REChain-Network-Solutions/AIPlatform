@@ -376,9 +376,11 @@ class UserController extends Controller
 
         if ($openai->type === 'voiceover' || $openai->type === 'isolator') {
             $elevenlabs = ElevenlabVoice::query()
-                ->select('voice_id', 'name')
+                ->select('voice_id', 'name', 'language')
                 ->where('status', 1)
-                ->where('user_id', Auth::id())
+                ->where(function ($query) {
+                    $query->where('user_id', Auth::id())->orWhereNull('user_id');
+                })
                 ->whereNotNull('voice_id')
                 ->get();
 
@@ -393,6 +395,11 @@ class UserController extends Controller
                     unset($elevenlabServiceVoice[$key]);
                 }
             }
+
+            $elevenlabServiceVoice = collect($elevenlabServiceVoice)
+                ->sortBy(fn ($voice) => in_array($voice['voice_id'], $userVoiceIds) ? 0 : 1)
+                ->values()
+                ->all();
         }
 
         $list = OpenAIGenerator::query()

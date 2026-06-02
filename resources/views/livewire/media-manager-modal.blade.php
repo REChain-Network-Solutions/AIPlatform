@@ -1,6 +1,6 @@
 @php use Illuminate\Support\Str; @endphp
 <div
-    class="fixed inset-0 z-[999] flex items-center justify-center bg-black/50"
+    class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50"
     id="mediaManagerModal"
     wire:ignore.self
     x-data="{ show: @entangle('showModal') }"

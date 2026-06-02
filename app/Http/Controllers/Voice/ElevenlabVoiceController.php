@@ -40,9 +40,10 @@ class ElevenlabVoiceController extends Controller
         }
 
         $data = $request->validate([
-            'name'   => 'required',
-            'status' => 'required',
-            'file'   => 'required|file|mimes:mp3,wav,ogg,flac,webm,mp4',
+            'name'     => 'required',
+            'status'   => 'required',
+            'language' => 'nullable|string|max:16',
+            'file'     => 'required|file|mimes:mp3,wav,ogg,flac,webm,mp4',
         ]);
 
         if ($request->hasFile('file')) {
@@ -81,8 +82,9 @@ class ElevenlabVoiceController extends Controller
         }
 
         $data = $request->validate([
-            'name'   => 'required',
-            'status' => 'required',
+            'name'     => 'required',
+            'status'   => 'required',
+            'language' => 'nullable|string|max:16',
         ]);
 
         $voice->update($data);

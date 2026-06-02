@@ -56,6 +56,33 @@
             </option>
         </x-forms.input>
 
+        @php
+            $voiceLanguages = [
+                'en' => 'English', 'es' => 'Spanish', 'fr' => 'French', 'de' => 'German',
+                'it' => 'Italian', 'pt' => 'Portuguese', 'pl' => 'Polish', 'nl' => 'Dutch',
+                'sv' => 'Swedish', 'da' => 'Danish', 'no' => 'Norwegian', 'fi' => 'Finnish',
+                'tr' => 'Turkish', 'ru' => 'Russian', 'uk' => 'Ukrainian', 'cs' => 'Czech',
+                'sk' => 'Slovak', 'ro' => 'Romanian', 'bg' => 'Bulgarian', 'el' => 'Greek',
+                'hu' => 'Hungarian', 'ar' => 'Arabic', 'he' => 'Hebrew', 'hi' => 'Hindi',
+                'bn' => 'Bengali', 'ta' => 'Tamil', 'te' => 'Telugu', 'ja' => 'Japanese',
+                'ko' => 'Korean', 'zh' => 'Chinese', 'id' => 'Indonesian', 'ms' => 'Malay',
+                'fil' => 'Filipino', 'vi' => 'Vietnamese', 'th' => 'Thai',
+            ];
+        @endphp
+        <x-forms.input
+            class:container="w-full"
+            id="language"
+            label="{{ __('Language') }}"
+            name="language"
+            size="lg"
+            type="select"
+        >
+            <option value="">{{ __('-- Select a language --') }}</option>
+            @foreach ($voiceLanguages as $code => $label)
+                <option value="{{ $code }}" @selected(old('language', $item?->language) === $code)>{{ $label }}</option>
+            @endforeach
+        </x-forms.input>
+
         @if (!$item?->id)
             <x-forms.input
                 class:container="w-full"

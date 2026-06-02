@@ -132,6 +132,18 @@
                             </option>
                         </select>
                     </div>
+
+                    @if (! $app_is_demo && ! empty($settings_two->elevenlabs_api_key))
+                        <div class="mb-3">
+                            <label class="form-label">{{ __('Voice Library') }}</label>
+                            <p class="text-2xs opacity-60 mb-2">
+                                {{ __('Browse public ElevenLabs voices and choose which ones are available to all users in voiceover, video editor, and chat features.') }}
+                            </p>
+                            @include('panel.admin.voice._shared-library-modal', [
+                                'triggerLabel' => __('Manage Voice Library'),
+                            ])
+                        </div>
+                    @endif
                 </x-card>
 
             </div>

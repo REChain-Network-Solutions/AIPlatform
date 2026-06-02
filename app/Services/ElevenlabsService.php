@@ -31,11 +31,21 @@ class ElevenlabsService
         $data = $response->json();
 
         return collect($data['voices'])->map(function ($voice) {
+            $labels = $voice['labels'] ?? [];
+
             return [
                 'voice_id'    => $voice['voice_id'],
                 'name'        => $voice['name'],
-                'preview_url' => $voice['preview_url'],
-                'category'    => $voice['category'],
+                'preview_url' => $voice['preview_url'] ?? null,
+                'category'    => $voice['category'] ?? null,
+                'description' => $voice['description'] ?? null,
+                'image_url'   => $voice['image_url'] ?? null,
+                'language'    => $labels['language'] ?? null,
+                'gender'      => $labels['gender'] ?? null,
+                'age'         => $labels['age'] ?? null,
+                'accent'      => $labels['accent'] ?? null,
+                'use_case'    => $labels['use_case'] ?? ($labels['use case'] ?? null),
+                'descriptive' => $labels['descriptive'] ?? null,
             ];
         });
     }

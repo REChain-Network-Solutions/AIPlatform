@@ -24,6 +24,7 @@ use App\Observer\Setting\SettingObserver;
 use App\Observer\Setting\SettingTwoObserver;
 use App\Observer\UserObserver;
 use App\Services\MemoryLimit;
+use App\Services\UGCStudio\UGCSourceRegistry;
 use Igaster\LaravelTheme\Facades\Theme;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Blade;
@@ -41,7 +42,10 @@ class AppServiceProvider extends ServiceProvider
 {
     public array $tables = [];
 
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->singleton(UGCSourceRegistry::class);
+    }
 
     public function boot(): void
     {

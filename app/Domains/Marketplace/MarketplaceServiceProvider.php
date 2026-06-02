@@ -11,6 +11,7 @@ use App\Domains\Marketplace\Services\ExtensionUninstallService;
 use App\Extensions\AdvancedImage\System\AdvancedImageServiceProvider;
 use App\Extensions\Affilate\System\AffilateServiceProvider;
 use App\Extensions\AiAvatar\System\AiAvatarServiceProvider;
+use App\Extensions\AiCaptions\System\AiCaptionsServiceProvider;
 use App\Extensions\AIChatPro\System\AIChatProServiceProvider;
 use App\Extensions\AIChatProDeepResearch\System\AIChatProDeepResearchServiceProvider;
 use App\Extensions\AiChatProEntityHighlight\System\AiChatProEntityHighlightServiceProvider;
@@ -60,6 +61,7 @@ use App\Extensions\CheckoutRegistration\System\RegistrationServiceProvider;
 use App\Extensions\Cloudflare\System\CloudflareServiceProvider;
 use App\Extensions\ContentManager\System\ContentManagerServiceProvider;
 use App\Extensions\CreativeSuite\System\CreativeSuiteServiceProvider;
+use App\Extensions\CreativeSuiteAITemplate\System\CreativeSuiteAITemplateServiceProvider;
 use App\Extensions\CreativeSuiteAnnotations\System\CreativeSuiteAnnotationsServiceProvider;
 use App\Extensions\Cryptomus\System\CryptomusServiceProvider;
 use App\Extensions\DemoExtension\System\DemoExtensionServiceProvider;
@@ -95,8 +97,13 @@ use App\Extensions\SeeDreamV4\System\SeeDreamV4ServiceProvider;
 use App\Extensions\SEOTool\System\SEOToolServiceProvider;
 use App\Extensions\SocialMedia\System\SocialMediaServiceProvider;
 use App\Extensions\SocialMediaAgent\System\SocialMediaAgentServiceProvider;
+use App\Extensions\SocialMediaAutomation\System\SocialMediaAutomationServiceProvider;
 use App\Extensions\SpeechifyTTS\System\SpeechifyServiceProvider;
+use App\Extensions\UGCCreator\System\UGCCreatorServiceProvider;
+use App\Extensions\UGCFactory\System\UGCFactoryServiceProvider;
 use App\Extensions\UrlToVideo\System\UrlToVideoServiceProvider;
+use App\Extensions\VideoDubbing\System\VideoDubbingServiceProvider;
+use App\Extensions\VideoEditor\System\VideoEditorServiceProvider;
 use App\Extensions\Wordpress\System\WordpressServiceProvider;
 use App\Extensions\Xero\System\XeroServiceProvider;
 use Illuminate\Routing\Router;
@@ -158,7 +165,7 @@ class MarketplaceServiceProvider extends ServiceProvider
         'midjourney'                    => MidjourneyServiceProvider::class,
         'social-media'                  => SocialMediaServiceProvider::class,
         'social-media-agent'            => SocialMediaAgentServiceProvider::class,
-		'social-media-automation'       => \App\Extensions\SocialMediaAutomation\System\SocialMediaAutomationServiceProvider::class,
+        'social-media-automation'       => SocialMediaAutomationServiceProvider::class,
         'blogpilot'                     => BlogPilotServiceProvider::class,
         'chatbot-agent'                 => ChatbotAgentServiceProvider::class,
         'chatbot-booking'               => ChatbotBookingServiceProvider::class,
@@ -207,10 +214,15 @@ class MarketplaceServiceProvider extends ServiceProvider
         'ai-chat-pro-memory'            => AIChatProMemoryServiceProvider::class,
         'ai-chat-pro-smart-image'       => AiChatProSmartImageServiceProvider::class,
         'fashion-studio'                => FashionStudioServiceProvider::class,
-        'creative-suite-ai-template'    => \App\Extensions\CreativeSuiteAITemplate\System\CreativeSuiteAITemplateServiceProvider::class,
+        'creative-suite-ai-template'    => CreativeSuiteAITemplateServiceProvider::class,
         'ai-photoshoot'                 => AIPhotoshootServiceProvider::class,
         'ai-chat-pro-entity-highlight'  => AiChatProEntityHighlightServiceProvider::class,
         'ai-chat-pro-highlight-to-ask'  => AiChatProHighlightToAskServiceProvider::class,
+        'video-editor'					             => VideoEditorServiceProvider::class,
+        'ugc-factory'                   => UGCFactoryServiceProvider::class,
+        'ugc-creator'                   => UGCCreatorServiceProvider::class,
+        'video-dubbing'                 => VideoDubbingServiceProvider::class,
+        'ai-captions'                   => AiCaptionsServiceProvider::class,
     ];
 
     public function register(): void

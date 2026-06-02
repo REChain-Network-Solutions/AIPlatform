@@ -292,6 +292,7 @@ enum EntityEnum: string
 
     case GAMMA_AI = 'gamma-ai';
     case VEED = 'veed';
+    case VEED_FABRIC = 'veed/fabric-1.0';
 
     case VEO_2 = 'veo2';
     case VEO_3 = 'veo3';
@@ -302,6 +303,9 @@ enum EntityEnum: string
     case VEO_3_1_IMAGE_TO_VIDEO = 'veo3.1/image-to-video';
     case VEO_3_1_IMAGE_TO_VIDEO_FAST = 'veo3.1/fast/image-to-video';
     case VEO_3_1_REFERENCE_TO_VIDEO = 'veo3.1/reference-to-video';
+    case VEO_3_1_LITE_TEXT_TO_VIDEO = 'veo3.1/lite';
+    case VEO_3_1_LITE_IMAGE_TO_VIDEO = 'veo3.1/lite/image-to-video';
+    case VEO_3_1_LITE_FIRST_LAST_FRAME_TO_VIDEO = 'veo3.1/lite/first-last-frame-to-video';
     case VEO_3_FAST = 'veo3-fast';
 
     case NANO_BANANA = 'nano-banana';
@@ -327,6 +331,18 @@ enum EntityEnum: string
     case SEEDREAM_4 = 'seedream/v4/text-to-image';
 
     case SEEDREAM_4_EDIT = 'seedream/v4/edit';
+
+    case SEEDANCE_2_TTV = 'bytedance/seedance-2.0/text-to-video';
+
+    case SEEDANCE_2_ITV = 'bytedance/seedance-2.0/image-to-video';
+
+    case SEEDANCE_2_RTV = 'bytedance/seedance-2.0/reference-to-video';
+
+    case SEEDANCE_2_FAST_TTV = 'bytedance/seedance-2.0/fast/text-to-video';
+
+    case SEEDANCE_2_FAST_ITV = 'bytedance/seedance-2.0/fast/image-to-video';
+
+    case SEEDANCE_2_FAST_RTV = 'bytedance/seedance-2.0/fast/reference-to-video';
 
     case FLUX_PRO = 'flux-pro';
 
@@ -417,6 +433,8 @@ enum EntityEnum: string
     case ANIMATEDIFF_V2V = 'animatediff-v2v';
 
     case FAST_ANIMATEDIFF_TURBO = 'fast-animatediff/turbo/video-to-video';
+
+    case VIDEO_BACKGROUND_REMOVAL = 'veed/video-background-removal';
 
     case BLACK_FOREST_LABS_FLUX_1_SCHNELL = 'black-forest-labs/FLUX.1-schnell';
 
@@ -729,9 +747,10 @@ enum EntityEnum: string
             // Gamma AI
             self::GAMMA_AI => __('Gamma AI'),
             // FAL AI
-            self::VEO_2                                  => __('Google VEO 2'),
+            self::VEO_2                                  => __('Veo 2'),
             self::IMAGEN_4                               => __('Google Imagen 4'),
             self::VEED                                   => __('Veed'),
+            self::VEED_FABRIC                            => __('Veed Fabric 1.0'),
             self::VEO_3                                  => __('Veo 3'),
             self::VEO_3_1_TEXT_TO_VIDEO                  => __('Veo 3.1 Text To Video'),
             self::VEO_3_1_TEXT_TO_VIDEO_FAST             => __('Fast Veo 3.1 Text To Video'),
@@ -740,6 +759,9 @@ enum EntityEnum: string
             self::VEO_3_1_IMAGE_TO_VIDEO                 => __('Veo 3.1 Image To Video'),
             self::VEO_3_1_IMAGE_TO_VIDEO_FAST            => __('Fast Veo 3.1 Image To Video'),
             self::VEO_3_1_REFERENCE_TO_VIDEO             => __('Veo 3.1 Reference To Video'),
+            self::VEO_3_1_LITE_TEXT_TO_VIDEO             => __('Veo 3.1 Lite Text To Video'),
+            self::VEO_3_1_LITE_IMAGE_TO_VIDEO            => __('Veo 3.1 Lite Image To Video'),
+            self::VEO_3_1_LITE_FIRST_LAST_FRAME_TO_VIDEO => __('Veo 3.1 Lite First Last Frame To Video'),
             self::VEO_3_FAST                             => __('Fast Veo 3'),
             self::KLING_VIDEO                            => __('Kling Video'),
             self::FLUX_PRO                               => __('Flux Pro'),
@@ -755,6 +777,12 @@ enum EntityEnum: string
             self::GROK_IMAGINE_VIDEO_ITV                 => __('Grok Imagine Video Image-to-Video'),
             self::SEEDREAM_4                             => __('SeeDream v4 '),
             self::SEEDREAM_4_EDIT                        => __('SeeDream v4 Edit'),
+            self::SEEDANCE_2_TTV                         => __('Seedance 2.0 Text-to-Video'),
+            self::SEEDANCE_2_ITV                         => __('Seedance 2.0 Image-to-Video'),
+            self::SEEDANCE_2_RTV                         => __('Seedance 2.0 Reference-to-Video'),
+            self::SEEDANCE_2_FAST_TTV                    => __('Seedance 2.0 Fast Text-to-Video'),
+            self::SEEDANCE_2_FAST_ITV                    => __('Seedance 2.0 Fast Image-to-Video'),
+            self::SEEDANCE_2_FAST_RTV                    => __('Seedance 2.0 Fast Reference-to-Video'),
             self::FLUX_PRO_KONTEXT_MAX_MULTI             => __('Flux Pro Kontext Max Multi'),
             self::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE         => __('Flux Pro Kontext Max Text to Image'),
             self::FLUX_PRO_KONTEXT                       => __('Flux Pro Kontext Max'),
@@ -785,6 +813,7 @@ enum EntityEnum: string
             self::COGVIDEOX_5B                           => __('Cogvideox 5B'),
             self::ANIMATEDIFF_V2V                        => __('Animatediff V2V'),
             self::FAST_ANIMATEDIFF_TURBO                 => __('Fast Animatediff Turbo'),
+            self::VIDEO_BACKGROUND_REMOVAL               => __('Video Background Removal'),
 
             self::AD_MARKETING_VIDEO         => __('Ad Marketing Video'),
             self::AD_MARKETING_VIDEO_TOPVIEW => __('Topview Ad Video'),
@@ -997,11 +1026,12 @@ enum EntityEnum: string
             // Gamma AI
             self::GAMMA_AI => EngineEnum::GAMMA_AI,
             // FAL AI
-            self::VEO_2, self::VEED,
+            self::VEO_2, self::VEED, self::VEED_FABRIC,
             self::VEO_3_1_TEXT_TO_VIDEO, self::VEO_3_1_TEXT_TO_VIDEO_FAST, self::VEO_3_1_FIRST_LAST_FRAME_TO_VIDEO, self::VEO_3_1_FIRST_LAST_FRAME_TO_VIDEO_FAST, self::VEO_3_1_IMAGE_TO_VIDEO, self::VEO_3_1_IMAGE_TO_VIDEO_FAST, self::VEO_3_1_REFERENCE_TO_VIDEO,
+            self::VEO_3_1_LITE_TEXT_TO_VIDEO, self::VEO_3_1_LITE_IMAGE_TO_VIDEO, self::VEO_3_1_LITE_FIRST_LAST_FRAME_TO_VIDEO,
             self::VEO_3, self::VEO_3_FAST,
             self::KLING_2_5_TURBO_PRO_TTV, self::KLING_2_5_TURBO_PRO_ITV, self::KLING_2_5_TURBO_STANDARD_ITV,
-            self::KLING_VIDEO, self::VIDEO_UPSCALER, self::COGVIDEOX_5B, self::ANIMATEDIFF_V2V, self::FAST_ANIMATEDIFF_TURBO, self::FLUX_PRO, self::NANO_BANANA, self::NANO_BANANA_EDIT, self::NANO_BANANA_PRO, self::NANO_BANANA_PRO_EDIT, self::NANO_BANANA_2, self::NANO_BANANA_2_EDIT, self::GROK_IMAGINE_IMAGE, self::GROK_IMAGINE_IMAGE_EDIT, self::GROK_IMAGINE_VIDEO_TTV, self::GROK_IMAGINE_VIDEO_ITV, self::SEEDREAM_4, self::SEEDREAM_4_EDIT, self::IMAGEN_4, self::FLUX_PRO_KONTEXT_MAX_MULTI, self::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE, self::FLUX_PRO_KONTEXT, self::FLUX_PRO_1_1, self::FLUX_REALISM, self::FLUX_SCHNELL, self::IDEOGRAM,
+            self::KLING_VIDEO, self::VIDEO_UPSCALER, self::COGVIDEOX_5B, self::ANIMATEDIFF_V2V, self::FAST_ANIMATEDIFF_TURBO, self::VIDEO_BACKGROUND_REMOVAL, self::FLUX_PRO, self::NANO_BANANA, self::NANO_BANANA_EDIT, self::NANO_BANANA_PRO, self::NANO_BANANA_PRO_EDIT, self::NANO_BANANA_2, self::NANO_BANANA_2_EDIT, self::GROK_IMAGINE_IMAGE, self::GROK_IMAGINE_IMAGE_EDIT, self::GROK_IMAGINE_VIDEO_TTV, self::GROK_IMAGINE_VIDEO_ITV, self::SEEDREAM_4, self::SEEDREAM_4_EDIT, self::SEEDANCE_2_TTV, self::SEEDANCE_2_ITV, self::SEEDANCE_2_RTV, self::SEEDANCE_2_FAST_TTV, self::SEEDANCE_2_FAST_ITV, self::SEEDANCE_2_FAST_RTV, self::IMAGEN_4, self::FLUX_PRO_KONTEXT_MAX_MULTI, self::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE, self::FLUX_PRO_KONTEXT, self::FLUX_PRO_1_1, self::FLUX_REALISM, self::FLUX_SCHNELL, self::IDEOGRAM,
             self::KLING, self::KLING_2_1, self::KLING_IMAGE, self::LUMA_DREAM_MACHINE, self::HAIPER, self::MINIMAX,
             self::KLING_2_6_PRO_TTV, self::KLING_2_6_PRO_ITV, self::KLING_2_6_PRO_MOTION_CONTROL, self::KLING_2_6_STANDARD_MOTION_CONTROL,
             self::KLING_3_PRO_TTV, self::KLING_3_PRO_ITV, self::KLING_3_STANDARD_TTV, self::KLING_3_STANDARD_ITV,
@@ -1210,8 +1240,12 @@ enum EntityEnum: string
             self::VEO_3_1_IMAGE_TO_VIDEO                 => FalAI\Veo31\Veo31ITVDriver::class,
             self::VEO_3_1_IMAGE_TO_VIDEO_FAST            => FalAI\Veo31\Veo31ITVFastDriver::class,
             self::VEO_3_1_REFERENCE_TO_VIDEO             => FalAI\Veo31\Veo31RTVDriver::class,
+            self::VEO_3_1_LITE_TEXT_TO_VIDEO             => FalAI\Veo31\Veo31LiteTTVDriver::class,
+            self::VEO_3_1_LITE_IMAGE_TO_VIDEO            => FalAI\Veo31\Veo31LiteITVDriver::class,
+            self::VEO_3_1_LITE_FIRST_LAST_FRAME_TO_VIDEO => FalAI\Veo31\Veo31LiteFLFTVDriver::class,
             self::KLING_VIDEO                            => FalAI\KlingVideoDriver::class,
             self::VEED                                   => FalAI\VeedDriver::class,
+            self::VEED_FABRIC                            => FalAI\VeedFabricDriver::class,
             self::FLUX_PRO                               => FalAI\FluxProDriver::class,
             self::NANO_BANANA                            => FalAI\NanoBananaDriver::class,
             self::NANO_BANANA_EDIT                       => FalAI\NanoBananaEditDriver::class,
@@ -1225,6 +1259,12 @@ enum EntityEnum: string
             self::GROK_IMAGINE_VIDEO_ITV                 => FalAI\GrokImagineVideoITVDriver::class,
             self::SEEDREAM_4                             => FalAI\SeeDream4Driver::class,
             self::SEEDREAM_4_EDIT                        => FalAI\SeeDream4EditDriver::class,
+            self::SEEDANCE_2_TTV                         => FalAI\Seedance2\Seedance2TTVDriver::class,
+            self::SEEDANCE_2_ITV                         => FalAI\Seedance2\Seedance2ITVDriver::class,
+            self::SEEDANCE_2_RTV                         => FalAI\Seedance2\Seedance2RTVDriver::class,
+            self::SEEDANCE_2_FAST_TTV                    => FalAI\Seedance2\Seedance2FastTTVDriver::class,
+            self::SEEDANCE_2_FAST_ITV                    => FalAI\Seedance2\Seedance2FastITVDriver::class,
+            self::SEEDANCE_2_FAST_RTV                    => FalAI\Seedance2\Seedance2FastRTVDriver::class,
             self::IMAGEN_4                               => FalAI\Imagen4Driver::class,
             self::FLUX_PRO_KONTEXT_MAX_MULTI             => FalAI\FluxProKontextMaxMultiDriver::class,
             self::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE         => FalAI\FluxProKontextTextToImageDriver::class,
@@ -1256,6 +1296,7 @@ enum EntityEnum: string
             self::COGVIDEOX_5B                           => FalAI\Cogvideox5bDriver::class,
             self::ANIMATEDIFF_V2V                        => FalAI\AnimatediffV2vDriver::class,
             self::FAST_ANIMATEDIFF_TURBO                 => FalAI\FastAnimatediffTurboDriver::class,
+            self::VIDEO_BACKGROUND_REMOVAL               => FalAI\VideoBackgroundRemovalDriver::class,
             // CREATIFY
             self::AD_MARKETING_VIDEO => Creatify\AdMarketingVideoDriver::class,
             // Topview
@@ -1454,12 +1495,15 @@ enum EntityEnum: string
             self::GROK_IMAGINE_VIDEO_TTV, self::GROK_IMAGINE_VIDEO_ITV => 0.5,
             self::SEEDREAM_4             => 0.03,
             self::FLUX_PRO_1_1, self::FLUX_REALISM, self::IMAGEN_4 => 0.04,
+            self::SEEDANCE_2_TTV, self::SEEDANCE_2_ITV, self::SEEDANCE_2_RTV => 0.5,
+            self::SEEDANCE_2_FAST_TTV, self::SEEDANCE_2_FAST_ITV, self::SEEDANCE_2_FAST_RTV => 0.35,
             self::NANO_BANANA_EDIT, self::SEEDREAM_4_EDIT, self::GROK_IMAGINE_IMAGE_EDIT => 0.4,
             self::NANO_BANANA_PRO_EDIT                   => 0.4,
             self::NANO_BANANA_2_EDIT                     => 0.4,
             self::GAMMA_AI                               => 0.01,
             self::VEO_2                                  => 2.5,
             self::VEED                                   => 0.35,
+            self::VEED_FABRIC                            => 0.50,
             self::VEO_3_1_TEXT_TO_VIDEO                  => 3.2,
             self::VEO_3_1_TEXT_TO_VIDEO_FAST             => 1.2,
             self::VEO_3_1_FIRST_LAST_FRAME_TO_VIDEO      => 3.2,
@@ -1467,6 +1511,9 @@ enum EntityEnum: string
             self::VEO_3_1_IMAGE_TO_VIDEO                 => 3.2,
             self::VEO_3_1_IMAGE_TO_VIDEO_FAST            => 1.2,
             self::VEO_3_1_REFERENCE_TO_VIDEO             => 3.2,
+            self::VEO_3_1_LITE_TEXT_TO_VIDEO             => 0.8,
+            self::VEO_3_1_LITE_IMAGE_TO_VIDEO            => 0.8,
+            self::VEO_3_1_LITE_FIRST_LAST_FRAME_TO_VIDEO => 0.8,
             self::VEO_3_FAST                             => 1.2,
             self::VEO_3                                  => 3.2,
             self::KLING_VIDEO                            => 1.4,
@@ -1481,7 +1528,7 @@ enum EntityEnum: string
             self::KLING_3_PRO_TTV, self::KLING_3_PRO_ITV => 1.4,
             self::KLING_3_STANDARD_TTV, self::KLING_3_STANDARD_ITV => 0.70,
             self::IDEOGRAM                          => 0.6,
-            self::VIDEO_UPSCALER, self::COGVIDEOX_5B, self::ANIMATEDIFF_V2V, self::FAST_ANIMATEDIFF_TURBO => 0.20,
+            self::VIDEO_UPSCALER, self::COGVIDEOX_5B, self::ANIMATEDIFF_V2V, self::FAST_ANIMATEDIFF_TURBO, self::VIDEO_BACKGROUND_REMOVAL => 0.20,
 
             // Creatify
             self::AD_MARKETING_VIDEO => 1.5,

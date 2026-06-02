@@ -73,7 +73,12 @@ class Plan extends Model
         'updated_at',
         'affiliate_status',
         'voice_call_seconds_limit',
+        'video_dubbing_seconds_limit',
         'deep_research_request_limit',
+        'ugc_videos_limit',
+        'ugc_creator_videos_limit',
+        'ai_captions_access',
+        'ai_captions_minutes',
     ];
 
     private ?array $mergedAiFeatures = null;
@@ -100,23 +105,25 @@ class Plan extends Model
     ];
 
     protected $casts = [
-        'open_ai_items'             => 'json',
-        'plan_ai_tools'             => 'json',
-        'plan_features'             => 'json',
-        'ai_models'                 => 'array',
-        'ai_models.*.credit'        => 'float',
-        'ai_models.*.isUnlimited'   => 'boolean',
-        'is_featured'               => 'boolean',
-        'is_team_plan'              => 'boolean',
-        'active'                    => 'boolean',
-        'user_api'                  => 'boolean',
-        'multi_model_support'       => 'boolean',
-        'model_council_support'     => 'boolean',
-        'chatbot_limit'             => 'integer',
-        'chatbot_human_agent'       => 'boolean',
-        'social_media_agent_limits' => 'array',
-        'blogpilot_limits'          => 'array',
+        'open_ai_items'                  => 'json',
+        'plan_ai_tools'                  => 'json',
+        'plan_features'                  => 'json',
+        'ai_models'                      => 'array',
+        'ai_models.*.credit'             => 'float',
+        'ai_models.*.isUnlimited'        => 'boolean',
+        'is_featured'                    => 'boolean',
+        'is_team_plan'                   => 'boolean',
+        'active'                         => 'boolean',
+        'user_api'                       => 'boolean',
+        'multi_model_support'            => 'boolean',
+        'model_council_support'          => 'boolean',
+        'chatbot_limit'                  => 'integer',
+        'chatbot_human_agent'            => 'boolean',
+        'social_media_agent_limits'      => 'array',
+        'blogpilot_limits'               => 'array',
         'social_media_automation_limits' => 'array',
+        'ai_captions_access'             => 'boolean',
+        'ai_captions_minutes'            => 'integer',
     ];
 
     protected static function boot(): void
@@ -386,7 +393,7 @@ class Plan extends Model
                 'agents'        => -1,
                 'monthly_posts' => -1,
             ],
-			'social_media_automation_limits' => [
+            'social_media_automation_limits' => [
                 'automations' => -1,
             ],
             'default_ai_model'                  => Helper::defaultWordModel()->slug(),
@@ -403,6 +410,11 @@ class Plan extends Model
             'last_date'                         => null,
             'voice_call_seconds_limit'          => -1,
             'deep_research_request_limit'       => 5,
+            'ugc_videos_limit'                  => -1,
+            'ugc_creator_videos_limit'          => -1,
+            'video_dubbing_seconds_limit'       => -1,
+            'ai_captions_access'                => true,
+            'ai_captions_minutes'               => 30,
         ];
     }
 

@@ -17,6 +17,10 @@ import { lqdCustomizer, lqdCustomizerFontPicker } from './components/customizer'
 import { lqdSidedrawer } from './components/sidedrawer';
 import elevenlabsRealtime from './components/realtime-frontend/elevenlabsRealtime';
 import tiptapEditor from './tiptapEditor';
+import liquidTabs from './components/tabs';
+import liquidSelectBox from './components/selectBox';
+import liquidDropArea from './components/dropArea';
+import liquidRecorder from './components/recorder';
 
 window.fetchEventSource = fetchEventSource;
 const darkMode = localStorage.getItem( 'lqdDarkMode' );
@@ -65,6 +69,10 @@ document.addEventListener( 'alpine:init', () => {
 	Alpine.data( 'modal', data => modal( data ) );
 	Alpine.data( 'clipboard', data => clipboard( data ) );
 	Alpine.data( 'assignViewCredits', data => assignViewCredits( data ) );
+	Alpine.data( 'liquidTabs', data => liquidTabs( data ) );
+	Alpine.data( 'liquidSelectBox', data => liquidSelectBox( data ) );
+	Alpine.data( 'liquidDropArea', data => liquidDropArea( data ) );
+	Alpine.data( 'liquidRecorder', data => liquidRecorder( data ) );
 
 	// Liquid Modal
 	Alpine.data('liquidModal', ({ disableModal = false, disableModalMessage = '' } = {}) => ({
@@ -85,8 +93,8 @@ document.addEventListener( 'alpine:init', () => {
 			this._modalOpen = value;
 		},
 
-		toggleModal() {
-			this.modalOpen = !this.modalOpen;
+		toggleModal(state) {
+			this.modalOpen = state !== undefined ? state : !this.modalOpen;
 		}
 	}));
 

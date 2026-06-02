@@ -65,12 +65,13 @@ class CheckTemplateTypeAndPlan
 
         // Wildcard route prefixes mapped to slugs
         $wildcardRoutes = [
-            'dashboard.user.fashion-studio.'   => 'ext_fashion_studio_dropdown',
-            'dashboard.user.ai-photoshoot.'    => 'ext_ai_photo_studio_dropdown',
-            'dashboard.user.ai-image-pro.'     => 'ai_image_pro',
-            'ai-image-pro.'                    => 'ai_image_pro',
-            'ai-chat-image.'                   => 'ai_chat_pro_image_chat',
+            'dashboard.user.fashion-studio.'              => 'ext_fashion_studio_dropdown',
+            'dashboard.user.ai-photoshoot.'               => 'ext_ai_photo_studio_dropdown',
+            'dashboard.user.ai-image-pro.'                => 'ai_image_pro',
+            'ai-image-pro.'                               => 'ai_image_pro',
+            'ai-chat-image.'                              => 'ai_chat_pro_image_chat',
             'dashboard.user.creative-suite-annotations.'  => 'creative_suite_annotations',
+            'dashboard.user.ugc-factory.'                 => 'ugc_factory',
         ];
 
         $slugsToSkip = ['ai_realtime_voice_chat'];
@@ -113,7 +114,7 @@ class CheckTemplateTypeAndPlan
             return ! ($isPremium === 1 || $isAccessTypePremium);
         }
         // now even if slug exist in route, openai table does not contain all slugs
-        $slugsNotInOpenAiGenerator = ['ai_image_pro', 'ai_chat_pro_image_chat', 'ext_fashion_studio_dropdown', 'ext_ai_photo_studio_dropdown', 'ai_chat_all', 'ai_editor', 'ai_writer', 'ai_social_media_extension', 'ext_chat_bot', 'brand_voice', 'photo_studio_extension', 'ext_ai_music_pro', 'ai_presentation', 'creative_suite_annotations'];
+        $slugsNotInOpenAiGenerator = ['ai_image_pro', 'ai_chat_pro_image_chat', 'ext_fashion_studio_dropdown', 'ext_ai_photo_studio_dropdown', 'ai_chat_all', 'ai_editor', 'ai_writer', 'ai_social_media_extension', 'ext_chat_bot', 'brand_voice', 'photo_studio_extension', 'ext_ai_music_pro', 'ai_presentation', 'creative_suite_annotations', 'ugc_factory'];
         // if openai record exist or slug is in the list of slugs that are not in openai generator
         if ($openAi || in_array($slug, $slugsNotInOpenAiGenerator, true)) {
             $setting = $this->settingSlug($slug);

@@ -111,6 +111,16 @@ if ( fs.existsSync( csAnnotationsEntry ) ) {
 	laravelInputs.push( csAnnotationsEntry );
 }
 
+const ugcFactoryEntry = 'app/Extensions/UGCFactory/resources/js/ugcFactory.js';
+if ( fs.existsSync( ugcFactoryEntry ) ) {
+	laravelInputs.push( ugcFactoryEntry );
+}
+
+const ugcCreatorEntry = 'app/Extensions/UGCCreator/resources/js/ugcCreator.js';
+if ( fs.existsSync( ugcCreatorEntry ) ) {
+	laravelInputs.push( ugcCreatorEntry );
+}
+
 if ( process.env.NODE_ENV === 'development' ) {
 	plugins.push( mkcert() );
 }

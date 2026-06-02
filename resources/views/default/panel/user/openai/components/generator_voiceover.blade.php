@@ -299,9 +299,9 @@
                             {{ __('Voice') }}
                         </span>
                     </label>
-                    <div class="flex items-end gap-2">
+                    <div class="flex min-w-0 items-end gap-2">
                         <x-dropdown.dropdown
-                            class="w-full grow"
+                            class="w-full grow min-w-0"
                             class:dropdown="w-[min(calc(100vw-30px),400px)] max-h-[min(75vh,500px)] overflow-y-auto bg-dropdown-background/90 px-2 pb-4 pt-0 shadow-[0_10px_15px_-3px_hsl(0_0%_0%/10%)] backdrop-blur-xl"
                             triggerType="click"
                             offsetY="0.25rem"
@@ -374,6 +374,10 @@
                                 </div>
                             </x-slot:dropdown>
                         </x-dropdown.dropdown>
+                        @include('panel.user.voice._library-modal', [
+                            'uid' => 'voiceover',
+                            'triggerLabel' => __('Library'),
+                        ])
                     </div>
                 </div>
 

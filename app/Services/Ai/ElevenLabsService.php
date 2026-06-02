@@ -45,6 +45,65 @@ class ElevenLabsService
      * @param  string|null  $collection_id
      * @param  bool|null  $include_total_count
      */
+    /**
+     * list shared (public library) voices
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function getSharedVoices(array $filters = []): JsonResponse
+    {
+        $allowed = [
+            'page_size', 'page', 'search', 'category', 'gender', 'age', 'accent',
+            'language', 'use_cases', 'descriptives', 'featured', 'min_notice_period_days',
+            'include_custom_rates', 'reader_app_enabled', 'owner_id', 'sort',
+        ];
+        $queryParams = $this->getParams(array_intersect_key($filters, array_flip($allowed)));
+
+        $url = $this->endpoint . 'v1/shared-voices';
+        $res = Http::withHeaders($this->getHeaders())->get($url, $queryParams);
+
+        return $this->statusJsonResponse($res, 'get shared voices error:');
+    }
+
+    /**
+     * add a shared voice to the account library
+     */
+    public function addSharedVoice(string $publicUserId, string $voiceId, string $newName): JsonResponse
+    {
+        $url = $this->endpoint . "v1/voices/add/{$publicUserId}/{$voiceId}";
+        $res = Http::withHeaders($this->getHeaders())->post($url, ['new_name' => $newName]);
+
+        if ($res->successful()) {
+            return response()->json([
+                'status'  => 'success',
+                'resData' => $res->json(),
+            ]);
+        }
+
+        Log::error('add shared voice error:', [$res->body()]);
+
+        $detail = $res->json('detail');
+        $code = is_array($detail) ? ($detail['code'] ?? $detail['type'] ?? null) : null;
+        $apiMessage = is_array($detail) ? ($detail['message'] ?? null) : (is_string($detail) ? $detail : null);
+
+        return response()->json([
+            'status'  => 'error',
+            'code'    => $code,
+            'message' => $apiMessage ?: __('Something went wrong!'),
+        ]);
+    }
+
+    /**
+     * delete a voice from the user's account library
+     */
+    public function deleteVoice(string $voiceId): JsonResponse
+    {
+        $url = $this->endpoint . "v1/voices/{$voiceId}";
+        $res = Http::withHeaders($this->getHeaders())->delete($url);
+
+        return $this->statusJsonResponse($res, 'delete voice error:');
+    }
+
     public function getListOfVoices(
         $next_page_token = null,
         $page_size = null,

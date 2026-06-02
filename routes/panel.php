@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\Config\PremiumAdvantagesController;
 use App\Http\Controllers\Admin\Config\SeoController;
 use App\Http\Controllers\Admin\Config\SmtpController;
 use App\Http\Controllers\Admin\Config\StorageController;
+use App\Http\Controllers\Admin\ElevenLabsLibraryController;
 use App\Http\Controllers\Admin\Finance\PlanController;
 use App\Http\Controllers\Admin\Finance\TokenPackPlanController;
 use App\Http\Controllers\Admin\Frontend\ChannelSettingController;
@@ -42,7 +43,9 @@ use App\Http\Controllers\Dashboard\SearchController;
 use App\Http\Controllers\Dashboard\SettingsController;
 use App\Http\Controllers\Dashboard\SupportController;
 use App\Http\Controllers\Dashboard\TranslateController;
+use App\Http\Controllers\Dashboard\UGCStudioController;
 use App\Http\Controllers\Dashboard\UserController;
+use App\Http\Controllers\Dashboard\VideoStudioController;
 use App\Http\Controllers\Dashboard\VipStatusController;
 use App\Http\Controllers\EmailTemplatesController;
 use App\Http\Controllers\ExportChatController;
@@ -108,6 +111,14 @@ Route::middleware(['auth', 'updateUserActivity'])
 
                 // premium support
                 Route::get('premium-support', PremiumSupportController::class)->name('premium-support');
+
+                // UGC Studio — centralized hub for outputs from UGC parent extensions
+                Route::get('ugc-studio', UGCStudioController::class)->name('ugc-studio.index');
+                Route::get('ugc-studio/outputs', [UGCStudioController::class, 'outputs'])->name('ugc-studio.outputs');
+
+                // Video Studio — centralized hub for outputs from AI video extensions
+                Route::get('video-studio', VideoStudioController::class)->name('video-studio.index');
+                Route::get('video-studio/outputs', [VideoStudioController::class, 'outputs'])->name('video-studio.outputs');
 
                 Route::controller(UserController::class)
                     ->prefix('api-keys')
@@ -685,6 +696,12 @@ Route::middleware(['auth', 'updateUserActivity'])
 
                     Route::get('/tts', [SettingsController::class, 'tts'])->name('tts');
                     Route::post('/tts-save', [SettingsController::class, 'ttsSave']);
+
+                    Route::prefix('/tts/elevenlabs/library')->name('tts.elevenlabs.library.')->group(function () {
+                        Route::get('/', [ElevenLabsLibraryController::class, 'index'])->name('index');
+                        Route::post('/add', [ElevenLabsLibraryController::class, 'add'])->name('add');
+                        Route::post('/remove', [ElevenLabsLibraryController::class, 'remove'])->name('remove');
+                    });
 
                     Route::get('/aimlapi', [SettingsController::class, 'aimlapi'])->name('aimlapi');
                     Route::post('/aimlapi-save', [SettingsController::class, 'aimlapiSave']);

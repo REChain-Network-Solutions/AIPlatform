@@ -181,9 +181,48 @@ class StreamService
                 }
                 $messageFix = $clean;
             }
+            // Early detection: model dropped ':::' prefix but emitted a bare `meta`
+            // marker followed by the entity JSON opener (`{` ... `"entities"`). Detect
+            // as soon as the START of the block is visible, strip from `meta` onward,
+            // and suppress all remaining chunks — same lifecycle as the `:::meta` path.
+            // Without this, chunks that split mid-JSON (e.g. ending at `"suggestions`)
+            // fall through to the generic suggestions branches, which only strip the
+            // closing JSON and leave `meta<br/>{"entities":[...]}` in the output.
+            elseif ($this->entityHighlightsEnabled
+                && preg_match('/(?:^|\s|<br\s*\/?>|>)meta\b\s*(?:<br\s*\/?>|\n)*\s*\{[\s\S]*?"entities"\s*:/si', $this->suggestionsBuffer)) {
+                $clean = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*(?:\*{3,}|-{3,}|_{3,})?\s*(<br\s*\/?>|\n)*\s*\bmeta\b\s*(?:<br\s*\/?>|\n)*\s*\{[\s\S]*$/si', '', $this->suggestionsBuffer);
+                $this->entityBlockSuppressed = true;
+                $this->suggestionsBuffer = '';
+                if ($clean === '') {
+                    return;
+                }
+                $messageFix = $clean;
+            }
+            // Fallback: bare `meta` tail that closes with `"suggestions":...}` shape
+            // without a preceding `{...entities` opener (legacy/partial variant).
+            elseif ($this->entityHighlightsEnabled
+                && preg_match('/(?:^|\s|<br\s*\/?>|>)meta\b\s*(?:<br\s*\/?>|\n)*\s*[\[\{\],}][\s\S]*?"suggestions"\s*:[\s\S]*?\}/si', $this->suggestionsBuffer)) {
+                $clean = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*\bmeta\b\s*(?:<br\s*\/?>|\n)*\s*[\[\{\],}][\s\S]*$/si', '', $this->suggestionsBuffer);
+                $this->entityBlockSuppressed = true;
+                $this->suggestionsBuffer = '';
+                if ($clean === '') {
+                    return;
+                }
+                $messageFix = $clean;
+            }
             // Check if buffer contains a complete suggestions JSON block ending with } — strip it
             elseif ($this->shouldGenerateSuggestions && preg_match('/\{\s*"[^"]+"/s', $this->suggestionsBuffer) && str_contains($this->suggestionsBuffer, '}')) {
-                $clean = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*,*\s*(```[\w]*\s*(<br\s*\/?>|\s)*)?\[?\s*\{[\s\S]*\}\s*\]?\s*,*\s*(```\s*)?(<br\s*\/?>|\s)*$/si', '', $this->suggestionsBuffer);
+                $clean = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*(?:\*{3,}|-{3,}|_{3,})?\s*(<br\s*\/?>|\n)*\s*,*\s*(?:\bmeta\b\s*(?:<br\s*\/?>|\n)*\s*)?(```[\w]*\s*(<br\s*\/?>|\s)*)?\[?\s*\{[\s\S]*\}\s*\]?\s*,*\s*(```\s*)?(<br\s*\/?>|\s)*$/si', '', $this->suggestionsBuffer);
+                $this->suggestionsBuffer = '';
+                if ($clean === '') {
+                    return;
+                }
+                $messageFix = $clean;
+            }
+            // Fallback: `"suggestions":` key appears without a leading `{` (malformed tail)
+            // and the buffer is closed by `}`. Strip the tail from the key onward.
+            elseif ($this->shouldGenerateSuggestions && preg_match('/["\']suggestions["\']\s*:/i', $this->suggestionsBuffer) && str_contains($this->suggestionsBuffer, '}')) {
+                $clean = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*[\[\{,]?\s*["\']?suggestions["\']?\s*:[\s\S]*$/si', '', $this->suggestionsBuffer);
                 $this->suggestionsBuffer = '';
                 if ($clean === '') {
                     return;
@@ -192,8 +231,16 @@ class StreamService
             }
             // Check if buffer ends with partial patterns worth waiting for — keep buffering
             elseif (preg_match('/:::\s*$/s', $this->suggestionsBuffer)
+                || ($this->entityHighlightsEnabled && preg_match('/^\s*(?:<br\s*\/?>|\n)*\s*\bmeta\b/si', $this->suggestionsBuffer) && ! str_contains($this->suggestionsBuffer, '}'))
                 || ($this->shouldGenerateSuggestions && preg_match('/\{\s*"?\s*$/s', $this->suggestionsBuffer))
-                || ($this->shouldGenerateSuggestions && str_contains($this->suggestionsBuffer, '{"') && ! str_contains($this->suggestionsBuffer, '}'))) {
+                || ($this->shouldGenerateSuggestions && str_contains($this->suggestionsBuffer, '{"') && ! str_contains($this->suggestionsBuffer, '}'))
+                || ($this->shouldGenerateSuggestions && preg_match('/["\']sugg[a-z]*$/i', $this->suggestionsBuffer))
+                // Markdown horizontal-rule separator (***, ---, ___) at end of buffer —
+                // the model sometimes emits this just before the suggestions/meta JSON tail.
+                // Wait one more chunk to see whether JSON follows; if not, the separator
+                // gets flushed as legitimate content on the next non-matching chunk.
+                || (($this->shouldGenerateSuggestions || $this->entityHighlightsEnabled)
+                    && preg_match('/(?:^|<br\s*\/?>|\n|\s)(?:\*{3,}|-{3,}|_{3,})\s*(?:<br\s*\/?>|\n|\s)*$/s', $this->suggestionsBuffer))) {
                 return;
             }
             // No pattern detected — flush buffer as normal content
@@ -1430,6 +1477,14 @@ class StreamService
                     }
                 }
 
+                if (request()?->input('realtime')
+                    && setting('default_realtime') === 'tool_calling') {
+                    $options['tools'] = array_merge($options['tools'] ?? [], [['type' => 'web_search_preview']]);
+                    if (! isset($options['tool_choice'])) {
+                        $options['tool_choice'] = 'auto';
+                    }
+                }
+
                 // Build instructions: skill instructions come first with strong framing
                 $instructionParts = [];
                 if (! empty($skillParts)) {
@@ -1625,6 +1680,13 @@ class StreamService
                                 'input'        => $nonSystemHistory,
                                 'temperature'  => 1.0,
                             ];
+                            // Pass tools with tool_choice=none so the model knows tools exist
+                            // but won't try to call them again. Without this, the model leaks
+                            // tool-routing tokens (e.g. "to=search_images …") as visible text
+                            // because the instructions still describe the tool but no tools
+                            // are advertised on this request.
+                            $fallbackOptions['tools'] = $tools;
+                            $fallbackOptions['tool_choice'] = 'none';
                             if ($baseInstructions !== '') {
                                 $fallbackOptions['instructions'] = $baseInstructions;
                             }
@@ -1963,6 +2025,18 @@ class StreamService
                         $skillTools = SkillToolService::anthropicTools($this->autoSkills);
                     }
 
+                    // Anthropic native web_search server tool when realtime + tool_calling.
+                    // Uses the broad-compat 20250305 version (works on Claude 3+). Skip on
+                    // Claude 2.x where the tool would 4xx.
+                    if (request()?->input('realtime')
+                        && setting('default_realtime') === 'tool_calling'
+                        && ! str_starts_with($driver->enum()->value, 'claude-2')) {
+                        $skillTools[] = [
+                            'type' => 'web_search_20250305',
+                            'name' => 'web_search',
+                        ];
+                    }
+
                     $data = $client->setStream(true)
                         ->setSystem($system)
                         ->setTools($skillTools)
@@ -2297,6 +2371,26 @@ class StreamService
                 $geminiSkillTools[] = SmartImageService::geminiToolDefinition();
             }
 
+            // Gemini native Google Search grounding when realtime + tool_calling mode is on.
+            // Gemini 3.x can combine grounding with function declarations; older Gemini
+            // versions cannot, so for them we drop function tools while grounding is active.
+            if (request()?->input('realtime')
+                && setting('default_realtime') === 'tool_calling') {
+                $modelValue = $driver->enum()->value;
+                $isGemini3Plus = str_starts_with($modelValue, 'gemini-3');
+                $isGemini15 = str_starts_with($modelValue, 'gemini-1.5');
+
+                $groundingTool = $isGemini15
+                    ? ['google_search_retrieval' => new stdClass]
+                    : ['google_search' => new stdClass];
+
+                if ($isGemini3Plus) {
+                    $geminiSkillTools[] = $groundingTool;
+                } else {
+                    $geminiSkillTools = [$groundingTool];
+                }
+            }
+
             try {
                 $response = $client
                     ->setHistory($newhistory)
@@ -2626,8 +2720,6 @@ class StreamService
                     $decodedLine = json_decode($line, true, 512, JSON_THROW_ON_ERROR);
 
                     if ($decodedLine === null || ! isset($decodedLine['candidates'])) {
-                        Log::info('Decoded line does not contain expected data: ' . json_encode($decodedLine));
-
                         continue;
                     }
                 } catch (JsonException $e) {
@@ -2880,6 +2972,19 @@ class StreamService
         // Strip malformed suggestions JSON — model sometimes outputs {"item1","item2"} without "suggestions": key
         $text = preg_replace('/\s*(?:<br\s*\/?>|\n)*\s*\{\s*"[^"]{2,60}"\s*,\s*"[^"]{2,60}"[\s\S]*?\}\s*$/i', '', $text);
 
+        // Strip malformed entity-meta tail where the model dropped the ':::' prefix and
+        // wrote a bare `meta], "suggestions":[...]}` fragment at the end of the response.
+        // Only matches the full malformed shape (meta + JSON terminator + "suggestions":
+        // key + closing }) so legitimate uses of the word "meta" in chat are preserved.
+        $text = preg_replace('/\s*(?:<br\s*\/?>|\n)*\s*(?:\*{3,}|-{3,}|_{3,})?\s*(?:<br\s*\/?>|\n)*\s*\bmeta\b\s*(?:<br\s*\/?>|\n)*\s*[\[\{\],}][\s\S]*?"suggestions"\s*:\s*\[[\s\S]*?\]\s*\}?\s*$/i', '', $text);
+
+        // Strip a trailing markdown horizontal rule (***, ---, ___) that the model
+        // sometimes emits as a visual separator before the (now-stripped) JSON tail.
+        $text = preg_replace('/\s*(?:<br\s*\/?>|\n)*\s*(?:\*{3,}|-{3,}|_{3,})\s*(?:<br\s*\/?>|\n)*\s*$/', '', $text);
+
+        // Strip a bare "suggestions":[...]} tail (no leading {) when present at end.
+        $text = preg_replace('/\s*(?:<br\s*\/?>|\n)*\s*[\[\{,]?\s*"suggestions"\s*:\s*\[[\s\S]*?\]\s*\}?\s*$/i', '', $text);
+
         // Strip bare "entity-highlights" text leaked from AI
         $text = preg_replace('/\s*(?:<br\s*\/?>|\n)*\s*entity[- ]?highlights?\s*$/i', '', $text);
 
@@ -2935,6 +3040,25 @@ class StreamService
                 $responsedText = $cleanText;
                 $output = (string) preg_replace('/^\s*(```[\w]*\s*(<br\s*\/?>|\s)*)?\{"title"\s*:\s*"[^"]*"[^}]*\}\s*(```\s*)?(<br\s*\/?>|\s)*/i', '', $output);
                 $this->emitChatTitle($chat, $title);
+
+                // When the streaming title regex (line 152) never matched (e.g. title JSON
+                // split across chunks), titleBuffer holds the entire response. The title was
+                // only recovered here at end-of-stream — so the answer body was never emitted
+                // as a data event and the UI bubble is empty until reload. Flush the cleaned
+                // remainder now. Strip meta/suggestions tails first so we don't leak JSON.
+                if ($bufferedContent !== '' && ! $this->entityBlockSuppressed) {
+                    $remainder = (string) preg_replace('/^\s*(```[\w]*\s*(<br\s*\/?>|\s)*)?\{"title"\s*:\s*"[^"]*"[^}]*\}\s*(```\s*)?(<br\s*\/?>|\s)*/i', '', $bufferedContent);
+                    $remainder = $this->stripSuggestionsJson($remainder);
+                    $remainder = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*:::\s*(meta|entity[- ]?highlights?)[\s\S]*$/i', '', $remainder);
+                    $remainder = rtrim($remainder);
+                    if ($remainder !== '') {
+                        echo PHP_EOL;
+                        echo "event: data\n";
+                        echo 'data: ' . $remainder;
+                        echo "\n\n";
+                        $this->safeFlush();
+                    }
+                }
             } elseif ($bufferedContent !== '') {
                 // No title found — flush the buffered content as data so it appears in the bubble
                 echo PHP_EOL;
@@ -2955,7 +3079,9 @@ class StreamService
 
         // Flush any remaining suggestions buffer content (strip headings/JSON/entity blocks, emit clean text)
         if ($this->suggestionsBuffer !== '') {
-            $buffered = (string) preg_replace('/\s*(<br\s*\/?>)*\s*,*\s*(```[\w]*\s*(<br\s*\/?>|\s)*)?\[?\s*\{[\s\S]*\}\s*\]?\s*,*\s*(```\s*)?(<br\s*\/?>|\s)*$/si', '', $this->suggestionsBuffer);
+            $buffered = (string) preg_replace('/\s*(<br\s*\/?>)*\s*(?:\*{3,}|-{3,}|_{3,})?\s*(<br\s*\/?>)*\s*,*\s*(?:\bmeta\b\s*(<br\s*\/?>|\n)*\s*)?(```[\w]*\s*(<br\s*\/?>|\s)*)?\[?\s*\{[\s\S]*\}\s*\]?\s*,*\s*(```\s*)?(<br\s*\/?>|\s)*$/si', '', $this->suggestionsBuffer);
+            // Strip trailing markdown horizontal rule with nothing after it.
+            $buffered = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*(?:\*{3,}|-{3,}|_{3,})\s*(<br\s*\/?>|\n)*\s*$/', '', $buffered);
             // Strip :::meta / :::entity-highlights blocks or bare label text
             $buffered = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*:::\s*(meta|entity[- ]?highlights?)[\s\S]*$/i', '', $buffered);
             $buffered = (string) preg_replace('/\s*(<br\s*\/?>|\n)*\s*:::?\s*(<br\s*\/?>|\n)*\s*(entity[- ]?highlights?\s*(<br\s*\/?>|\n)*\s*)?(\[?\{[\s\S]*"text"\s*:[\s\S]*)?$/i', '', $buffered);

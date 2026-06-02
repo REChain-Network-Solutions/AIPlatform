@@ -86,6 +86,9 @@
 						>
 							@lang('New')
 						</x-badge>
+						<x-info-tooltip
+							text="{{ __('Tool Calling uses the native web search tool of the active chat model: web_search_preview for OpenAI, google_search for Gemini 2.0+, web_search for Claude 3+. The model decides when to call it.') }}"
+						/>
 					</label>
 					<select
 						class="form-select"
@@ -98,11 +101,14 @@
 						</option>
 						@includeIf('perplexity::select-option')
 						<option value="openai">
-							{{ __('OpenAI') }}
+							{{ __('OpenAI (GPT-4o Search Preview)') }}
+						</option>
+						<option value="tool_calling">
+							{{ __('Tool Calling (Native — works with OpenAI, Gemini, etc.)') }}
 						</option>
 					</select>
 
-					<!-- OpenAI Model Selection - Shows only when OpenAI is selected -->
+					<!-- OpenAI Realtime Model Selection - Shows only when OpenAI provider is selected -->
 					<div
 						class="mt-3"
 						id="openai_realtime_model_container"
@@ -129,6 +135,7 @@
 							</option>
 						</select>
 					</div>
+
 				</div>
 			</div>
 			<div class="col-md-12">

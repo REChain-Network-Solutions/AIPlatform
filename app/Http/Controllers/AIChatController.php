@@ -1836,6 +1836,9 @@ class AIChatController extends Controller
             if ($category && $category?->chatbot_id) {
                 $openaiUse = true;
             }
+            $openaiToolWebSearch = $request->get('realtime')
+                && setting('default_realtime') === 'tool_calling';
+
             if ($ai_max_tokens !== null) {
                 if ($openaiUse) {
                     $gclient = new Client;
@@ -1844,14 +1847,21 @@ class AIChatController extends Controller
                         'Authorization' => 'Bearer ' . $openaiApiKey,
                     ];
 
+                    $chatParams = [
+                        'model'      => $driver->enum()->value,
+                        'messages'   => $history,
+                        'max_tokens' => $ai_max_tokens,
+                        'stream'     => true,
+                    ];
+
+                    if ($openaiToolWebSearch) {
+                        $chatParams['tools'] = [['type' => 'web_search_preview']];
+                        $chatParams['tool_choice'] = 'auto';
+                    }
+
                     $postData = [
                         'headers' => $headers,
-                        'json'    => OpenAiParamHelper::sanitizeChatParams([
-                            'model'      => $driver->enum()->value,
-                            'messages'   => $history,
-                            'max_tokens' => $ai_max_tokens,
-                            'stream'     => true,
-                        ]),
+                        'json'    => OpenAiParamHelper::sanitizeChatParams($chatParams),
                     ];
 
                     $response = $gclient->post($url, $postData);
@@ -1972,12 +1982,19 @@ class AIChatController extends Controller
                     }
                 }
             } elseif ($openaiUse) {
-                $stream = OpenAI::chat()->createStreamed(OpenAiParamHelper::sanitizeChatParams([
+                $chatParams = [
                     'model'             => $driver->enum()->value,
                     'messages'          => $history,
                     'presence_penalty'  => 0.6,
                     'frequency_penalty' => 0,
-                ]));
+                ];
+
+                if ($openaiToolWebSearch) {
+                    $chatParams['tools'] = [['type' => 'web_search_preview']];
+                    $chatParams['tool_choice'] = 'auto';
+                }
+
+                $stream = OpenAI::chat()->createStreamed(OpenAiParamHelper::sanitizeChatParams($chatParams));
                 $total_used_tokens = 0;
                 $output = '';
                 $responsedText = '';
@@ -2282,12 +2299,20 @@ class AIChatController extends Controller
                 }
                 if ($type === 'chat') {
                     try {
-                        $stream = OpenAI::chat()->createStreamed(OpenAiParamHelper::sanitizeChatParams([
+                        $chatParams = [
                             'model'             => $driver->enum()->value,
                             'messages'          => $history,
                             'presence_penalty'  => 0.6,
                             'frequency_penalty' => 0,
-                        ]));
+                        ];
+
+                        if ($request->get('realtime')
+                            && setting('default_realtime') === 'tool_calling') {
+                            $chatParams['tools'] = [['type' => 'web_search_preview']];
+                            $chatParams['tool_choice'] = 'auto';
+                        }
+
+                        $stream = OpenAI::chat()->createStreamed(OpenAiParamHelper::sanitizeChatParams($chatParams));
                         $total_used_tokens = 0;
                         $output = '';
                         $responsedText = '';

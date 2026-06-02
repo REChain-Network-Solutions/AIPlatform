@@ -192,26 +192,63 @@
     ];
 
 
-    const elevenLabsVoices = [
-        @if ($elevenlabServiceVoice !== [])
-            @foreach ($elevenlabServiceVoice as $voice)
-                {
-                    "voice_id": "{{ $voice['voice_id'] }}",
-                    "name": "{{ $voice['name'] }}",
-                    "preview_url": "{{ $voice['preview_url'] }}",
-                },
-            @endforeach
-        @endif
+    const elevenLabsVoices = (function () {
+        const list = [
+            @if ($elevenlabServiceVoice !== [])
+                @foreach ($elevenlabServiceVoice as $voice)
+                    {
+                        "voice_id": "{{ $voice['voice_id'] }}",
+                        "name": "{{ $voice['name'] }}",
+                        "preview_url": "{{ $voice['preview_url'] ?? '' }}",
+                        "category": @json($voice['category'] ?? null),
+                        "language": @json($voice['language'] ?? null),
+                        "description": @json($voice['description'] ?? null),
+                        "image_url": @json($voice['image_url'] ?? null),
+                        "gender": @json($voice['gender'] ?? null),
+                        "age": @json($voice['age'] ?? null),
+                        "accent": @json($voice['accent'] ?? null),
+                        "use_case": @json($voice['use_case'] ?? null),
+                        "descriptive": @json($voice['descriptive'] ?? null),
+                    },
+                @endforeach
+            @endif
 
-        @if ($elevenlabs)
-            @foreach ($elevenlabs as $voice)
-                {
-                    "voice_id": "{{ $voice->voice_id }}",
-                    "name": "{{ $voice->name }}",
-                },
-            @endforeach
-        @endif
-    ];
+            @if ($elevenlabs)
+                @foreach ($elevenlabs as $voice)
+                    {
+                        "voice_id": "{{ $voice->voice_id }}",
+                        "name": "{{ $voice->name }}",
+                        "language": @json($voice->language ?? null),
+                    },
+                @endforeach
+            @endif
+        ];
+        const seen = new Map();
+        list.forEach((v) => {
+            if (!v || !v.voice_id) return;
+            const existing = seen.get(v.voice_id);
+            if (!existing) {
+                seen.set(v.voice_id, { ...v });
+                return;
+            }
+            // Merge so neither source loses metadata.
+            seen.set(v.voice_id, {
+                ...existing,
+                ...v,
+                preview_url: existing.preview_url || v.preview_url || '',
+                language: existing.language || v.language || null,
+                category: existing.category || v.category || null,
+                description: existing.description || v.description || null,
+                image_url: existing.image_url || v.image_url || null,
+                gender: existing.gender || v.gender || null,
+                age: existing.age || v.age || null,
+                accent: existing.accent || v.accent || null,
+                use_case: existing.use_case || v.use_case || null,
+                descriptive: existing.descriptive || v.descriptive || null,
+            });
+        });
+        return Array.from(seen.values());
+    })();
 
     const voicesData = {
         "af-ZA": [{
@@ -3875,6 +3912,9 @@
     $(document).ready(function() {
         "use strict";
 
+        window.elevenLabsVoices = elevenLabsVoices;
+        window.populateVoiceSelect = populateVoiceSelect;
+
         populateVoiceSelect();
         populatePaceSelect();
 
@@ -3923,7 +3963,11 @@
                 if (@json($settings_two->feature_tts_elevenlabs) == true) {
                     const playButton = $('#playVoiceButton');
                     if (allowedElevenLabsList.includes(selectedLanguage)) {
-                        elevenLabsVoices.forEach(option => {
+                        const langPrefix = (selectedLanguage || '').split('-')[0].toLowerCase();
+                        elevenLabsVoices.filter(option => {
+                            if (!option.language) return false;
+                            return String(option.language).toLowerCase().split(/[-_]/)[0] === langPrefix;
+                        }).forEach(option => {
                             $("<option></option>")
                                 .val(option.voice_id)
                                 .text(option.name)
@@ -4262,6 +4306,35 @@
                 }));
             },
 
+            hasVoicesForLanguage(value) {
+                if (!value) return false;
+                const googleEnabled = @json((bool) ($settings_two->feature_tts_google ?? false));
+                const openaiEnabled = @json((bool) ($settings_two->feature_tts_openai ?? false));
+                const elevenEnabled = @json((bool) ($settings_two->feature_tts_elevenlabs ?? false));
+
+                if (googleEnabled && typeof voicesData !== 'undefined'
+                    && Array.isArray(voicesData[value]) && voicesData[value].length) {
+                    return true;
+                }
+
+                if (openaiEnabled && typeof allowedOpenAIList !== 'undefined'
+                    && allowedOpenAIList.includes(value)) {
+                    return true;
+                }
+
+                if (elevenEnabled && typeof allowedElevenLabsList !== 'undefined'
+                    && allowedElevenLabsList.includes(value)
+                    && typeof elevenLabsVoices !== 'undefined' && Array.isArray(elevenLabsVoices)) {
+                    const langPrefix = value.split('-')[0].toLowerCase();
+                    return elevenLabsVoices.some((v) => {
+                        if (!v || !v.language) return false;
+                        return String(v.language).toLowerCase().split(/[-_]/)[0] === langPrefix;
+                    });
+                }
+
+                return false;
+            },
+
             refreshVoices() {
                 this.voiceOptions = Array.from(this._voiceEl.options).map((o) => ({
                     value: o.value,
@@ -4272,9 +4345,10 @@
             },
 
             get filteredLanguages() {
+                const available = this.languageOptions.filter((o) => this.hasVoicesForLanguage(o.value));
                 const query = (this.languageQuery || '').trim().toLowerCase();
-                if (!query) return this.languageOptions;
-                return this.languageOptions.filter((o) => {
+                if (!query) return available;
+                return available.filter((o) => {
                     const haystack = [o.label, o.value, o.language, o.abbr]
                         .filter(Boolean)
                         .join(' ')

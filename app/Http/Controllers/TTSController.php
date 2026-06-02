@@ -123,7 +123,7 @@ class TTSController extends Controller
             try {
                 $audioContent = $this->processSpeech($speech, $azureService, $speechifyService);
             } catch (ApiException|GuzzleException $e) {
-                return $this->sendErrorResponse(__('Failed to connect to the AI service') . ': ' . $e->getMessage());
+                return $this->sendErrorResponse($this->friendlyTtsErrorMessage($e));
             }
 
             $resAudio .= $audioContent;
@@ -135,6 +135,45 @@ class TTSController extends Controller
         $this->saveSpeechRecord($user, $request, $audioName, $wordCount, $langsAndVoices);
 
         return $this->buildResponse($request, $audioName, $user);
+    }
+
+    private function friendlyTtsErrorMessage(Throwable $e): string
+    {
+        $body = null;
+        if (method_exists($e, 'getResponse') && $e->getResponse()) {
+            $body = (string) $e->getResponse()->getBody();
+        }
+
+        $detail = null;
+        $code = null;
+        if ($body) {
+            $decoded = json_decode($body, true);
+            if (is_array($decoded) && isset($decoded['detail'])) {
+                $d = $decoded['detail'];
+                if (is_array($d)) {
+                    $code = $d['code'] ?? ($d['type'] ?? null);
+                    $detail = $d['message'] ?? null;
+                } else {
+                    $detail = is_string($d) ? $d : null;
+                }
+            }
+        }
+
+        $isAdmin = Auth::check() && Auth::user()->isAdmin();
+
+        if ($code === 'paid_plan_required' || $code === 'payment_required') {
+            if ($isAdmin) {
+                return __('ElevenLabs rejected the request: a paid plan is required to use library voices via the API. Please upgrade your ElevenLabs subscription or remove library voices from this account.') . ($detail ? ' (' . $detail . ')' : '');
+            }
+
+            return __('This voice is not available right now. Please choose another voice or try again later.');
+        }
+
+        if ($isAdmin) {
+            return __('Failed to connect to the AI service') . ': ' . ($detail ?: $e->getMessage());
+        }
+
+        return __('We could not generate the audio right now. Please try again in a moment.');
     }
 
     /**

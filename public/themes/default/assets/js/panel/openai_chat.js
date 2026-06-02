@@ -999,31 +999,31 @@ function formatString(string, options = {}) {
 	});
 
 	// Add a renderer rule to handle emphasize and strong markup at the end of a string without closing markers
-	// renderer.use( function ( md ) {
-	// 	md.core.ruler.after( 'inline', 'fix_unclosed_markup', function ( state ) {
-	// 		state.tokens.forEach( function ( blockToken ) {
-	// 			if ( blockToken.type !== 'inline' ) return;
+	renderer.use( function ( md ) {
+		md.core.ruler.after( 'inline', 'fix_unclosed_markup', function ( state ) {
+			state.tokens.forEach( function ( blockToken ) {
+				if ( blockToken.type !== 'inline' ) return;
 
-	// 			blockToken.children.forEach( ( token, idx ) => {
-	// 				const { content } = token;
+				blockToken.children.forEach( ( token, idx ) => {
+					const { content } = token;
 
-	// 				// Check for unclosed markup at the end of the content
-	// 				if ( token.type === 'text' ) {
-	// 					// Replace multiple patterns in sequence
-	// 					let newContent = content;
+					// Check for unclosed markup at the end of the content
+					if ( token.type === 'text' ) {
+						// Replace multiple patterns in sequence
+						let newContent = content;
 
-	// 					// Remove trailing *** (three or more asterisks)
-	// 					newContent = newContent.replace( /\*{3,}$/, '' );
+						// Remove trailing *** (three or more asterisks)
+						newContent = newContent.replace( /\*{3,}$/, '' );
 
-	// 					// Update content if modified
-	// 					if ( newContent !== content ) {
-	// 						token.content = newContent;
-	// 					}
-	// 				}
-	// 			} );
-	// 		} );
-	// 	} );
-	// } );
+						// Update content if modified
+						if ( newContent !== content ) {
+							token.content = newContent;
+						}
+					}
+				} );
+			} );
+		} );
+	} );
 
 	let renderedString = renderer.render(renderer.utils.unescapeAll(string));
 

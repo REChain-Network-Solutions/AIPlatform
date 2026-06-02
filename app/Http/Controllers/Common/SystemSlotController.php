@@ -70,7 +70,7 @@ class SystemSlotController extends Controller
             return response('Not found.', 404);
         }
 
-        return view('admin.system-slot', [
+        return view('system-slot', [
             'slots' => self::SLOT_LABELS,
         ]);
     }

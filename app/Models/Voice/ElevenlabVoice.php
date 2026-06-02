@@ -10,6 +10,7 @@ class ElevenlabVoice extends Model
         'user_id',
         'name',
         'voice_id',
+        'language',
         'path',
         'status',
     ];

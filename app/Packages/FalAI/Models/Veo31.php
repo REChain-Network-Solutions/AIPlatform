@@ -19,8 +19,8 @@ class Veo31 implements TextToVideoModelInterface
      * Submit task to generate the video
      *
      * Supported modes with their endpoints:
-     * - text-to-video: fal-ai/veo3.1/text-to-video
-     * - text-to-video-fast: fal-ai/veo3.1/fast/text-to-video
+     * - text-to-video: fal-ai/veo3.1 (parent app path, no sub-endpoint)
+     * - text-to-video-fast: fal-ai/veo3.1/fast (parent path, no sub-endpoint)
      * - first-last-frame-to-video: fal-ai/veo3.1/first-last-frame-to-video
      * - first-last-frame-to-video-fast: fal-ai/veo3.1/fast/first-last-frame-to-video
      * - image-to-video: fal-ai/veo3.1/image-to-video
@@ -75,10 +75,11 @@ class Veo31 implements TextToVideoModelInterface
      */
     protected function buildEndpoint(string $mode): string
     {
-        if (! str_starts_with($mode, 'fal-ai/')) {
-            $mode = "fal-ai/$mode";
-        }
-
-        return $mode;
+        // text-to-video variants live at the parent app path on fal, not under /text-to-video.
+        return match ($mode) {
+            'veo3.1/text-to-video'      => 'fal-ai/veo3.1',
+            'veo3.1/fast/text-to-video' => 'fal-ai/veo3.1/fast',
+            default                     => str_starts_with($mode, 'fal-ai/') ? $mode : "fal-ai/$mode",
+        };
     }
 }

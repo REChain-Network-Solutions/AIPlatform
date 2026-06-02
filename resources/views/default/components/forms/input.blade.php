@@ -9,7 +9,7 @@
 		dark:focus:ring-foreground/10';
     $input_checkbox_custom_wrapper_base_class = 'lqd-input-checkbox-custom-wrap inline-flex items-center justify-center size-[18px] shrink-0 rounded-full bg-foreground/10 text-heading-foreground bg-center bg-no-repeat
 		peer-checked:bg-primary/[7%] peer-checked:text-primary';
-    $label_base_class = 'lqd-input-label flex cursor-pointer items-center gap-2 text-2xs font-medium leading-none text-label';
+    $label_base_class = 'lqd-input-label flex cursor-pointer items-center gap-2 text-2xs font-medium leading-none text-label transition';
     $label_extra_base_class = 'ms-auto';
 
     $variations = [
@@ -85,7 +85,10 @@
     @if (!empty($label) || ($type === 'checkbox' || $type === 'radio'))
         <label
             {{ $attributes->withoutTwMergeClasses()->twMergeFor('label', $label_base_class, $attributes->get('class:label')) }}
-            for={{ $id }}
+            @if ($label instanceof \Illuminate\View\ComponentSlot)
+                {{ $label->attributes->whereDoesntStartWith('class') }}
+            @endif
+			for="{{ $id }}"
         >
             {{-- Checkbox and radio --}}
             @if ($type === 'checkbox' || $type === 'radio')

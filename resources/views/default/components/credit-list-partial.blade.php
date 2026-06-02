@@ -37,5 +37,20 @@
                 </td>
             </tr>
         @endforeach
+
+        @includeIf('video-dubbing::partials.credit-list-row', [
+            'plan' => $plan ?? null,
+            'user' => $user ?? null,
+        ])
+
+        @includeIf('ugc-creator::partials.credit-list-row', [
+            'plan' => $plan ?? null,
+            'user' => $user ?? null,
+        ])
+
+        @includeIf('ai-captions::partials.credit-list-row', [
+            'plan' => $plan ?? null,
+            'user' => $user ?? null,
+        ])
     </tbody>
 </table>

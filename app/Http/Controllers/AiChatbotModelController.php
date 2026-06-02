@@ -114,7 +114,7 @@ class AiChatbotModelController extends Controller
             }
 
             $safeEngineKey = preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $engineKey);
-            $extension = $file->getClientOriginalExtension() ?: 'png';
+            $extension = ($file->guessExtension() ?? $file->getClientOriginalExtension()) ?: 'png';
             $fileName = $safeEngineKey . '_logo_' . time() . '.' . $extension;
 
             $file->move($uploadDirAbsolute, $fileName);
