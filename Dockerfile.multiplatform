@@ -2,7 +2,7 @@
 # Supports building for multiple architectures and deployment targets
 
 # Base stage with common dependencies
-FROM node:25-alpine AS base
+FROM node:26-alpine AS base
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -107,7 +107,7 @@ EXPOSE 4001 5001 8080
 CMD ["ipfs", "daemon", "--migrate"]
 
 # Edge computing node (lightweight)
-FROM node:25-alpine AS edge-node
+FROM node:26-alpine AS edge-node
 RUN apk add --no-cache curl
 WORKDIR /app
 COPY --from=production-base /app/dist ./
