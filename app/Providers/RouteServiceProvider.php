@@ -11,6 +11,7 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -28,6 +29,45 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware([
                 'web',  ViewSharedMiddleware::class, NewExtensionInstalled::class,
             ])->group(base_path('routes/web.php'));
+        });
+
+        $this->app->booted(function (): void {
+            foreach (Route::getRoutes() as $route) {
+                $uri = $route->uri();
+
+                if (Str::is([
+                    'translations/lang/update/*',
+                    'translations/lang/update-all',
+                    'translations/lang-save',
+                ], $uri)) {
+                    $route->middleware(['auth', 'admin', 'throttle:30,1']);
+                }
+
+                if (Str::is([
+                    'image/upload',
+                    'images/upload',
+                    'files/upload',
+                    'pdf/getContent',
+                    'rss/fetch',
+                ], $uri)) {
+                    $route->middleware(['auth', 'throttle:30,1']);
+                }
+
+                if (Str::is([
+                    'dashboard/*',
+                    'ai-image-pro/*',
+                    'ai-chat-pro-memory/*',
+                    'chatbot-voice/checkVoiceBalance',
+                    'share/link',
+                    'broadcasting/auth',
+                ], $uri)) {
+                    $route->middleware('auth');
+                }
+
+                if (Str::is('dashboard/admin/*', $uri)) {
+                    $route->middleware('admin');
+                }
+            }
         });
     }
 

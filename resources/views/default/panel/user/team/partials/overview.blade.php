@@ -45,6 +45,15 @@
                     </span>
 					<b>{{ $app_is_demo ? 2 : $team->allow_seats }}</b>
 				</p>
+				@if ($team->isSharedCreditTeam())
+					<div class="mt-3">
+						<p class="mb-1 text-xs text-foreground/60">{{ __('Team Credit Pool') }}</p>
+						<p class="text-2xl font-bold text-primary">
+							@formatNumber($team->shared_credits)
+							<span class="text-sm font-normal text-foreground/50">{{ __('credits') }}</span>
+						</p>
+					</div>
+				@endif
 				<x-credit-list
 					class="pt-2"
 					:team="$team"

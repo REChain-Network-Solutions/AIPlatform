@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace App\Domains\Entity\Drivers\AiMlMinimax;
 
 use App\Domains\Entity\BaseDriver;
-use App\Domains\Entity\Concerns\Calculate\HasTextToSpeech;
-use App\Domains\Entity\Concerns\Input\HasInputVoice;
-use App\Domains\Entity\Contracts\Calculate\WithTextToSpeechInterface;
-use App\Domains\Entity\Contracts\Input\WithInputVoiceInterface;
+use App\Domains\Entity\Concerns\Calculate\HasMinutes;
+use App\Domains\Entity\Concerns\Input\HasInputMinute;
+use App\Domains\Entity\Contracts\Calculate\WithMinuteInterface;
+use App\Domains\Entity\Contracts\Input\WithInputMinuteInterface;
 use App\Domains\Entity\Enums\EntityEnum;
 
-class Music01Driver extends BaseDriver implements WithInputVoiceInterface, WithTextToSpeechInterface
+class Music01Driver extends BaseDriver implements WithInputMinuteInterface, WithMinuteInterface
 {
-    use HasInputVoice;
-    use HasTextToSpeech;
+    use HasInputMinute;
+    use HasMinutes;
 
     public function enum(): EntityEnum
     {

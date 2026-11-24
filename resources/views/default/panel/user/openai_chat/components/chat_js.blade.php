@@ -59,6 +59,12 @@
         ) {
             $template = 'social-media-agent';
         }
+        if (
+            \App\Helpers\Classes\MarketplaceHelper::isRegistered('crm') &&
+            str_starts_with($currentPath, '/dashboard/user/crm/assistant')
+        ) {
+            $template = 'crm-assistant';
+        }
     @endphp
     <script>
         window.addEventListener("load", (event) => {

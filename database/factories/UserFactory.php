@@ -19,4 +19,12 @@ class UserFactory extends Factory
             'entity_credits' => User::getFreshCredits(),
         ];
     }
+
+    public function sharedCredit(float $balance = 1000.0): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'credit_system_type' => 'shared',
+            'shared_credits'     => $balance,
+        ]);
+    }
 }

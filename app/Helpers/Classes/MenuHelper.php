@@ -47,7 +47,6 @@ class MenuHelper
         'ai_vision',
         'ai_product_shot',
         'ai_image_generator',
-        'ai_video',
         'seo_tool_extension',
         'ai_voiceover',
         'ai_pdf',
@@ -73,6 +72,7 @@ class MenuHelper
         'influencer_avatar',
         'brand_voice',
         'support',
+        'auto_edit_videos',
     ];
 
     public function __construct()

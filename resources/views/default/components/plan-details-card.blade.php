@@ -82,21 +82,25 @@
         </span>
 
         @lang('Plan Credits')
-        <div class="group inline-block sm:relative sm:before:absolute sm:before:-inset-2.5">
-            <span class="peer relative -mt-6 inline-flex !h-6 !w-6 cursor-pointer items-center justify-center">
-                <x-tabler-info-circle-filled class="size-4 opacity-20" />
-            </span>
-            <div
-                class="lqd-price-table-info pointer-events-none invisible absolute start-full top-1/2 z-10 ms-2 max-h-96 min-w-60 -translate-y-1/2 translate-x-2 scale-105 overflow-y-auto rounded-lg border bg-background p-5 opacity-0 shadow-xl transition-all before:absolute before:-start-2 before:top-0 before:h-full before:w-2 group-hover:pointer-events-auto group-hover:visible group-hover:translate-x-0 group-hover:opacity-100 max-sm:!end-0 max-sm:!start-0 max-sm:!top-full max-sm:!me-0 max-sm:!ms-0 max-sm:mt-4 max-sm:!translate-x-0 max-sm:!translate-y-0 [&.anchor-end]:end-2 [&.anchor-end]:start-auto [&.anchor-end]:me-2 [&.anchor-end]:ms-0"
-                data-set-anchor="true"
-            >
-                <x-credit-list
-                    :plan="$plan"
-                    showType="directly"
-                    tooltipClass="max-w-48"
-                />
+        @if ($plan->isSharedCreditPlan() && setting('shared_credit_system_enabled'))
+            <strong>@formatNumber($plan->shared_credits_amount)</strong>
+        @else
+            <div class="group inline-block sm:relative sm:before:absolute sm:before:-inset-2.5">
+                <span class="peer relative -mt-6 inline-flex !h-6 !w-6 cursor-pointer items-center justify-center">
+                    <x-tabler-info-circle-filled class="size-4 opacity-20" />
+                </span>
+                <div
+                    class="lqd-price-table-info pointer-events-none invisible absolute start-full top-1/2 z-10 ms-2 max-h-96 min-w-60 -translate-y-1/2 translate-x-2 scale-105 overflow-y-auto rounded-lg border bg-background p-5 opacity-0 shadow-xl transition-all before:absolute before:-start-2 before:top-0 before:h-full before:w-2 group-hover:pointer-events-auto group-hover:visible group-hover:translate-x-0 group-hover:opacity-100 max-sm:!end-0 max-sm:!start-0 max-sm:!top-full max-sm:!me-0 max-sm:!ms-0 max-sm:mt-4 max-sm:!translate-x-0 max-sm:!translate-y-0 [&.anchor-end]:end-2 [&.anchor-end]:start-auto [&.anchor-end]:me-2 [&.anchor-end]:ms-0"
+                    data-set-anchor="true"
+                >
+                    <x-credit-list
+                        :plan="$plan"
+                        showType="directly"
+                        tooltipClass="max-w-48"
+                    />
+                </div>
             </div>
-        </div>
+        @endif
     </li>
     @if ($plan->is_team_plan)
         <li class="mb-3 last:mb-0">

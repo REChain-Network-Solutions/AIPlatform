@@ -138,6 +138,51 @@
                         </x-form.group>
                     </div>
                 </div>
+
+                <x-form-step
+                    class="mb-4 mt-4"
+                    step="3"
+                    label="{{ __('Credit System') }}"
+                />
+
+                <div
+                    class="flex w-full gap-6"
+                    x-data="{ creditType: @entangle('plan.credit_system_type').live ?? 'separated' }"
+                >
+                    <div class="mt-3 w-1/2">
+                        <x-form.group
+                            label="{{ __('Credit System') }}"
+                            tooltip="{{ __('Choose whether this pack uses separated per-model credits or a shared credit pool.') }}"
+                            error="plan.credit_system_type"
+                        >
+                            <x-form.select
+                                wire:model.live="plan.credit_system_type"
+                                x-model="creditType"
+                            >
+                                <option value="separated">{{ __('Separated (Per Model)') }}</option>
+                                <option value="shared">{{ __('Shared Credit Pool') }}</option>
+                            </x-form.select>
+                        </x-form.group>
+                    </div>
+
+                    <div
+                        class="mt-3 w-1/2"
+                        x-show="creditType === 'shared'"
+                        x-cloak
+                    >
+                        <x-form.group
+                            label="{{ __('Shared Credits Amount') }}"
+                            tooltip="{{ __('Total shared credits allocated to this token pack.') }}"
+                            error="plan.shared_credits_amount"
+                        >
+                            <x-form.stepper
+                                wire:model="plan.shared_credits_amount"
+                                step="1"
+                                min="0"
+                            />
+                        </x-form.group>
+                    </div>
+                </div>
             </div>
         @endif
 

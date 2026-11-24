@@ -111,6 +111,9 @@
 					{!! $labelIcon !!}
 				@endif
 				{{ $label }}
+				@if ($attributes->has('required'))
+					<span class="lqd-input-label-required text-red-500">*</span>
+				@endif
             </span>
 
             @if ($type === 'checkbox' || $type === 'radio')
@@ -125,7 +128,7 @@
 
             {{-- Tooltip --}}
             @if (!empty($tooltip))
-                <x-info-tooltip text="{{ $tooltip }}" />
+                <x-info-tooltip text="{!! $tooltip !!}" />
             @endif
         </label>
     @endif

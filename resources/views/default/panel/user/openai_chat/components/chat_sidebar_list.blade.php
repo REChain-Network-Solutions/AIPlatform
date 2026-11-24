@@ -6,7 +6,7 @@
 	$categoryId = isset($category) ? $category?->id : null;
 	$website_url = $website_url ?? null;
 	$isChatProImage = ($website_url ?? null) === 'chatpro-image' && MarketplaceHelper::isRegistered('ai-chat-pro-image-chat');
-	$isChatProContext = in_array($website_url, ['chatpro', 'chatpro-temp', 'chatPro', 'chatpro-image', 'social-media-agent'], true);
+	$isChatProContext = in_array($website_url, ['chatpro', 'chatpro-temp', 'chatPro', 'chatpro-image', 'social-media-agent', 'crm-assistant'], true);
 	$chatProFoldersEnabled = $isChatProContext && MarketplaceHelper::isRegistered('ai-chat-pro-folders');
 @endphp
 

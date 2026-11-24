@@ -40,6 +40,7 @@ class UserOpenaiChatMessage extends Model
         'suggestions_response' => 'array',
         'council_response'     => 'array',
         'used_skills'          => 'array',
+        'used_connectors'      => 'array',
     ];
 
     public function __construct(array $attributes = [])
@@ -64,6 +65,10 @@ class UserOpenaiChatMessage extends Model
 
         if (Schema::hasColumn($this->getTable(), 'used_skills')) {
             $this->fillable[] = 'used_skills';
+        }
+
+        if (Schema::hasColumn($this->getTable(), 'used_connectors')) {
+            $this->fillable[] = 'used_connectors';
         }
 
         if (Schema::hasColumn($this->getTable(), 'highlight_context')) {

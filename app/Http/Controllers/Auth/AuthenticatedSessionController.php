@@ -105,7 +105,7 @@ class AuthenticatedSessionController extends Controller
                 return response()->json(['link' => '2fa/login']);
             }
 
-            event(new UsersActivityEvent($user->email, $user->type, $request->ip(), $request->header('User-Agent')));
+            event(new UsersActivityEvent($user->email, $user->type, $request->header('User-Agent')));
         }
 
         if ((setting('frontend_additional_url_type') !== 'ai-image-pro') && (setting('dash_theme') === 'social-media-agent-dashboard')) {

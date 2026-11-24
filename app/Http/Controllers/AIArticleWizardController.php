@@ -8,6 +8,7 @@ use App\Domains\Entity\Enums\EntityEnum;
 use App\Domains\Entity\Facades\Entity;
 use App\Enums\BedrockEngine;
 use App\Helpers\Classes\ApiHelper;
+use App\Helpers\Classes\DefaultOpenAiImageModel;
 use App\Helpers\Classes\Helper;
 use App\Models\ArticleWizard;
 use App\Models\OpenAIGenerator;
@@ -16,6 +17,7 @@ use App\Models\SettingTwo;
 use App\Models\Usage;
 use App\Models\UserOpenai;
 use App\Services\Ai\AiCompletionService;
+use App\Services\Ai\OpenAI\Image\CreateImageService;
 use App\Services\Bedrock\BedrockRuntimeService;
 use Exception;
 use GuzzleHttp\Client;
@@ -32,6 +34,7 @@ use Illuminate\Support\Str;
 use JsonException;
 use OpenAI\Laravel\Facades\OpenAI;
 use Random\RandomException;
+use Throwable;
 
 class AIArticleWizardController extends Controller
 {
@@ -225,7 +228,7 @@ class AIArticleWizardController extends Controller
             }
 
             return response()->json(['result' => $responsedText])->header('Content-Type', 'application/json');
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json([
                 'message' => $e->getMessage(),
             ], 500);
@@ -253,7 +256,7 @@ class AIArticleWizardController extends Controller
             Usage::getSingle()->updateWordCounts($driver->calculate());
 
             return response()->json(['result' => $responsedText])->header('Content-Type', 'application/json');
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json([
                 'message' => $e->getMessage(),
             ], 500);
@@ -279,7 +282,7 @@ class AIArticleWizardController extends Controller
             Usage::getSingle()->updateWordCounts($driver->calculate());
 
             return response()->json(['result' => $responsedText, 'words' =>  EntityStats::word()->totalCredits(), 'images' =>  EntityStats::image()->totalCredits()])->header('Content-Type', 'application/json');
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return response()->json([
                 'message' => $e->getMessage(),
             ], 500);
@@ -335,7 +338,7 @@ class AIArticleWizardController extends Controller
                         flush();
                     }
                 }
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 echo "event: data\n";
                 echo 'data: ' . json_encode(['message' => $e->getMessage()]) . "\n\n";
                 flush();
@@ -368,10 +371,10 @@ class AIArticleWizardController extends Controller
             $this->getImagesFromThirdParty($defaultEngine, $defaultModel, $prompt, $count, $size, $paths);
 
             return response()->json(['status' => 'success', 'path' => $paths]);
-        } catch (ClientException|Exception|GuzzleException $e) {
+        } catch (Throwable $e) {
             $engine = $defaultEngine === 'sd' ? EngineEnum::STABLE_DIFFUSION->slug() : $defaultEngine;
 
-            if (! ($e instanceof Exception) && $e?->getResponse()?->getStatusCode() === 401) {
+            if ($e instanceof ClientException && $e->getResponse()?->getStatusCode() === 401) {
                 // Unauthorized error
                 if (Auth::user()?->isAdmin()) {
                     return response()->json([
@@ -400,7 +403,7 @@ class AIArticleWizardController extends Controller
         match ($defaultEngine) {
             EngineEnum::PEXELS->value                     => $this->getImagesFromPexels($defaultModel, $prompt, $count, $size, $paths),
             EngineEnum::PIXABAY->value                    => $this->getImagesFromPixabay($defaultModel, $prompt, $count, $paths),
-            EngineEnum::OPEN_AI->value                    => $this->getImagesDalle($defaultModel, $prompt, $count, $size, $paths),
+            EngineEnum::OPEN_AI->value                    => $this->getImagesFromOpenAi($defaultModel, $prompt, $count, $size, $paths),
             'sd', EngineEnum::STABLE_DIFFUSION->value     => $this->getImagesFromStableDiffusion($defaultModel, $prompt, $count, $size, $paths),
             default                                       => $this->getImagesFromUnsplash($defaultModel, $prompt, $count, $size, $paths),
         };
@@ -534,7 +537,7 @@ class AIArticleWizardController extends Controller
         }
     }
 
-    private function getImagesDalle($defaultModel, $prompt, $count, $size, &$paths)
+    private function getImagesFromOpenAi($defaultModel, $prompt, $count, $size, &$paths)
     {
         $driver = Entity::driver($defaultModel)->inputImageCount($count)->calculateCredit();
         $driver->redirectIfNoCreditBalance();
@@ -559,21 +562,26 @@ class AIArticleWizardController extends Controller
             $driver->redirectIfNoCreditBalance();
 
             $size = match ($size) {
-                'small' => $defaultModel === EntityEnum::DALL_E_3->value ? '1024x1792' : '512x512',
-                'large', 'full', 'medium' => $defaultModel === EntityEnum::DALL_E_3->value ? '1792x1024' : '1024x1024',
-                default => $defaultModel === EntityEnum::DALL_E_3->value ? '1024x1024' : '256x256',
+                'thumb', 'small' => '1024x1536',
+                'full', 'raw'    => '1536x1024',
+                default          => '1024x1024',
             };
             for ($i = 0; $i < $count; $i++) {
-                $response = OpenAI::images()->create([
-                    'model'           => $defaultModel,
-                    'prompt'          => $prompt,
-                    'size'            => $size,
-                    'response_format' => 'b64_json',
-                    'quality'         => 'standard',
-                    'n'               => 1,
-                ]);
-                $image_url = $response['data'][0]['b64_json'];
-                $contents = base64_decode($image_url);
+                $base64 = app(CreateImageService::class)
+                    ->setModel($defaultModel instanceof EntityEnum ? $defaultModel->value : (string) $defaultModel)
+                    ->setPrompt($prompt)
+                    ->setSize($size)
+                    ->setOutputFormat('png')
+                    ->generateForAi();
+
+                if ($base64 === null) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => __('Image generation failed. Please try again later.'),
+                    ], 500);
+                }
+
+                $contents = base64_decode($base64);
 
                 $nameOfImage = Str::random(12) . '.png';
                 Storage::disk('public')->put($nameOfImage, $contents);
@@ -700,13 +708,13 @@ class AIArticleWizardController extends Controller
                     ],
                 ];
 
-                $validEngines = [EntityEnum::SD_3->value, EntityEnum::SD_3_TURBO->value, EntityEnum::SD_3_MEDIUM->value, EntityEnum::SD_3_LARGE->value, EntityEnum::SD_3_LARGE_TURBO->value];
-                if (in_array($engine, $validEngines, true)) {
-                    $engine = 'sd3';
+                if ($isV2BetaModels) {
                     $sd3Payload[] = [
                         'name'     => 'model',
-                        'contents' => $engine,
+                        'contents' => (string) $engine,
                     ];
+                    // 'sd3' is the v2beta endpoint path, not the model id.
+                    $engine = 'sd3';
                 }
                 $prompt = [
                     [
@@ -994,12 +1002,12 @@ class AIArticleWizardController extends Controller
 
     private function getDefaultOpenAiImageModel(): EntityEnum
     {
-        return EntityEnum::fromSlug($this->settings_two?->dalle) ?? EntityEnum::DALL_E_2;
+        return DefaultOpenAiImageModel::resolve($this->settings_two);
     }
 
     private function getStableDiffusionDefaultModel(): EntityEnum
     {
-        return EntityEnum::fromSlug($this->settings_two?->stablediffusion_default_model) ?? EntityEnum::SD_3;
+        return EntityEnum::fromSlug($this->settings_two?->stablediffusion_default_model) ?? EntityEnum::SD_3_5_LARGE;
     }
 
     private function getStableApiKey(): string

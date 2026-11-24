@@ -6,9 +6,12 @@ use App\Domains\Engine\Enums\EngineEnum;
 use App\Domains\Entity\Enums\EntityEnum;
 use App\Domains\Entity\Facades\Entity as EntityFacade;
 use App\Domains\Entity\Models\Entity;
+use App\Extensions\AIChatPro\System\Connectors\ConnectorPlanGate;
+use App\Extensions\AIChatPro\System\Connectors\Models\AIChatProConnector;
 use App\Extensions\AiChatProImageChat\System\Services\AIChatImageService;
 use App\Extensions\AIChatProMemory\System\Models\UserChatInstruction;
 use App\Extensions\AIChatProSkills\System\Models\Skill;
+use App\Extensions\Crm\System\Services\CrmAssistantChatService;
 use App\Extensions\ModelCouncil\System\Services\ModelCouncilService;
 use App\Extensions\SocialMedia\System\Models\SocialMediaPostDailyMetric;
 use App\Extensions\SocialMediaAgent\System\Models\SocialMediaAgent;
@@ -84,7 +87,7 @@ class GeneratorController extends Controller
 
         // If the template type is chat, then we will build a chat streamed output or other ai template streamed output
         return match ($template_type) {
-            'chatbot', 'vision', 'chatPro', 'chatPro-image', 'socialMediaAgent' => $this->buildChatStreamedOutput($request),
+            'chatbot', 'vision', 'chatPro', 'chatPro-image', 'socialMediaAgent', 'crmAssistant' => $this->buildChatStreamedOutput($request),
             'chatPro-council'         => $this->buildCouncilStreamedOutput($request),
             'chatPro-council-summary' => $this->buildCouncilSummaryStreamedOutput($request),
             default                   => $this->buildOtherStreamedOutput($request),
@@ -280,6 +283,7 @@ class GeneratorController extends Controller
             'chat_id'             => $chat_id,
             'chat_type'           => $request->get('template_type'),
             'agent_id'            => $request->integer('chat_open_ai_agent_id') ?: null,
+            'crm_scope'           => $request->get('crm_scope') ?: 'all',
             'images'              => $request->get('images', null),
             'pdfname'             => $request->get('pdfname', null),
             'pdfpath'             => $request->get('pdfpath', null),
@@ -327,7 +331,7 @@ class GeneratorController extends Controller
         } elseif ($default_ai_engine === EngineEnum::ANTHROPIC->value) {
             $chat_bot = setting('anthropic_default_model', EntityEnum::CLAUDE_3_OPUS->value);
         } elseif ($default_ai_engine === EngineEnum::DEEP_SEEK->value) {
-            $chat_bot = setting('deepseek_default_model', EntityEnum::DEEPSEEK_CHAT->value);
+            $chat_bot = setting('deepseek_default_model', EntityEnum::DEEPSEEK_V4_PRO->value);
         } elseif ($default_ai_engine === EngineEnum::X_AI->value) {
             $chat_bot = setting('xai_default_model', EntityEnum::GROK_2_1212->value);
         } else {
@@ -444,6 +448,10 @@ class GeneratorController extends Controller
 
             $history = $this->appendSocialMediaAgentContext($history, $chatParams, $systemRole);
         }
+
+        if (($chatParams['chat_type'] ?? null) === 'crmAssistant') {
+            $history = $this->appendCrmAssistantContext($history, $chatParams, $systemRole);
+        }
         $history = $this->addFileOrInstructionsToHistory($history, $category, $chat_id, $chatParams['prompt'], $systemRole);
         $history = $this->checkBrandVoice($chatParams['chat_brand_voice'], $chatParams['brand_voice_prod'], $history);
         $history = $this->checkSkills($chatParams['skill_ids'] ?? null, $history, $systemRole, $chatParams);
@@ -456,6 +464,23 @@ class GeneratorController extends Controller
         );
 
         return $this->addCurrentPromptToHistory($history, $chatParams, $systemRole);
+    }
+
+    private function appendCrmAssistantContext(array $history, array $chatParams, string $systemRole): array
+    {
+        if (! MarketplaceHelper::isRegistered('crm') || ! Auth::check()) {
+            return $history;
+        }
+
+        $history[] = [
+            'role'    => $systemRole,
+            'content' => app(CrmAssistantChatService::class)->systemPrompt(
+                (int) Auth::id(),
+                (string) ($chatParams['crm_scope'] ?? 'all')
+            ),
+        ];
+
+        return $history;
     }
 
     private function appendSocialMediaAgentContext(array $history, array $chatParams, string $systemRole): array
@@ -1106,6 +1131,34 @@ class GeneratorController extends Controller
             }
         }
 
+        // Load the user's active AI Chat Pro connectors so StreamService can inject tools + system summary
+        if (class_exists(AIChatProConnector::class)
+            && auth()->check()
+            && (bool) setting('ai_chat_pro_connectors_enabled', '1')) {
+            $connectorPlan = ConnectorPlanGate::resolvePlan(auth()->user());
+
+            $autoConnectors = AIChatProConnector::query()
+                ->where('user_id', auth()->id())
+                ->where('is_active', true)
+                ->where('is_paused', false)
+                ->get()
+                ->filter(fn (AIChatProConnector $connector): bool => ConnectorPlanGate::allowsForPlan($connectorPlan, $connector->type))
+                ->values();
+
+            $pausedConnectors = AIChatProConnector::query()
+                ->where('user_id', auth()->id())
+                ->where('is_paused', true)
+                ->get();
+
+            if ($autoConnectors->isNotEmpty()) {
+                $chatParams['auto_connectors'] = $autoConnectors;
+            }
+
+            if ($pausedConnectors->isNotEmpty()) {
+                $chatParams['paused_connectors'] = $pausedConnectors;
+            }
+        }
+
         return $history;
     }
 
@@ -1121,7 +1174,7 @@ class GeneratorController extends Controller
         } elseif ($default_ai_engine === EngineEnum::ANTHROPIC->value) {
             $chatBot = setting('anthropic_default_model', EntityEnum::CLAUDE_3_OPUS->value);
         } elseif ($default_ai_engine === EngineEnum::DEEP_SEEK->value) {
-            $chatBot = setting('deepseek_default_model', EntityEnum::DEEPSEEK_CHAT->value);
+            $chatBot = setting('deepseek_default_model', EntityEnum::DEEPSEEK_V4_PRO->value);
         } elseif ($default_ai_engine === EngineEnum::X_AI->value) {
             $chatBot = setting('xai_default_model', EntityEnum::GROK_2_1212->value);
         } else {

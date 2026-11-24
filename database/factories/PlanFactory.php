@@ -45,4 +45,12 @@ class PlanFactory extends Factory
             ],
         ];
     }
+
+    public function sharedCredit(float $amount = 1000.0): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'credit_system_type'    => 'shared',
+            'shared_credits_amount' => $amount,
+        ]);
+    }
 }

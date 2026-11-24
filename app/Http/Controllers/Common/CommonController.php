@@ -4,27 +4,42 @@ namespace App\Http\Controllers\Common;
 
 use App\Helpers\Classes\Helper;
 use App\Helpers\Classes\Localization;
-use App\Helpers\Classes\MarketplaceHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UploadFilesRequest;
 use App\Models\SettingTwo;
+use App\Services\Security\RssFeedService;
+use App\Services\Security\SafeUploadService;
 use Elseyyid\LaravelJsonLocationsManager\Models\Strings;
-use Exception;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Http\File;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
 use JsonException;
-use RuntimeException;
-use Throwable;
+use Mews\Purifier\Facades\Purifier;
 
 class CommonController extends Controller
 {
+    public function translationsLangUpdate(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'  => ['required', 'string', 'regex:/^[a-z]{2}(?:_[A-Z]{2})?$/'],
+            'value' => ['required', 'string', 'max:20000'],
+            'rich'  => ['sometimes', 'boolean'],
+        ]);
+
+        $this->assertTranslationColumn($validated['name']);
+
+        Strings::query()->where('code', $id)->update([
+            $validated['name'] => $this->sanitizeTranslation($validated['value'], $validated['rich'] ?? false),
+        ]);
+
+        return response()->json(['code' => 200]);
+    }
+
     public function regenerate()
     {
         Artisan::call('elseyyid:location:install');
@@ -51,60 +66,125 @@ class CommonController extends Controller
 
     public function setLocale(Request $request): RedirectResponse
     {
+        $validated = $request->validate([
+            'setLocale' => ['required', 'string', 'regex:/^[a-z]{2}(?:_[A-Z]{2})?$/'],
+        ]);
         $settings_two = SettingTwo::getCache();
-        $settings_two->languages_default = $request->setLocale;
-        $settings_two->save();
-        Localization::setLocale($request->setLocale);
+        abort_unless(in_array($validated['setLocale'], explode(',', $settings_two->languages), true), 422);
 
-        return redirect()->route('elseyyid.translations.home', [$request->setLocale])->with(config('elseyyid-location.message_flash_variable'), $request->setLocale);
+        $settings_two->languages_default = $validated['setLocale'];
+        $settings_two->save();
+        Localization::setLocale($validated['setLocale']);
+
+        return redirect()->route('elseyyid.translations.home', [$validated['setLocale']])->with(config('elseyyid-location.message_flash_variable'), $validated['setLocale']);
     }
 
     /**
      * @throws FileNotFoundException
      * @throws JsonException
      */
-    public function translationsLangUpdateAll(Request $request)
+    public function translationsLangUpdateAll(Request $request): JsonResponse
     {
-        ini_set('max_input_vars', -1);
-        $json = json_decode($request->input('json'), true, 512, JSON_THROW_ON_ERROR);
-        $column_name = $request->get('lang');
+        $validated = $request->validate([
+            'json' => ['required', 'json'],
+            'lang' => ['required', 'string', 'regex:/^(?:edit|[a-z]{2}(?:_[A-Z]{2})?)$/'],
+        ]);
+
+        try {
+            $json = json_decode($validated['json'], true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            throw ValidationException::withMessages(['json' => __('The translation payload is invalid.')]);
+        }
+
+        if (! is_array($json)) {
+            throw ValidationException::withMessages(['json' => __('The translation payload is invalid.')]);
+        }
+
+        $column_name = $validated['lang'];
+        $this->assertTranslationColumn($column_name);
+
+        $updates = [];
         foreach ($json as $code => $column_value) {
-            if (! empty($column_value)) {
-                $test = Strings::where('code', '=', $code)->update([$column_name => $column_value]);
+            if (is_string($column_value) && $column_value !== '') {
+                $updates[(string) $code] = $this->sanitizeTranslation($column_value);
             }
         }
 
-        $lang = $column_name;
-        $list = Strings::pluck($lang, 'en');
+        // Fail before touching the database when a value cannot be JSON-encoded,
+        // so a chunk never commits rows it cannot persist to the language file.
+        foreach ($updates as $column_value) {
+            if (! is_string(json_encode($column_value))) {
+                throw ValidationException::withMessages(['json' => __('The translation file could not be generated.')]);
+            }
+        }
 
+        Strings::query()->getConnection()->transaction(static function () use ($updates, $column_name): void {
+            foreach ($updates as $code => $column_value) {
+                Strings::where('code', '=', $code)->update([
+                    $column_name => $column_value,
+                ]);
+            }
+        });
+
+        // Filesystem failures after this point (disk full, permissions) are
+        // operational: the database state is valid, retry the save to rewrite
+        // the language files.
+        $this->writeLanguageJson($column_name);
+
+        if ($column_name === 'edit') {
+            $this->mergeEditJsonIntoEn();
+        }
+
+        return response()->json(['code' => 200, 'saved' => count($updates)], 200);
+    }
+
+    private function writeLanguageJson(string $column): void
+    {
+        $list = Strings::pluck($column, 'en');
         $new_json = json_encode_prettify($list);
-        $filesystem = new Filesystem;
-        $filesystem->put(base_path('lang/' . $lang . '.json'), $new_json);
 
-        if ($column_name == 'edit') {
-            // Read existing values from en.json
-            $enJsonPath = base_path('lang/en.json');
-            $existingJson = $filesystem->get($enJsonPath);
-            $existingValues = json_decode($existingJson, true);
-            // Read non-empty values from edit.json
-            $editJsonPath = base_path('lang/edit.json');
-            $editJson = $filesystem->get($editJsonPath);
-            $editValues = json_decode($editJson, true);
-            // Update values in en.json using keys from edit.json
-            foreach ($editValues as $key => $column_value) {
-                // Check if the value is not empty
-                if (! empty($column_value)) {
-                    // Update the existing values with non-empty values using the key from edit.json
-                    $existingValues[$key] = $column_value;
-                }
-            }
-            // Convert the updated values to JSON
-            $updatedJson = json_encode_prettify($existingValues);
-            // Write the updated JSON to en.json
-            $filesystem->put($enJsonPath, $updatedJson);
+        if (! is_string($new_json)) {
+            throw ValidationException::withMessages(['json' => __('The translation file could not be generated.')]);
         }
 
-        return response()->json(['code' => 200], 200);
+        (new Filesystem)->put(base_path('lang/' . $column . '.json'), $new_json);
+    }
+
+    private function mergeEditJsonIntoEn(): void
+    {
+        $filesystem = new Filesystem;
+
+        try {
+            // Read existing values from en.json
+            $existingValues = json_decode($filesystem->get(base_path('lang/en.json')), true, 512, JSON_THROW_ON_ERROR);
+            // Read non-empty values from edit.json
+            $editValues = json_decode($filesystem->get(base_path('lang/edit.json')), true, 512, JSON_THROW_ON_ERROR);
+        } catch (FileNotFoundException|JsonException) {
+            throw ValidationException::withMessages(['lang' => __('The translation file could not be generated.')]);
+        }
+
+        if (! is_array($existingValues) || ! is_array($editValues)) {
+            throw ValidationException::withMessages(['lang' => __('The translation file could not be generated.')]);
+        }
+
+        // Update values in en.json using keys from edit.json
+        foreach ($editValues as $key => $column_value) {
+            // Check if the value is not empty
+            if (! empty($column_value)) {
+                // Update the existing values with non-empty values using the key from edit.json
+                $existingValues[$key] = $column_value;
+            }
+        }
+
+        // Convert the updated values to JSON
+        $updatedJson = json_encode_prettify($existingValues);
+
+        if (! is_string($updatedJson)) {
+            throw ValidationException::withMessages(['lang' => __('The translation file could not be generated.')]);
+        }
+
+        // Write the updated JSON to en.json
+        $filesystem->put(base_path('lang/en.json'), $updatedJson);
     }
 
     public function translationsLangSave(Request $request)
@@ -113,16 +193,21 @@ class CommonController extends Controller
             return response()->json(['code' => 403, 'message' => __('This feature is disabled in demo mode.')], 403);
         }
 
+        $validated = $request->validate([
+            'lang'  => ['required', 'string', 'regex:/^[a-z]{2}(?:_[A-Z]{2})?$/'],
+            'state' => ['required', 'boolean'],
+        ]);
+
         $settings_two = SettingTwo::getCache();
         $codes = explode(',', $settings_two->languages);
 
-        if ($request->state) {
-            if (! in_array($request->lang, $codes)) {
-                $codes[] = $request->lang;
+        if ($validated['state']) {
+            if (! in_array($validated['lang'], $codes)) {
+                $codes[] = $validated['lang'];
             }
         } else {
-            if (in_array($request->lang, $codes)) {
-                unset($codes[array_search($request->lang, $codes)]);
+            if (in_array($validated['lang'], $codes)) {
+                unset($codes[array_search($validated['lang'], $codes)]);
             }
         }
         $settings_two->languages = implode(',', $codes);
@@ -131,209 +216,117 @@ class CommonController extends Controller
         return response()->json(['code' => 200], 200);
     }
 
-    public function imagesUpload(Request $request)
+    private function assertTranslationColumn(string $column): void
     {
-        $images = $request->input('images');
+        $connection = (new Strings)->getConnectionName() ?? config('database.default');
 
-        $paths = [];
-
-        foreach ($images ?? [] as $image) {
-            $base64Image = $image;
-            $nameOfImage = Str::random(12) . '.png';
-
-            // save file on local storage or aws s3
-            Storage::disk('public')->put($nameOfImage, base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64Image)));
-            $path = '/uploads/' . $nameOfImage;
-
-            $uploadedFile = new File(substr($path, 1));
-
-            if (SettingTwo::getCache()->ai_image_storage == 's3') {
-                try {
-                    $aws_path = Storage::disk('s3')->put('', $uploadedFile);
-                    unlink(substr($path, 1));
-                    $path = Storage::disk('s3')->url($aws_path);
-                } catch (Exception $e) {
-                    return response()->json(['status' => 'error', 'message' => 'AWS Error - ' . $e->getMessage()]);
-                }
-            }
-
-            if (SettingTwo::getCache()->ai_image_storage == 'r2') {
-                try {
-                    $aws_path = Storage::disk('r2')->put('', $uploadedFile);
-                    unlink(substr($path, 1));
-                    $path = Storage::disk('r2')->url($aws_path);
-                } catch (Exception $e) {
-                    return response()->json(['status' => 'error', 'message' => 'AWS Error - ' . $e->getMessage()]);
-                }
-            }
-
-            $paths[] = $path;
-        }
-
-        return response()->json(['path' => $paths]);
+        abort_unless(Schema::connection($connection)->hasColumn('strings', $column), 422, __('Unknown translation language.'));
     }
 
-    public function filesUpload(Request $request): JsonResponse
+    private function sanitizeTranslation(string $value, bool $allowRichText = false): string
     {
-        $contentManagerActive = MarketplaceHelper::isRegistered('content-manager')
-            && setting('content_manager_enabled', '1');
+        if (! $allowRichText) {
+            return Purifier::clean($value, ['HTML.Allowed' => '']);
+        }
 
+        return Purifier::clean($value, [
+            'HTML.Allowed'             => 'a[href|title|target],b,br,em,i,span[class],strong,u',
+            'Attr.AllowedFrameTargets' => ['_blank'],
+        ]);
+    }
+
+    public function imagesUpload(Request $request, SafeUploadService $safeUploadService): JsonResponse
+    {
+        $validated = $request->validate([
+            'images'   => ['required', 'array', 'min:1', 'max:5'],
+            'images.*' => ['required', 'string', 'max:30000000'],
+        ]);
+        $paths = [];
+        $uploads = [];
+
+        foreach ($validated['images'] as $image) {
+            if (! preg_match('#^data:image/(jpeg|png|gif|webp);base64,#i', $image, $matches)) {
+                abort(422, __('Only JPEG, PNG, GIF, and WebP images are allowed.'));
+            }
+
+            $extension = strtolower($matches[1]) === 'jpeg' ? 'jpg' : strtolower($matches[1]);
+            $upload = $safeUploadService->store($request->user(), [
+                'name' => 'image.' . $extension,
+                'data' => $image,
+            ]);
+            $paths[] = route('uploads.show', $upload);
+            $uploads[] = $upload->only(['id', 'original_name', 'mime_type', 'size']);
+        }
+
+        return response()->json(['path' => $paths, 'uploads' => $uploads]);
+    }
+
+    public function filesUpload(UploadFilesRequest $request, SafeUploadService $safeUploadService): JsonResponse
+    {
         $images = [];
         $others = [];
+        $uploads = [];
 
-        foreach ($request->input('files', []) as $file) {
-            $name = $file['name'] ?? 'file';
-            $base64Data = $file['data'] ?? null;
+        foreach ($request->validated('files') as $file) {
+            $upload = $safeUploadService->store($request->user(), $file);
+            $url = route('uploads.show', $upload);
+            $metadata = [
+                'id'        => $upload->id,
+                'name'      => $upload->original_name,
+                'mime_type' => $upload->mime_type,
+                'size'      => $upload->size,
+                'url'       => $url,
+            ];
 
-            if (! $base64Data) {
-                continue;
-            }
+            $uploads[] = $metadata;
 
-            if (preg_match('/^data:([^;]+);base64,(.+)$/', $base64Data, $matches)) {
-                $mimeType = $matches[1];
-                $rawData = base64_decode($matches[2]);
-                $extension = mimeToExtension($mimeType);
-
-                if (! pathinfo($name, PATHINFO_EXTENSION)) {
-                    $name .= '.' . $extension;
-                }
+            if (str_starts_with($upload->mime_type, 'image/')) {
+                $images[] = $url;
             } else {
-                continue;
-            }
-
-            // Decide type
-            $fileType = str_starts_with($mimeType, 'image/') ? 'images' : 'other';
-
-            // Directory per user
-            $relativePath = "uploads/media/{$fileType}/u-" . auth()->id();
-            $absoluteDir = public_path($relativePath);
-
-            if (! is_dir($absoluteDir) && ! mkdir($absoluteDir, 0775, true) && ! is_dir($absoluteDir)) {
-                throw new RuntimeException(sprintf('Directory "%s" was not created', $absoluteDir));
-            }
-
-            // Avoid duplicates only for "other" when content manager active
-            if ($fileType === 'other' && $contentManagerActive) {
-                $existingPath = $absoluteDir . '/' . $name;
-                if (file_exists($existingPath)) {
-                    $publicPath = '/' . $relativePath . '/' . $name;
-                    $uploadedFile = new File($existingPath);
-                    $this->checkOtherStorage($uploadedFile, $publicPath);
-
-                    $others[] = $publicPath;
-
-                    continue;
-                }
-            }
-
-            // File naming
-            $uniqueName = ($fileType === 'other' && $contentManagerActive)
-                ? $name
-                : Str::random(10) . '-' . time() . '-' . $name;
-
-            $absolutePath = $absoluteDir . '/' . $uniqueName;
-
-            try {
-                if (file_put_contents($absolutePath, $rawData) === false) {
-                    Log::error("Failed to save file: {$absolutePath}");
-
-                    continue;
-                }
-
-                $publicPath = '/' . $relativePath . '/' . $uniqueName;
-                $uploadedFile = new File($absolutePath);
-                $this->checkOtherStorage($uploadedFile, $publicPath);
-
-                if (! validateUploadedFile(public_path($publicPath), $extension)) {
-                    Storage::disk('public')->delete($publicPath);
-
-                    continue;
-                }
-
-                if ($fileType === 'images') {
-                    $images[] = $publicPath;
-                } else {
-                    $others[] = $publicPath;
-                }
-            } catch (Throwable $e) {
-                Log::error("Upload failed for {$uniqueName}: " . $e->getMessage());
+                $others[] = $url;
             }
         }
 
         // Priority: other > image
         if (! empty($others)) {
             return response()->json([
-                'type' => 'other',
-                'path' => $others,
+                'type'    => 'other',
+                'path'    => $others,
+                'uploads' => $uploads,
             ]);
         }
 
         return response()->json([
-            'type' => 'image',
-            'path' => $images,
+            'type'    => 'image',
+            'path'    => $images,
+            'uploads' => $uploads,
         ]);
     }
 
-    private function checkOtherStorage($uploadedFile, &$path): void
+    public function imageUpload(Request $request, SafeUploadService $safeUploadService): JsonResponse
     {
-        try {
-            $disk = SettingTwo::getCache()->ai_image_storage;
+        $validated = $request->validate([
+            'image' => ['required', 'file', 'mimes:jpg,jpeg,png,gif,webp', 'max:20480'],
+        ]);
+        $image = $validated['image'];
+        $contents = file_get_contents($image->getRealPath());
+        abort_if($contents === false, 422, __('The image could not be read.'));
 
-            if (in_array($disk, ['s3', 'r2'])) {
-                $awsPath = Storage::disk($disk)->putFile('', $uploadedFile);
-                unlink($uploadedFile->getPathname());
-                $path = Storage::disk($disk)->url($awsPath);
-            }
-        } catch (Exception $e) {
-            Log::error($e->getMessage());
-        }
+        $upload = $safeUploadService->store($request->user(), [
+            'name' => $image->getClientOriginalName(),
+            'data' => sprintf('data:%s;base64,%s', $image->getMimeType(), base64_encode($contents)),
+        ]);
+
+        return response()->json([
+            'path'   => route('uploads.show', $upload),
+            'upload' => $upload->only(['id', 'original_name', 'mime_type', 'size']),
+        ]);
     }
 
-    public function imageUpload(Request $request)
+    public function rssFetch(Request $request, RssFeedService $rssFeedService): JsonResponse
     {
-        $image = $request->file('image');
-        $title = $request->input('title');
-
-        $imageContent = file_get_contents($image->getRealPath());
-        $base64Image = base64_encode($imageContent);
-        $nameOfImage = Str::random(12) . '.png';
-
-        // save file on local storage or aws s3
-        Storage::disk('public')->put($nameOfImage, base64_decode($base64Image));
-        $path = '/uploads/' . $nameOfImage;
-        $uploadedFile = new File(substr($path, 1));
-
-        if (SettingTwo::getCache()->ai_image_storage == 's3') {
-            try {
-                $aws_path = Storage::disk('s3')->put('', $uploadedFile);
-                unlink(substr($path, 1));
-                $path = Storage::disk('s3')->url($aws_path);
-            } catch (Exception $e) {
-                return response()->json(['status' => 'error', 'message' => 'AWS Error - ' . $e->getMessage()]);
-            }
-        }
-
-        if (SettingTwo::getCache()->ai_image_storage == 'r2') {
-            try {
-                $aws_path = Storage::disk('r2')->put('', $uploadedFile);
-                unlink(substr($path, 1));
-                $path = Storage::disk('r2')->url($aws_path);
-            } catch (Exception $e) {
-                return response()->json(['status' => 'error', 'message' => 'AWS Error - ' . $e->getMessage()]);
-            }
-        }
-
-        return response()->json(['path' => "$path"]);
-    }
-
-    public function rssFetch(Request $request)
-    {
-        $data = parseRSS($request->url);
-
-        if (! $data) {
-            return response()->json(__('RSS Not Fetched! Please check your URL and validete the RSS!'), 419);
-
-        }
+        $validated = $request->validate(['url' => ['required', 'url:http,https', 'max:2048']]);
+        $data = $rssFeedService->fetch($validated['url']);
 
         $html = '';
 

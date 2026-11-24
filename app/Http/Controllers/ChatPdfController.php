@@ -7,6 +7,7 @@ use App\Helpers\Classes\ApiHelper;
 use App\Models\PdfData;
 use App\Models\Setting;
 use App\Models\SettingTwo;
+use App\Models\UserOpenaiChat;
 use App\Services\VectorService;
 use Exception;
 use Illuminate\Http\File;
@@ -126,13 +127,23 @@ class ChatPdfController extends Controller
 
     public function getSimiliarContent(Request $request)
     {
-        $count = $request->count;
-        if ($count == null) {
-            $count = 3;
-        }
+        $validated = $request->validate([
+            'chat_id' => ['required', 'integer'],
+            'prompt'  => ['required', 'string', 'max:10000'],
+            'count'   => ['nullable', 'integer', 'between:1,10'],
+        ]);
+
+        UserOpenaiChat::query()
+            ->whereKey($validated['chat_id'])
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        $count = $validated['count'] ?? 3;
 
         $vectorService = new VectorService;
 
-        return response()->json(['extra_prompt' => $vectorService->getMostSimilarText($request->prompt, $request->chat_id, $count)]);
+        return response()->json([
+            'extra_prompt' => $vectorService->getMostSimilarText($validated['prompt'], $validated['chat_id'], $count),
+        ]);
     }
 }

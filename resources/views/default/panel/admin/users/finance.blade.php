@@ -203,6 +203,133 @@
         @endif
     </form>
 
+    {{-- Section 4: Shared Credit Management --}}
+    @if ($user->isSharedCreditUser() || setting('shared_credit_system_enabled'))
+        <div class="mb-10 mt-4 flex items-center !gap-3 rounded-xl bg-[rgba(157,107,221,0.1)] !p-4 !py-3 text-[17px] font-semibold">
+            <span class="inline-flex !h-6 !w-6 items-center justify-center rounded-full bg-[#9D6BDD] text-sm font-bold text-white">4</span>
+            {{ __('Shared Credit') }}
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="mb-1 text-sm text-foreground/60">{{ __('Current Balance') }}</p>
+                        <p class="text-2xl font-bold">{{ number_format($user->shared_credits, 2) }}</p>
+                    </div>
+                    <div>
+                        <x-badge variant="{{ $user->isSharedCreditUser() ? 'success' : 'secondary' }}" class="text-xs">
+                            {{ $user->credit_system_type === 'shared' ? __('Shared') : __('Separated') }}
+                        </x-badge>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Adjust Balance --}}
+        <form method="POST" action="{{ route('dashboard.admin.users.shared-credit.adjust', $user) }}">
+            @csrf
+            <div class="card mb-4">
+                <div class="card-header pb-0 pt-3" style="border-bottom: none;">
+                    <label class="form-label">
+                        {{ __('Adjust Balance') }}
+                        <x-info-tooltip text="{{ __('Add, subtract, or set the shared credit balance for this user.') }}" />
+                    </label>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div>
+                            <label class="form-label">{{ __('Action') }}</label>
+                            <select class="form-select" name="action" required>
+                                <option value="add">{{ __('Add') }}</option>
+                                <option value="subtract">{{ __('Subtract') }}</option>
+                                <option value="set">{{ __('Set') }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">{{ __('Amount') }}</label>
+                            <input class="form-control" type="number" name="amount" step="0.01" min="0.01" required>
+                        </div>
+                        <div>
+                            <label class="form-label">{{ __('Description') }}</label>
+                            <input class="form-control" type="text" name="description" placeholder="{{ __('Optional note...') }}">
+                        </div>
+                    </div>
+                    <x-button type="submit" class="w-full">
+                        {{ __('Apply') }}
+                    </x-button>
+                </div>
+            </div>
+        </form>
+
+        {{-- Change Credit Type --}}
+        <form method="POST" action="{{ route('dashboard.admin.users.credit-type.update', $user) }}">
+            @csrf
+            @method('PUT')
+            <div class="card mb-4">
+                <div class="card-header pb-0 pt-3" style="border-bottom: none;">
+                    <label class="form-label">
+                        {{ __('Credit System Type') }}
+                        <x-info-tooltip text="{{ __('Switch the user between separated and shared credit systems.') }}" />
+                    </label>
+                </div>
+                <div class="card-body">
+                    <div class="flex gap-3">
+                        <select class="form-select" name="credit_system_type" required>
+                            <option value="separated" @selected($user->credit_system_type !== 'shared')>{{ __('Separated') }}</option>
+                            <option value="shared" @selected($user->credit_system_type === 'shared')>{{ __('Shared') }}</option>
+                        </select>
+                        <x-button type="submit">
+                            {{ __('Update') }}
+                        </x-button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        {{-- Recent Transactions --}}
+        @if ($user->isSharedCreditUser())
+            @php
+                $recentTransactions = $user->sharedCreditTransactions()->latest()->limit(10)->get();
+            @endphp
+            @if ($recentTransactions->isNotEmpty())
+                <div class="card mb-4">
+                    <div class="card-header pb-0 pt-3" style="border-bottom: none;">
+                        <label class="form-label">{{ __('Recent Transactions') }}</label>
+                    </div>
+                    <div class="card-body p-0">
+                        <x-table variant="plain">
+                            <x-slot:head>
+                                <tr>
+                                    <th>{{ __('Date') }}</th>
+                                    <th>{{ __('Action') }}</th>
+                                    <th>{{ __('Amount') }}</th>
+                                    <th>{{ __('Balance') }}</th>
+                                </tr>
+                            </x-slot:head>
+                            <x-slot:body>
+                                @foreach ($recentTransactions as $tx)
+                                    <tr>
+                                        <td class="text-2xs">{{ $tx->created_at->format('Y-m-d H:i') }}</td>
+                                        <td>
+                                            <x-badge class="text-2xs" variant="{{ $tx->action_type === 'deduct' ? 'danger' : 'success' }}">
+                                                {{ __(str_replace('_', ' ', ucfirst($tx->action_type))) }}
+                                            </x-badge>
+                                        </td>
+                                        <td class="{{ $tx->amount < 0 ? 'text-red-500' : 'text-green-500' }}">
+                                            {{ $tx->amount >= 0 ? '+' : '' }}{{ number_format($tx->amount, 2) }}
+                                        </td>
+                                        <td>{{ number_format($tx->balance_after, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </x-slot:body>
+                        </x-table>
+                    </div>
+                </div>
+            @endif
+        @endif
+    @endif
+
     <!-- =======Cancel Subscription Modal======= -->
     <div
         class="modal fade"

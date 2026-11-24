@@ -58,6 +58,7 @@ class Plan extends Model
         'social_media_agent_limits',
         'blogpilot_limits',
         'social_media_automation_limits',
+        'marketing_bot_limits',
         'reset_credits_on_renewal',
         'default_ai_model',
         'ai_models',
@@ -74,11 +75,29 @@ class Plan extends Model
         'affiliate_status',
         'voice_call_seconds_limit',
         'video_dubbing_seconds_limit',
+        'video_agent_seconds_limit',
+        'video_agent_videos_limit',
+        'phone_call_agent_seconds_limit',
+        'phone_call_agent_outbound_enabled',
+        'phone_call_agent_outbound_seconds_limit',
+        'phone_call_agent_outbound_calls_per_day',
+        'phone_call_agent_follow_up_enabled',
+        'ai_chat_pro_connectors',
         'deep_research_request_limit',
         'ugc_videos_limit',
         'ugc_creator_videos_limit',
         'ai_captions_access',
         'ai_captions_minutes',
+        'auto_edit_videos_seconds_limit',
+        'auto_edit_videos_renders_limit',
+        'credit_system_type',
+        'shared_credits_amount',
+        'shared_credit_model_overrides',
+        'shared_credit_feature_limits',
+        'ai_agent_workflow_limit',
+        'ai_agent_channel_limit',
+        'ai_agent_message_limit',
+        'ai_agent_memory_limit',
     ];
 
     private ?array $mergedAiFeatures = null;
@@ -105,26 +124,55 @@ class Plan extends Model
     ];
 
     protected $casts = [
-        'open_ai_items'                  => 'json',
-        'plan_ai_tools'                  => 'json',
-        'plan_features'                  => 'json',
-        'ai_models'                      => 'array',
-        'ai_models.*.credit'             => 'float',
-        'ai_models.*.isUnlimited'        => 'boolean',
-        'is_featured'                    => 'boolean',
-        'is_team_plan'                   => 'boolean',
-        'active'                         => 'boolean',
-        'user_api'                       => 'boolean',
-        'multi_model_support'            => 'boolean',
-        'model_council_support'          => 'boolean',
-        'chatbot_limit'                  => 'integer',
-        'chatbot_human_agent'            => 'boolean',
-        'social_media_agent_limits'      => 'array',
-        'blogpilot_limits'               => 'array',
-        'social_media_automation_limits' => 'array',
-        'ai_captions_access'             => 'boolean',
-        'ai_captions_minutes'            => 'integer',
+        'open_ai_items'                      => 'json',
+        'plan_ai_tools'                      => 'json',
+        'plan_features'                      => 'json',
+        'ai_models'                          => 'array',
+        'ai_chat_pro_connectors'             => 'array',
+        'ai_models.*.credit'                 => 'float',
+        'ai_models.*.isUnlimited'            => 'boolean',
+        'is_featured'                        => 'boolean',
+        'is_team_plan'                       => 'boolean',
+        'active'                             => 'boolean',
+        'user_api'                           => 'boolean',
+        'multi_model_support'                => 'boolean',
+        'model_council_support'              => 'boolean',
+        'chatbot_limit'                      => 'integer',
+        'chatbot_human_agent'                => 'boolean',
+        'social_media_agent_limits'          => 'array',
+        'blogpilot_limits'                   => 'array',
+        'shared_credits_amount'              => 'float',
+        'shared_credit_model_overrides'      => 'array',
+        'shared_credit_feature_limits'       => 'array',
+        'social_media_automation_limits'     => 'array',
+        'ai_captions_access'                 => 'boolean',
+        'ai_captions_minutes'                => 'integer',
+        'auto_edit_videos_seconds_limit'     => 'integer',
+        'auto_edit_videos_renders_limit'     => 'integer',
+        'marketing_bot_limits'               => 'array',
+        'ai_agent_workflow_limit'            => 'integer',
+        'ai_agent_channel_limit'             => 'integer',
+        'ai_agent_message_limit'             => 'integer',
+        'ai_agent_memory_limit'              => 'integer',
+        'phone_call_agent_outbound_enabled'  => 'boolean',
+        'phone_call_agent_follow_up_enabled' => 'boolean',
     ];
+
+    public function isSharedCreditPlan(): bool
+    {
+        return $this->credit_system_type === 'shared';
+    }
+
+    public function allowsAiChatProConnector(string $key): bool
+    {
+        $map = $this->ai_chat_pro_connectors;
+
+        if (empty($map) || ! is_array($map)) {
+            return true;
+        }
+
+        return (bool) ($map[$key] ?? true);
+    }
 
     protected static function boot(): void
     {
@@ -396,25 +444,40 @@ class Plan extends Model
             'social_media_automation_limits' => [
                 'automations' => -1,
             ],
-            'default_ai_model'                  => Helper::defaultWordModel()->slug(),
-            'ai_models'                         => EngineEnum::getNestedPlanLimits(),
-            'hidden_url'                        => null,
-            'hidden'                            => false,
-            'reset_credits_on_renewal'          => false,
-            'max_subscribe'                     => 0,
-            'chatbot_limit'                     => null,
-            'chatbot_channels'                  => [],
-            'chatbot_human_agent'               => true,
-            'multi_model_support'               => false,
-            'model_council_support'             => false,
-            'last_date'                         => null,
-            'voice_call_seconds_limit'          => -1,
-            'deep_research_request_limit'       => 5,
-            'ugc_videos_limit'                  => -1,
-            'ugc_creator_videos_limit'          => -1,
-            'video_dubbing_seconds_limit'       => -1,
-            'ai_captions_access'                => true,
-            'ai_captions_minutes'               => 30,
+            'default_ai_model'                        => Helper::defaultWordModel()->slug(),
+            'ai_models'                               => EngineEnum::getNestedPlanLimits(),
+            'hidden_url'                              => null,
+            'hidden'                                  => false,
+            'reset_credits_on_renewal'                => false,
+            'max_subscribe'                           => 0,
+            'chatbot_limit'                           => null,
+            'chatbot_channels'                        => [],
+            'chatbot_human_agent'                     => true,
+            'multi_model_support'                     => false,
+            'model_council_support'                   => false,
+            'last_date'                               => null,
+            'voice_call_seconds_limit'                => -1,
+            'phone_call_agent_seconds_limit'          => -1,
+            'phone_call_agent_outbound_enabled'       => true,
+            'phone_call_agent_outbound_seconds_limit' => -1,
+            'phone_call_agent_outbound_calls_per_day' => -1,
+            'phone_call_agent_follow_up_enabled'      => true,
+            'deep_research_request_limit'             => 5,
+            'ugc_videos_limit'                        => -1,
+            'ugc_creator_videos_limit'                => -1,
+            'video_dubbing_seconds_limit'             => -1,
+            'video_agent_seconds_limit'               => -1,
+            'video_agent_videos_limit'                => -1,
+            'ai_captions_access'                      => true,
+            'ai_captions_minutes'                     => 30,
+            'auto_edit_videos_seconds_limit'          => -1,
+            'auto_edit_videos_renders_limit'          => -1,
+            'ai_agent_workflow_limit'                 => -1,
+            'ai_agent_channel_limit'                  => -1,
+            'ai_agent_message_limit'                  => -1,
+            'ai_agent_memory_limit'                   => -1,
+            'credit_system_type'                      => 'separated',
+            'shared_credits_amount'                   => 0,
         ];
     }
 

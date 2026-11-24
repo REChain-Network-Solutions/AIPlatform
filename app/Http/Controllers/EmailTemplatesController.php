@@ -141,6 +141,11 @@ class EmailTemplatesController extends Controller
                 ->whereDoesntHave('subscriptions')
                 ->pluck('name', 'email')
                 ->toArray();
+        } elseif ($request['customer_group'] == 'shared_credit_users') {
+            $users = User::query()
+                ->where('credit_system_type', 'shared')
+                ->pluck('name', 'email')
+                ->toArray();
         } else {
             $users = User::query()
                 ->whereIn('email', $arrayReceivers)

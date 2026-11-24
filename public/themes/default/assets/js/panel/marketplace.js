@@ -9,16 +9,67 @@ $(document).ready(function () {
 		event.preventDefault();
 
 		const $button = $(this);
+
+		if ($button.data('busy')) {
+			return;
+		}
+
 		const url = $button.attr('href');
+
+		$button.data('busy', true);
 
 		toastr.info(magicai_localize.updating_cart || 'Updating Cart');
 
 		$.get(url, function (data) {
-			$button.toggleClass('in-cart');
+			$('a[href="' + url + '"]').toggleClass('in-cart');
 
 			$('#itemCount').html(data.itemCount);
 
 			toastr.success(data.message);
+		}).fail(function (xhr) {
+			$('#itemCount').html(xhr.responseJSON?.itemCount ?? $('#itemCount').html());
+
+			toastr.error(xhr.responseJSON?.message || magicai_localize.updating_cart_failed || 'An error occurred');
+		}).always(function () {
+			$button.data('busy', false);
+		});
+	});
+
+	$('[data-bundle-buy]').on('click', function (event) {
+		event.preventDefault();
+
+		const $button = $(this);
+
+		if ($button.hasClass('in-cart')) {
+			window.location.href = $button.data('cart-url');
+
+			return;
+		}
+
+		if ($button.data('busy')) {
+			return;
+		}
+
+		const url = $button.attr('href');
+
+		$button.data('busy', true);
+
+		toastr.info(magicai_localize.updating_cart || 'Updating Cart');
+
+		$.get(url, function (data) {
+			$('a[href="' + url + '"]').addClass('in-cart');
+
+			$('#itemCount').html(data.itemCount);
+
+			toastr.success(data.message);
+
+			window.location.href = $button.data('cart-url');
+		}).fail(function (xhr) {
+			$('#itemCount').html(xhr.responseJSON?.itemCount ?? $('#itemCount').html());
+
+			toastr.error(xhr.responseJSON?.message || magicai_localize.updating_cart_failed || 'An error occurred');
+		}).always(function () {
+			$button.data('busy', false);
 		});
 	});
 

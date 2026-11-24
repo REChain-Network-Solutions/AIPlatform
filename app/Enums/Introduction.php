@@ -57,6 +57,8 @@ enum Introduction: string implements Contracts\WithStringBackedEnum
     case AI_FALL_VIDEO = 'ai_video_pro';
     case AI_VIDEO_DUBBING = 'video_dubbing';
     case AI_CAPTIONS = 'ai_captions';
+    case AUTO_EDIT_VIDEOS = 'auto_edit_videos';
+    case VIDEO_AGENT = 'video_agent';
     case AI_REPLICA = 'ai_replica';
     case AI_MUSIC = 'ai_music';
     case AI_MUSIC_PRO = 'ai_music_pro';
@@ -168,6 +170,8 @@ enum Introduction: string implements Contracts\WithStringBackedEnum
             self::AI_FALL_VIDEO                           => __('Fall Video'),
             self::AI_VIDEO_DUBBING                        => __('Video Dubbing'),
             self::AI_CAPTIONS                             => __('AI Captions'),
+            self::AUTO_EDIT_VIDEOS                        => __('Auto Edit Videos'),
+            self::VIDEO_AGENT                             => __('Video Agent'),
             self::AI_REPLICA                              => __('AI Replica'),
             self::AI_MUSIC                                => __('AI Music'),
             self::AI_MUSIC_PRO                            => __('AI Music Pro'),

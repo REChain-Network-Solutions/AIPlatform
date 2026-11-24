@@ -30,6 +30,7 @@
                 'target_language' => $entry['target_language'] ?? null,
                 'width' => $entry['width'] ?? null,
                 'height' => $entry['height'] ?? null,
+                '_ts' => $entry['_ts'] ?? 0,
             ];
         };
 
@@ -501,7 +502,7 @@
                             const json = await res.json();
                             if (!Array.isArray(json.entries)) continue;
 
-                            const next = this.bucketEntries(bucket).concat(this.normalizeEntries(json.entries));
+                            const next = this.sortByDate(this.bucketEntries(bucket).concat(this.normalizeEntries(json.entries)));
                             this.replaceBucket(bucket, next);
 
                             this.paging[sourceKey][bucket] = {
@@ -545,7 +546,12 @@
                         target_language: e.target_language ?? null,
                         width: e.width ?? null,
                         height: e.height ?? null,
+                        _ts: e._ts ?? 0,
                     }));
+                },
+
+                sortByDate(list) {
+                    return [...list].sort((a, b) => (b._ts ?? 0) - (a._ts ?? 0));
                 },
 
                 get totalSelected() {

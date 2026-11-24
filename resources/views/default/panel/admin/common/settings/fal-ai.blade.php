@@ -38,15 +38,11 @@
                                     selected
                                     value="*********************"
                                 >*********************</option>
-                            @else
-                                @foreach (explode(',', setting('fal_ai_api_secret')) as $secret)
-                                    <option
-                                        value="{{ $secret }}"
-                                        selected
-                                    >{{ $secret }}</option>
-                                @endforeach
                             @endif
                         </select>
+                        @if (! $app_is_demo && filled(setting('fal_ai_api_secret', '')))
+                            <small>{{ __('An API key is configured. Leave this field empty to keep it unchanged.') }}</small>
+                        @endif
                         <x-alert class="mt-2">
                             <p>
                                 {{ __('You can enter as much API key as you want. Click "Enter" after each API key.') }}
@@ -99,7 +95,7 @@
                     $current_flux_model = EntityEnum::fromSlug(setting('fal_ai_default_model', EntityEnum::FLUX_PRO->slug()))->slug();
                 @endphp
                 <x-model-select-list-with-change-alert
-                    :listLabel="'Default Flux Image Model'"
+                    :listLabel="'Default FalAI Image Model'"
                     :listId="'fal_ai_default_model'"
                     currentModel="{{ $current_flux_model }}"
                     :drivers="$fluxDrivers"

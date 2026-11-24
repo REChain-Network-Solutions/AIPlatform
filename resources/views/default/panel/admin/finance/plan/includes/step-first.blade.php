@@ -129,7 +129,10 @@
 		</div>
 	</div>
 
-	<div class="row gap-y-7">
+	<div
+		class="row gap-y-7"
+		x-data="{ creditType: @entangle('plan.credit_system_type').live ?? 'separated' }"
+	>
 		<div class="col-12">
 			<x-form-step
 				class="mb-0"
@@ -137,6 +140,41 @@
 				label="{{ __('Pricing') }}"
 			/>
 		</div>
+
+		<div class="col-12 col-sm-6">
+			<x-form.group
+				label="{{ __('Credit System') }}"
+				tooltip="{{ __('Choose whether this plan uses separated per-model credits or a shared credit pool.') }}"
+				error="plan.credit_system_type"
+			>
+				<x-form.select
+					wire:model.live="plan.credit_system_type"
+					x-model="creditType"
+				>
+					<option value="separated">{{ __('Separated (Per Model)') }}</option>
+					<option value="shared">{{ __('Shared Credit Pool') }}</option>
+				</x-form.select>
+			</x-form.group>
+		</div>
+
+		<div
+			class="col-12 col-sm-6"
+			x-show="creditType === 'shared'"
+			x-cloak
+		>
+			<x-form.group
+				label="{{ __('Shared Credits Amount') }}"
+				tooltip="{{ __('Total shared credits allocated to this plan.') }}"
+				error="plan.shared_credits_amount"
+			>
+				<x-form.stepper
+					wire:model="plan.shared_credits_amount"
+					step="1"
+					min="0"
+				/>
+			</x-form.group>
+		</div>
+
 		<div class="col-12 col-sm-6">
 			<x-form.group
 				label="{{ __('Price') }}"
@@ -435,4 +473,6 @@
 	@includeIf('social-media-agent::admin.plan.social-media-agent-limits')
 	@includeIf('blogpilot::admin.plan.blogpilot-limits')
 	@includeIf('social-media-automation::admin.plan.social-media-automation-limits')
+	@includeIf('marketing-bot::admin.plan.marketing-bot-limits')
+	@includeIf('ai-agent::admin.plan.ai-agent-limits')
 </div>

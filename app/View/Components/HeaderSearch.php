@@ -17,6 +17,7 @@ class HeaderSearch extends Component
         public bool $showArrow = true,
         public bool $showLoader = true,
         public bool $outlineGlow = false,
+        public bool $showTriggerKbd = true,
     ) {
         //
     }

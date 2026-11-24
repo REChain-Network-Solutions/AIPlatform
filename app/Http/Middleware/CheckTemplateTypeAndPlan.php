@@ -72,6 +72,10 @@ class CheckTemplateTypeAndPlan
             'ai-chat-image.'                              => 'ai_chat_pro_image_chat',
             'dashboard.user.creative-suite-annotations.'  => 'creative_suite_annotations',
             'dashboard.user.ugc-factory.'                 => 'ugc_factory',
+            'dashboard.user.video-agent.'                 => 'video_agent',
+            'dashboard.user.crm.'                         => 'ext_crm_dropdown',
+            'dashboard.user.sales.'                       => 'ext_sales_dropdown',
+            'dashboard.user.auto-edit-videos.'            => 'auto_edit_videos',
         ];
 
         $slugsToSkip = ['ai_realtime_voice_chat'];
@@ -114,7 +118,7 @@ class CheckTemplateTypeAndPlan
             return ! ($isPremium === 1 || $isAccessTypePremium);
         }
         // now even if slug exist in route, openai table does not contain all slugs
-        $slugsNotInOpenAiGenerator = ['ai_image_pro', 'ai_chat_pro_image_chat', 'ext_fashion_studio_dropdown', 'ext_ai_photo_studio_dropdown', 'ai_chat_all', 'ai_editor', 'ai_writer', 'ai_social_media_extension', 'ext_chat_bot', 'brand_voice', 'photo_studio_extension', 'ext_ai_music_pro', 'ai_presentation', 'creative_suite_annotations', 'ugc_factory'];
+        $slugsNotInOpenAiGenerator = ['ai_image_pro', 'ai_chat_pro_image_chat', 'ext_fashion_studio_dropdown', 'ext_ai_photo_studio_dropdown', 'ai_chat_all', 'ai_editor', 'ai_writer', 'ai_social_media_extension', 'ext_chat_bot', 'brand_voice', 'photo_studio_extension', 'ext_ai_music_pro', 'ai_presentation', 'creative_suite_annotations', 'ugc_factory', 'ext_crm_dropdown', 'ext_sales_dropdown', 'video_agent', 'auto_edit_videos'];
         // if openai record exist or slug is in the list of slugs that are not in openai generator
         if ($openAi || in_array($slug, $slugsNotInOpenAiGenerator, true)) {
             $setting = $this->settingSlug($slug);

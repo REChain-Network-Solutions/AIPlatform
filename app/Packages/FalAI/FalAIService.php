@@ -6,12 +6,14 @@ use App\Domains\Entity\Enums\EntityEnum;
 use App\Packages\FalAI\API\BaseApiClient;
 use App\Packages\FalAI\Contracts\TextToVideoModelInterface;
 use App\Packages\FalAI\Models\FastVeo3;
+use App\Packages\FalAI\Models\GeminiOmniFlash;
 use App\Packages\FalAI\Models\GrokImagineVideo;
 use App\Packages\FalAI\Models\Kling;
 use App\Packages\FalAI\Models\Kling25Turbo;
 use App\Packages\FalAI\Models\Kling26Pro;
 use App\Packages\FalAI\Models\KlingV3;
 use App\Packages\FalAI\Models\Seedance2;
+use App\Packages\FalAI\Models\Seedance25;
 use App\Packages\FalAI\Models\Veed;
 use App\Packages\FalAI\Models\Veo3;
 use App\Packages\FalAI\Models\Veo31;
@@ -70,6 +72,12 @@ class FalAIService
             EntityEnum::SEEDANCE_2_FAST_TTV,
             EntityEnum::SEEDANCE_2_FAST_ITV,
             EntityEnum::SEEDANCE_2_FAST_RTV        => new Seedance2($this->client, $model),
+            EntityEnum::SEEDANCE_2_5_TTV,
+            EntityEnum::SEEDANCE_2_5_ITV,
+            EntityEnum::SEEDANCE_2_5_RTV           => new Seedance25($this->client, $model),
+            EntityEnum::GEMINI_OMNI_FLASH_TTV,
+            EntityEnum::GEMINI_OMNI_FLASH_ITV,
+            EntityEnum::GEMINI_OMNI_FLASH_RTV      => new GeminiOmniFlash($this->client, $model),
             EntityEnum::VIDEO_BACKGROUND_REMOVAL   => new VideoBackgroundRemoval($this->client),
             default                                => throw new InvalidArgumentException("Model {$model->value} is not supported."),
 

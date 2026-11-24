@@ -57,13 +57,11 @@
                                     name="openai_api_secret"
                                     multiple
                                 >
-                                    @foreach (explode(',', $setting->openai_api_secret) as $secret)
-                                        <option
-                                            value="{{ $secret }}"
-                                            selected
-                                        >{{ $secret }}</option>
-                                    @endforeach
                                 </select>
+
+                                @if (filled($setting->openai_api_secret))
+                                    <small>{{ __('An API key is configured. Leave this field empty to keep it unchanged.') }}</small>
+                                @endif
 
                                 <x-alert class="mt-2">
                                     <p class="text-justify">
@@ -111,6 +109,8 @@
             @include('panel.admin.settings.particles.gpt-image-1')
             @include('panel.admin.settings.particles.gpt-image-1-5')
             @include('panel.admin.settings.particles.gpt-image-2')
+            @include('panel.admin.settings.particles.gpt-image-2-5-sunburst')
+            @include('panel.admin.settings.particles.gpt-image-2-5-flare')
 
             <div class="col-md-12">
                 <div class="mb-3">
@@ -126,7 +126,7 @@
                                     type="checkbox"
                                     name="dalle_hidden"
                                     :checked="setting('dalle_hidden') == 1"
-                                    label="{{ __('Hide Dall-E from AI Image') }}"
+                                    label="{{ __('Hide OpenAI image models from AI Image') }}"
                                     switcher
                                 />
                             </div>
@@ -134,12 +134,10 @@
                         @php
                             $openaiImageDrivers = \App\Domains\Entity\EntityStats::image()->filterByEngine(\App\Domains\Engine\Enums\EngineEnum::OPEN_AI)->list();
 
-                            $openaiImageDrivers = $openaiImageDrivers->reject(fn($value) => $value instanceof \App\Domains\Entity\Drivers\OpenAI\GptImage1Driver);
-
-                            $current_dall_e_model = EntityEnum::fromSlug($settings_two->dalle ?? EntityEnum::DALL_E_2->slug())->slug();
+                            $current_dall_e_model = \App\Helpers\Classes\DefaultOpenAiImageModel::slug($settings_two);
                         @endphp
                         <x-model-select-list-with-change-alert
-                            :listLabel="'OpenAI Default Dall-E Model'"
+                            :listLabel="'OpenAI Default Image Model'"
                             :listId="'dalle_default_model'"
                             currentModel="{{ $current_dall_e_model }}"
                             :drivers="$openaiImageDrivers"
@@ -234,11 +232,6 @@
                                 {{ $settings_two->openai_default_stream_server == 'backend' ? 'selected' : '' }}
                             >
                                 {{ __('Backend') }}</option>
-                            <option
-                                value="frontend"
-                                {{ $settings_two->openai_default_stream_server == 'frontend' ? 'selected' : '' }}
-                            >
-                                {{ __('Frontend') }}</option>
                         </select>
                     </x-card>
                 </div>

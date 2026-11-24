@@ -15,7 +15,8 @@ class CreateImageEditService
     private string $generateURL = 'https://api.openai.com/v1/images/edits';
 
     /**
-     * Supported models: dall-e-2, gpt-image-1, gpt-image-1.5, gpt-image-2
+     * Supported models: dall-e-2, gpt-image-1, gpt-image-1.5, gpt-image-2,
+     * gpt-image-2.5-sunburst, gpt-image-2.5-flare
      */
     private string $model = 'gpt-image-1';
 

@@ -12,6 +12,7 @@ use App\Enums\AiImageStatusEnum;
 use App\Enums\BedrockEngine;
 use App\Extensions\ElevenLabsVoiceChat\System\Services\ElevenLabsVoiceChatService;
 use App\Helpers\Classes\ApiHelper;
+use App\Helpers\Classes\DefaultOpenAiImageModel;
 use App\Helpers\Classes\Helper;
 use App\Helpers\Classes\MarketplaceHelper;
 use App\Helpers\Classes\OpenAiParamHelper;
@@ -28,6 +29,7 @@ use App\Models\Usage;
 use App\Models\User;
 use App\Models\UserOpenaiChat;
 use App\Models\UserOpenaiChatMessage;
+use App\Models\UserUpload;
 use App\Services\Ai\AiCompletionService;
 use App\Services\Ai\OpenAI\FileSearchService;
 use App\Services\Assistant\AssistantService;
@@ -52,6 +54,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use JsonException;
 use OpenAI\Laravel\Facades\OpenAI;
@@ -141,7 +144,7 @@ class AIChatController extends Controller
         $categoryId = $validated['category_id'] ?? null;
         $folderId = $validated['folder_id'] ?? null;
 
-        $isChatProContext = in_array($websiteUrl, ['chatpro', 'chatpro-temp', 'chatPro', 'chatpro-image', 'social-media-agent'], true);
+        $isChatProContext = in_array($websiteUrl, ['chatpro', 'chatpro-temp', 'chatPro', 'chatpro-image', 'social-media-agent', 'crm-assistant'], true);
         $foldersEnabled = $isChatProContext && MarketplaceHelper::isRegistered('ai-chat-pro-folders');
 
         $selectColumns = ['id', 'title', 'created_at', 'is_pinned', 'updated_at', 'reference_url', 'doc_name', 'website_url'];
@@ -393,7 +396,7 @@ class AIChatController extends Controller
         }
 
         $apiSearch = base64_encode('https://google.serper.dev/search');
-        $apiSearchId = base64_encode($this->settings_two->serper_api_key ?? '');
+        $apiSearchId = '';
         $lastThreeMessage = null;
         $chat_completions = null;
         if ($chat !== null) {
@@ -541,6 +544,10 @@ class AIChatController extends Controller
             $chatView = 'social-media-agent::chat.includes.chat_area_container';
         }
 
+        if ($website_url === 'crm-assistant' && MarketplaceHelper::isRegistered('crm')) {
+            $chatView = 'crm::assistant.includes.chat_area_container';
+        }
+
         $html = view($chatView, compact(
             'chat',
             'category',
@@ -615,7 +622,7 @@ class AIChatController extends Controller
         $chat = new UserOpenaiChat;
         $website_url = $request->website_url ?? null;
 
-        if (in_array($website_url, ['social-media-agent', 'chatpro-image'], true)) {
+        if (in_array($website_url, ['social-media-agent', 'chatpro-image', 'crm-assistant'], true)) {
             $chat->chat_type = $website_url;
         }
 
@@ -623,7 +630,7 @@ class AIChatController extends Controller
         $chat->team_id = $user?->team_id;
         $chat->chatbot_id = $category->chatbot_id;
         $chat->openai_chat_category_id = $category?->id;
-        $chat->title = $category->name . ' Chat';
+        $chat->title = $chat->chat_type === 'crm-assistant' ? __('CRM Assistant') : $category->name . ' Chat';
         $chat->total_credits = 0;
         $chat->total_words = 0;
         $chat->thread_id = $thread['id'] ?? null;
@@ -653,6 +660,10 @@ class AIChatController extends Controller
             if ($category->first_message !== null) {
                 $output = $category->first_message;
             }
+        }
+
+        if ($chat->chat_type === 'crm-assistant') {
+            $output = __('Hi! I am your CRM Assistant. Ask me anything about your contacts, deals, tasks and invoices — or tell me what to create, update or delete.');
         }
 
         $message->output = $output;
@@ -723,6 +734,10 @@ class AIChatController extends Controller
             $chatView = 'social-media-agent::chat.includes.chat_area_container';
         }
 
+        if ($website_url === 'crm-assistant' && MarketplaceHelper::isRegistered('crm')) {
+            $chatView = 'crm::assistant.includes.chat_area_container';
+        }
+
         $elevenlabsAgentId = null;
         if (setting('default_voice_chat_engine', 'openai') == 'elevenlabs' && MarketplaceHelper::isRegistered('elevenlabs-voice-chat')) {
             $voiceChatbot = app(ElevenLabsVoiceChatService::class)?->fetchVoiceChatbot();
@@ -761,6 +776,12 @@ class AIChatController extends Controller
 
     public function startNewDocChatPdfData(Request $request): JsonResponse
     {
+        $request->validate([
+            'doc'         => ['required', 'file', 'max:10240'],
+            'category_id' => ['required', 'integer', 'exists:openai_chat_category,id'],
+            'type'        => ['required', 'string'],
+        ]);
+
         $category = OpenaiGeneratorChatCategory::where('id', $request->category_id)->firstOrFail();
         $chat = new UserOpenaiChat;
         $chat->user_id = Auth::id();
@@ -841,15 +862,26 @@ class AIChatController extends Controller
             $html2 = view('panel.user.openai_chat.components.chat_sidebar_list', compact('list', 'chat'))->render();
 
             return response()->json(compact('html', 'html2', 'chat'));
-        } catch (Exception $e) {
+        } catch (ValidationException $e) {
             $chat->delete();
 
-            return response()->json(['message' => $e->getMessage()], 500);
+            throw $e;
+        } catch (Throwable $e) {
+            Log::error('Doc chat creation failed', ['error' => $e->getMessage()]);
+            $chat->delete();
+
+            return response()->json(['message' => __('The document could not be processed. Please try a different file.')], 500);
         }
     }
 
     public function startNewDocChatResponseApi(Request $request): JsonResponse
     {
+        $request->validate([
+            'doc'         => ['required', 'file', 'max:10240'],
+            'category_id' => ['required', 'integer', 'exists:openai_chat_category,id'],
+            'type'        => ['required', 'string'],
+        ]);
+
         $user = Auth::user();
         $category = OpenaiGeneratorChatCategory::where('id', $request->category_id)->firstOrFail();
         $chat = new UserOpenaiChat;
@@ -942,10 +974,15 @@ class AIChatController extends Controller
             $html2 = view('panel.user.openai_chat.components.chat_sidebar_list', compact('list', 'chat'))->render();
 
             return response()->json(compact('html', 'html2', 'chat'));
-        } catch (Exception|Throwable $e) {
+        } catch (ValidationException $e) {
             $chat->delete();
 
-            return response()->json(['message' => $e->getMessage()], 500);
+            throw $e;
+        } catch (Exception|Throwable $e) {
+            Log::error('Doc chat creation failed', ['error' => $e->getMessage()]);
+            $chat->delete();
+
+            return response()->json(['message' => __('The document could not be processed. Please try a different file.')], 500);
         }
     }
 
@@ -1073,6 +1110,10 @@ class AIChatController extends Controller
 
         if ($websiteUrl === 'social-media-agent') {
             return $query->where('chat_type', 'social-media-agent');
+        }
+
+        if ($websiteUrl === 'crm-assistant') {
+            return $query->where('chat_type', 'crm-assistant');
         }
 
         // Normal chat: exclude extension-specific chat types
@@ -2114,8 +2155,9 @@ class AIChatController extends Controller
             $message->credits = $total_used_tokens;
             $message->words = 0;
             $message->images = implode(',', $images);
-            $message->pdfName = $request->pdfname;
-            $message->pdfPath = $request->pdfpath;
+            $ownedUpload = $this->ownedUpload($request);
+            $message->pdfName = $ownedUpload?->original_name;
+            $message->pdfPath = $ownedUpload ? route('uploads.show', $ownedUpload) : null;
             $message->save();
             $driver
                 ->input($responsedText)
@@ -2446,8 +2488,9 @@ class AIChatController extends Controller
                 $message->credits = $total_used_tokens;
                 $message->words = 0;
                 $message->images = implode(',', $images);
-                $message->pdfName = $request->pdfname;
-                $message->pdfPath = $request->pdfpath;
+                $ownedUpload = $this->ownedUpload($request);
+                $message->pdfName = $ownedUpload?->original_name;
+                $message->pdfPath = $ownedUpload ? route('uploads.show', $ownedUpload) : null;
                 $message->save();
                 $driver
                     ->input($responsedText)
@@ -2661,8 +2704,9 @@ class AIChatController extends Controller
         $message->credits = countWords($request->response);
         $message->words = countWords($request->response);
         $message->images = $request->images;
-        $message->pdfPath = $request->pdfPath;
-        $message->pdfName = $request->pdfName;
+        $ownedUpload = $this->ownedUpload($request);
+        $message->pdfPath = $ownedUpload ? route('uploads.show', $ownedUpload) : null;
+        $message->pdfName = $ownedUpload?->original_name;
         $message->outputImage = $request->outputImage;
         $message->save();
 
@@ -2671,6 +2715,20 @@ class AIChatController extends Controller
         return response()->json([
             'message' => $message->makeHidden(['hash']),
         ]);
+    }
+
+    private function ownedUpload(Request $request): ?UserUpload
+    {
+        $uploadIds = array_values(array_filter((array) $request->input('upload_ids', []), 'is_string'));
+
+        if ($uploadIds === []) {
+            return null;
+        }
+
+        return UserUpload::query()
+            ->whereKey($uploadIds[0])
+            ->where('user_id', $request->user()?->id)
+            ->first();
     }
 
     public function changeChatTitle(Request $request): JsonResponse
@@ -2715,13 +2773,7 @@ class AIChatController extends Controller
 
     private function getDefaultOpenAiImageModel(): EntityEnum
     {
-        $default = match ($this->settings_two->dalle) {
-            'dalle3' => EntityEnum::DALL_E_3->slug(),
-            'dalle2' => EntityEnum::DALL_E_2->slug(),
-            default  => $this->settings_two->dalle,
-        };
-
-        return EntityEnum::fromSlug($default) ?? EntityEnum::DALL_E_2;
+        return DefaultOpenAiImageModel::resolve($this->settings_two);
     }
 
     // file upload bug fixed
@@ -2759,6 +2811,15 @@ class AIChatController extends Controller
         }
 
         $docContent = file_get_contents($doc->getRealPath());
+
+        if ($docContent === false) {
+            throw new RuntimeException('Invalid file');
+        }
+
+        if ($realExtension === 'pdf' && ! self::hasPdfStructure($docContent)) {
+            throw ValidationException::withMessages(['doc' => __('The file content does not match an allowed type.')]);
+        }
+
         if ($this->containsMaliciousContent($docContent, $realExtension)) {
             throw new RuntimeException('Malicious content detected');
         }
@@ -2790,6 +2851,19 @@ class AIChatController extends Controller
         $this->processEmbeddings($page, $chat_id);
 
         return $resPath;
+    }
+
+    private static function hasPdfStructure(string $contents): bool
+    {
+        $contents = ltrim($contents, "\xEF\xBB\xBF \t\r\n");
+
+        if (! str_starts_with($contents, '%PDF-')) {
+            return false;
+        }
+
+        $tail = substr($contents, -1024);
+
+        return $tail !== false && str_contains($tail, '%%EOF');
     }
 
     private function containsMaliciousContent(string $content, string $extension): bool

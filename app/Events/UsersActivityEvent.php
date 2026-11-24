@@ -16,8 +16,6 @@ class UsersActivityEvent
 
     public $type;
 
-    public $ip;
-
     public $connection;
 
     /**
@@ -25,11 +23,10 @@ class UsersActivityEvent
      *
      * @return void
      */
-    public function __construct($email, $type, $ip, $connection)
+    public function __construct($email, $type, $connection)
     {
         $this->email = $email;
         $this->type = $type;
-        $this->ip = $ip;
         $this->connection = $connection;
     }
 }

@@ -1,5 +1,4 @@
 @php
-    use App\Domains\Entity\Enums\EntityEnum;
     $dalle_select_options = [
         'image_style' => [
             '' => 'None',
@@ -75,9 +74,10 @@
         ],
     ];
    		$dalle_select_options['size'] = [
-            '1024x1024' => '1024 x 1024',
-            '1024x1792' => '1024 x 1792',
-            '1792x1024' => '1792 x 1024',
+            'auto' => 'Auto',
+            '1024x1024' => '1024 x 1024 (Square)',
+            '1536x1024' => '1536 x 1024 (Landscape)',
+            '1024x1536' => '1024 x 1536 (Portrait)',
         ];
         $dalle_select_options['image_number_of_images'] = [
             '1' => '1',
@@ -89,17 +89,11 @@
     id="size"
     container-class="grow"
     label="{{ __('Image resolution') }}"
-    @class([
-        'bg-background focus:ring-foreground/10',
-        EntityEnum::DALL_E_2->value =>
-            $settings_two->dalle === EntityEnum::DALL_E_2->value,
-        EntityEnum::DALL_E_3->value =>
-            $settings_two->dalle === EntityEnum::DALL_E_3->value,
-    ])
+    class="bg-background focus:ring-foreground/10"
     type="select"
     name="size"
     size="lg"
-    @change="if ( $app_is_demo && {{ $settings_two->dalle === EntityEnum::DALL_E_3 ? 1 : 0 }} && $event.target.value !== '1024x1024' ) {
+    @change="if ( $app_is_demo && $event.target.value !== '1024x1024' ) {
 				toastr.info('{{ __('This feature is disabled in Demo version.') }}')
 				return $event.target.value = '1024x1024';
 			}"
@@ -177,13 +171,7 @@
 <x-forms.input
     class:label="text-heading-foreground font-medium"
     id="image_number_of_images"
-    @class([
-        'bg-background focus:ring-foreground/10',
-        EntityEnum::DALL_E_2->value =>
-            $settings_two->dalle === EntityEnum::DALL_E_2->value,
-        EntityEnum::DALL_E_3->value =>
-            $settings_two->dalle === EntityEnum::DALL_E_3->value,
-    ])
+    class="bg-background focus:ring-foreground/10"
     label="{{ __('Number of Images') }}"
     name="image_number_of_images"
     container-class="grow"
@@ -202,7 +190,7 @@
 
 <x-forms.input
     class:label="text-heading-foreground font-medium"
-    class="dall-e-2 bg-background focus:ring-foreground/10"
+    class="bg-background focus:ring-foreground/10"
     id="image_quality"
     label="{{ __('Quality of Images') }}"
     name="image_quality"

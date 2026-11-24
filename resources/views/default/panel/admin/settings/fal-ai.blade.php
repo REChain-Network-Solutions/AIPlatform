@@ -46,13 +46,11 @@
                                 name="fal_ai_api_secret"
                                 multiple
                         >
-                            @foreach (explode(',', setting('fal_ai_api_secret')) as $secret)
-                                <option
-                                        value="{{ $secret }}"
-                                        selected
-                                >{{ $secret }}</option>
-                            @endforeach
                         </select>
+
+                        @if (filled(setting('fal_ai_api_secret', '')))
+                            <small>{{ __('An API key is configured. Leave this field empty to keep it unchanged.') }}</small>
+                        @endif
 
                         <x-alert class="mt-2">
                             <p>

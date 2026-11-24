@@ -1,5 +1,9 @@
 <?php
 
+use App\Services\UpdateChannel;
+
+$beta = UpdateChannel::isBeta();
+
 return [
 
     'tmp_folder_name' => 'tmp',
@@ -10,7 +14,7 @@ return [
 
     'version_baseurl' => 'https://api.liquid-themes.com/magicai/updater-v2/magicaiupdater.json',
 
-    'update_new_base_url' => env('MAGICAI_USER_TYPE', 'customer') == 'tester' ? 'https://api.liquid-themes.com/magicai/update-test' : 'https://api.liquid-themes.com/magicai/updater-v2',
+    'update_new_base_url' => $beta ? UpdateChannel::BETA_BASE_V2 : UpdateChannel::STABLE_BASE_V2,
 
-    'version_new_base_url' => env('MAGICAI_USER_TYPE', 'customer') == 'tester' ? 'https://api.liquid-themes.com/magicai/update-test/magicaiupdater.json' : 'https://api.liquid-themes.com/magicai/updater-v2/magicaiupdater.json',
+    'version_new_base_url' => $beta ? UpdateChannel::BETA_BASE_V2 . '/magicaiupdater.json' : UpdateChannel::STABLE_BASE_V2 . '/magicaiupdater.json',
 ];

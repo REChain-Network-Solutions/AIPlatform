@@ -36,9 +36,11 @@
     <x-button
         class="{{ @twMerge($trigger_base_class, $attributes->get('class:trigger'), $trigger->attributes->get('class')) }}"
         variant="{{ $trigger->attributes->get('variant') ? $trigger->attributes->get('variant') : 'link' }}"
+        size="{{ $trigger->attributes->get('size', '') }}"
+        type="{{ $trigger->attributes->get('type', '') }}"
         x-bind="trigger"
         x-ref="trigger"
-        :attributes="$trigger->attributes"
+        :attributes="$trigger->attributes->except(['variant', 'size', 'type'])"
     >
         {{ $trigger }}
     </x-button>

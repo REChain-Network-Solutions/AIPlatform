@@ -9,6 +9,7 @@ use App\Domains\Entity\BaseDriver;
 use App\Domains\Entity\Enums\EntityEnum;
 use App\Domains\Entity\Facades\Entity;
 use App\Enums\BedrockEngine;
+use App\Extensions\AIChatPro\System\Connectors\ConnectorToolService;
 use App\Extensions\AIChatPro\System\Services\AiChatProService;
 use App\Extensions\AiChatProEntityHighlight\System\Services\EntityHighlightService;
 use App\Extensions\AIChatProFileChat\System\Services\AIFileChatService;
@@ -77,11 +78,22 @@ class StreamService
 
     private array $usedSkills = [];
 
+    private Collection $autoConnectors;
+
+    private Collection $pausedConnectors;
+
+    private array $usedConnectors = [];
+
+    /** @var array<string, bool> tracks connector keys whose badge has been streamed to the client */
+    private array $emittedConnectorKeys = [];
+
     public function __construct(
         Setting $setting,
         SettingTwo $settingTwo,
     ) {
         $this->autoSkills = collect();
+        $this->autoConnectors = collect();
+        $this->pausedConnectors = collect();
         match (setting('default_ai_engine', EngineEnum::OPEN_AI->value)) {
             EngineEnum::ANTHROPIC->value => ApiHelper::setAnthropicKey($setting),
             EngineEnum::GEMINI->value    => ApiHelper::setGeminiKey($setting),
@@ -136,6 +148,49 @@ class StreamService
         echo PHP_EOL;
         echo "event: skills_used\n";
         echo 'data: ' . json_encode(['skills' => $this->usedSkills]);
+        echo "\n\n";
+        $this->safeFlush();
+    }
+
+    private function emitUsedConnectors(): void
+    {
+        if (empty($this->usedConnectors)) {
+            return;
+        }
+
+        $newlyEmitted = [];
+
+        foreach ($this->usedConnectors as $meta) {
+            $key = (string) ($meta['key'] ?? '');
+            if ($key === '' || isset($this->emittedConnectorKeys[$key])) {
+                continue;
+            }
+            $this->emittedConnectorKeys[$key] = true;
+            $newlyEmitted[] = $meta;
+        }
+
+        if (empty($newlyEmitted)) {
+            return;
+        }
+
+        $payload = array_map(function (array $meta): array {
+            $iconName = $meta['icon'] ?? null;
+            $iconSvg = '';
+
+            if (is_string($iconName) && $iconName !== '') {
+                try {
+                    $iconSvg = (string) svg($iconName, 'size-3.5 opacity-70')->toHtml();
+                } catch (Throwable) {
+                    $iconSvg = '';
+                }
+            }
+
+            return $meta + ['icon_svg' => $iconSvg];
+        }, $newlyEmitted);
+
+        echo PHP_EOL;
+        echo "event: connectors_used\n";
+        echo 'data: ' . json_encode(['connectors' => $payload]);
         echo "\n\n";
         $this->safeFlush();
     }
@@ -287,6 +342,33 @@ class StreamService
         $this->autoSkills = collect($chatParams['auto_skills'] ?? []);
         $this->usedSkills = $chatParams['used_skills'] ?? [];
 
+        // Initialize connector tracking
+        $this->autoConnectors = collect($chatParams['auto_connectors'] ?? []);
+        $this->pausedConnectors = collect($chatParams['paused_connectors'] ?? []);
+        $this->usedConnectors = $chatParams['used_connectors'] ?? [];
+
+        if ($this->autoConnectors->isNotEmpty() && class_exists(ConnectorToolService::class)) {
+            $summary = app(ConnectorToolService::class)->systemPromptSummary($this->autoConnectors);
+            if ($summary !== null && $summary !== '') {
+                array_unshift($history, ['role' => 'system', 'content' => $summary]);
+            }
+        }
+
+        if ($this->pausedConnectors->isNotEmpty()) {
+            $pausedLabels = $this->pausedConnectors
+                ->map(fn ($c) => ucfirst((string) $c->type))
+                ->unique()
+                ->values()
+                ->implode(', ');
+
+            $pausedInstruction = 'The user has paused the following connectors: ' . $pausedLabels . '. '
+                . 'You MUST NOT reference, summarize, or surface any data previously fetched from these connectors in your replies, '
+                . 'even if it appears earlier in this conversation. If the user asks about data from a paused connector, '
+                . 'reply that the connector is paused and ask them to resume it. Do not call any tools belonging to these connectors.';
+
+            array_unshift($history, ['role' => 'system', 'content' => $pausedInstruction]);
+        }
+
         $this->tempChatActive = $tempChatActive;
 
         // If temp chat is active, merge with session history
@@ -373,6 +455,11 @@ class StreamService
             }
         }
 
+        // Pre-build connector tools early so they can be merged with extension tools
+        if ($this->autoConnectors->isNotEmpty() && class_exists(ConnectorToolService::class) && $ai_engine === EngineEnum::OPEN_AI->value) {
+            $earlySkillTools = array_merge($earlySkillTools, app(ConnectorToolService::class)->openAiTools($this->autoConnectors));
+        }
+
         if ($chat_type === 'chatPro' && MarketplaceHelper::isRegistered('ai-chat-pro')) {
             if (! auth()->check()) {
                 $this->guest = true;
@@ -381,7 +468,7 @@ class StreamService
             $pass = false;
             if (MarketplaceHelper::isRegistered('ai-chat-pro-file-chat') && ((int) setting('chatpro_file_chat_allowed', 1) === 1)) {
                 $service = new AIFileChatService(
-                    request()?->input('pdfpath'),
+                    request()?->input('upload_ids', []),
                     request()?->input('chat_id')
                 );
 
@@ -436,6 +523,31 @@ class StreamService
                 EngineEnum::GEMINI->value    => SkillToolService::geminiTools($this->autoSkills),
                 default                      => [],
             };
+        }
+
+        // Merge connector tools alongside skill tools
+        if ($this->autoConnectors->isNotEmpty() && class_exists(ConnectorToolService::class)) {
+            $connectorService = app(ConnectorToolService::class);
+            $connectorTools = match ($ai_engine) {
+                EngineEnum::OPEN_AI->value   => $connectorService->openAiTools($this->autoConnectors),
+                EngineEnum::ANTHROPIC->value => $connectorService->anthropicTools($this->autoConnectors),
+                EngineEnum::GEMINI->value    => $connectorService->geminiTools($this->autoConnectors),
+                default                      => [],
+            };
+
+            if ($ai_engine === EngineEnum::GEMINI->value) {
+                // Gemini wraps declarations in a single block; merge functionDeclarations together.
+                if (! empty($connectorTools) && ! empty($skillTools)) {
+                    $skillTools[0]['functionDeclarations'] = array_merge(
+                        $skillTools[0]['functionDeclarations'] ?? [],
+                        $connectorTools[0]['functionDeclarations'] ?? []
+                    );
+                } elseif (! empty($connectorTools)) {
+                    $skillTools = $connectorTools;
+                }
+            } else {
+                $skillTools = array_merge($skillTools, $connectorTools);
+            }
         }
 
         return match ($ai_engine) {
@@ -1534,8 +1646,94 @@ class StreamService
                             }
 
                             if ($call instanceof OutputFunctionToolCall) {
-                                $functionName = $call?->name;
+                                $functionName = (string) ($call?->name ?? '');
                                 $argumentsString = $call?->arguments;
+
+                                // Connector tool calls: execute the connector, inject result, restream
+                                if (str_starts_with($functionName, 'connector_') && class_exists(ConnectorToolService::class)) {
+                                    $connectorService = app(ConnectorToolService::class);
+                                    $connectorArgs = json_decode($argumentsString ?: '{}', true) ?: [];
+
+                                    if (Helper::appIsDemo()) {
+                                        $connectorResult = ['error' => 'This feature is disabled in demo mode.'];
+                                    } else {
+                                        try {
+                                            $connectorResult = $connectorService->handle($functionName, $connectorArgs, $this->autoConnectors) ?? ['error' => 'Connector not available.'];
+                                        } catch (Throwable $e) {
+                                            Log::error('[connectors] StreamService(OpenAI): tool call threw', [
+                                                'function' => $functionName,
+                                                'message'  => $e->getMessage(),
+                                            ]);
+                                            $connectorResult = ['error' => $e->getMessage()];
+                                        }
+                                    }
+
+                                    $connectorMeta = $connectorService->getMeta($functionName, $this->autoConnectors);
+                                    if ($connectorMeta) {
+                                        $this->usedConnectors[] = $connectorMeta;
+                                        $this->emitUsedConnectors();
+                                    }
+
+                                    $resultJson = json_encode($connectorResult, JSON_UNESCAPED_SLASHES);
+                                    $history[] = [
+                                        'role'    => 'system',
+                                        'content' => '[Connector: ' . ($connectorMeta['name'] ?? $functionName) . "]\nThe user called this connector. Use the data below to answer their question. Do not invent facts that are not in the data.\n\nResult:\n" . $resultJson,
+                                    ];
+                                    $history = array_values(array_filter($history, function ($msg) {
+                                        return ! str_contains($msg['content'] ?? '', '{"title":"short descriptive title');
+                                    }));
+                                    $this->isFirstMessage = false;
+
+                                    $connectorFollowUpParts = [];
+                                    if ($baseInstructions !== '') {
+                                        $connectorFollowUpParts[] = $baseInstructions;
+                                    }
+                                    $connectorFollowUpParts[] = '[Connector: ' . ($connectorMeta['name'] ?? $functionName) . "]\n"
+                                        . "The user invoked this connector. Use ONLY the JSON result below to answer their question — do not invent data, and do not say the data is unavailable. Summarize clearly. Do not call any tools.\n\n"
+                                        . "Result JSON:\n" . $resultJson;
+                                    $connectorFollowUpInstructions = implode("\n\n---\n\n", $connectorFollowUpParts);
+
+                                    $connectorNonSystemInput = array_values(array_filter($history, fn ($msg) => ($msg['role'] ?? '') !== 'system'));
+
+                                    $connectorOptions = [
+                                        'model'        => $model,
+                                        'stream'       => true,
+                                        'instructions' => $connectorFollowUpInstructions,
+                                        'input'        => $connectorNonSystemInput,
+                                        'temperature'  => 1.0,
+                                    ];
+                                    if ($driver->enum()->isReasoningModel()) {
+                                        if (in_array($driver->enum(), [EntityEnum::GPT_5_PRO, EntityEnum::GPT_5_2_PRO])) {
+                                            $effort = setting('openai_reasoning_models_effort', 'high');
+                                            $connectorOptions['reasoning']['effort'] = in_array($effort, ['medium', 'high', 'xhigh']) ? $effort : 'high';
+                                        } else {
+                                            $connectorOptions['reasoning']['effort'] = $this->resolveReasoningEffort($driver->enum());
+                                        }
+                                    }
+
+                                    $connectorStream = OpenAI::responses()->createStreamed($connectorOptions);
+
+                                    foreach ($connectorStream as $connectorResponse) {
+                                        if (! isset($connectorResponse->event)) {
+                                            continue;
+                                        }
+                                        if (connection_aborted()) {
+                                            break;
+                                        }
+                                        if (isset($connectorResponse->response->delta) && $connectorResponse->event === 'response.output_text.delta') {
+                                            $text = $connectorResponse->response->delta;
+                                            $messageFix = str_replace(["\r\n", "\r", "\n"], '<br/>', $text);
+                                            $output .= $messageFix;
+                                            $responsedText .= $text;
+                                            $total_used_tokens += countWords($text);
+                                            $this->emitStreamChunk($messageFix);
+                                        }
+                                    }
+
+                                    $hasTextOutput = true;
+
+                                    continue;
+                                }
 
                                 // Skill tool calls: inject instructions and stream a second response
                                 if (str_starts_with($functionName, 'use_skill_') && class_exists(SkillToolService::class)) {
@@ -2066,6 +2264,81 @@ class StreamService
                         } elseif (isset($jsonData->type) && $jsonData->type === 'content_block_stop' && $toolUseBlock !== null) {
                             // Tool use complete — handle skill call
                             $functionName = $toolUseBlock->name ?? '';
+                            if (str_starts_with($functionName, 'connector_') && class_exists(ConnectorToolService::class)) {
+                                $connectorService = app(ConnectorToolService::class);
+                                $connectorArgs = json_decode($toolUseInput ?: '{}', true) ?: [];
+
+                                if (Helper::appIsDemo()) {
+                                    $connectorResult = ['error' => 'This feature is disabled in demo mode.'];
+                                } else {
+                                    try {
+                                        $connectorResult = $connectorService->handle($functionName, $connectorArgs, $this->autoConnectors) ?? ['error' => 'Connector not available.'];
+                                    } catch (Throwable $e) {
+                                        $connectorResult = ['error' => $e->getMessage()];
+                                    }
+                                }
+
+                                $connectorMeta = $connectorService->getMeta($functionName, $this->autoConnectors);
+                                if ($connectorMeta) {
+                                    $this->usedConnectors[] = $connectorMeta;
+                                    $this->emitUsedConnectors();
+                                }
+
+                                $resultJson = json_encode($connectorResult, JSON_UNESCAPED_SLASHES);
+
+                                $followUpMessages = array_values($historyMessages);
+                                $followUpMessages[] = [
+                                    'role'    => 'assistant',
+                                    'content' => [
+                                        ['type' => 'tool_use', 'id' => $toolUseBlock->id, 'name' => $functionName, 'input' => json_decode($toolUseInput ?: '{}', true) ?: new stdClass],
+                                    ],
+                                ];
+                                $followUpMessages[] = [
+                                    'role'    => 'user',
+                                    'content' => [
+                                        ['type' => 'tool_result', 'tool_use_id' => $toolUseBlock->id, 'content' => $resultJson],
+                                    ],
+                                ];
+
+                                $followUpData = $client->setStream(true)
+                                    ->setSystem($system)
+                                    ->setTools([])
+                                    ->setMessages($followUpMessages)
+                                    ->stream()
+                                    ->body();
+
+                                foreach (explode("\n", $followUpData) as $followChunk) {
+                                    if (strlen($followChunk) < 6) {
+                                        continue;
+                                    }
+                                    if (! Str::contains($followChunk, 'data: ')) {
+                                        continue;
+                                    }
+                                    $followChunk = str_replace('data: {', '{', $followChunk);
+
+                                    try {
+                                        $followJson = json_decode($followChunk, false, 512, JSON_THROW_ON_ERROR);
+                                    } catch (JsonException) {
+                                        continue;
+                                    }
+                                    if (isset($followJson->delta->text)) {
+                                        $message = $followJson->delta->text;
+                                        $messageFix = str_replace(["\r\n", "\r", "\n"], '<br/>', $message);
+                                        $output .= $messageFix;
+                                        $responsedText .= $message;
+                                        $total_used_tokens += countWords($message);
+                                        $this->emitStreamChunk($messageFix);
+                                    }
+                                    if (connection_aborted()) {
+                                        break;
+                                    }
+                                }
+
+                                $toolUseBlock = null;
+
+                                continue;
+                            }
+
                             if (str_starts_with($functionName, 'use_skill_') && class_exists(SkillToolService::class)) {
                                 $skillInstructions = SkillToolService::handleSkillCall($functionName, $this->autoSkills);
                                 $skillMeta = SkillToolService::getSkillMeta($functionName, $this->autoSkills);
@@ -2543,6 +2816,92 @@ class StreamService
                                     }
                                 } catch (Throwable) {
                                     // Follow-up failed — images still load, text is skipped
+                                }
+
+                                continue;
+                            }
+
+                            if (str_starts_with($functionName, 'connector_') && class_exists(ConnectorToolService::class)) {
+                                $connectorService = app(ConnectorToolService::class);
+                                $connectorArgs = is_array($part['functionCall']['args'] ?? null) ? $part['functionCall']['args'] : [];
+
+                                if (Helper::appIsDemo()) {
+                                    $connectorResult = ['error' => 'This feature is disabled in demo mode.'];
+                                } else {
+                                    try {
+                                        $connectorResult = $connectorService->handle($functionName, $connectorArgs, $this->autoConnectors) ?? ['error' => 'Connector not available.'];
+                                    } catch (Throwable $e) {
+                                        $connectorResult = ['error' => $e->getMessage()];
+                                    }
+                                }
+
+                                $connectorMeta = $connectorService->getMeta($functionName, $this->autoConnectors);
+                                if ($connectorMeta) {
+                                    $this->usedConnectors[] = $connectorMeta;
+                                    $this->emitUsedConnectors();
+                                }
+
+                                $functionCallData = $part['functionCall'];
+                                $functionCallData['args'] = ! empty($functionCallData['args']) && is_array($functionCallData['args'])
+                                    ? (object) $functionCallData['args']
+                                    : new stdClass;
+                                $connectorModelPart = ['functionCall' => $functionCallData];
+                                if (isset($part['thoughtSignature'])) {
+                                    $connectorModelPart['thoughtSignature'] = $part['thoughtSignature'];
+                                }
+
+                                $followUpHistory = $newhistory;
+                                $followUpHistory[] = [
+                                    'role'  => 'model',
+                                    'parts' => [$connectorModelPart],
+                                ];
+                                $followUpHistory[] = [
+                                    'role'  => 'user',
+                                    'parts' => [['functionResponse' => [
+                                        'name'     => $functionName,
+                                        'id'       => $functionId,
+                                        'response' => ['result' => $connectorResult],
+                                    ]]],
+                                ];
+
+                                $followUpClient = app(GeminiService::class);
+                                $followUpResponse = $followUpClient
+                                    ->setHistory($followUpHistory)
+                                    ->setTools([])
+                                    ->streamGenerateContent($driver->enum()->value);
+
+                                while (! $followUpResponse->getBody()->eof()) {
+                                    $followLine = trim($followUpClient->readLine($followUpResponse->getBody()));
+                                    if ($followLine === '' || $followLine === '[' || $followLine === ']' || $followLine === ',') {
+                                        continue;
+                                    }
+
+                                    try {
+                                        $followDecoded = json_decode($followLine, true, 512, JSON_THROW_ON_ERROR);
+                                    } catch (JsonException) {
+                                        continue;
+                                    }
+                                    if (isset($followDecoded['error'])) {
+                                        break;
+                                    }
+                                    if (isset($followDecoded['candidates'])) {
+                                        foreach ($followDecoded['candidates'] as $followCandidate) {
+                                            $followParts = $followCandidate['content']['parts'] ?? [];
+                                            foreach ($followParts as $followPart) {
+                                                $followText = $followPart['text'] ?? '';
+                                                if ($followText !== '') {
+                                                    $messageFix = str_replace(["\r\n", "\r", "\n"], '<br/>', $followText);
+                                                    $output .= $messageFix;
+                                                    $responsedText .= $followText;
+                                                    $total_used_tokens += countWords($followText);
+                                                    $this->emitStreamChunk($messageFix);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (connection_aborted()) {
+                                        break;
+                                    }
                                 }
 
                                 continue;
@@ -3171,6 +3530,10 @@ class StreamService
 
         if (! empty($this->usedSkills)) {
             $main_message->used_skills = $this->usedSkills;
+        }
+
+        if (! empty($this->usedConnectors)) {
+            $main_message->used_connectors = $this->usedConnectors;
         }
 
         $main_message->save();

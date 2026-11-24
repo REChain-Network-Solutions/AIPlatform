@@ -448,7 +448,7 @@ class UserController extends Controller
 
         $apiSearch = base64_encode('https://google.serper.dev/search');
 
-        $apiSearchId = base64_encode($settings2->serper_api_key);
+        $apiSearchId = '';
 
         if ($slug == 'ai_vision' || $slug == 'ai_pdf' || $slug == 'ai_chat_image' || $slug == 'ai_realtime_voice_chat') {
 
@@ -749,6 +749,9 @@ class UserController extends Controller
                             ->where('slug', 'not like', 'ai-chat-pro-image-chat-%');
                     });
             })
+            ->when(Schema::hasColumn('user_openai', 'is_ai_photo_studio'), function ($query) {
+                $query->where('is_ai_photo_studio', false);
+            })
             ->get();
 
         // Get all videos
@@ -810,10 +813,10 @@ class UserController extends Controller
         $direction = $sortAscDesc === 'desc' ? 'sortByDesc' : 'sortBy';
 
         return match ($sort) {
-            'title' => $items->$direction(fn ($item) => $item->input ?? ''),
+            'title'                 => $items->$direction(fn ($item) => $item->input ?? ''),
             'created_at', 'credits' => $items->$direction($sort),
-            'openai_id' => $items->$direction(fn ($item) => $item->generator->type ?? ''),
-            default     => $items
+            'openai_id'             => $items->$direction(fn ($item) => $item->generator->type ?? ''),
+            default                 => $items
         };
     }
 
@@ -850,6 +853,9 @@ class UserController extends Controller
             ->where('folder_id', $folderID)
             ->whereHas('generator', function ($q) {
                 $q->where('type', 'video');
+            })
+            ->when(Schema::hasColumn('user_openai', 'is_ai_photo_studio'), function ($q) {
+                $q->where('is_ai_photo_studio', false);
             })
             ->with(['generator' => function ($q) {
                 $q->select('id', 'type', 'title');
@@ -1892,7 +1898,20 @@ class UserController extends Controller
         $anthropic_api_keys = $user?->anthropic_api_keys;
         $gemini_api_keys = $user?->gemini_api_keys;
 
-        return view('panel.user.apiKeys.index', compact('list', 'anthropic_api_keys', 'gemini_api_keys'));
+        $hasOpenAiApiKeys = filled($list);
+        $hasAnthropicApiKeys = filled($anthropic_api_keys);
+        $hasGeminiApiKeys = filled($gemini_api_keys);
+
+        $list = $anthropic_api_keys = $gemini_api_keys = '';
+
+        return view('panel.user.apiKeys.index', compact(
+            'list',
+            'anthropic_api_keys',
+            'gemini_api_keys',
+            'hasOpenAiApiKeys',
+            'hasAnthropicApiKeys',
+            'hasGeminiApiKeys',
+        ));
     }
 
     public function apiKeysSave(Request $request)
@@ -1910,9 +1929,15 @@ class UserController extends Controller
 
         $user = Auth::user();
         if ($user) {
-            $user->api_keys = $request->api_keys;
-            $user->anthropic_api_keys = $request->anthropic_api_keys;
-            $user->gemini_api_keys = $request->gemini_api_keys;
+            if ($request->filled('api_keys')) {
+                $user->api_keys = $request->api_keys;
+            }
+            if ($request->filled('anthropic_api_keys')) {
+                $user->anthropic_api_keys = $request->anthropic_api_keys;
+            }
+            if ($request->filled('gemini_api_keys')) {
+                $user->gemini_api_keys = $request->gemini_api_keys;
+            }
             $user->save();
         }
 

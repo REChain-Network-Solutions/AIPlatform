@@ -462,7 +462,7 @@ function generateKeywords() {
 				type: 'post',
 				url: atob( guest_id ),
 				headers: {
-					'Authorization': 'Bearer ' + atob( guest_event_id ) + atob( guest_look_id ) + atob( guest_product_id ),
+					'X-MagicAI-Frontend-Streaming-Disabled': '1',
 					'Content-Type': 'application/json'
 				},
 				data: JSON.stringify( {
@@ -558,7 +558,7 @@ function generateTitles() {
 			type: 'post',
 			url: atob( guest_id ),
 			headers: {
-				'Authorization': 'Bearer ' + atob( guest_event_id ) + atob( guest_look_id ) + atob( guest_product_id ),
+				'X-MagicAI-Frontend-Streaming-Disabled': '1',
 				'Content-Type': 'application/json'
 			},
 			data: JSON.stringify( {
@@ -654,7 +654,7 @@ function generateOutlines() {
 			type: 'post',
 			url: atob( guest_id ),
 			headers: {
-				'Authorization': 'Bearer ' + atob( guest_event_id ) + atob( guest_look_id ) + atob( guest_product_id ),
+				'X-MagicAI-Frontend-Streaming-Disabled': '1',
 				'Content-Type': 'application/json'
 			},
 			data: JSON.stringify( {
@@ -858,7 +858,7 @@ async function generateArticle() {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					Authorization: 'Bearer ' + atob( guest_event_id ) + atob( guest_look_id ) + atob( guest_product_id ),
+					'X-MagicAI-Frontend-Streaming-Disabled': '1',
 				},
 				body: JSON.stringify( {
 					model: openai_model,

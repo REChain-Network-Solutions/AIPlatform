@@ -57,17 +57,11 @@
                             name="stable_diffusion_api_key"
                             multiple
                         >
-                            @foreach (explode(',', $settings_two->stable_diffusion_api_key) ?? [] as $secret)
-                                {{-- if null then pass --}}
-                                @if ($secret == null)
-                                    @continue
-                                @endif
-                                <option
-                                    value="{{ $secret }}"
-                                    selected
-                                >{{ $secret }}</option>
-                            @endforeach
                         </select>
+
+                        @if (filled($settings_two->stable_diffusion_api_key ?? null))
+                            <small>{{ __('An API key is configured. Leave this field empty to keep it unchanged.') }}</small>
+                        @endif
 
                         <x-alert class="mt-2">
                             <p>

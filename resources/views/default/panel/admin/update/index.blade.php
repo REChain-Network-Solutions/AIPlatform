@@ -6,6 +6,7 @@
 		<div class="container-xl">
 			<div class="col-12 md:px-10">
 				@if ($app_is_not_demo)
+					@php($isBetaChannel = \App\Services\UpdateChannel::isBeta())
 					<!-- Update Channel Selector -->
 					<div class="card mb-2 shadow-sm">
 						<div class="card-body p-6">
@@ -14,7 +15,7 @@
 									<h5 class="text-heading font-semibold mb-2">{{ __('Update Channel') }}</h5>
 									<p class="text-sm text-gray-600 dark:text-gray-400 mb-0">
                                         <span id="channel_description">
-                                            @if(env('MAGICAI_USER_TYPE', '') === 'tester')
+                                            @if($isBetaChannel)
 												{{ __('You are currently on the Beta channel. You will receive early access to new features and updates.') }}
 											@else
 												{{ __('You are currently on the Stable channel. You will receive thoroughly tested updates.') }}
@@ -30,7 +31,7 @@
 												type="checkbox"
 												id="beta_toggle"
 												class="sr-only peer"
-												@if(env('MAGICAI_USER_TYPE', '') === 'tester') checked @endif
+												@if($isBetaChannel) checked @endif
 											>
 											<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600"></div>
 										</label>
@@ -45,7 +46,7 @@
 					<div
 						class="card mb-6 bg-amber-50 border-l-4 border-amber-400 dark:bg-amber-900/20"
 						id="beta_warning"
-						style="display: {{ env('MAGICAI_USER_TYPE', '') === 'tester' ? 'block' : 'none' }};"
+						style="display: {{ $isBetaChannel ? 'block' : 'none' }};"
 					>
 						<div class="card-body p-6">
 							<div class="flex gap-4">
@@ -175,7 +176,7 @@
 
 			$.ajax({
 				type: 'POST',
-				url: '{{ route('dashboard.update.channel.convert') }}',
+				url: '{{ route('dashboard.admin.update.channel.convert') }}',
 				data: {
 					_token: '{{ csrf_token() }}',
 					enable_beta: enableBeta

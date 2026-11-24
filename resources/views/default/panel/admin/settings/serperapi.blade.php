@@ -48,8 +48,8 @@
                         id="serper_api_key"
                         type="text"
                         name="serper_api_key"
-                        value="{{ $settings_two->serper_api_key }}"
-                        required
+                        value=""
+                        placeholder="{{ filled($settings_two->serper_api_key) ? __('Configured — leave empty to keep unchanged') : __('Enter API key') }}"
                     >
                     <x-alert class="mt-2">
                         <p>

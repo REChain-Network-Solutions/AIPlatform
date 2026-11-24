@@ -76,9 +76,8 @@ class AuthenticationController extends Controller
         $request->authenticate();
         $request->session()->regenerate();
         $user = Auth::user();
-        $ip = $request->ip();
         $connection = $request->header('User-Agent');
-        event(new UsersActivityEvent($user?->email, $user?->type, $ip, $connection));
+        event(new UsersActivityEvent($user?->email, $user?->type, $connection));
 
         return redirect()->intended(RouteServiceProvider::HOME);
     }
@@ -116,9 +115,8 @@ class AuthenticationController extends Controller
             $user->updateCredits(setting('freeCreditsUponRegistration', User::getFreshCredits()));
         }
         Auth::login($user);
-        $ip = $request->ip();
         $connection = $request->header('User-Agent');
-        event(new UsersActivityEvent($user->email, $user->type, $ip, $connection));
+        event(new UsersActivityEvent($user->email, $user->type, $connection));
 
         return redirect('/dashboard/user');
     }
@@ -155,9 +153,8 @@ class AuthenticationController extends Controller
                 $user->updateCredits(setting('freeCreditsUponRegistration', User::getFreshCredits()));
             }
             Auth::login($user);
-            $ip = $request->ip();
             $connection = $request->header('User-Agent');
-            event(new UsersActivityEvent($user->email, $user->type, $ip, $connection));
+            event(new UsersActivityEvent($user->email, $user->type, $connection));
         }
 
         return redirect('/dashboard/user');
@@ -301,7 +298,7 @@ class AuthenticationController extends Controller
             Auth::login($user);
 
             // Log user activity (for analytics or auditing)
-            event(new UsersActivityEvent($user->email, $user->type, $request->ip(), $request->header('User-Agent')));
+            event(new UsersActivityEvent($user->email, $user->type, $request->header('User-Agent')));
         } else {
             return response()->json([
                 'errors' => ['We have sent you an email for account confirmation. Please confirm your account to continue.'],

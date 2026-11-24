@@ -137,9 +137,10 @@
 
 					(async function sendChunks() {
 						console.log('Starting chunk processing...');
+						let chunkIndex = 0;
 						try {
-							for (let index = 0; index < chunks.length; index++) {
-								const chunk = Object.fromEntries(chunks[index]);
+							for (; chunkIndex < chunks.length; chunkIndex++) {
+								const chunk = Object.fromEntries(chunks[chunkIndex]);
 								await $.ajax({
 									type: "post",
 									headers: {
@@ -159,7 +160,13 @@
 							toastr.success("{{ __('All translations saved successfully!') }}");
 						} catch (error) {
 							console.error('Error processing chunk:', error);
-							toastr.error("{{ __('An error occurred while saving translations.') }}");
+							const serverMessage = error?.responseJSON?.message || error?.responseJSON?.errors?.json?.[0];
+							toastr.error(
+								"{{ __('An error occurred while saving translations.') }}" +
+								' (' + (chunkIndex + 1) + '/' + chunks.length + ')' +
+								(serverMessage ? ' ' + serverMessage : '')
+							);
+							return;
 						} finally {
 							document.getElementById("save_all").disabled = false;
 							document.getElementById("save_all").innerHTML = "Save";

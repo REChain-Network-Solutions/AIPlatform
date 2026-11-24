@@ -352,6 +352,7 @@ class AssistantService
 
             $blockSubstrings = [
                 'realtime',    // gpt-realtime*, gpt-4o*-realtime-*
+                'gpt-live',    // gpt-live-1*, full-duplex voice
                 'audio',       // gpt-audio*, gpt-4o*-audio-*
                 'search',      // gpt-4o*-search-*
                 'transcribe',  // gpt-4o*-transcribe*

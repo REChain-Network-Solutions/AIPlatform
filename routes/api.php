@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\SharedCreditApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -41,6 +42,12 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::middleware('auth:api')->prefix('v1/shared-credit')->group(function () {
+    Route::get('/balance', [SharedCreditApiController::class, 'balance']);
+    Route::get('/history', [SharedCreditApiController::class, 'history']);
+    Route::get('/cost/{entity}', [SharedCreditApiController::class, 'cost']);
+});
+
 Route::middleware('auth:api')->group(function () {
 
     Route::prefix('auth')->group(function () {
@@ -67,7 +74,6 @@ Route::middleware('auth:api')->group(function () {
 
     Route::prefix('aichat')->group(function () {
 
-        Route::post('/stream-test', 'App\Http\Controllers\Api\AIChatController@developerStreamTest');
         Route::post('/change-chat-title', 'App\Http\Controllers\Api\AIChatController@changeChatTitle');
 
         Route::prefix('chat-templates')->group(function () {
@@ -98,7 +104,6 @@ Route::middleware('auth:api')->group(function () {
 
     Route::prefix('airealtimechat')->group(function () {
 
-        Route::post('/stream-test', 'App\Http\Controllers\Api\AIRealTimeChatController@developerStreamTest');
         Route::post('/change-chat-title', 'App\Http\Controllers\Api\AIRealTimeChatController@changeChatTitle');
 
         Route::prefix('chat-templates')->group(function () {
@@ -126,7 +131,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/recent-chats', 'App\Http\Controllers\Api\AIRealTimeChatController@recentChats');
         Route::post('/search-recent-chats', 'App\Http\Controllers\Api\AIRealTimeChatController@searchRecentChats');
 
-        Route::get('/websocket-credentials', 'App\Http\Controllers\Api\AIRealTimeChatController@getWebsocketCredentials');
+        Route::get('/websocket-credentials', 'App\Http\Controllers\Api\AIRealTimeChatController@getWebsocketCredentials')
+            ->middleware('throttle:10,1');
         Route::post('/save-conversation', 'App\Http\Controllers\Api\AIRealTimeChatController@saveConversation');
 
     });

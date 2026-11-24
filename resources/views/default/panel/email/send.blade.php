@@ -67,6 +67,9 @@
                     <option value="cancelled"{{ old('customer_group') == 'cancelled' ? 'selected' : '' }}>
                         {{ __('Purchased but then cancelled') }}
                     </option>
+                    <option value="shared_credit_users"{{ old('customer_group') == 'shared_credit_users' ? 'selected' : '' }}>
+                        {{ __('Shared credit users') }}
+                    </option>
                 </select>
             </div>
         </div>

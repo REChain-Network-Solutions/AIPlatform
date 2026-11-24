@@ -4,18 +4,19 @@ namespace App\Services\Ai\Images;
 
 use App\Domains\Entity\Enums\EntityEnum;
 use App\Helpers\Classes\ApiHelper;
+use App\Helpers\Classes\DefaultOpenAiImageModel;
 use App\Services\Ai\Images\Contracts\ImageGeneratorInterface;
 use App\Services\Ai\OpenAI\Image\CreateImageEditService;
 use App\Services\Ai\OpenAI\Image\CreateImageService;
 use BadMethodCallException;
 use InvalidArgumentException;
-use OpenAI\Laravel\Facades\OpenAI;
 
 class OpenAIImageService implements ImageGeneratorInterface
 {
     public function generate(array $options): array
     {
-        $model = EntityEnum::fromSlug($options['model'] ?? '') ?? EntityEnum::DALL_E_2;
+        $model = EntityEnum::tryFrom(str_replace('__', '.', (string) ($options['model'] ?? '')))
+            ?? DefaultOpenAiImageModel::FALLBACK;
         $prompt = $options['prompt'] ?? throw new InvalidArgumentException(__('Prompt is required'));
         $imageReference = $options['image_reference'] ?? null;
         $background = $options['background'] ?? null;
@@ -26,9 +27,8 @@ class OpenAIImageService implements ImageGeneratorInterface
         $fullPrompt = $this->buildPrompt($prompt, $options);
 
         $data = [
-            'model'           => $model->value,
-            'prompt'          => $fullPrompt,
-            'response_format' => 'b64_json',
+            'model'  => $model->value,
+            'prompt' => $fullPrompt,
         ];
 
         if ($size) {
@@ -81,44 +81,34 @@ class OpenAIImageService implements ImageGeneratorInterface
         $images = [];
 
         ApiHelper::setOpenAiKey();
-        $isGptImage = in_array($model, [EntityEnum::GPT_IMAGE_1, EntityEnum::GPT_IMAGE_1_5, EntityEnum::GPT_IMAGE_2], true);
 
-        if ($isGptImage || ($model === EntityEnum::DALL_E_2 && $imageRef)) {
-
-            if ($imageRef) {
-                $imagesToSet = is_array($imageRef) ? $imageRef : [$imageRef];
-                $service = app(CreateImageEditService::class)
-                    ->setImages($imagesToSet)
-                    ->setModel($model->value)
-                    ->setPrompt($prompt);
-            } else {
-                $service = app(CreateImageService::class)
-                    ->setModel($model->value)
-                    ->setPrompt($prompt);
-            }
-
-            if (isset($data['size'])) {
-                $service->setSize($data['size']);
-            }
-
-            if (isset($data['background'])) {
-                $service->setBackground($data['background']);
-            }
-
-            if (isset($data['quality'])) {
-                $service->setQuality($data['quality']);
-            }
-
-            $base64 = $service->generateForAi();
-
-            if ($base64) {
-                $images[] = base64_decode($base64);
-            }
+        if ($imageRef) {
+            $service = app(CreateImageEditService::class)
+                ->setImages(is_array($imageRef) ? $imageRef : [$imageRef])
+                ->setModel($model->value)
+                ->setPrompt($prompt);
         } else {
-            $response = OpenAI::images()->create($data);
-            foreach ($response['data'] as $imageData) {
-                $images[] = base64_decode($imageData['b64_json']);
-            }
+            $service = app(CreateImageService::class)
+                ->setModel($model->value)
+                ->setPrompt($prompt);
+        }
+
+        if (isset($data['size'])) {
+            $service->setSize($data['size']);
+        }
+
+        if (isset($data['background'])) {
+            $service->setBackground($data['background']);
+        }
+
+        if (isset($data['quality'])) {
+            $service->setQuality($data['quality']);
+        }
+
+        $base64 = $service->generateForAi();
+
+        if ($base64) {
+            $images[] = base64_decode($base64);
         }
 
         return $images;

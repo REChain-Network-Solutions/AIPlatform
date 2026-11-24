@@ -33,6 +33,10 @@ class PlanHelper
 
     public static function planMenuCheck($plan, ?string $key = null): bool
     {
+        if (Auth::user()?->isAdmin()) {
+            return true;
+        }
+
         if (! $plan) {
             return true;
         }

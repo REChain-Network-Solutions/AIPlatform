@@ -8,9 +8,9 @@ use RuntimeException;
 
 trait HasInputMinute
 {
-    protected int $inputMinute;
+    protected float $inputMinute;
 
-    public function getInputMinute(): int
+    public function getInputMinute(): float
     {
         if (! isset($this->inputMinute)) {
             throw new RuntimeException('Input is not provided');
@@ -19,7 +19,7 @@ trait HasInputMinute
         return $this->inputMinute;
     }
 
-    public function inputMinute(int $inputMinute): static
+    public function inputMinute(float $inputMinute): static
     {
         $this->inputMinute = $inputMinute;
 

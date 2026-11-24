@@ -38,13 +38,17 @@ class GeminiService
 
     public function generateContent($entity = EntityEnum::GEMINI_3_FLASH->value): PromiseInterface|Response
     {
-
         ApiHelper::setGeminiKey();
 
         $client = $this->client();
         $body = [
             'contents' => $this->getHistory(),
         ];
+
+        if (! empty($this->tools)) {
+            $body['tools'] = $this->tools;
+            $body['toolConfig'] = ['functionCallingConfig' => ['mode' => 'AUTO']];
+        }
 
         $url = sprintf('%s%s:generateContent?key=%s', self::ENDPOINT, $entity, config('gemini.api_key'));
 

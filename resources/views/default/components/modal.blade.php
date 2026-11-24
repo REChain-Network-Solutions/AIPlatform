@@ -87,9 +87,9 @@
                         <button
                             {{ $attributes->twMergeFor('close-btn', $modal_close_btn_base_class) }}
                             type="button"
-                            @click.prevent="modalOpen = false"
+                            @click.prevent.stop="if ( !modalLocked ) { modalOpen = false }"
                         >
-                            <x-tabler-x class="size-5" />
+                            <x-tabler-x {{ $attributes->twMergeFor('close-btn-icon', 'size-5') }} />
                         </button>
                     </div>
                 @endif
@@ -112,3 +112,41 @@
 @endif
 @endif
 </div>
+
+@pushOnce('script')
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('liquidModal', () => ({
+                modalLocked: false,
+                _modalOpen: false,
+
+                get modalOpen() {
+                    return this._modalOpen;
+                },
+                set modalOpen(value) {
+                    if (this.modalLocked) return;
+
+                    this._modalOpen = value;
+
+                    this.$dispatch('modal-toggle', {
+                        el: this.$el,
+                        open: value
+                    });
+                },
+
+                toggleModal() {
+                    if (this.modalLocked) return;
+                    @if ($disableModal)
+                        toastr.info('{{ $disableModalMessage }}')
+                    @else
+                        this.modalOpen = !this.modalOpen
+                    @endif
+                },
+
+                lockUnlockModal(lock) {
+                    this.modalLocked = lock;
+                }
+            }))
+        })
+    </script>
+@endPushOnce

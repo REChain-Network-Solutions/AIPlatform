@@ -59,6 +59,8 @@ class User extends Authenticatable
         'entity_credits',
         'last_activity_at',
         'two_checkout_customer_reference',
+        'credit_system_type',
+        'shared_credits',
     ];
 
     protected $hidden = [
@@ -69,10 +71,11 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'defi_setting'      => 'json',
-        'type'              => Roles::class,
-        'entity_credits'    => 'array',
+        'email_verified_at'             => 'datetime',
+        'defi_setting'                  => 'json',
+        'type'                          => Roles::class,
+        'entity_credits'                => 'array',
+        'shared_credits'                => 'float',
     ];
 
     public function teamId()
@@ -101,6 +104,16 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return in_array($this->type, [Roles::SUPER_ADMIN, Roles::ADMIN], true);
+    }
+
+    public function isSharedCreditUser(): bool
+    {
+        return $this->credit_system_type === 'shared';
+    }
+
+    public function sharedCreditTransactions(): HasMany
+    {
+        return $this->hasMany(SharedCreditTransaction::class);
     }
 
     public function isSuperAdmin(): bool
@@ -158,6 +171,11 @@ class User extends Authenticatable
     public function activities(): HasMany
     {
         return $this->hasMany(Activity::class);
+    }
+
+    public function uploads(): HasMany
+    {
+        return $this->hasMany(UserUpload::class);
     }
 
     public function relationPlan()
@@ -371,6 +389,40 @@ class User extends Authenticatable
     public function externalChatbots(): HasMany
     {
         return $this->hasMany(\App\Extensions\Chatbot\System\Models\Chatbot::class, 'user_id');
+    }
+
+    public function isActiveHumanAgent(): bool
+    {
+        if (! $this->team_manager_id) {
+            return false;
+        }
+
+        $member = $this->teamMember;
+
+        return (bool) ($member && $member->status === 'active' && $member->is_human_agent);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public function accessibleChatbotIds(): array
+    {
+        $ids = $this->externalChatbots()->pluck('id');
+
+        if ($this->isActiveHumanAgent()) {
+            $ids = $ids->merge(
+                \App\Extensions\Chatbot\System\Models\Chatbot::query()
+                    ->where('user_id', $this->team_manager_id)
+                    ->pluck('id')
+            );
+        }
+
+        return $ids->unique()->values()->all();
+    }
+
+    public function resolveHumanAgentOwnerId(): int
+    {
+        return $this->isActiveHumanAgent() ? (int) $this->team_manager_id : (int) $this->getKey();
     }
 
     public function myTeam()

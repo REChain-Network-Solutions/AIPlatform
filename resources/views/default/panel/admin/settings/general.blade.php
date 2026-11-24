@@ -1048,14 +1048,6 @@
                 />
                 <x-forms.input
                         class:container="mb-2"
-                        id="feature_ai_video"
-                        type="checkbox"
-                        :checked="$settings_two->feature_ai_video == 1"
-                        label="{{ __('AI Video') }}"
-                        switcher
-                />
-                <x-forms.input
-                        class:container="mb-2"
                         id="feature_ai_chat"
                         type="checkbox"
                         :checked="$setting->feature_ai_chat == 1"

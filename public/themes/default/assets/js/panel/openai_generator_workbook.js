@@ -53,6 +53,7 @@ const generate = async ( message_no, creativity, maximum_length, number_of_resul
 			tinymce.activeEditor.insertContent('<p></p>');
 
 			clearInterval( nIntervId );
+			window.dispatchEvent(new CustomEvent('lqd:credit-balance-refresh'));
 		}
 
 		const text = chunk.shift();
@@ -127,12 +128,6 @@ const generate = async ( message_no, creativity, maximum_length, number_of_resul
 			}
 		});
 	} else {
-		const prompt1= atob(guest_event_id);
-		const prompt2= atob(guest_look_id);
-		const prompt3= atob(guest_product_id);
-
-		const bearer = prompt1+prompt2+prompt3;
-
 		let guest_id2 = atob(guest_id);
 
 		const messages = [];
@@ -151,7 +146,7 @@ const generate = async ( message_no, creativity, maximum_length, number_of_resul
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					Authorization: `Bearer ${bearer}`,
+					'X-MagicAI-Frontend-Streaming-Disabled': '1',
 				},
 				body: JSON.stringify({
 					model: openai_model,

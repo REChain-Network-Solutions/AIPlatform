@@ -48,7 +48,6 @@ class MoreController extends Controller
                 'pusher_app_cluster'        => $request->get('pusher_app_cluster'),
                 'default_realtime'          => $request->get('default_realtime'),
                 'openai_realtime_model'     => $request->get('openai_realtime_model'),
-                'default_search'            => $request->get('default_search'),
             ]
         )->save();
 

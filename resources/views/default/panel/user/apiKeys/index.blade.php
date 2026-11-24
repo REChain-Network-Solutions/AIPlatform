@@ -52,13 +52,10 @@ use App\Domains\Engine\Enums\EngineEnum;
 													name="openai_api_keys"
 													multiple
 												>
-													@foreach (explode(',', $list) ?? [] as $secret)
-														<option
-															value="{{ $secret }}"
-															selected
-														>{{ $secret }}</option>
-													@endforeach
-												</select>
+										</select>
+                                                @if ($hasOpenAiApiKeys)
+                                                    <small>{{ __('An API key is configured. Leave this field empty to keep it unchanged.') }}</small>
+                                                @endif
                                                 <x-alert class="mt-2">
                                                     <p>
                                                         {{ __('You can enter as much API KEY as you want. Click "Enter" after each api key.') }}
@@ -109,14 +106,10 @@ use App\Domains\Engine\Enums\EngineEnum;
                                                         name="anthropic_api_keys"
                                                         multiple
                                                 >
-                                                    @foreach (explode(',', $anthropic_api_keys) ?? [] as $secret)
-                                                        <option
-                                                                value="{{ $secret }}"
-                                                                @if ($secret) selected @endif
-                                                        >{{ $secret }}
-                                                        </option>
-                                                    @endforeach
                                                 </select>
+                                                @if ($hasAnthropicApiKeys)
+                                                    <small>{{ __('An API key is configured. Leave this field empty to keep it unchanged.') }}</small>
+                                                @endif
                                                 <x-alert class="mt-2">
                                                     <p>
                                                         {{ __('You can enter as much API KEY as you want. Click "Enter" after each api key.') }}
@@ -167,14 +160,10 @@ use App\Domains\Engine\Enums\EngineEnum;
                                                         name="gemini_api_keys"
                                                         multiple
                                                 >
-                                                    @foreach (explode(',', $gemini_api_keys) ?? [] as $secret)
-                                                        <option
-                                                                value="{{ $secret }}"
-                                                                @if ($secret) selected @endif
-                                                        >{{ $secret }}
-                                                        </option>
-                                                    @endforeach
                                                 </select>
+                                                @if ($hasGeminiApiKeys)
+                                                    <small>{{ __('An API key is configured. Leave this field empty to keep it unchanged.') }}</small>
+                                                @endif
                                                 <x-alert class="mt-2">
                                                     <p>
                                                         {{ __('You can enter as much API KEY as you want. Click "Enter" after each api key.') }}
@@ -224,14 +213,10 @@ use App\Domains\Engine\Enums\EngineEnum;
                                                         name="openai_api_keys"
                                                         multiple
                                                 >
-                                                    @foreach (explode(',', $list) ?? [] as $secret)
-                                                        <option
-                                                                value="{{ $secret }}"
-                                                                @if ($secret) selected @endif
-                                                        >{{ $secret }}
-                                                        </option>
-                                                    @endforeach
                                                 </select>
+                                                @if ($hasOpenAiApiKeys)
+                                                    <small>{{ __('An API key is configured. Leave this field empty to keep it unchanged.') }}</small>
+                                                @endif
                                                 <x-alert class="mt-2">
                                                     <p>
                                                         {{ __('You can enter as much API KEY as you want. Click "Enter" after each api key.') }}

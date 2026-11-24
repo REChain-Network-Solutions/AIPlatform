@@ -12,11 +12,15 @@ use App\Http\Controllers\Admin\Config\SeoController;
 use App\Http\Controllers\Admin\Config\SmtpController;
 use App\Http\Controllers\Admin\Config\StorageController;
 use App\Http\Controllers\Admin\ElevenLabsLibraryController;
+use App\Http\Controllers\Admin\Finance\AiPlanWizardController;
+use App\Http\Controllers\Admin\Finance\CreditMigrationController;
 use App\Http\Controllers\Admin\Finance\PlanController;
+use App\Http\Controllers\Admin\Finance\SharedCreditCostController;
 use App\Http\Controllers\Admin\Finance\TokenPackPlanController;
 use App\Http\Controllers\Admin\Frontend\ChannelSettingController;
 use App\Http\Controllers\Admin\Frontend\ContentBoxController;
 use App\Http\Controllers\Admin\Frontend\CurtainController;
+use App\Http\Controllers\Admin\UserSharedCreditController;
 use App\Http\Controllers\AdsController;
 use App\Http\Controllers\AdvertisController;
 use App\Http\Controllers\AIArticleWizardController;
@@ -37,13 +41,14 @@ use App\Http\Controllers\Common\HealthController;
 use App\Http\Controllers\Common\Settings\FalAISettingController as CommonFalAISettingController;
 use App\Http\Controllers\Dashboard\AdminController;
 use App\Http\Controllers\Dashboard\BrandController;
-use App\Http\Controllers\Dashboard\DebugController;
+use App\Http\Controllers\Dashboard\GlobalSearchController;
 use App\Http\Controllers\Dashboard\NotificationController;
 use App\Http\Controllers\Dashboard\SearchController;
 use App\Http\Controllers\Dashboard\SettingsController;
 use App\Http\Controllers\Dashboard\SupportController;
 use App\Http\Controllers\Dashboard\TranslateController;
 use App\Http\Controllers\Dashboard\UGCStudioController;
+use App\Http\Controllers\Dashboard\UpdateChannelController;
 use App\Http\Controllers\Dashboard\UserController;
 use App\Http\Controllers\Dashboard\VideoStudioController;
 use App\Http\Controllers\Dashboard\VipStatusController;
@@ -57,14 +62,17 @@ use App\Http\Controllers\InstallationController;
 use App\Http\Controllers\Integration\IntegrationController;
 use App\Http\Controllers\Market\MarketPlaceController;
 use App\Http\Controllers\OpenAi\GeneratorController;
+use App\Http\Controllers\OpenAi\RealtimeClientSecretController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Payment\PlanAndPricingController;
 use App\Http\Controllers\PremiumSupportController;
 use App\Http\Controllers\PromptController;
+use App\Http\Controllers\Settings\HeygenSettingController;
 use App\Http\Controllers\Settings\SearchapiSettingController;
 use App\Http\Controllers\Team\TeamController;
 use App\Http\Controllers\Themes\ThemeController;
 use App\Http\Controllers\TTSController;
+use App\Http\Controllers\UserUploadController;
 use App\Http\Controllers\Voice\ElevenlabVoiceController;
 use App\Http\Middleware\CheckTemplateTypeAndPlan;
 use App\Services\DeFi\DeFi;
@@ -211,8 +219,6 @@ Route::middleware(['auth', 'updateUserActivity'])
                         Route::get('/generate', [AIController::class, 'streamedTextOutput']);
 
                         Route::post('/getYoutubeCaptions', [AIController::class, 'getYoutubeCaptions']);
-
-                        Route::post('/check/videoprogress', [AIController::class, 'checkVideoProgress']);
 
                         Route::get('/rewrite', [AIController::class, 'reWrite'])->name('rewriter')->middleware(CheckTemplateTypeAndPlan::class);
 
@@ -492,6 +498,11 @@ Route::middleware(['auth', 'updateUserActivity'])
 
                     Route::get('deletion/requests', [AdminController::class, 'deletionRequests'])->name('deletion.reqs');
                     Route::post('deletion/requests/{id}', [AdminController::class, 'deletionRequest'])->name('deletion.req');
+
+                    Route::post('{user}/shared-credit/adjust', [UserSharedCreditController::class, 'adjust'])
+                        ->name('shared-credit.adjust');
+                    Route::put('{user}/credit-type', [UserSharedCreditController::class, 'updateType'])
+                        ->name('credit-type.update');
                 });
 
                 // Announcements
@@ -557,6 +568,13 @@ Route::middleware(['auth', 'updateUserActivity'])
                 // Finance
                 Route::prefix('finance')->name('finance.')->group(function () {
 
+                    Route::prefix('plan/ai-wizard')->name('plan.ai-wizard.')->group(function () {
+                        Route::get('presets', [AiPlanWizardController::class, 'presets'])->name('presets');
+                        Route::post('validate-step', [AiPlanWizardController::class, 'validateStep'])->name('validate-step');
+                        Route::post('chat', [AiPlanWizardController::class, 'chat'])->name('chat');
+                        Route::post('store', [AiPlanWizardController::class, 'store'])->name('store');
+                    });
+
                     Route::resource('plan', PlanController::class)->except(
                         'store', 'update', 'destroy', 'show'
                     );
@@ -591,6 +609,18 @@ Route::middleware(['auth', 'updateUserActivity'])
                     Route::prefix('mobile')->name('mobile.')->group(function () {
                         Route::match(['get', 'post'], '/', [MobilePaymentsController::class, 'mobilePlanIdSettings'])->name('index');
                     });
+
+                    // Shared Credit Costs
+                    Route::prefix('shared-credit-costs')->name('shared-credit-costs.')->group(function () {
+                        Route::get('/', [SharedCreditCostController::class, 'index'])->name('index');
+                        Route::post('/', [SharedCreditCostController::class, 'store'])->name('store');
+                        Route::put('/{cost}', [SharedCreditCostController::class, 'update'])->name('update');
+                        Route::delete('/{cost}', [SharedCreditCostController::class, 'destroy'])->name('destroy');
+                    });
+
+                    Route::get('credit-migration', [CreditMigrationController::class, 'index'])
+                        ->name('credit-migration.index');
+
                 });
 
                 // Testimonials
@@ -640,6 +670,9 @@ Route::middleware(['auth', 'updateUserActivity'])
 
                 // Settings
                 Route::prefix('settings')->name('settings.')->group(function () {
+                    Route::get('heygen', [HeygenSettingController::class, 'index'])->name('heygen');
+                    Route::post('heygen', [HeygenSettingController::class, 'update'])->name('heygen.update');
+
                     Route::get('/general', [SettingsController::class, 'general'])->name('general');
                     Route::post('/general-save', [SettingsController::class, 'generalSave']);
 
@@ -801,15 +834,17 @@ Route::middleware(['auth', 'updateUserActivity'])
 
                 // Update
                 Route::view('update', 'panel.admin.update.index')->name('update.index');
+                Route::post('update/channel', [UpdateChannelController::class, 'update'])
+                    ->middleware('throttle:10,1')
+                    ->name('update.channel.convert');
 
                 // Healt Page
                 Route::prefix('health')
                     ->name('health.')
                     ->group(function () {
-                        Route::get('', [HealthController::class, 'index'])->name('index');
-                        Route::get('logs', [HealthController::class, 'logs'])->name('logs');
-                        // cache clear
-                        Route::get('cache-clear', [HealthController::class, 'cacheClear'])->name('cache.clear');
+                        Route::get('', [HealthController::class, 'index'])->middleware('throttle:30,1')->name('index');
+                        Route::get('logs', [HealthController::class, 'logs'])->middleware('throttle:30,1')->name('logs');
+                        Route::post('cache-clear', [HealthController::class, 'cacheClear'])->middleware('throttle:10,1')->name('cache.clear');
                     });
 
                 // Update license type
@@ -884,40 +919,50 @@ Route::middleware(['auth', 'updateUserActivity'])
 
         Route::post('/api/search', [SearchController::class, 'search']);
         Route::delete('/api/search/delete-search-key/{key}', [SearchController::class, 'deleteSearchkey']);
+
+        // Global Search
+        Route::post('/api/global-search', [GlobalSearchController::class, 'search']);
+        Route::get('/api/global-search/ai', [GlobalSearchController::class, 'aiStream']);
     });
 
 Route::group(['prefix' => config('elseyyid-location.prefix'), 'middleware' => config('elseyyid-location.middlewares'), 'as' => 'elseyyid.translations.'], function () {
     Route::get('home', '\Elseyyid\LaravelJsonLocationsManager\Controllers\HomeController@index')->name('home');
     Route::get('lang/{lang}', '\Elseyyid\LaravelJsonLocationsManager\Controllers\HomeController@lang')->name('lang');
-    Route::get('lang/generateJson/{lang}', '\Elseyyid\LaravelJsonLocationsManager\Controllers\HomeController@generateJson')->name('lang.generateJson');
-    Route::get('newLang', '\Elseyyid\LaravelJsonLocationsManager\Controllers\HomeController@newLang')->name('lang.newLang');
-    Route::get('newString', '\Elseyyid\LaravelJsonLocationsManager\Controllers\HomeController@newString')->name('lang.newString');
+    Route::post('lang/generateJson/{lang}', '\Elseyyid\LaravelJsonLocationsManager\Controllers\HomeController@generateJson')->name('lang.generateJson');
+    Route::post('newLang', '\Elseyyid\LaravelJsonLocationsManager\Controllers\HomeController@newLang')->name('lang.newLang');
+    Route::post('newString', '\Elseyyid\LaravelJsonLocationsManager\Controllers\HomeController@newString')->name('lang.newString');
     Route::get('search', '\Elseyyid\LaravelJsonLocationsManager\Controllers\HomeController@search')->name('lang.search');
     Route::get('string/{code}', '\Elseyyid\LaravelJsonLocationsManager\Controllers\HomeController@string')->name('lang.string');
-    Route::get('publish-all', '\Elseyyid\LaravelJsonLocationsManager\Controllers\HomeController@publishAll')->name('lang.publishAll');
+    Route::post('publish-all', '\Elseyyid\LaravelJsonLocationsManager\Controllers\HomeController@publishAll')->name('lang.publishAll');
 
     // Reinstall
-    Route::get('regenerate', [CommonController::class, 'regenerate'])->name('lang.reinstall');
+    Route::post('regenerate', [CommonController::class, 'regenerate'])->name('lang.reinstall');
 
     // setLocale
-    Route::get('setLocale', [CommonController::class, 'setLocale'])->name('lang.setLocale');
+    Route::post('setLocale', [CommonController::class, 'setLocale'])->name('lang.setLocale');
+
 });
 
-Route::post('translations/lang/update/{id}', '\Elseyyid\LaravelJsonLocationsManager\Controllers\HomeController@update')->name('elseyyid.translations.lang.update');
+Route::middleware(['auth', 'admin', 'throttle:30,1'])->group(function () {
+    Route::post('translations/lang/update/{id}', [CommonController::class, 'translationsLangUpdate'])
+        ->name('elseyyid.translations.lang.update');
+    Route::post('translations/lang/update-all', [CommonController::class, 'translationsLangUpdateAll'])
+        ->name('elseyyid.translations.lang.update-all');
+    Route::post('translations/lang-save', [CommonController::class, 'translationsLangSave'])
+        ->name('elseyyid.translations.lang.lang-save');
+});
 
-Route::post('translations/lang/update-all', [CommonController::class, 'translationsLangUpdateAll'])->name('elseyyid.translations.lang.update-all');
-
-Route::post('translations/lang-save', [CommonController::class, 'translationsLangSave'])->name('elseyyid.translations.lang.lang-save');
-
-Route::post('image/upload', [CommonController::class, 'imageUpload'])->name('upload.image');
-
-Route::post('images/upload', [CommonController::class, 'imagesUpload'])->name('upload.images');
-
-Route::post('files/upload', [CommonController::class, 'filesUpload'])->name('upload.files');
-
-Route::post('pdf/getContent', [ChatPdfController::class, 'getSimiliarContent'])->name('pdf.getcontent');
-
-Route::post('rss/fetch', [CommonController::class, 'rssFetch'])->name('rss.fetch');
+Route::middleware(['auth', 'throttle:30,1'])->group(function () {
+    Route::post('image/upload', [CommonController::class, 'imageUpload'])->name('upload.image');
+    Route::post('images/upload', [CommonController::class, 'imagesUpload'])->name('upload.images');
+    Route::post('files/upload', [CommonController::class, 'filesUpload'])->name('upload.files');
+    Route::post('pdf/getContent', [ChatPdfController::class, 'getSimiliarContent'])->name('pdf.getcontent');
+    Route::post('rss/fetch', [CommonController::class, 'rssFetch'])->name('rss.fetch');
+    Route::get('media/uploads/{userUpload}', [UserUploadController::class, 'show'])->name('uploads.show');
+    Route::post('api/realtime/client-secret', RealtimeClientSecretController::class)
+        ->middleware('throttle:10,1')
+        ->name('realtime.client-secret');
+});
 
 $files = glob(base_path('routes/extroutes/*.php'));
 foreach ($files as $i => $iValue) {
@@ -926,9 +971,6 @@ foreach ($files as $i => $iValue) {
 
 Route::middleware('auth')
     ->group(function () {
-        Route::middleware('admin')->get('debug', DebugController::class)->name('dashboard.debug');
-        Route::middleware('admin')->post('channel-convert', [DebugController::class, 'convertChannel'])->name('dashboard.update.channel.convert');
-
         Route::get('admin-vip-button', [VipStatusController::class, 'adminVipButton'])->name('admin-vip-button');
 
         Route::get('check-vip-status', [VipStatusController::class, 'checkVipStatus'])->name('checkVipStatus');

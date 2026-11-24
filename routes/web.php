@@ -4,29 +4,19 @@ declare(strict_types=1);
 
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\Common\CheckSubscriptionEndController;
-use App\Http\Controllers\Common\ClearController;
-use App\Http\Controllers\Common\DebugModeController;
 use App\Http\Controllers\Common\LocaleController;
 use App\Http\Controllers\Common\SitemapController;
 use App\Http\Controllers\Common\SystemSlotController;
-use App\Http\Controllers\FontsController;
 use App\Http\Controllers\IndexController;
-use App\Http\Controllers\InstallationController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\Payment\PlanAndPricingController;
 use App\Http\Controllers\PrivatePlanController;
-use App\Http\Controllers\TestController;
+use App\Http\Controllers\SharedCreditPreviewController;
 use Illuminate\Support\Facades\Route;
-use RachidLaasri\LaravelInstaller\Middleware\ApplicationStatus;
 
 Route::get('language/{lang}/change', LocaleController::class)->name('language.change');
 
-Route::any('test', [TestController::class, 'test'])->name('test');
-Route::post('test', [TestController::class, 'test'])->name('test.post');
-Route::get('test/stream/{model}', [TestController::class, 'stream'])->name('test.stream');
-
-Route::view('test/chatbot', 'default.chatbot');
 Route::get('default', static function () {
     return response()->noContent(
 
@@ -60,23 +50,17 @@ Route::get('sitemap.xml', [SitemapController::class, 'index']);
 Route::get('plan/private/subscription/{key}', [PrivatePlanController::class, 'index']);
 Route::get('confirm/email/{email_confirmation_code}', [MailController::class, 'emailConfirmationMail']);
 
-Route::controller(InstallationController::class)
-    ->group(static function () {
-        Route::get('upgrade-script', 'upgrade')->withoutMiddleware(ApplicationStatus::class)->name('upgrade-script');
-        Route::get('update-manual/{pass?}', 'updateManual')->withoutMiddleware(ApplicationStatus::class)->name('update-manual');
-        Route::get('cache-clear-menu', 'menuClearCache')->name('menuClearCache');
-        Route::post('install-extension/{slug}', 'installExtension')->name('install-extension');
-        Route::post('uninstall-extension/{slug}', 'uninstallExtension')->name('uninstall-extension');
-
-    });
-
-Route::get('clear-log', [ClearController::class, 'clearLog'])->name('clearLog');
-Route::get('cache-clear', [ClearController::class, 'cacheClear'])->name('cache.clear');
-Route::get('update-fonts', [FontsController::class, 'updateFontsCache']);
-Route::get('debug/{token?}', DebugModeController::class)->name('debug');
 Route::get('sys/{tk}', [SystemSlotController::class, 'index'])->middleware(['auth', 'admin', 'throttle:10,1']);
 Route::post('sys/{slot}', [SystemSlotController::class, 'record'])->middleware(['auth', 'admin', 'throttle:10,1']);
 Route::get('check-subscription-end', CheckSubscriptionEndController::class)->name('check-subscription-end');
+
+Route::get('shared-credit/balance', [SharedCreditPreviewController::class, 'balance'])
+    ->middleware('auth')
+    ->name('shared-credit.balance');
+
+Route::post('shared-credit/cost-preview', [SharedCreditPreviewController::class, 'preview'])
+    ->middleware('auth')
+    ->name('shared-credit.cost-preview');
 
 if (file_exists(base_path('routes/custom_routes_web.php'))) {
     include base_path('routes/custom_routes_web.php');

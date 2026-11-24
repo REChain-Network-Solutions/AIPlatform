@@ -49,34 +49,6 @@
                     </select>
                 </div>
             </div>
-            <div class="col-md-12">
-                <div class="mb-3">
-                    <label class="form-label">{{ __('Search Screen') }}
-                        <x-badge
-                            class="ms-2 text-2xs"
-                            variant="secondary"
-                        >
-                            @lang('New')
-                        </x-badge>
-                    </label>
-                    <select
-                        class="form-select"
-                        id="default_search"
-                        name="default_search"
-                    >
-                        <option
-                            value="modern"
-                            {{ setting('default_search') === 'modern' ? 'selected' : '' }}
-                        >
-                            {{ __('Modern') }}</option>
-                        <option
-                            value="compact"
-                            {{ setting('default_search') === 'compact' ? 'selected' : '' }}
-                        >
-                            {{ __('Compact') }}</option>
-                    </select>
-                </div>
-            </div>
 			<div class="col-md-12" x-data="{ realtimeModel: '{{ setting('default_realtime') }}' }">
 				<div class="mb-3">
 					<label class="form-label">{{ __('Realtime Search Model') }}

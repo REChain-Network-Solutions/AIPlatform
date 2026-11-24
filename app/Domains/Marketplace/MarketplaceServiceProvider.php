@@ -10,6 +10,15 @@ use App\Domains\Marketplace\Services\ExtensionInstallService;
 use App\Domains\Marketplace\Services\ExtensionUninstallService;
 use App\Extensions\AdvancedImage\System\AdvancedImageServiceProvider;
 use App\Extensions\Affilate\System\AffilateServiceProvider;
+use App\Extensions\AIAgent\System\AIAgentServiceProvider;
+use App\Extensions\AIAgentGmail\System\AIAgentGmailServiceProvider;
+use App\Extensions\AIAgentOutlook\System\AIAgentOutlookServiceProvider;
+use App\Extensions\AIAgentSlackChannel\System\AIAgentSlackChannelServiceProvider;
+use App\Extensions\AIAgentToolChatbot\System\AIAgentToolChatbotServiceProvider;
+use App\Extensions\AIAgentToolCrm\System\AIAgentToolCrmServiceProvider;
+use App\Extensions\AIAgentToolMarketingBot\System\AIAgentToolMarketingBotServiceProvider;
+use App\Extensions\AIAgentToolSocialMediaAgent\System\AIAgentToolSocialMediaAgentServiceProvider;
+use App\Extensions\AIAgentWhatsappChannel\System\AIAgentWhatsappChannelServiceProvider;
 use App\Extensions\AiAvatar\System\AiAvatarServiceProvider;
 use App\Extensions\AiCaptions\System\AiCaptionsServiceProvider;
 use App\Extensions\AIChatPro\System\AIChatProServiceProvider;
@@ -17,9 +26,14 @@ use App\Extensions\AIChatProDeepResearch\System\AIChatProDeepResearchServiceProv
 use App\Extensions\AiChatProEntityHighlight\System\AiChatProEntityHighlightServiceProvider;
 use App\Extensions\AIChatProFileChat\System\AIChatProFileChatServiceProvider;
 use App\Extensions\AIChatProFolders\System\AIChatProFoldersServiceProvider;
+use App\Extensions\AIChatProGmail\System\AIChatProGmailServiceProvider;
+use App\Extensions\AIChatProGoogleCalendar\System\AIChatProGoogleCalendarServiceProvider;
+use App\Extensions\AIChatProGoogleDrive\System\AIChatProGoogleDriveServiceProvider;
 use App\Extensions\AiChatProHighlightToAsk\System\AiChatProHighlightToAskServiceProvider;
 use App\Extensions\AiChatProImageChat\System\AiChatProImageChatServiceProvider;
 use App\Extensions\AIChatProMemory\System\AIChatProMemoryServiceProvider;
+use App\Extensions\AIChatProNotion\System\AIChatProNotionServiceProvider;
+use App\Extensions\AIChatProOutlook\System\AIChatProOutlookServiceProvider;
 use App\Extensions\AIChatProSkills\System\AIChatProSkillsServiceProvider;
 use App\Extensions\AiChatProSmartImage\System\AiChatProSmartImageServiceProvider;
 use App\Extensions\AIImagePro\System\AIImageProServiceProvider;
@@ -38,6 +52,7 @@ use App\Extensions\AIVoiceIsolator\System\AIVoiceIsolatorServiceProvider;
 use App\Extensions\AIWebChat\System\AIWebChatServiceProvider;
 use App\Extensions\AIWriterTemplates\System\AIWriterTemplateServiceProvider;
 use App\Extensions\Announcement\System\AnnouncementServiceProvider;
+use App\Extensions\AutoEditVideos\System\AutoEditVideosServiceProvider;
 use App\Extensions\AzureOpenai\System\AzureOpenaiServiceProvider;
 use App\Extensions\AzureTTS\System\AzureTTSServiceProvider;
 use App\Extensions\BlogPilot\System\BlogPilotServiceProvider;
@@ -63,6 +78,7 @@ use App\Extensions\ContentManager\System\ContentManagerServiceProvider;
 use App\Extensions\CreativeSuite\System\CreativeSuiteServiceProvider;
 use App\Extensions\CreativeSuiteAITemplate\System\CreativeSuiteAITemplateServiceProvider;
 use App\Extensions\CreativeSuiteAnnotations\System\CreativeSuiteAnnotationsServiceProvider;
+use App\Extensions\Crm\System\CrmServiceProvider;
 use App\Extensions\Cryptomus\System\CryptomusServiceProvider;
 use App\Extensions\DemoExtension\System\DemoExtensionServiceProvider;
 use App\Extensions\DiscountManager\System\DiscountManagerServiceProvider;
@@ -91,6 +107,7 @@ use App\Extensions\OnboardingPro\System\OnboardingProServiceProvider;
 use App\Extensions\OpenAIRealtimeChat\System\OpenAIRealtimeChatServiceProvider;
 use App\Extensions\OpenRouter\System\OpenRouterServiceProvider;
 use App\Extensions\Perplexity\System\PerplexityServiceProvider;
+use App\Extensions\PhoneCallAgent\System\PhoneCallAgentServiceProvider;
 use App\Extensions\PhotoStudio\System\PhotoStudioServiceProvider;
 use App\Extensions\ProductPhotography\System\ProductPhotographyServiceProvider;
 use App\Extensions\SeeDreamV4\System\SeeDreamV4ServiceProvider;
@@ -102,6 +119,7 @@ use App\Extensions\SpeechifyTTS\System\SpeechifyServiceProvider;
 use App\Extensions\UGCCreator\System\UGCCreatorServiceProvider;
 use App\Extensions\UGCFactory\System\UGCFactoryServiceProvider;
 use App\Extensions\UrlToVideo\System\UrlToVideoServiceProvider;
+use App\Extensions\VideoAgent\System\VideoAgentServiceProvider;
 use App\Extensions\VideoDubbing\System\VideoDubbingServiceProvider;
 use App\Extensions\VideoEditor\System\VideoEditorServiceProvider;
 use App\Extensions\Wordpress\System\WordpressServiceProvider;
@@ -180,6 +198,7 @@ class MarketplaceServiceProvider extends ServiceProvider
         'azure-openai'                  => AzureOpenaiServiceProvider::class,
         'chatbot-voice'                 => ChatbotVoiceServiceProvider::class,
         'chatbot-voice-call'            => ChatbotVoiceCallServiceProvider::class,
+        'phone-call-agent'              => PhoneCallAgentServiceProvider::class,
         'chatbot-telegram'              => ChatbotTelegramServiceProvider::class,
         'chatbot-whatsapp'              => ChatbotWhatsappServiceProvider::class,
         'chatbot-messenger'             => ChatbotMessengerServiceProvider::class,
@@ -221,8 +240,25 @@ class MarketplaceServiceProvider extends ServiceProvider
         'video-editor'					             => VideoEditorServiceProvider::class,
         'ugc-factory'                   => UGCFactoryServiceProvider::class,
         'ugc-creator'                   => UGCCreatorServiceProvider::class,
+        'video-agent'                   => VideoAgentServiceProvider::class,
         'video-dubbing'                 => VideoDubbingServiceProvider::class,
         'ai-captions'                   => AiCaptionsServiceProvider::class,
+        'auto-edit-videos'              => AutoEditVideosServiceProvider::class,
+        'ai-agent'                      => AIAgentServiceProvider::class,
+        'ai-agent-whatsapp-channel'     => AIAgentWhatsappChannelServiceProvider::class,
+        'ai-agent-slack-channel'        => AIAgentSlackChannelServiceProvider::class,
+        'ai-agent-tool-social-media'    => AIAgentToolSocialMediaAgentServiceProvider::class,
+        'ai-agent-tool-marketing-bot'   => AIAgentToolMarketingBotServiceProvider::class,
+        'ai-agent-tool-chatbot'         => AIAgentToolChatbotServiceProvider::class,
+        'ai-agent-tool-crm'             => AIAgentToolCrmServiceProvider::class,
+        'ai-agent-gmail'                => AIAgentGmailServiceProvider::class,
+        'ai-agent-outlook'              => AIAgentOutlookServiceProvider::class,
+        'ai-chat-pro-gmail'             => AIChatProGmailServiceProvider::class,
+        'ai-chat-pro-outlook'           => AIChatProOutlookServiceProvider::class,
+        'ai-chat-pro-notion'            => AIChatProNotionServiceProvider::class,
+        'ai-chat-pro-google-drive'      => AIChatProGoogleDriveServiceProvider::class,
+        'ai-chat-pro-google-calendar'   => AIChatProGoogleCalendarServiceProvider::class,
+        'crm'                           => CrmServiceProvider::class,
     ];
 
     public function register(): void

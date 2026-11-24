@@ -7,6 +7,7 @@ namespace App\Domains\Engine\Enums;
 use App\Domains\Engine\Drivers\AiMlMinimaxAIEngineDriver;
 use App\Domains\Engine\Drivers\AnthropicEngineDriver;
 use App\Domains\Engine\Drivers\AzureEngineDriver;
+use App\Domains\Engine\Drivers\CaptionsEngineDriver;
 use App\Domains\Engine\Drivers\ClipDropEngineDriver;
 use App\Domains\Engine\Drivers\CreatifyEngineDriver;
 use App\Domains\Engine\Drivers\DeepSeekAIEngineDriver;
@@ -27,6 +28,7 @@ use App\Domains\Engine\Drivers\PexelsEngineDriver;
 use App\Domains\Engine\Drivers\PiAPIEngineDriver;
 use App\Domains\Engine\Drivers\PixabayEngineDriver;
 use App\Domains\Engine\Drivers\PlagiarismCheckEngineDriver;
+use App\Domains\Engine\Drivers\RendleyEngineDriver;
 use App\Domains\Engine\Drivers\SerperEngineDriver;
 use App\Domains\Engine\Drivers\SpeechifyEngineDriver;
 use App\Domains\Engine\Drivers\StableDiffusionEngineDriver;
@@ -42,6 +44,7 @@ use App\Enums\Contracts;
 use App\Enums\Traits\EnumTo;
 use App\Enums\Traits\SluggableEnumTrait;
 use App\Enums\Traits\StringBackedEnumTrait;
+use App\Helpers\Classes\DefaultOpenAiImageModel;
 use App\Models\Setting;
 use App\Models\SettingTwo;
 use Exception;
@@ -114,6 +117,10 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
     case VIZARD = 'vizard';
     case KLAP = 'klap';
 
+    case CAPTIONS = 'captions';
+
+    case RENDLEY = 'rendley';
+
     public function label(): string
     {
         return match ($this) {
@@ -149,6 +156,8 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
             self::TOPVIEW                => __('Topview'),
             self::VIZARD                 => __('Vizard'),
             self::KLAP                   => __('Klap'),
+            self::CAPTIONS               => __('Captions'),
+            self::RENDLEY                => __('Rendley'),
         };
     }
 
@@ -187,6 +196,8 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
             self::AI_ML_MINIMAX    => AiMlMinimaxAIEngineDriver::class,
             self::OPEN_ROUTER      => OpenRouterEngineDriver::class,
             self::TOGETHER         => TogetherEngineDriver::class,
+            self::CAPTIONS         => CaptionsEngineDriver::class,
+            self::RENDLEY          => RendleyEngineDriver::class,
         };
     }
 
@@ -213,15 +224,6 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
         });
     }
 
-    private function getDefaultOpenAiImageModel($settings_two): string
-    {
-        return match ($settings_two?->dalle) {
-            'dalle3' => EntityEnum::DALL_E_3->slug(),
-            'dalle2' => EntityEnum::DALL_E_2->slug(),
-            default  => $settings_two?->dalle ?? 'dall-e-2',
-        };
-    }
-
     /**
      * @throws Exception
      */
@@ -230,7 +232,7 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
         return match ($this) {
             self::OPEN_AI          => [
                 EntityEnum::fromSlug($setting?->openai_default_model ?? EntityEnum::GPT_5_MINI->slug()),
-                EntityEnum::fromSlug($this->getDefaultOpenAiImageModel($settingTwo)),
+                DefaultOpenAiImageModel::resolve($settingTwo),
                 EntityEnum::TTS_1_HD,
                 EntityEnum::TTS_1,
                 EntityEnum::WHISPER_1,
@@ -238,18 +240,22 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
                 ...(EntityEnum::fromSlug($setting?->openai_default_model ?? EntityEnum::GPT_5_MINI->slug()) !== EntityEnum::GPT_5_MINI
                     ? [EntityEnum::GPT_5_MINI]
                     : []),
+                EntityEnum::GPT_REALTIME,
                 EntityEnum::GPT_4_O_REALTIME_PREVIEW,
                 EntityEnum::GPT_4_O_SEARCH_PREVIEW,
                 EntityEnum::GPT_4_O_MINI_SEARCH_PREVIEW,
                 EntityEnum::GPT_IMAGE_1,
                 EntityEnum::GPT_IMAGE_1_5,
-                EntityEnum::GPT_IMAGE_2,
+                EntityEnum::GPT_IMAGE_2_5_SUNBURST,
+                EntityEnum::GPT_IMAGE_2_5_FLARE,
                 EntityEnum::SORA_2,
                 EntityEnum::SORA_2_PRO,
+                EntityEnum::GPT_6_ASTRA,
+                EntityEnum::GPT_6_LUNA,
+                EntityEnum::GPT_6_SOL,
             ],
             self::STABLE_DIFFUSION => [
                 EntityEnum::fromSlug($settingTwo?->stable_diffusion_default_model ?? $settingTwo?->stablediffusion_default_model ?? EntityEnum::STABLE_DIFFUSION_XL_1024_V_1_0->slug()),
-                EntityEnum::IMAGE_TO_VIDEO,
             ],
             self::ANTHROPIC        => [EntityEnum::fromSlug(setting('anthropic_default_model', EntityEnum::CLAUDE_3_OPUS->slug()))],
             self::OPEN_ROUTER      => [EntityEnum::fromSlug(setting('default_open_router_model', EntityEnum::PERPLEXITY_LLAMA_31_SONAR_8B->slug()))],
@@ -260,12 +266,24 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
                 EntityEnum::GEMINI_EMBEDDING_EXP,
                 EntityEnum::GEMINI_TEXT_EMBEDDING_004,
                 EntityEnum::GEMINI_3_1_FLASH_LIVE_PREVIEW,
+                EntityEnum::GEMINI_3_6_FLASH,
+                EntityEnum::GEMINI_3_5_FLASH,
+                EntityEnum::GEMINI_3_5_FLASH_LITE,
+                EntityEnum::GEMINI_3_7_FLASH,
+                EntityEnum::GEMINI_3_8_FLASH,
+                EntityEnum::LYRIA_3_5,
             ],
-            self::DEEP_SEEK        => [EntityEnum::fromSlug(setting('deepseek_default_model', EntityEnum::DEEPSEEK_CHAT->slug()))],
+            self::DEEP_SEEK        => [
+                EntityEnum::fromSlug(setting('deepseek_default_model', EntityEnum::DEEPSEEK_V4_PRO->slug())),
+                EntityEnum::DEEPSEEK_V4_FLASH,
+                EntityEnum::DEEPSEEK_V4_FLASH_VISION_EXP,
+            ],
             self::ELEVENLABS       => [
                 EntityEnum::ELEVENLABS_AI_MUSIC,
                 EntityEnum::ELEVENLABS,
                 EntityEnum::ELEVENLABS_V3,
+                EntityEnum::ELEVENLABS_V4,
+                EntityEnum::ELEVENLABS_V4_TURBO,
                 EntityEnum::ELEVENLABS_VOICE_CHATBOT,
                 EntityEnum::ISOLATOR,
             ],
@@ -333,6 +351,12 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
                 EntityEnum::SEEDANCE_2_FAST_TTV,
                 EntityEnum::SEEDANCE_2_FAST_ITV,
                 EntityEnum::SEEDANCE_2_FAST_RTV,
+                EntityEnum::SEEDANCE_2_5_TTV,
+                EntityEnum::SEEDANCE_2_5_ITV,
+                EntityEnum::SEEDANCE_2_5_RTV,
+                EntityEnum::GEMINI_OMNI_FLASH_TTV,
+                EntityEnum::GEMINI_OMNI_FLASH_ITV,
+                EntityEnum::GEMINI_OMNI_FLASH_RTV,
             ],
             self::CREATIFY => [EntityEnum::AD_MARKETING_VIDEO],
             self::TOPVIEW  => [EntityEnum::AD_MARKETING_VIDEO_TOPVIEW],
@@ -357,9 +381,17 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
             self::FREEPIK           => [EntityEnum::FREEPIK],
             self::PLAGIARISM_CHECK  => [EntityEnum::PLAGIARISMCHECK],
             self::SYNTHESIA         => [EntityEnum::SYNTHESIA],
-            self::HEYGEN            => [EntityEnum::HEYGEN],
+            self::HEYGEN            => [
+                EntityEnum::HEYGEN,
+                EntityEnum::HEYGEN_VIDEO_AGENT,
+                EntityEnum::HEYGEN_VIDEO_V3,
+                EntityEnum::HEYGEN_LIPSYNC,
+                EntityEnum::HEYGEN_TTS,
+            ],
             self::PEBBLELY          => [EntityEnum::PEBBLELY],
             self::TOGETHER          => [EntityEnum::BLACK_FOREST_LABS_FLUX_1_SCHNELL],
+            self::CAPTIONS          => [EntityEnum::AI_CAPTIONS],
+            self::RENDLEY           => [EntityEnum::RENDLEY_AUTO_EDIT],
             default                 => throw new Exception('No default model found for engine ' . $this->value),
         };
     }
@@ -370,7 +402,7 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
             self::OPEN_AI          => EntityEnum::fromSlug($setting?->openai_default_model ?? EntityEnum::GPT_5_MINI->slug()),
             self::ANTHROPIC        => EntityEnum::fromSlug(setting('anthropic_default_model', EntityEnum::CLAUDE_3_OPUS->slug())),
             self::GEMINI           => EntityEnum::fromSlug(setting('gemini_default_model', EntityEnum::GEMINI_3_FLASH->slug())),
-            self::DEEP_SEEK        => EntityEnum::fromSlug(setting('deepseek_default_model', EntityEnum::DEEPSEEK_CHAT->slug())),
+            self::DEEP_SEEK        => EntityEnum::fromSlug(setting('deepseek_default_model', EntityEnum::DEEPSEEK_V4_PRO->slug())),
             self::X_AI             => EntityEnum::fromSlug(setting('xai_default_model', EntityEnum::GROK_2_1212->slug())),
             default                => throw new Exception('No default model found for engine ' . $this->value),
         };
@@ -381,7 +413,7 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
         $settingTwo = SettingTwo::getCache();
 
         return match ($this) {
-            self::OPEN_AI          => EntityEnum::fromSlug($this->getDefaultOpenAiImageModel($settingTwo)),
+            self::OPEN_AI          => DefaultOpenAiImageModel::resolve($settingTwo),
             self::STABLE_DIFFUSION => EntityEnum::fromSlug($settingTwo?->stable_diffusion_default_model ?? $settingTwo?->stablediffusion_default_model ?? EntityEnum::STABLE_DIFFUSION_XL_1024_V_1_0->slug()),
             self::FAL_AI           => EntityEnum::fromSlug(setting('fal_ai_default_model', EntityEnum::FLUX_PRO->slug())),
             self::PI_API           => EntityEnum::MIDJOURNEY,
@@ -392,7 +424,7 @@ enum EngineEnum: string implements Contracts\WithStringBackedEnum
     public function getDefaultAWImageModel(?SettingTwo $settingTwo): EntityEnum
     {
         return match ($this) {
-            self::OPEN_AI          => EntityEnum::fromSlug($this->getDefaultOpenAiImageModel($settingTwo)),
+            self::OPEN_AI          => DefaultOpenAiImageModel::resolve($settingTwo),
             self::STABLE_DIFFUSION => EntityEnum::fromSlug($settingTwo?->stable_diffusion_default_model ?? $settingTwo?->stablediffusion_default_model ?? EntityEnum::STABLE_DIFFUSION_XL_1024_V_1_0->slug()),
             self::UNSPLASH         => EntityEnum::UNSPLASH,
             self::PEXELS           => EntityEnum::PEXELS,

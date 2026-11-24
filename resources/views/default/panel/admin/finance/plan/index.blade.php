@@ -2,18 +2,48 @@
 @section('title', __('Subscriptions and Packs'))
 @section('titlebar_actions')
     <div class="flex flex-wrap gap-3">
-        <x-button
-            href="{{ $app_is_demo ? '#' : route('dashboard.admin.finance.plan.create') }}"
-            onclick="{{ $app_is_demo ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '' }}"
+        <x-dropdown.dropdown
+            anchor="end"
+            offsetY="10px"
         >
-            {{ __('Create New Subscription') }}
-        </x-button>
-        <x-button
-            href="{{ $app_is_demo ? '#' : route('dashboard.admin.finance.token-pack-plan.create', ['type' => 'token-pack']) }}"
-            onclick="{{ $app_is_demo ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '' }}"
-        >
-            {{ __('Create New Token Pack') }}
-        </x-button>
+            <x-slot:trigger variant="primary">
+                <x-tabler-plus class="size-4" />
+                {{ __('Create Plan') }}
+                <x-tabler-chevron-down class="size-4" />
+            </x-slot:trigger>
+
+            <x-slot:dropdown class="min-w-fit overflow-hidden whitespace-nowrap py-1 text-2xs font-medium">
+                <x-button
+                    class="flex w-full justify-start rounded-none px-3 py-2 text-2xs shadow-none hover:translate-y-0 hover:bg-foreground/5 hover:text-inherit hover:shadow-none focus-visible:bg-foreground/5 focus-visible:text-inherit"
+                    size="none"
+                    variant="ghost-shadow"
+                    @click.prevent="Alpine.$data(document.querySelector('#ai-plan-wizard-root'))?.openWizard()"
+                >
+                    <x-tabler-sparkles class="size-4" />
+                    {{ __('Create with AI') }}
+                </x-button>
+                <x-button
+                    class="flex w-full justify-start rounded-none px-3 py-2 text-2xs shadow-none hover:translate-y-0 hover:bg-foreground/5 hover:text-inherit hover:shadow-none focus-visible:bg-foreground/5 focus-visible:text-inherit"
+                    size="none"
+                    variant="ghost-shadow"
+                    href="{{ $app_is_demo ? '#' : route('dashboard.admin.finance.plan.create') }}"
+                    onclick="{{ $app_is_demo ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '' }}"
+                >
+                    <x-tabler-repeat class="size-4" />
+                    {{ __('Create New Subscription') }}
+                </x-button>
+                <x-button
+                    class="flex w-full justify-start rounded-none px-3 py-2 text-2xs shadow-none hover:translate-y-0 hover:bg-foreground/5 hover:text-inherit hover:shadow-none focus-visible:bg-foreground/5 focus-visible:text-inherit"
+                    size="none"
+                    variant="ghost-shadow"
+                    href="{{ $app_is_demo ? '#' : route('dashboard.admin.finance.token-pack-plan.create', ['type' => 'token-pack']) }}"
+                    onclick="{{ $app_is_demo ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '' }}"
+                >
+                    <x-tabler-coins class="size-4" />
+                    {{ __('Create New Token Pack') }}
+                </x-button>
+            </x-slot:dropdown>
+        </x-dropdown.dropdown>
     </div>
 @endsection
 @section('content')
@@ -99,6 +129,14 @@
                             </td>
                             <td>
                                 {{ $entry->name }}
+                                @if($entry->isSharedCreditPlan())
+                                    <x-badge
+                                        class="text-2xs ms-1"
+                                        variant="info"
+                                    >
+                                        {{ __('Shared') }}
+                                    </x-badge>
+                                @endif
                             </td>
                             <td>
                                 {{ $entry->price }}
@@ -154,6 +192,8 @@
 
                 </x-slot:body>
             </x-table>
+
+            @include('panel.admin.finance.plan.ai-wizard.wizard')
         @endif
     </div>
 @endsection

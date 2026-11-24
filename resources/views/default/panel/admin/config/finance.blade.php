@@ -134,6 +134,46 @@
 						</div>
 					</div>
 				</div>
+
+				<x-form-step
+					class="mb-4 mt-5"
+					step="4"
+					label="{{ __('Shared Credit System') }}"
+				>
+				</x-form-step>
+				<div class="row">
+					<div class="col-md-12">
+						<div class="flex flex-col gap-2">
+							<x-forms.input
+								id="shared_credit_system_enabled"
+								name="shared_credit_system_enabled"
+								type="checkbox"
+								switcher
+								:checked="(bool) setting('shared_credit_system_enabled', false)"
+								label="{{ __('Enable Shared Credit System') }}"
+								tooltip="{{ __('When enabled, plans with shared credit type will use a single credit pool for all AI operations.') }}"
+							/>
+							<x-forms.input
+								id="shared_credit_show_cost_preview"
+								name="shared_credit_show_cost_preview"
+								type="checkbox"
+								switcher
+								:checked="(bool) setting('shared_credit_show_cost_preview', false)"
+								label="{{ __('Show Cost Preview') }}"
+								tooltip="{{ __('Show estimated credit cost before each AI operation.') }}"
+							/>
+							<x-forms.input
+								id="shared_credit_allow_negative"
+								name="shared_credit_allow_negative"
+								type="checkbox"
+								switcher
+								:checked="(bool) setting('shared_credit_allow_negative', false)"
+								label="{{ __('Allow Negative Balance') }}"
+								tooltip="{{ __('Allow users to continue operations even with insufficient balance.') }}"
+							/>
+						</div>
+					</div>
+					</div>
             </div>
 
             <div class="col-md-5 mx-auto">

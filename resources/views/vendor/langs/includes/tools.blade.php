@@ -37,7 +37,8 @@
    --}}
 
     <div class="col-md-6 mb-2">
-        <form action="{{route('elseyyid.translations.lang.newLang')}}" class="relative" method="GET" onSubmit="if(!confirm('{{__('Are you sure you want to create a new language?')}}')){return false;}">
+        <form action="{{route('elseyyid.translations.lang.newLang')}}" class="relative" method="POST" onSubmit="if(!confirm('{{__('Are you sure you want to create a new language?')}}')){return false;}">
+            @csrf
             <select class="form-control rounded-full bg-[#F1EDFF]" name="newLang" id="new-lang">
                 <option value="" disabled selected>{{__('Add new language ↓')}}</option>
                 @foreach(LaravelLocalization::getSupportedLocales() as $localeCode => $properties)
@@ -57,7 +58,8 @@
     </div>
 
     <div class="col-md-6 mb-2">
-        <form action="{{route('elseyyid.translations.lang.setLocale')}}" class="relative" method="GET" onSubmit="if(!confirm('{{__('Are you sure you want to change default language?')}}')){return false;}">
+        <form action="{{route('elseyyid.translations.lang.setLocale')}}" class="relative" method="POST" onSubmit="if(!confirm('{{__('Are you sure you want to change default language?')}}')){return false;}">
+            @csrf
             <select class="form-control rounded-full bg-[#F1EDFF]" name="setLocale" id="setLocale">
                 <option value="" disabled selected>{{__('Select Default Language ↓')}}</option>
                 @foreach(LaravelLocalization::getSupportedLocales() as $localeCode => $properties)

@@ -160,7 +160,14 @@
             event.preventDefault();
 
             const $button = $(this);
+
+            if ($button.data('busy')) {
+                return;
+            }
+
             const url = $button.attr('href');
+
+            $button.data('busy', true);
 
             toastr.info('{{ __('Updating Cart') }}');
 
@@ -174,6 +181,10 @@
                 setTimeout(function() {
                     location.reload();
                 }, 500);
+            }).fail(function(xhr) {
+                toastr.error(xhr.responseJSON?.message || '{{ __('An error occurred') }}');
+            }).always(function() {
+                $button.data('busy', false);
             });
         });
     </script>

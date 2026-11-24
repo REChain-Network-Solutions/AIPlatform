@@ -6,7 +6,8 @@ namespace App\Services\Ai\OpenAI\Image\Support;
 
 /**
  * Normalizes request payloads for OpenAI GPT Image models
- * (gpt-image-1, gpt-image-1.5, gpt-image-2).
+ * (gpt-image-1, gpt-image-1.5, gpt-image-2, gpt-image-2.5-sunburst,
+ * gpt-image-2.5-flare).
  *
  * The OpenAI API rejects requests that contain unknown parameters or disallowed
  * parameter values for a given model. This helper coerces our internal request
@@ -23,6 +24,10 @@ final class GptImageParamNormalizer
 
     public const MODEL_GPT_IMAGE_2 = 'gpt-image-2';
 
+    public const MODEL_GPT_IMAGE_2_5_SUNBURST = 'gpt-image-2.5-sunburst';
+
+    public const MODEL_GPT_IMAGE_2_5_FLARE = 'gpt-image-2.5-flare';
+
     public const ALLOWED_QUALITY = ['auto', 'low', 'medium', 'high'];
 
     public const ALLOWED_OUTPUT_FORMAT = ['png', 'jpeg', 'webp'];
@@ -33,6 +38,8 @@ final class GptImageParamNormalizer
             self::MODEL_GPT_IMAGE_1,
             self::MODEL_GPT_IMAGE_1_5,
             self::MODEL_GPT_IMAGE_2,
+            self::MODEL_GPT_IMAGE_2_5_SUNBURST,
+            self::MODEL_GPT_IMAGE_2_5_FLARE,
         ], true);
     }
 
@@ -43,8 +50,13 @@ final class GptImageParamNormalizer
      */
     public static function allowedBackgrounds(string $model): array
     {
-        // gpt-image-2 dropped transparent-background support.
-        if ($model === self::MODEL_GPT_IMAGE_2) {
+        // gpt-image-2 and the gpt-image-2.5 variants dropped
+        // transparent-background support.
+        if (in_array($model, [
+            self::MODEL_GPT_IMAGE_2,
+            self::MODEL_GPT_IMAGE_2_5_SUNBURST,
+            self::MODEL_GPT_IMAGE_2_5_FLARE,
+        ], true)) {
             return ['auto', 'opaque'];
         }
 
@@ -88,8 +100,13 @@ final class GptImageParamNormalizer
         // These params are not accepted by gpt-image-* models regardless of version.
         unset($data['response_format']);
 
-        // input_fidelity was removed in gpt-image-2 (always high fidelity).
-        if ($model === self::MODEL_GPT_IMAGE_2) {
+        // input_fidelity was removed in gpt-image-2 (always high fidelity);
+        // the gpt-image-2.5 variants behave the same.
+        if (in_array($model, [
+            self::MODEL_GPT_IMAGE_2,
+            self::MODEL_GPT_IMAGE_2_5_SUNBURST,
+            self::MODEL_GPT_IMAGE_2_5_FLARE,
+        ], true)) {
             unset($data['input_fidelity']);
         }
 

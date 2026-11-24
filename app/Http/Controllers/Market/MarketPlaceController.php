@@ -76,19 +76,29 @@ class MarketPlaceController extends Controller
                     'cart_html' => '',
                     'itemCount' => $count,
                     'iconId'    => $id . '-icon',
-                    'message'   => $response->json('message'),
+                    'message'   => $response->json('message', trans('An error occurred')),
                     'action'    => $response->json('action'),
                 ]);
             }
+
+            $cart = data_get($this->extensionRepository->cart(), 'data', []);
+
+            return response()->json([
+                'cart_html' => '',
+                'itemCount' => count(is_array($cart) ? $cart : []),
+                'iconId'    => $id . '-icon',
+                'message'   => $response->json('message', trans('An error occurred')),
+                'action'    => $response->json('action', 'error'),
+            ], $response->status() ?: 500);
         }
 
         return response()->json([
             'cart_html' => '',
             'itemCount' => 0,
             'iconId'    => $id . '-icon',
-            'message'   => trans('Bir hata oluştu'),
+            'message'   => trans('An error occurred'),
             'action'    => 'error',
-        ]);
+        ], 500);
     }
 
     public function index()

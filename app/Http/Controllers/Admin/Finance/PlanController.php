@@ -7,6 +7,7 @@ use App\Http\Controllers\Finance\PaymentProcessController;
 use App\Http\Middleware\Custom\FinanceLicenseMiddleware;
 use App\Models\Plan;
 use App\Models\Setting;
+use App\Services\Common\MenuService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use RachidLaasri\LaravelInstaller\Repositories\ApplicationStatusRepositoryInterface;
@@ -27,6 +28,8 @@ class PlanController extends Controller
             'plans'        => Plan::query()->orderByDesc('updated_at')
                 ->select(['id', 'name', 'type', 'frequency', 'active', 'updated_at', 'price'])
                 ->get(),
+            'planAiToolsMenu' => MenuService::planAiToolsMenu(),
+            'planFeatureMenu' => MenuService::planFeatureMenu(),
         ]);
     }
 

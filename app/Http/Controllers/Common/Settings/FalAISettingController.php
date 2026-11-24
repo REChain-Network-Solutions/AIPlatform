@@ -27,12 +27,24 @@ class FalAISettingController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'fal_ai_api_secret'              => 'required|string',
+            'fal_ai_api_secret'              => 'nullable',
             'fal_ai_default_model'           => 'required|string',
             'enabled_flux_pro_kontext'       => 'nullable',
             'social_media_image_model'       => 'nullable|string',
             'social_media_agent_image_model' => 'nullable|string',
         ]);
+
+        $secret = $data['fal_ai_api_secret'] ?? null;
+
+        if (is_array($secret)) {
+            $secret = implode(',', $secret);
+        }
+
+        if (! is_string($secret) || blank(trim($secret, " \t\n\r\0\x0B,"))) {
+            unset($data['fal_ai_api_secret']);
+        } else {
+            $data['fal_ai_api_secret'] = trim((string) $secret);
+        }
 
         $data['enabled_flux_pro_kontext'] = $request->has('enabled_flux_pro_kontext');
         $data['enabled_flux_2_flex'] = $request->has('enabled_flux_2_flex');

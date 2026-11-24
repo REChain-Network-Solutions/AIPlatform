@@ -130,6 +130,12 @@
                             <option value="{{ \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS_V3->value }}" {{ setting('tts_elevenlabs_model', \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS->value) === \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS_V3->value ? 'selected' : '' }}>
                                 {{ __('ElevenLabs v3') }}
                             </option>
+                            <option value="{{ \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS_V4->value }}" {{ setting('tts_elevenlabs_model', \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS->value) === \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS_V4->value ? 'selected' : '' }}>
+                                {{ __('ElevenLabs v4') }}
+                            </option>
+                            <option value="{{ \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS_V4_TURBO->value }}" {{ setting('tts_elevenlabs_model', \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS->value) === \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS_V4_TURBO->value ? 'selected' : '' }}>
+                                {{ __('ElevenLabs v4 Turbo') }}
+                            </option>
                         </select>
                     </div>
 

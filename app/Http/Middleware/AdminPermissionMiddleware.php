@@ -25,6 +25,10 @@ class AdminPermissionMiddleware
         }
 
         if (! Auth::user()?->isAdmin()) {
+            if ($request->expectsJson()) {
+                abort(403);
+            }
+
             return redirect()->route('index');
         }
 

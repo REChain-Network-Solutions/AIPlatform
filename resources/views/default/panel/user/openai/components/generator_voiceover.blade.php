@@ -476,6 +476,49 @@
     </form>
 </x-card>
 
+@php
+    $ttsEntity = match ($settings_two->tts ?? 'openai') {
+        'google' => \App\Domains\Entity\Enums\EntityEnum::GOOGLE->value,
+        'elevenlabs' => setting('tts_elevenlabs_model', \App\Domains\Entity\Enums\EntityEnum::ELEVENLABS->value),
+        'azure' => \App\Domains\Entity\Enums\EntityEnum::AZURE->value,
+        'speechify' => \App\Domains\Entity\Enums\EntityEnum::Speechify->value,
+        default => \App\Domains\Entity\Enums\EntityEnum::TTS_1->value,
+    };
+@endphp
+<div
+    x-data
+    x-init="
+        $nextTick(() => {
+            const speechesEl = document.querySelector('.speeches');
+            const getTotalCharCount = () => {
+                const textareas = speechesEl?.querySelectorAll('.speech textarea') || [];
+                return Array.from(textareas).reduce((sum, ta) => sum + ta.value.length, 0);
+            };
+            const dispatchUpdate = () => {
+                $dispatch('generator-changed', { generator: '{{ $ttsEntity }}', quantity: getTotalCharCount(), _force: Date.now() });
+            };
+            const attachInputListeners = (root) => {
+                root.querySelectorAll?.('textarea')?.forEach(ta => ta.addEventListener('input', dispatchUpdate));
+            };
+            dispatchUpdate();
+            if (speechesEl) {
+                attachInputListeners(speechesEl);
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach(m => m.addedNodes.forEach(node => {
+                        if (node.nodeType === 1) {
+                            attachInputListeners(node);
+                        }
+                    }));
+                    dispatchUpdate();
+                });
+                observer.observe(speechesEl, { childList: true, subtree: true });
+            }
+        });
+    "
+>
+    <x-cost-preview class="w-full justify-end" />
+</div>
+
 <div id="generator_sidebar_table">
     @include('panel.user.openai.components.generator_sidebar_table')
 </div>

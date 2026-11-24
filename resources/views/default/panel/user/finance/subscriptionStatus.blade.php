@@ -5,6 +5,10 @@
 
     $team = auth()->user()->getAttribute('team');
     $teamManager = auth()->user()->getAttribute('teamManager');
+
+    $isSharedCreditUser = auth()->user()->isSharedCreditUser()
+        && (bool) setting('shared_credit_system_enabled');
+    $sharedCreditBalance = (float) auth()->user()->shared_credits;
 @endphp
 
 @if ($team && $team?->allow_seats > 0)
@@ -65,7 +69,13 @@
             {{ __('You have no subscription at the moment. Please select a subscription plan or a token pack.') }}
         @endif
 
-        @if ($setting->feature_ai_image)
+        @if ($isSharedCreditUser)
+            {{ __('Total') }}
+            <strong class="text-primary">
+                @formatNumber($sharedCreditBalance)
+            </strong>
+            {{ __('shared credits left.') }}
+        @elseif ($setting->feature_ai_image)
             {{ __('Total') }}
             <strong class="text-foreground">
                 @formatNumber($wordModels->checkIfThereUnlimited() ? __('Unlimited') : $wordModels->totalCredits())
@@ -73,7 +83,6 @@
             {{ __('word and') }}
             <strong class="text-foreground">
                 @formatNumber($imageModels->checkIfThereUnlimited() ? __('Unlimited') : $imageModels->totalCredits())
-
             </strong>
             {{ __('image tokens left.') }}
         @else
@@ -85,25 +94,36 @@
         @endif
     </p>
 
-    <div class="relative">
-        <div
-            class="relative [&_.apexcharts-canvas]:mx-auto [&_.apexcharts-canvas]:max-w-full [&_.apexcharts-legend-text]:!m-0 [&_.apexcharts-legend-text]:!pe-2 [&_.apexcharts-legend-text]:ps-2 [&_.apexcharts-legend-text]:!text-foreground [&_.apexcharts-svg]:max-w-full"
-            id="chart-credit"
-        ></div>
-        <h3 class="group absolute left-1/2 top-[calc(50%-5px)] m-0 -translate-x-1/2 text-center text-xs font-normal">
-            <strong class="block text-[2em] font-semibold leading-none max-sm:text-[1.5em]">
-                @formatNumberShort($wordModels->checkIfThereUnlimited() ? __('Unlimited') : $wordModels->totalCredits())
-                @if (!$wordModels->checkIfThereUnlimited())
-                    <span
-                        class="pointer-events-none invisible absolute bottom-full left-1/2 mb-1 -translate-x-1/2 translate-y-1 scale-90 rounded-md bg-heading-foreground/10 px-2 py-1 text-base leading-none text-heading-foreground opacity-0 blur-md backdrop-blur-lg transition-all group-hover:visible group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 group-hover:blur-0"
-                    >
-                        @formatNumber($wordModels->totalCredits())
-                    </span>
-                @endif
-            </strong>
-            {{ __('Words') }}
-        </h3>
-    </div>
+    @if ($isSharedCreditUser)
+        <div class="py-6">
+            <h3 class="group m-0 text-center text-xs font-normal">
+                <strong class="block text-[2em] font-semibold leading-none text-primary max-sm:text-[1.5em]">
+                    @formatNumberShort($sharedCreditBalance)
+                </strong>
+                {{ __('Shared Credits') }}
+            </h3>
+        </div>
+    @else
+        <div class="relative">
+            <div
+                class="relative [&_.apexcharts-canvas]:mx-auto [&_.apexcharts-canvas]:max-w-full [&_.apexcharts-legend-text]:!m-0 [&_.apexcharts-legend-text]:!pe-2 [&_.apexcharts-legend-text]:ps-2 [&_.apexcharts-legend-text]:!text-foreground [&_.apexcharts-svg]:max-w-full"
+                id="chart-credit"
+            ></div>
+            <h3 class="group absolute left-1/2 top-[calc(50%-5px)] m-0 -translate-x-1/2 text-center text-xs font-normal">
+                <strong class="block text-[2em] font-semibold leading-none max-sm:text-[1.5em]">
+                    @formatNumberShort($wordModels->checkIfThereUnlimited() ? __('Unlimited') : $wordModels->totalCredits())
+                    @if (!$wordModels->checkIfThereUnlimited())
+                        <span
+                            class="pointer-events-none invisible absolute bottom-full left-1/2 mb-1 -translate-x-1/2 translate-y-1 scale-90 rounded-md bg-heading-foreground/10 px-2 py-1 text-base leading-none text-heading-foreground opacity-0 blur-md backdrop-blur-lg transition-all group-hover:visible group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 group-hover:blur-0"
+                        >
+                            @formatNumber($wordModels->totalCredits())
+                        </span>
+                    @endif
+                </strong>
+                {{ __('Words') }}
+            </h3>
+        </div>
+    @endif
 
     <div class="mt-4 flex flex-wrap items-center justify-center gap-4">
         <x-credit-list
@@ -137,6 +157,7 @@
     </div>
 @endif
 
+@if (!$isSharedCreditUser)
 @push('script')
     <script src="{{ custom_theme_url('/assets/libs/apexcharts/dist/apexcharts.min.js') }}"></script>
     <script>
@@ -209,3 +230,4 @@
         // @formatter:on
     </script>
 @endpush
+@endif

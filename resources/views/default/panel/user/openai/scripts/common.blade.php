@@ -154,7 +154,7 @@
         @if ($openai->type == 'image')
             formData.append('image_generator', imageGenerator);
 
-            if (imageGenerator === 'openai' || imageGenerator === 'gpt-image-1' || imageGenerator === 'gpt-image-1.5' || imageGenerator === 'gpt-image-2') {
+            if (imageGenerator === 'openai' || imageGenerator === 'gpt-image-1' || imageGenerator === 'gpt-image-1.5' || imageGenerator === 'gpt-image-2' || imageGenerator === 'gpt-image-2.5-sunburst' || imageGenerator === 'gpt-image-2.5-flare') {
 
 
                 formData.append('image_style', $("#image_style").val());
@@ -162,14 +162,9 @@
                 formData.append('image_mood', $("#image_mood").val());
                 // formData.append('image_model', document.getElementById('image_model').value)
                 formData.delete('size');
-                //if(document.getElementById('image_model').value == 'dall-e-2'){
                 formData.append('image_number_of_images', $("#image_number_of_images").val());
                 formData.append('size', $("#size").val());
                 formData.append('quality', $("#image_quality").val());
-                // } else {
-                //     formData.append('image_number_of_images', $("#image_number_of_images_3").val());
-                //     formData.append('size', $("#size_3").val());
-                // }
 
                 if (imageGenerator === 'gpt-image-1') {
                     formData.append("stable_description", $("#gpt_1_description").val());
@@ -181,6 +176,14 @@
 
 				if (imageGenerator === 'gpt-image-2') {
 					formData.append("stable_description", $("#gpt_2_description").val());
+				}
+
+				if (imageGenerator === 'gpt-image-2.5-sunburst') {
+					formData.append("stable_description", $("#gpt_2_5_sunburst_description").val());
+				}
+
+				if (imageGenerator === 'gpt-image-2.5-flare') {
+					formData.append("stable_description", $("#gpt_2_5_flare_description").val());
 				}
 
             } else {
@@ -238,8 +241,14 @@
         @endif
 
         @foreach (json_decode($openai->questions) ?? [] as $question)
-            if ("{{ $question->name }}" != "size")
-                formData.append("{{ $question->name }}", $("#{{ $question->name }}").val());
+            {
+                const questionName = @json($question->name);
+                const questionElement = document.getElementById(questionName);
+
+                if (questionName !== 'size' && questionElement && typeof questionElement.value !== 'undefined') {
+                    formData.append(questionName, questionElement.value);
+                }
+            }
         @endforeach
 
         $.ajax({

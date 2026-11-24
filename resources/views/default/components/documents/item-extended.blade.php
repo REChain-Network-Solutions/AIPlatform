@@ -1,7 +1,7 @@
 @php
     $base_class .= ' grid gap-4 px-4 py-3 text-2xs font-medium';
-    $isImage = $entry->generator->type === 'image';
-    $isVideo = $entry->generator->type === 'video';
+    $isImage = $entry?->generator?->type === 'image';
+    $isVideo = $entry?->generator?->type === 'video';
     $isAiImagePro = ($entry->source ?? null) === 'ai-image-pro';
     $isAiChatProImageChat = ($entry->source ?? null) === 'ai-chat-pro-image-chat';
     $isExternalImageDoc = $isAiImagePro || $isAiChatProImageChat;
@@ -11,7 +11,7 @@
 @endphp
 
 <div
-    data-type="{{ trim($entry->generator->type) }}"
+    data-type="{{ trim($entry?->generator?->type) }}"
     {{ $attributes->withoutTwMergeClasses()->twMerge($base_class, $attributes->get('class')) }}
     @if ($isExternalImageDoc) data-external-image-doc="true" @endif
 >
@@ -52,7 +52,7 @@
             <img
                 class="lqd-posts-item-img lqd-docs-item-img size-9 rounded-full object-cover object-center group-[&[data-view-mode=grid]]:mb-2 group-[&[data-view-mode=grid]]:aspect-video group-[&[data-view-mode=grid]]:h-auto group-[&[data-view-mode=grid]]:w-full group-[&[data-view-mode=grid]]:rounded-md"
                 src="{{ $imageSource }}"
-                alt="{{ __($entry->generator->title) }}"
+                alt="{{ __($entry?->generator?->title) }}"
                 loading="lazy"
                 decoding="async"
             />
@@ -87,11 +87,11 @@
         @else
             <x-lqd-icon
                 class="lqd-posts-item-icon lqd-docs-item-icon"
-                style="background: {{ $entry->generator->color }}"
+                style="background: {{ $entry?->generator?->color }}"
             >
                 <span class="size-5">
-                    @if ($entry->generator->image !== 'none')
-                        {!! html_entity_decode($entry->generator->image) !!}
+                    @if ($entry?->generator?->image !== 'none')
+                        {!! html_entity_decode($entry?->generator?->image) !!}
                     @endif
                 </span>
             </x-lqd-icon>
@@ -103,13 +103,13 @@
                 @php
                     $title = $entry->title ? $entry->title . ' : ' . $entry->output : $entry->output;
                 @endphp
-                @if (in_array($entry->generator->type, ['text', 'youtube', 'rss', 'code']))
+                @if (in_array($entry?->generator?->type, ['text', 'youtube', 'rss', 'code']))
                     {{ str()->limit(strip_tags($title), $trim) }}
-                @elseif (in_array($entry->generator->type, ['image', 'video']))
+                @elseif (in_array($entry?->generator?->type, ['image', 'video']))
                     {{ str()->limit(strip_tags($entry->input ?? $entry->title), $trim) }}
-                @elseif($entry->generator->type == 'audio')
+                @elseif($entry?->generator?->type == 'audio')
                     {!! str()->limit($title, $trim) !!}
-                @elseif ($entry->generator->type == 'voiceover' || $entry->generator->type == 'isolator')
+                @elseif ($entry?->generator?->type == 'voiceover' || $entry?->generator?->type == 'isolator')
                     {{ str()->limit($entry->title, $trim) }}
                 @endif
             </p>
@@ -118,10 +118,10 @@
 
     <p
         class="lqd-posts-item-type lqd-docs-item-type sort-file inline-block w-auto max-w-full justify-self-start overflow-hidden truncate rounded-md bg-primary px-1.5 py-1 text-3xs font-medium leading-tight text-primary-foreground group-[&[data-view-mode=grid]]:col-span-2 group-[&[data-view-mode=grid]]:max-w-[calc(100%-50px)]"
-        data-generator-title="{{ trim($entry->generator->title) }}"
-        @if ($entry->generator->color) style="background: {{ $entry->generator->color }}; color: black;" @endif
+        data-generator-title="{{ trim($entry?->generator?->title) }}"
+        @if ($entry?->generator?->color) style="background: {{ $entry?->generator?->color }}; color: black;" @endif
     >
-        {{ __($entry->generator->title) }}
+        {{ __($entry?->generator?->title) }}
     </p>
 
     <p

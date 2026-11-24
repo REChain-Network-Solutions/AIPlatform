@@ -3,7 +3,7 @@
 	"scripts": {
 		"lint": "eslint ./resources/views/page",
 		"dev": "vite",
-		"build": "vite build",
+		"build": "NODE_OPTIONS=--max-old-space-size=4096 vite build",
 		"clean": "vite clean",
 		"watch": "gulp watch"
 	},
@@ -14,7 +14,7 @@
 		"@vitejs/plugin-react-swc": "^4.3.0",
 		"autoprefixer": "^10.4.14",
 		"axios": "^1.8.4",
-		"blade-formatter": "^1.42.2",
+		"blade-formatter": "^1.44.4",
 		"del": "^7.0.0",
 		"eslint": "^8.56.0",
 		"eslint-plugin-tailwindcss": "^3.14.0",

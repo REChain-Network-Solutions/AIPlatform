@@ -650,6 +650,14 @@ function openaiSettingsSave() {
 		formData.append('enabled_gpt_image_2', $("#enabled_gpt_image_2").is(":checked") ? 1 : 0);
 	}
 
+	if ($('#enabled_gpt_image_2_5_sunburst')) {
+		formData.append('enabled_gpt_image_2_5_sunburst', $("#enabled_gpt_image_2_5_sunburst").is(":checked") ? 1 : 0);
+	}
+
+	if ($('#enabled_gpt_image_2_5_flare')) {
+		formData.append('enabled_gpt_image_2_5_flare', $("#enabled_gpt_image_2_5_flare").is(":checked") ? 1 : 0);
+	}
+
     $.ajax({
         type: "post",
         url: "/dashboard/admin/settings/openai-save",

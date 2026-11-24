@@ -17,15 +17,13 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         // '*',
-        'pdf/getContent',
         'stripe/*',
         'webhooks/*',
-        'dashboard/*',
         'dashboard/user/payment/iyzico/*',
         'chatbot/*',
         'generator/webhook/fal-ai',
+        'video-agent/webhook/*',
         'dashboard/admin/config/more',
-        'translations/lang/update-all',
         'social-media/*',
         'chatbot/instagram/*',
     ];

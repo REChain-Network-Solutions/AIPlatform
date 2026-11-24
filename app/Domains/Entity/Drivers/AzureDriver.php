@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace App\Domains\Entity\Drivers;
 
 use App\Domains\Entity\BaseDriver;
-use App\Domains\Entity\Concerns\Calculate\HasTextToSpeech;
-use App\Domains\Entity\Concerns\Input\HasInputVoice;
-use App\Domains\Entity\Contracts\Calculate\WithTextToSpeechInterface;
-use App\Domains\Entity\Contracts\Input\WithInputVoiceInterface;
+use App\Domains\Entity\Concerns\Calculate\HasCharacters;
+use App\Domains\Entity\Concerns\Input\HasInput;
+use App\Domains\Entity\Contracts\Calculate\WithCharsInterface;
+use App\Domains\Entity\Contracts\Input\WithInputInterface;
 use App\Domains\Entity\Enums\EntityEnum;
 
-class AzureDriver extends BaseDriver implements WithInputVoiceInterface, WithTextToSpeechInterface
+class AzureDriver extends BaseDriver implements WithCharsInterface, WithInputInterface
 {
-    use HasInputVoice;
-    use HasTextToSpeech;
+    use HasCharacters;
+    use HasInput;
 
     public function enum(): EntityEnum
     {

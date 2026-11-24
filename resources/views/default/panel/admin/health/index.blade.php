@@ -7,38 +7,29 @@
         <div class="container-xl">
             @if (Auth::user()?->isAdmin())
                 @php
-                    function backgroundColor($status)
-                    {
-                        return match ($status) {
-                            Spatie\Health\Enums\Status::ok()->value => 'bg-green-500',
-                            Spatie\Health\Enums\Status::warning()->value => 'bg-yellow-500',
-                            Spatie\Health\Enums\Status::skipped()->value => 'bg-blue-500',
-                            Spatie\Health\Enums\Status::failed()->value, Spatie\Health\Enums\Status::crashed()->value => 'bg-red-500',
-                            default => 'bg-gray-500',
-                        };
-                    }
+                    $healthBackgroundColor = fn ($status) => match ($status) {
+                        Spatie\Health\Enums\Status::ok()->value => 'bg-green-500',
+                        Spatie\Health\Enums\Status::warning()->value => 'bg-yellow-500',
+                        Spatie\Health\Enums\Status::skipped()->value => 'bg-blue-500',
+                        Spatie\Health\Enums\Status::failed()->value, Spatie\Health\Enums\Status::crashed()->value => 'bg-red-500',
+                        default => 'bg-gray-500',
+                    };
 
-                    function iconColor($status)
-                    {
-                        return match ($status) {
-                            Spatie\Health\Enums\Status::ok()->value => 'text-green-500',
-                            Spatie\Health\Enums\Status::warning()->value => 'text-yellow-500',
-                            Spatie\Health\Enums\Status::skipped()->value => 'text-blue-500',
-                            Spatie\Health\Enums\Status::failed()->value, Spatie\Health\Enums\Status::crashed()->value => 'text-red-500',
-                            default => 'text-gray-500',
-                        };
-                    }
+                    $healthIconColor = fn ($status) => match ($status) {
+                        Spatie\Health\Enums\Status::ok()->value => 'text-green-500',
+                        Spatie\Health\Enums\Status::warning()->value => 'text-yellow-500',
+                        Spatie\Health\Enums\Status::skipped()->value => 'text-blue-500',
+                        Spatie\Health\Enums\Status::failed()->value, Spatie\Health\Enums\Status::crashed()->value => 'text-red-500',
+                        default => 'text-gray-500',
+                    };
 
-                    function icon($status)
-                    {
-                        return match ($status) {
-                            Spatie\Health\Enums\Status::ok()->value => 'check-circle',
-                            Spatie\Health\Enums\Status::warning()->value => 'exclamation-circle',
-                            Spatie\Health\Enums\Status::skipped()->value => 'arrow-circle-right',
-                            Spatie\Health\Enums\Status::failed()->value, Spatie\Health\Enums\Status::crashed()->value => 'x-circle',
-                            default => '',
-                        };
-                    }
+                    $healthIcon = fn ($status) => match ($status) {
+                        Spatie\Health\Enums\Status::ok()->value => 'check-circle',
+                        Spatie\Health\Enums\Status::warning()->value => 'exclamation-circle',
+                        Spatie\Health\Enums\Status::skipped()->value => 'arrow-circle-right',
+                        Spatie\Health\Enums\Status::failed()->value, Spatie\Health\Enums\Status::crashed()->value => 'x-circle',
+                        default => '',
+                    };
                 @endphp
 
 
@@ -46,32 +37,32 @@
 						@if (count($checkResults?->storedCheckResults ?? []))
                         @foreach ($checkResults->storedCheckResults as $result)
                             <x-card class:body="flex items-start gap-3">
-                                <div class="{{ backgroundColor($result->status) }} flex items-center justify-center rounded-full bg-opacity-25 p-1.5">
+                                <div class="{{ $healthBackgroundColor($result->status) }} flex items-center justify-center rounded-full bg-opacity-25 p-1.5">
                                     <svg
-                                        class="{{ iconColor($result->status) }} size-5"
+                                        class="{{ $healthIconColor($result->status) }} size-5"
                                         xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 20 20"
                                         fill="currentColor"
                                     >
-                                        @if (icon($result->status) == 'check-circle')
+                                        @if ($healthIcon($result->status) == 'check-circle')
                                             <path
                                                 fill-rule="evenodd"
                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                                 clip-rule="evenodd"
                                             />
-                                        @elseif(icon($result->status) == 'exclamation-circle')
+                                        @elseif($healthIcon($result->status) == 'exclamation-circle')
                                             <path
                                                 fill-rule="evenodd"
                                                 d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
                                                 clip-rule="evenodd"
                                             />
-                                        @elseif(icon($result->status) == 'arrow-circle-right')
+                                        @elseif($healthIcon($result->status) == 'arrow-circle-right')
                                             <path
                                                 fill-rule="evenodd"
                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z"
                                                 clip-rule="evenodd"
                                             />
-                                        @elseif(icon($result->status) == 'x-circle')
+                                        @elseif($healthIcon($result->status) == 'x-circle')
                                             <path
                                                 fill-rule="evenodd"
                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -114,32 +105,32 @@
 							}
 						@endphp
 							<x-card class:body="flex items-start gap-3">
-								<div class="{{ backgroundColor($chronJobStatus) }} flex items-center justify-center rounded-full bg-opacity-25 p-1.5">
+								<div class="{{ $healthBackgroundColor($chronJobStatus) }} flex items-center justify-center rounded-full bg-opacity-25 p-1.5">
 									<svg
-										class="{{ iconColor($chronJobStatus) }} size-5"
+										class="{{ $healthIconColor($chronJobStatus) }} size-5"
 										xmlns="http://www.w3.org/2000/svg"
 										viewBox="0 0 20 20"
 										fill="currentColor"
 									>
-										@if (icon($chronJobStatus) == 'check-circle')
+										@if ($healthIcon($chronJobStatus) == 'check-circle')
 											<path
 												fill-rule="evenodd"
 												d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
 												clip-rule="evenodd"
 											/>
-										@elseif(icon($chronJobStatus) == 'exclamation-circle')
+										@elseif($healthIcon($chronJobStatus) == 'exclamation-circle')
 											<path
 												fill-rule="evenodd"
 												d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
 												clip-rule="evenodd"
 											/>
-										@elseif(icon($chronJobStatus) == 'arrow-circle-right')
+										@elseif($healthIcon($chronJobStatus) == 'arrow-circle-right')
 											<path
 												fill-rule="evenodd"
 												d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z"
 												clip-rule="evenodd"
 											/>
-										@elseif(icon($chronJobStatus) == 'x-circle')
+										@elseif($healthIcon($chronJobStatus) == 'x-circle')
 											<path
 												fill-rule="evenodd"
 												d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -313,39 +304,57 @@
 @push('script')
     <script>
         var cleanCacheBtn = document.getElementById('cleanCacheBtn');
-        cleanCacheBtn.addEventListener('click', function() {
-            var confirmResultCache = confirm(@json(__('Are you sure you want to clear the cache?')));
-            if (confirmResultCache) {
-                // AJAX request to delete the log file
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', '/dashboard/admin/health/cache-clear', true);
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === XMLHttpRequest.DONE) {
-                        if (xhr.status === 200) {
-                            // Log file successfully deleted, reload the page
+        if (cleanCacheBtn) {
+            cleanCacheBtn.addEventListener('click', function() {
+                var confirmResultCache = confirm(@json(__('Are you sure you want to clear the cache?')));
+                if (confirmResultCache) {
+                    fetch(@json(route('dashboard.admin.health.cache.clear')), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    }).then(function(response) {
+                        if (response.ok) {
                             location.reload();
                         } else {
-                            // Error occurred while deleting the log file
                             alert(@json(__('An error occurred while clearing the cache.')));
                         }
-                    }
-                };
-                xhr.send();
-            }
-        });
+                    }).catch(function() {
+                        alert(@json(__('An error occurred while clearing the cache.')));
+                    });
+                }
+            });
+        }
     </script>
     <script>
-        document.querySelector('textarea').addEventListener('click', function() {
-            this.select();
-        });
+        var logTextarea = document.getElementById('log');
+        if (logTextarea) {
+            logTextarea.addEventListener('click', function() {
+                this.select();
+            });
+        }
 
         var copyButton = document.getElementById('copyButton');
-        var logTextarea = document.getElementById('log');
 
-        copyButton.addEventListener('click', function() {
-            logTextarea.select();
-            document.execCommand('copy');
-            toastr.success(@json(__('Copied')));
-        });
+        if (copyButton && logTextarea) {
+            copyButton.addEventListener('click', function() {
+                var done = function() {
+                    toastr.success(@json(__('Copied')));
+                };
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(logTextarea.value).then(done).catch(function() {
+                        logTextarea.select();
+                        document.execCommand('copy');
+                        done();
+                    });
+                } else {
+                    logTextarea.select();
+                    document.execCommand('copy');
+                    done();
+                }
+            });
+        }
     </script>
 @endpush

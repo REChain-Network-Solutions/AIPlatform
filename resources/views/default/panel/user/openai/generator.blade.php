@@ -7,7 +7,6 @@
 
         $view = match (true) {
             $openai->type === 'image' => 'panel.user.openai.components.generator_image',
-            $openai->type === 'video' => 'panel.user.openai.components.generator_video',
             $openai->type === 'voiceover' => 'panel.user.openai.components.generator_voiceover',
             $openai->type === \App\Domains\Entity\Enums\EntityEnum::ISOLATOR->value => 'ai-voice-isolator::generator_voice_isolator',
             $openai->type === 'video-to-video' && \App\Helpers\Classes\MarketplaceHelper::isRegistered('ai-video-to-video') => 'ai-video-to-video::component',

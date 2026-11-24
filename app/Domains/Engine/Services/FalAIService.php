@@ -10,13 +10,20 @@ use GuzzleHttp\Promise\PromiseInterface;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use InvalidArgumentException;
 use RuntimeException;
 
 class FalAIService
 {
+    private const MAX_GPT_IMAGE_REFERENCES = 16;
+
     public const GENERATE_ENDPOINT = 'https://queue.fal.run/fal-ai/%s';
 
     public const CHECK_ENDPOINT = 'https://queue.fal.run/fal-ai/%s/requests/%s';
+
+    public const PROVIDER_ENDPOINT = 'https://queue.fal.run/%s';
+
+    public const PROVIDER_CHECK_ENDPOINT = 'https://queue.fal.run/%s/requests/%s';
 
     public const SYNC_ENDPOINT = 'https://fal.run/%s';
 
@@ -148,26 +155,24 @@ class FalAIService
             $request = Arr::add($request, $ratioParamName, $ratio);
         }
 
-        // Handle image_reference which can be a string or array
         $imageReference = $options['image_reference'] ?? null;
         $styleReference = $options['style_reference'] ?? null;
+        $imageUrls = collect(Arr::wrap($imageReference))
+            ->merge(Arr::wrap($styleReference))
+            ->filter()
+            ->values();
 
-        // Normalize image_reference to array if it's a string
-        $imageReferenceUrls = [];
-        if (is_array($imageReference)) {
-            $imageReferenceUrls = array_filter($imageReference);
-        } elseif (is_string($imageReference) && ! empty($imageReference)) {
-            $imageReferenceUrls = [$imageReference];
-        }
+        if (self::isGptImageModel($entity)) {
+            if ($imageUrls->count() > self::MAX_GPT_IMAGE_REFERENCES) {
+                throw new InvalidArgumentException(__('GPT Image models accept at most 16 reference images.'));
+            }
 
-        // Collect all image URLs
-        $imageUrls = collect($imageReferenceUrls);
-        if (! empty($styleReference)) {
-            $imageUrls->push($styleReference);
-        }
-        $imageUrls = $imageUrls->filter()->values();
+            $entityValue = self::gptImageEndpoint($entity, $imageUrls->isNotEmpty());
 
-        if ($entity === EntityEnum::SEEDREAM_4) {
+            if ($imageUrls->isNotEmpty()) {
+                $request['image_urls'] = $imageUrls->all();
+            }
+        } elseif ($entity === EntityEnum::SEEDREAM_4) {
             $entityValue = 'bytedance/' . $entity?->value;
             if ($imageUrls->isNotEmpty()) {
                 $entityValue = EntityEnum::SEEDREAM_4_EDIT->value;
@@ -205,7 +210,7 @@ class FalAIService
             $request['image_urls'] = $imageUrls->all();
         }
 
-        $url = sprintf(self::GENERATE_ENDPOINT, $entityValue);
+        $url = self::generationUrl($entityValue);
 
         if ($entityValue === EntityEnum::IMAGEN_4->value) {
             $url .= '/preview';
@@ -294,6 +299,15 @@ class FalAIService
         return $entity !== null && in_array($entity, [EntityEnum::GROK_IMAGINE_IMAGE, EntityEnum::GROK_IMAGINE_IMAGE_EDIT], true);
     }
 
+    public static function isGptImageModel(?EntityEnum $entity): bool
+    {
+        return $entity !== null && in_array($entity, [
+            EntityEnum::FAL_GPT_IMAGE_2,
+            EntityEnum::FAL_GPT_IMAGE_2_5_SUNBURST,
+            EntityEnum::FAL_GPT_IMAGE_2_5_FLARE,
+        ], true);
+    }
+
     public static function check($uuid, EntityEnum $entity = EntityEnum::FLUX_PRO): ?array
     {
         $entityValue = $entity->value ?? setting('fal_ai_default_model');
@@ -340,7 +354,11 @@ class FalAIService
             $entityValue = 'xai';
         }
 
-        $url = sprintf(self::CHECK_ENDPOINT, $entityValue, $uuid);
+        if (self::isGptImageModel($enum)) {
+            $url = sprintf(self::PROVIDER_CHECK_ENDPOINT, self::gptImageApplication($enum), $uuid);
+        } else {
+            $url = sprintf(self::CHECK_ENDPOINT, $entityValue, $uuid);
+        }
 
         $http = self::falRequest($url);
 
@@ -390,6 +408,41 @@ class FalAIService
             'Accept'        => 'application/json',
             'Authorization' => 'Key ' . ApiHelper::setFalAIKey(),
         ])->get($url);
+    }
+
+    private static function generationUrl(string $entityValue): string
+    {
+        if (str_starts_with($entityValue, 'openai/')) {
+            return sprintf(self::PROVIDER_ENDPOINT, $entityValue);
+        }
+
+        return sprintf(self::GENERATE_ENDPOINT, $entityValue);
+    }
+
+    private static function gptImageEndpoint(EntityEnum $entity, bool $isEdit): string
+    {
+        return match ($entity) {
+            EntityEnum::FAL_GPT_IMAGE_2 => $isEdit
+                ? 'openai/gpt-image-2/edit'
+                : EntityEnum::FAL_GPT_IMAGE_2->value,
+            EntityEnum::FAL_GPT_IMAGE_2_5_SUNBURST => $isEdit
+                ? 'openai/gpt-image-2.5/sunburst/edit'
+                : EntityEnum::FAL_GPT_IMAGE_2_5_SUNBURST->value,
+            EntityEnum::FAL_GPT_IMAGE_2_5_FLARE => $isEdit
+                ? 'openai/gpt-image-2.5/flare/edit'
+                : EntityEnum::FAL_GPT_IMAGE_2_5_FLARE->value,
+            default => throw new InvalidArgumentException(__('Unsupported FAL GPT Image model.')),
+        };
+    }
+
+    private static function gptImageApplication(EntityEnum $entity): string
+    {
+        return match ($entity) {
+            EntityEnum::FAL_GPT_IMAGE_2 => 'openai/gpt-image-2',
+            EntityEnum::FAL_GPT_IMAGE_2_5_SUNBURST,
+            EntityEnum::FAL_GPT_IMAGE_2_5_FLARE => 'openai/gpt-image-2.5',
+            default                             => throw new InvalidArgumentException(__('Unsupported FAL GPT Image model.')),
+        };
     }
 
     private static function parseImageResult(array $payload): ?array

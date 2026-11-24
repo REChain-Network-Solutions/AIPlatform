@@ -82,7 +82,7 @@
                     style="background-image: url('{{ !empty($chat->category?->image) ? custom_theme_url($chat->category?->image, true) : url(custom_theme_url('/assets/img/auth/default-avatar.png')) }}')"
                 ></span>
                 <span class="lqd-chat-sender-name sr-only">
-                    {{ __($chat?->category?->name ?? 'AI Assistant') }}
+                    {{ $chat?->chat_type === 'crm-assistant' ? __('CRM Assistant') : __($chat?->category?->name ?? 'AI Assistant') }}
                 </span>
             </div>
             <div class="chat-content-container group relative max-w-[calc(100%-64px)] rounded-[2em] bg-clay text-heading-foreground dark:bg-white/[2%]">
@@ -91,6 +91,35 @@
                         @foreach ($message->used_skills as $skill)
                             <span>
                                 {{ __('Used :name Skill', ['name' => $skill['name'] ?? '']) }}
+                            </span>
+                        @endforeach
+                    </div>
+                @endif
+                @if ($is_chat_pro && !empty($message->used_connectors))
+                    <div class="lqd-connectors-used mb-3 flex flex-wrap items-center gap-1.5 text-xs text-foreground/50">
+                        @foreach ($message->used_connectors as $connector)
+                            @php
+                                $connectorIcon = $connector['icon'] ?? null;
+                                $connectorIconIsBlade = is_string($connectorIcon) && str_contains($connectorIcon, '::') && view()->exists($connectorIcon);
+                                $connectorIconSvg = '';
+                                if (is_string($connectorIcon) && $connectorIcon !== '' && ! $connectorIconIsBlade) {
+                                    // Stored icon may reference an uninstalled provider — fall back silently.
+                                    try {
+                                        $connectorIconSvg = (string) svg($connectorIcon, 'size-3.5 opacity-70')->toHtml();
+                                    } catch (\Throwable) {
+                                        $connectorIconSvg = '';
+                                    }
+                                }
+                            @endphp
+                            <span class="inline-flex items-center gap-1">
+                                @if ($connectorIconIsBlade)
+                                    <span class="inline-grid size-3.5 place-items-center opacity-70 [&>svg]:size-full">
+                                        @include($connectorIcon)
+                                    </span>
+                                @elseif ($connectorIconSvg !== '')
+                                    {!! $connectorIconSvg !!}
+                                @endif
+                                {{ __('Used :name Connector', ['name' => $connector['name'] ?? '']) }}
                             </span>
                         @endforeach
                     </div>

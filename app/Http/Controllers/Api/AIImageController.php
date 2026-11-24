@@ -8,6 +8,7 @@ use App\Domains\Entity\Enums\EntityEnum;
 use App\Domains\Entity\Facades\Entity;
 use App\Enums\BedrockEngine;
 use App\Helpers\Classes\ApiHelper;
+use App\Helpers\Classes\DefaultOpenAiImageModel;
 use App\Helpers\Classes\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\OpenAIGenerator;
@@ -16,6 +17,7 @@ use App\Models\SettingTwo;
 use App\Models\Usage;
 use App\Models\User;
 use App\Models\UserOpenai;
+use App\Services\Ai\OpenAI\Image\CreateImageService;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -28,7 +30,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use OpenAI\Laravel\Facades\OpenAI as FacadesOpenAI;
 use Random\RandomException;
 use RuntimeException;
 
@@ -222,10 +223,14 @@ class AIImageController extends Controller
             EntityEnum::GPT_IMAGE_1->value,
             EntityEnum::GPT_IMAGE_1_5->value,
             EntityEnum::GPT_IMAGE_2->value,
+            EntityEnum::GPT_IMAGE_2_5_SUNBURST->value,
+            EntityEnum::GPT_IMAGE_2_5_FLARE->value,
             'gpt-image-1',
             'gpt-image-1.5',
             'gpt-image-1-5',
             'gpt-image-2',
+            'gpt-image-2.5-sunburst',
+            'gpt-image-2.5-flare',
             'dall-e' => EngineEnum::OPEN_AI->value,
             default  => $imageGenerator ?? EngineEnum::OPEN_AI->value,
         };
@@ -249,6 +254,8 @@ class AIImageController extends Controller
             'gpt-image-1'                              => EntityEnum::GPT_IMAGE_1,
             'gpt-image-1.5', 'gpt-image-1-5' => EntityEnum::GPT_IMAGE_1_5,
             'gpt-image-2'                    => EntityEnum::GPT_IMAGE_2,
+            'gpt-image-2.5-sunburst'         => EntityEnum::GPT_IMAGE_2_5_SUNBURST,
+            'gpt-image-2.5-flare'            => EntityEnum::GPT_IMAGE_2_5_FLARE,
             default                          => $this->getDefaultModel($engine),
         };
     }
@@ -316,16 +323,23 @@ class AIImageController extends Controller
             'mood'     => $mood ? "$mood mood" : null,
         ];
         $prompt .= ' ' . implode(' ', array_filter($attributes));
-        $response = FacadesOpenAI::images()->create([
-            'model'           => $model,
-            'prompt'          => $prompt,
-            'size'            => $is_demo ? $this->getDemoImageSize($model) : $size,
-            'response_format' => 'b64_json',
-            'quality'         => $is_demo ? 'standard' : $quality,
-            'n'               => 1,
-        ]);
-        $contents = base64_decode($response['data'][0]['b64_json']);
-        $nameOfImage = Str::random(12) . '-DALL-E-' . Str::slug(explode(' ', mb_substr($prompt, 0, 15))[0]) . '.png';
+
+        // GptImageParamNormalizer strips response_format and coerces size/quality to
+        // the values gpt-image models accept; the raw images endpoint rejects both.
+        $base64 = app(CreateImageService::class)
+            ->setModel(($model ?? DefaultOpenAiImageModel::FALLBACK)->value)
+            ->setPrompt($prompt)
+            ->setSize($is_demo ? '1024x1024' : (string) $size)
+            ->setQuality($is_demo ? 'low' : (string) $quality)
+            ->setOutputFormat('png')
+            ->generateForAi();
+
+        if ($base64 === null) {
+            throw new RuntimeException(__('Image generation failed'));
+        }
+
+        $contents = base64_decode($base64);
+        $nameOfImage = Str::random(12) . '-GPT-IMG-' . Str::slug(explode(' ', mb_substr($prompt, 0, 15))[0]) . '.png';
 
         return [
             'prompt'                => $prompt,
@@ -356,15 +370,7 @@ class AIImageController extends Controller
         $mood = $param['mood'] ?? null;
         $defaultSdModel = $this->getStableDiffusionDefaultModel()->value;
 
-        $v2BetaModels = [
-            EntityEnum::SD_3->value,
-            EntityEnum::SD_3_TURBO->value,
-            EntityEnum::SD_3_MEDIUM->value,
-            EntityEnum::SD_3_LARGE->value,
-            EntityEnum::SD_3_LARGE_TURBO->value,
-            EntityEnum::CORE->value,
-            EntityEnum::ULTRA->value,
-        ];
+        $isV2BetaModels = EntityEnum::tryFrom($defaultSdModel)?->isV2BetaSdEntity() ?? false;
         $width = (int) explode('x', $image_resolution)[0];
         $height = (int) explode('x', $image_resolution)[1];
 
@@ -519,15 +525,15 @@ class AIImageController extends Controller
         }
 
         try {
-            if (in_array($defaultSdModel, $v2BetaModels, true) && in_array($stable_type, ['text-to-image', 'image-to-image'], true)) {
-                $defaultSdModel = 'sd3';
+            if ($isV2BetaModels && in_array($stable_type, ['text-to-image', 'image-to-image'], true)) {
+                // 'sd3' is the v2beta endpoint path; the selected model goes in the model field.
                 $sd3Payload[] = ['name' => 'model', 'contents' => $defaultSdModel];
-                $response = $client->post($defaultSdModel, [
+                $response = $client->post('sd3', [
                     'headers'   => ['accept' => 'application/json'],
                     'multipart' => $sd3Payload,
                 ]);
             } else {
-                $defaultSdModel = $stable_type === 'multi-prompt' ? EntityEnum::STABLE_DIFFUSION_V_1_6->value : $defaultSdModel;
+                $defaultSdModel = $stable_type === 'multi-prompt' ? EntityEnum::STABLE_DIFFUSION_XL_1024_V_1_0->value : $defaultSdModel;
                 $response = $client->post("$defaultSdModel/$stable_url", [
                     $content_type => $payload,
                 ]);
@@ -781,29 +787,14 @@ class AIImageController extends Controller
         };
     }
 
-    private function getDemoImageSize(?EntityEnum $model): string
-    {
-        return match ($model) {
-            EntityEnum::DALL_E_3 => '1024x1024',
-            EntityEnum::DALL_E_2 => '256x256',
-            default              => '512x512',
-        };
-    }
-
     private function getDefaultOpenAiImageModel(): EntityEnum
     {
-        $default = match ($this->settings_two->dalle) {
-            'dalle3' => EntityEnum::DALL_E_3->slug(),
-            'dalle2' => EntityEnum::DALL_E_2->slug(),
-            default  => $this->settings_two->dalle,
-        };
-
-        return EntityEnum::fromSlug($default) ?? EntityEnum::DALL_E_2;
+        return DefaultOpenAiImageModel::resolve($this->settings_two);
     }
 
     private function getStableDiffusionDefaultModel(): EntityEnum
     {
-        return EntityEnum::fromSlug($this->settings_two?->stablediffusion_default_model) ?? EntityEnum::SD_3;
+        return EntityEnum::fromSlug($this->settings_two?->stablediffusion_default_model) ?? EntityEnum::SD_3_5_LARGE;
     }
 
     private function getDefaultFalAiModel(): EntityEnum

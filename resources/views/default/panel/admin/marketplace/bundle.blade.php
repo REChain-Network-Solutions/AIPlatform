@@ -253,15 +253,10 @@
 							</div>
 						</div>
 
-						<x-button
-							class="w-full shadow-xl shadow-black/10"
-							variant="success"
-							target="_blank"
-							size="lg"
-							href="{{ $item['routes']['payment'] }}"
-						>
-							{{ __('Purchase Bundle') }}
-						</x-button>
+						<div class="flex gap-2">
+							@include('default.panel.admin.marketplace.particles.bundle-is-buy')
+							@include('default.panel.admin.marketplace.particles.bundle-is-cart')
+						</div>
 					@else
 						<x-button
 							class="w-full"
@@ -418,6 +413,7 @@
                                         @endif
                                     @else
                                         @include('default.panel.admin.marketplace.particles.bundle-is-buy')
+                                        @include('default.panel.admin.marketplace.particles.bundle-is-cart')
                                     @endif
 
                                 @endif

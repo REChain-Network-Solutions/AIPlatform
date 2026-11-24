@@ -121,6 +121,46 @@
 						@enderror
 					</div>
 				</div>
+				@if (\App\Helpers\Classes\MarketplaceHelper::isRegistered('chatbot-agent'))
+					<div class="col-md-12">
+						<div class="form-check form-switch mb-4">
+							<input
+								type="hidden"
+								name="is_human_agent"
+								value="0"
+							>
+							<input
+								class="form-check-input"
+								id="is_human_agent"
+								type="checkbox"
+								name="is_human_agent"
+								value="1"
+								{{ $member->is_human_agent ? 'checked' : '' }}
+							>
+							<label
+								class="form-check-label"
+								for="is_human_agent"
+							>{{ __('Human Agent inbox access') }}</label>
+							<small class="form-text text-muted d-block">{{ __('Allow this member to reply to your chatbot conversations in the Human Agent inbox.') }}</small>
+						</div>
+					</div>
+				@endif
+				@if ($team->isSharedCreditTeam())
+					<div class="col-md-12">
+						<div class="mb-3">
+							<label class="form-label">{{ __('Daily Credit Limit (empty = unlimited)') }}</label>
+							<input
+								class="form-control"
+								type="number"
+								name="daily_shared_credit_limit"
+								step="0.01"
+								min="0"
+								value="{{ $member->daily_shared_credit_limit }}"
+								placeholder="{{ __('e.g. 500') }}"
+							>
+						</div>
+					</div>
+				@endif
 				<div class="col-md-12">
 					<button
 						class="btn btn-primary w-full"

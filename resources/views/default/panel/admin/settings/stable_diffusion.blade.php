@@ -31,9 +31,11 @@
                         <input
                                 class="form-control"
                                 id="openai_api_secret"
-                                type="text"
+                                type="password"
                                 name="openai_api_secret"
-                                value="{{ $setting->openai_api_secret }}"
+                                value=""
+                                placeholder="{{ filled($setting->openai_api_secret) ? __('Configured — leave empty to keep unchanged') : __('Enter API key') }}"
+                                autocomplete="new-password"
                         >
                     </div>
                 </div>

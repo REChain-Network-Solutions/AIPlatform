@@ -14,6 +14,18 @@
         \App\Helpers\Classes\MarketplaceHelper::isRegistered('social-media-agent') &&
         Route::has('dashboard.user.social-media.agent.chat.index') &&
         (route('dashboard.user.social-media.agent.chat.index') === $currentUrl || route('dashboard.user.social-media.agent.chat.index') === $previousUrl);
+    $is_crm_assistant_chat =
+        \App\Helpers\Classes\MarketplaceHelper::isRegistered('crm') &&
+        Route::has('dashboard.user.crm.ai.index') &&
+        (route('dashboard.user.crm.ai.index') === $currentUrl || route('dashboard.user.crm.ai.index') === $previousUrl);
+
+    // Template the mobile "New Conversation" button starts a chat with, so it
+    // lands in the same chat_type as the page it was pressed on.
+    $new_chat_template = match (true) {
+        $is_crm_assistant_chat => 'crm-assistant',
+        $is_social_media_agent_chat => 'social-media-agent',
+        default => 'chatpro',
+    };
 
     $isOtherCategories = isset($category) && ($category->slug == 'ai_vision' || $category->slug == 'ai_pdf' || $category->slug == 'ai_chat_image');
     $realtimeHiddenIn = ['ai_pdf', 'ai_vision', 'ai_chat_image'];
@@ -38,7 +50,7 @@
                         @yield('chat_head_actions')
                     @else
                         @auth
-                            @if (!$is_chat_pro && !$is_social_media_agent_chat)
+                            @if (!$is_chat_pro && !$is_social_media_agent_chat && !$is_crm_assistant_chat)
                                 <div x-data="realtimeToggle">
                                     <x-forms.input
                                         class="max-md:hidden"
@@ -161,7 +173,7 @@
                         onclick="{!! $disable_actions
                             ? 'return toastr.info(\'{{ __('This feature is disabled in Demo version.') }}\')'
                             : (auth()->check()
-                                ? 'return startNewChat(\'{{ $category?->id }}\', \'{{ LaravelLocalization::getCurrentLocale() }}\', \'chatpro\')'
+                                ? 'return startNewChat(\'{{ $category?->id }}\', \'{{ LaravelLocalization::getCurrentLocale() }}\', \'{{ $new_chat_template }}\')'
                                 : 'return window.location.reload();') !!}"
                     >
                         <x-tabler-plus class="size-5" />

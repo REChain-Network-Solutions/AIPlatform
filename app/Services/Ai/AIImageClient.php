@@ -4,6 +4,7 @@ namespace App\Services\Ai;
 
 use App\Domains\Engine\Enums\EngineEnum;
 use App\Domains\Entity\Enums\EntityEnum;
+use App\Helpers\Classes\DefaultOpenAiImageModel;
 use App\Services\Ai\Images\Contracts\ImageGeneratorInterface;
 use App\Services\Ai\Images\FalAIImageService;
 use App\Services\Ai\Images\OpenAIImageService;
@@ -58,7 +59,7 @@ class AIImageClient
 
     protected static function resolveService(string $modelSlug): ImageGeneratorInterface
     {
-        $entity = EntityEnum::fromSlug($modelSlug) ?? EntityEnum::DALL_E_2;
+        $entity = EntityEnum::tryFrom(str_replace('__', '.', $modelSlug)) ?? DefaultOpenAiImageModel::FALLBACK;
 
         return static::resolveServiceByEngine($entity->engine());
     }

@@ -39,6 +39,15 @@ class Handler extends ExceptionHandler
         'current_password',
         'password',
         'password_confirmation',
+        'openai_api_secret',
+        'anthropic_api_secret',
+        'serper_api_key',
+        'api_keys',
+        'anthropic_api_keys',
+        'gemini_api_keys',
+        'xai_api_secret',
+        'stable_diffusion_api_key',
+        'perplexity_key',
     ];
 
     /**

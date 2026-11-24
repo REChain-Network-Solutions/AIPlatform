@@ -6,7 +6,7 @@ namespace App\Domains\Entity\Contracts\Input;
 
 interface WithInputMinuteInterface
 {
-    public function getInputMinute(): int;
+    public function getInputMinute(): float;
 
-    public function inputMinute(int $input): static;
+    public function inputMinute(float $input): static;
 }

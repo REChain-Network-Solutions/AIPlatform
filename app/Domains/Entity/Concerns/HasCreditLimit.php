@@ -13,18 +13,33 @@ use App\Helpers\Classes\RateLimiter\RateLimiter;
 use App\Models\Plan;
 use App\Models\Setting;
 use App\Models\SettingTwo;
+use App\Models\SharedCreditTransaction;
 use App\Models\Team\Team;
 use App\Models\User;
 use App\Models\UserUsageCredit;
+use App\Services\SharedCredit\SharedCreditService;
 use Closure;
 use Exception;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Throwable;
 
 trait HasCreditLimit
 {
     protected ?float $calculatedInputCredit = null;
 
     private static ?array $aiImageProSelectedModelsCache = null;
+
+    public function isSharedCreditUser(): bool
+    {
+        $service = app(SharedCreditService::class);
+        if (! $service->isEnabled()) {
+            return false;
+        }
+
+        $user = $this->getUser();
+
+        return $user instanceof User && $user->isSharedCreditUser();
+    }
 
     public function creditEnum(): EntityEnum
     {
@@ -54,6 +69,24 @@ trait HasCreditLimit
 
     public function getCredit(): array
     {
+        if ($this->isSharedCreditUser()) {
+            $user = $this->getUserWithCredit();
+            $balance = (float) $user->shared_credits;
+
+            $team = $this->team ?? $user->myTeam;
+            if ($team?->exists && $team->isSharedCreditTeam()) {
+                $memberStat = $user->teamMember;
+                if (isset($memberStat) && $memberStat->status === 'active') {
+                    $balance += (float) $team->shared_credits;
+                }
+            }
+
+            return [
+                'credit'      => $balance,
+                'isUnlimited' => false,
+            ];
+        }
+
         if ($this->plan?->exists) {
             return $this->getPlanWithCredit()?->getCredit($this->engine()->slug(), $this->creditKey());
         }
@@ -198,6 +231,10 @@ trait HasCreditLimit
      */
     public function getIsUnlimitedCredit(): bool
     {
+        if ($this->isSharedCreditUser()) {
+            return false;
+        }
+
         $aiFinances = app('ai_chat_model_plan');
 
         $engineDefaultModels = $this->engine()->getDefaultModels(Setting::getCache(), SettingTwo::getCache());
@@ -312,6 +349,13 @@ trait HasCreditLimit
      */
     public function setCredit(float $value = 1.00): bool
     {
+        if ($this->isSharedCreditUser()) {
+            $user = $this->getUserWithCredit();
+            $user->shared_credits = $value;
+
+            return $user->save();
+        }
+
         return $this->updateUserCredit($value, function ($creditBalance, $credit) {
             return $credit;
         }, skipCalculatedCredit: true);
@@ -331,6 +375,10 @@ trait HasCreditLimit
 
     public function setAsUnlimited(bool $unlimited = true): bool
     {
+        if ($this->isSharedCreditUser()) {
+            return true;
+        }
+
         $user = $this->getUserWithCredit();
         $creditKey = $this->creditKey();
         $engineKey = $this->engine()->slug();
@@ -352,6 +400,15 @@ trait HasCreditLimit
      */
     public function increaseCredit(float $value = 1.00): bool
     {
+        if ($this->isSharedCreditUser()) {
+            $user = $this->getUserWithCredit();
+            $service = app(SharedCreditService::class);
+            $entity = EntityEnum::fromSlug($this->enum()->slug());
+            $service->topUp($user, $value, 'Credit increase', $entity, 'increase');
+
+            return true;
+        }
+
         return $this->updateUserCredit($value, function ($creditBalance, $credit) {
             return $creditBalance + $credit;
         });
@@ -366,9 +423,11 @@ trait HasCreditLimit
             return true;
         }
 
-        $unitPrice = EntityEnum::fromSlug($this->enum()->slug())->unitPrice();
+        $entity = EntityEnum::fromSlug($this->enum()->slug());
+        $unitPrice = $entity->unitPrice();
         $currentSpend = $value * $unitPrice;
-        setting(['total_spend' => number_format((setting('total_spend', 0) + $currentSpend), 2)])->save();
+        $previousSpend = (float) str_replace(',', '', (string) setting('total_spend', 0));
+        setting(['total_spend' => number_format($previousSpend + $currentSpend, 2, '.', '')])->save();
 
         UserUsageCredit::create([
             'user_id'     => $this->getUser()->id,
@@ -378,8 +437,37 @@ trait HasCreditLimit
             'total'       => $value * $unitPrice,
         ]);
 
-        if ($this->isWebSearchModel() && $this->getCredit()['credit'] == 0) {
-            return $this->decreaseCreditFromDefaultChatModel($value);
+        if ($this->isSharedCreditUser()) {
+            $user = $this->getUserWithCredit();
+            $service = app(SharedCreditService::class);
+
+            // Feature limit check
+            $featureLimits = $user->activePlan()?->shared_credit_feature_limits;
+            if ($featureLimits && $this->isFeatureLimitExceeded($user, $entity, $featureLimits)) {
+                return false;
+            }
+
+            // Derive raw unit count from calculatedInputCredit so deduction scales with output length.
+            // calculatedInputCredit = count × getCreditIndex(); deduct() multiplies quantity × unitCost,
+            // so we divide back to avoid double-multiplication.
+            $creditIndex = $this->getCreditIndex();
+            $quantity = ($this->calculatedInputCredit !== null && $creditIndex > 0)
+                ? $this->calculatedInputCredit / $creditIndex
+                : $value;
+
+            $team = $this->team ?? $user->myTeam;
+            if ($team?->exists && $team->isSharedCreditTeam()) {
+                $memberStat = $user->teamMember;
+                if (isset($memberStat) && $memberStat->status === 'active') {
+                    $transaction = $service->deductWithTeam($user, $team, $entity, $quantity);
+
+                    return $transaction !== null;
+                }
+            }
+
+            $transaction = $service->deduct($user, $entity, $quantity);
+
+            return $transaction !== null;
         }
 
         return $this->updateUserCredit($value, function ($creditBalance, $credit) {
@@ -452,6 +540,14 @@ trait HasCreditLimit
 
     public function getCreditIndex(): float
     {
+        if ($this->isSharedCreditUser()) {
+            $entity = $this->creditEnum();
+            $service = app(SharedCreditService::class);
+            $costOverride = $service->getCostOverride($entity->slug());
+
+            return $costOverride ? $costOverride->base_cost : $entity->sharedCreditIndex();
+        }
+
         return $this->creditEnum()->creditIndex();
     }
 
@@ -477,5 +573,91 @@ trait HasCreditLimit
         $this->calculatedInputCredit = $value;
 
         return $this;
+    }
+
+    private function isFeatureLimitExceeded(User $user, EntityEnum $entity, array $featureLimits): bool
+    {
+        $tokenType = null;
+
+        try {
+            $tokenType = $entity->tokenType()->value;
+        } catch (Throwable) {
+            return false;
+        }
+
+        $entitySlug = $entity->slug();
+
+        // Check per-model limits first
+        $perModelLimits = $featureLimits['per_model_limits'][$entitySlug] ?? null;
+        if ($perModelLimits) {
+            if ($this->checkTransactionLimit($user, $entitySlug, $perModelLimits, 'entity_key')) {
+                return true;
+            }
+        }
+
+        // Check global token-type limits
+        $dailyKey = "daily_{$tokenType}_limit";
+        $monthlyKey = "monthly_{$tokenType}_limit";
+
+        if (isset($featureLimits[$dailyKey])) {
+            $todayCount = SharedCreditTransaction::query()
+                ->where('user_id', $user->id)
+                ->where('action_type', 'deduct')
+                ->where('feature_type', $tokenType)
+                ->whereDate('created_at', now()->toDateString())
+                ->count();
+
+            if ($todayCount >= (int) $featureLimits[$dailyKey]) {
+                return true;
+            }
+        }
+
+        if (isset($featureLimits[$monthlyKey])) {
+            $monthCount = SharedCreditTransaction::query()
+                ->where('user_id', $user->id)
+                ->where('action_type', 'deduct')
+                ->where('feature_type', $tokenType)
+                ->whereYear('created_at', now()->year)
+                ->whereMonth('created_at', now()->month)
+                ->count();
+
+            if ($monthCount >= (int) $featureLimits[$monthlyKey]) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function checkTransactionLimit(User $user, string $entitySlug, array $limits, string $column): bool
+    {
+        if (isset($limits['daily'])) {
+            $todayCount = SharedCreditTransaction::query()
+                ->where('user_id', $user->id)
+                ->where('action_type', 'deduct')
+                ->where($column, $entitySlug)
+                ->whereDate('created_at', now()->toDateString())
+                ->count();
+
+            if ($todayCount >= (int) $limits['daily']) {
+                return true;
+            }
+        }
+
+        if (isset($limits['monthly'])) {
+            $monthCount = SharedCreditTransaction::query()
+                ->where('user_id', $user->id)
+                ->where('action_type', 'deduct')
+                ->where($column, $entitySlug)
+                ->whereYear('created_at', now()->year)
+                ->whereMonth('created_at', now()->month)
+                ->count();
+
+            if ($monthCount >= (int) $limits['monthly']) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

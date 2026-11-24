@@ -15,7 +15,7 @@
         <template x-if="entry.status === 'completed' && !entry.thumb_url && entry.video_url">
             <video
                 class="size-full object-contain"
-                :src="entry.video_url"
+                :src="entry.video_url + (entry.video_url.includes('#') ? '' : '#t=0.1')"
                 preload="metadata"
                 muted
                 playsinline

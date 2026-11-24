@@ -374,7 +374,8 @@
 			}
 		}
 
-		&:has(.social-media-agent-chat-post-card) {
+		&:has(.social-media-agent-chat-post-card),
+		&:has(.crm-assistant-action-card) {
 			.lqd-chat-bubble-canvas-trigger {
 				@apply hidden;
 			}

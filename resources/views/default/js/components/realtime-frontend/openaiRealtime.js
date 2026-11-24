@@ -1,6 +1,6 @@
 import { Player } from './player.js';
 import { Recorder } from './recorder.js';
-import { LowLevelRTClient } from 'rt-client';
+import { NativeRTClient } from './nativeRTClient.js';
 import { Alpine } from '~vendor/livewire/livewire/dist/livewire.esm';
 
 Alpine.store( 'realtimeChatStatus', {
@@ -41,7 +41,7 @@ export default () => ( {
 	apiKey: '',
 	recordingActive: false,
 	buffer: new Uint8Array(),
-	/** @type {LowLevelRTClient} */
+	/** @type {NativeRTClient} */
 	wsConnection: null,
 	/** @type {Recorder} */
 	audioRecorder: null,
@@ -111,7 +111,7 @@ export default () => ( {
 			return;
 		}
 
-		this.wsConnection = new LowLevelRTClient(
+		this.wsConnection = new NativeRTClient(
 			{ key: tokenData.ephemeral_key },
 			{ model: tokenData.model }
 		);
@@ -152,7 +152,7 @@ export default () => ( {
 				'',
 				'',
 				'',
-				'gpt-4o-realtime-preview-2024-12-17'
+				'gpt-realtime'
 			).then(response => {
 				aiChatBubble?.setAttribute('data-message-id', response.message.id);
 
@@ -189,12 +189,18 @@ export default () => ( {
 		let configMessage = {
 			type: 'session.update',
 			session: {
-				turn_detection: {
-					type: 'server_vad',
-					silence_duration_ms: 500
-				},
-				input_audio_transcription: {
-					model: 'gpt-4o-mini-transcribe'
+				type: 'realtime',
+				audio: {
+					input: {
+						transcription: {
+							model: 'gpt-4o-mini-transcribe'
+						},
+						turn_detection: {
+							type: 'server_vad',
+							silence_duration_ms: 500
+						},
+					},
+					output: {},
 				},
 			},
 		};
@@ -210,7 +216,7 @@ export default () => ( {
 			configMessage.session.temperature = temperature;
 		}
 		if ( voice ) {
-			configMessage.session.voice = voice;
+			configMessage.session.audio.output.voice = voice;
 		}
 
 		return configMessage;
@@ -236,10 +242,12 @@ export default () => ( {
 
 					this.createChatBubble( 'ai' );
 					break;
+				case 'response.output_audio_transcript.delta':
 				case 'response.audio_transcript.delta':
 					this.lastAiResponse += message.delta;
 					this.appendToChatBubble( 'ai', message.delta );
 					break;
+				case 'response.output_audio.delta':
 				case 'response.audio.delta': {
 					this.switchVisualizers( 'playing' );
 
@@ -303,7 +311,7 @@ export default () => ( {
 							'',
 							'',
 							'',
-							'gpt-4o-realtime-preview-2024-12-17'
+							'gpt-realtime'
 						).then(response => {
 							aiChatBubble?.setAttribute('data-message-id', response.message.id);
 						});

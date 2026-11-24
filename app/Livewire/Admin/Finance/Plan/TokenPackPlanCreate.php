@@ -28,15 +28,17 @@ class TokenPackPlanCreate extends Component
     {
         return [
             // Step 1
-            'plan.active'             => 'boolean',
-            'plan.name'               => 'required_if:step,1|string|max:190',
-            'plan.description'        => 'required_if:step,1|nullable|string|max:15000',
-            'plan.price'              => 'required_if:step,1|numeric|min:0',
-            'plan.price_tax_included' => 'nullable|boolean',
-            'plan.features'           => 'required_if:step,1|string|max:15000',
-            'plan.type'               => 'nullable',
-            'plan.plan_ai_tools'      => 'nullable',
-            'plan.plan_features'      => 'nullable',
+            'plan.active'                 => 'boolean',
+            'plan.name'                   => 'required_if:step,1|string|max:190',
+            'plan.description'            => 'required_if:step,1|nullable|string|max:15000',
+            'plan.price'                  => 'required_if:step,1|numeric|min:0',
+            'plan.price_tax_included'     => 'nullable|boolean',
+            'plan.features'               => 'required_if:step,1|string|max:15000',
+            'plan.type'                   => 'nullable',
+            'plan.plan_ai_tools'          => 'nullable',
+            'plan.plan_features'          => 'nullable',
+            'plan.credit_system_type'     => 'required_if:step,1|in:separated,shared',
+            'plan.shared_credits_amount'  => 'required_if:plan.credit_system_type,shared|nullable|numeric|min:0',
             // Step 2 rules and validation in child livewire component
         ];
     }
@@ -75,7 +77,9 @@ class TokenPackPlanCreate extends Component
             ]);
         }
         $isSensitiveDataChanged = $this->isSensitiveDataChanged();
-        $this->changePlanValuesWithSuppliedEntities();
+        if (! $this->plan->isSharedCreditPlan()) {
+            $this->changePlanValuesWithSuppliedEntities();
+        }
         $this->plan->save();
         if ($isSensitiveDataChanged) {
             PaymentProcessController::saveGatewayProducts($this->plan);

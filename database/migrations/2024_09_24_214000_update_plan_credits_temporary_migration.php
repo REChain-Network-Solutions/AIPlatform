@@ -217,10 +217,11 @@ return new class extends Migration
 
         $models = [];
 
+        // Literals, not enum constants: DALL-E was removed from EntityEnum after
+        // OpenAI shut both models down on 2026-05-12.
         $dalleModel = match ($settingsTwo?->dalle) {
-            'dalle3' => EntityEnum::DALL_E_3->slug(),
-            'dalle2' => EntityEnum::DALL_E_2->slug(),
-            default  => $settingsTwo?->dalle ?? EntityEnum::DALL_E_2->slug(),
+            'dalle3', 'dalle2', 'dall-e-3', 'dall-e-2' => 'gpt-image-2',
+            default => $settingsTwo?->dalle ?? 'gpt-image-2',
         };
 
         if (! setting('dalle_hidden') && $openAIModel = EntityEnum::fromSlug($dalleModel)) {

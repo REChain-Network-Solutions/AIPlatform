@@ -9,6 +9,7 @@ use App\Domains\Entity\Facades\Entity;
 use App\Enums\BedrockEngine;
 use App\Extensions\Midjourney\System\Services\PiAPIService;
 use App\Helpers\Classes\ApiHelper;
+use App\Helpers\Classes\DefaultOpenAiImageModel;
 use App\Helpers\Classes\Helper;
 use App\Helpers\Classes\RateLimiter\RateLimiter;
 use App\Helpers\Classes\RateLimiter\WordLimitRateLimiter;
@@ -28,7 +29,6 @@ use App\Services\Youtube\YoutubeTranscriptService;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\File;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -536,7 +536,6 @@ class AIController extends Controller
             'text', 'rss', 'youtube' => $this->textOutput($prompt, $post, $creativity, $maximum_length, $number_of_results, $user),
             'code'     => $this->codeOutput($prompt, $post, $user),
             'image'    => $this->imageOutput($imageParam, $post, $user),
-            'video'    => $this->videoOutput($videoParam),
             'audio'    => $this->audioOutput($request->file('file'), $post, $user),
             'isolator' => $this->audioIsolator($request->file('file'), $post, $user),
             default    => response()->json([
@@ -855,14 +854,18 @@ class AIController extends Controller
         $modelImage = $this->getDefaultOpenAiImageModel();
         $driver = Entity::driver($modelImage)->inputImageCount(1)->calculateCredit();
         $driver->redirectIfNoCreditBalance();
-        $response = FacadesOpenAI::images()->create([
-            'model'           => $modelImage->value,
-            'prompt'          => $completion->choices[0]->message->content,
-            'size'            => '1024x1024',
-            'response_format' => 'b64_json',
-        ]);
-        $image_url = $response['data'][0]['b64_json'];
-        $contents = base64_decode($image_url);
+        $base64 = app(CreateImageService::class)
+            ->setModel($modelImage->value)
+            ->setPrompt($completion->choices[0]->message->content)
+            ->setSize('1024x1024')
+            ->setOutputFormat('png')
+            ->generateForAi();
+
+        if ($base64 === null) {
+            throw new RuntimeException(__('Image generation failed'));
+        }
+
+        $contents = base64_decode($base64);
         // save file on local storage or aws s3
         Storage::disk('public')->put($nameOfImage, $contents);
 
@@ -905,7 +908,7 @@ class AIController extends Controller
         $engineCheck = match ($param['image_generator']) {
             'flux-pro', 'flux-2-flex', 'flux-2-flex/edit', 'ideogram', 'ideogram-v2', 'flux-pro-kontext', 'flux-pro/kontext/text-to-image', 'nano-banana', 'nano-banana-pro', 'nano-banana-2', 'seedream/v4/text-to-image', 'flux/schnell', 'flux-pro/v1.1', 'flux-realism', 'imagen4', 'fal-ai', 'xai/grok-imagine-image', 'xai/grok-imagine-image/edit' => EngineEnum::FAL_AI->value,
             EntityEnum::MIDJOURNEY->value  => EngineEnum::PI_API->value,
-            EntityEnum::GPT_IMAGE_1->value, EntityEnum::GPT_IMAGE_1_5->value, EntityEnum::GPT_IMAGE_2->value => EngineEnum::OPEN_AI->value,
+            EntityEnum::GPT_IMAGE_1->value, EntityEnum::GPT_IMAGE_1_5->value, EntityEnum::GPT_IMAGE_2->value, EntityEnum::GPT_IMAGE_2_5_SUNBURST->value, EntityEnum::GPT_IMAGE_2_5_FLARE->value => EngineEnum::OPEN_AI->value,
             'stable_diffusion'             => EngineEnum::STABLE_DIFFUSION->value,
             default                        => $param['image_generator'] ?? EngineEnum::OPEN_AI->value,
         };
@@ -966,6 +969,14 @@ class AIController extends Controller
                 $model = EntityEnum::GPT_IMAGE_2;
             }
 
+            if ($param['image_generator'] === 'gpt-image-2.5-sunburst') {
+                $model = EntityEnum::GPT_IMAGE_2_5_SUNBURST;
+            }
+
+            if ($param['image_generator'] === 'gpt-image-2.5-flare') {
+                $model = EntityEnum::GPT_IMAGE_2_5_FLARE;
+            }
+
             $driver = Entity::driver($model)->inputImageCount($number_of_images)->calculateCredit();
 
             $driver->redirectIfNoCreditBalance();
@@ -1024,164 +1035,6 @@ class AIController extends Controller
         }
 
         return EntityEnum::FLUX_PRO_KONTEXT_TEXT_TO_IMAGE;
-    }
-
-    /**
-     * @throws GuzzleException
-     * @throws Exception
-     */
-    public function videoOutput($param): JsonResponse
-    {
-        set_time_limit(120);
-        $imageToVideoModel = EntityEnum::IMAGE_TO_VIDEO;
-        $driver = Entity::driver($imageToVideoModel)->inputVideoCount(1)->calculateCredit();
-        $driver->redirectIfNoCreditBalance();
-
-        $init_image = file_get_contents($param['image_src']);
-        $nameOfImage = Str::random(12) . '.png';
-
-        Storage::disk('public')->put($nameOfImage, $init_image);
-        $path = '/uploads/' . $nameOfImage;
-        if ($this->settings_two->ai_image_storage === self::STORAGE_S3) {
-            try {
-                $uploadedFile = new File(substr($path, 1));
-
-                $aws_path = Storage::disk(self::STORAGE_S3)->put('', $uploadedFile);
-                unlink(substr($path, 1));
-                $path = Storage::disk(self::STORAGE_S3)->url($aws_path);
-            } catch (Exception $e) {
-                return response()->json(['status' => 'error', 'message' => 'AWS Error - ' . $e->getMessage()]);
-            }
-        }
-        $seed = $param['seed'];
-        $cfg_scale = $param['cfg_scale'];
-        $motion_bucket_id = $param['motion_bucket_id'];
-
-        $stableDiffusionKey = $this->getStableApiKey();
-        if (empty($stableDiffusionKey)) {
-            return response()->json(['status' => 'error', 'message' => __('You must provide a StableDiffusion API Key.')]);
-        }
-
-        $client = new Client([
-            'base_uri' => 'https://api.stability.ai/v2beta/',
-            'headers'  => [
-                'content-type'  => 'multipart/form-data',
-                'Authorization' => 'Bearer ' . $stableDiffusionKey,
-            ],
-        ]);
-
-        $payload = [
-            'image'            => $init_image,
-            'cfg_scale'        => $cfg_scale,
-            'seed'             => $seed,
-            'motion_bucket_id' => $motion_bucket_id,
-        ];
-
-        $multipart = [];
-        foreach ($payload as $key => $value) {
-            if ($key === 'image') {
-                $multipart[] = ['name' => $key, 'contents' => $value, 'filename' => 'image.png'];
-            } else {
-                $multipart[] = ['name' => $key, 'contents' => $value];
-            }
-        }
-        $payload = $multipart;
-
-        try {
-            $response = $client->post($imageToVideoModel->value, [
-                'multipart' => $payload,
-            ]);
-        } catch (RequestException|Exception $e) {
-            if ($e->hasResponse()) {
-                $errorMessage = $e->getResponse()->getBody()->getContents();
-                $errorData = json_decode($errorMessage);
-                $error = $errorData['message'] ?? $errorMessage;
-
-                throw new RuntimeException($error);
-            }
-
-            throw new RuntimeException($e->getMessage());
-        }
-
-        $body = $response->getBody();
-        if ($response->getStatusCode() === 200) {
-            $driver->decreaseCredit();
-
-            return response()->json(['status' => 'success', 'id' => json_decode($body, false, 512, JSON_THROW_ON_ERROR)->id, 'sourceUrl' => $path]);
-        }
-
-        if ($body->status === 'error') {
-            $message = $body->message;
-        } else {
-            $message = __('Failed, Try Again');
-        }
-
-        return response()->json(['status' => 'error', 'message' => $message]);
-    }
-
-    /**
-     * @throws GuzzleException
-     *                         this function only for check progress, no need to decrease the credit
-     */
-    public function checkVideoProgress(Request $request): JsonResponse
-    {
-        $resultId = $request->id;
-        $user = Auth::user();
-        $stableDiffusionKey = $this->getStableApiKey();
-        $client = new Client([
-            'base_uri' => 'https://api.stability.ai/v2beta/image-to-video/result/' . $resultId,
-            'headers'  => [
-                'Accept'        => 'video/*',
-                'Authorization' => 'Bearer ' . $stableDiffusionKey,
-            ],
-        ]);
-
-        try {
-            $response = $client->request('GET');
-            if ($response->getStatusCode() === 200) {
-                $fileContents = $response->getBody()->getContents();
-                $nameOfImage = 'image-to-video-' . Str::random(12) . '.mp4';
-                Storage::disk('public')->put($nameOfImage, $fileContents);
-                $path = 'uploads/' . $nameOfImage;
-                $imageStorage = $this->settings_two->ai_image_storage;
-                if ($imageStorage === self::STORAGE_S3) {
-                    try {
-                        $uploadedFile = new File($path);
-                        $aws_path = Storage::disk(self::STORAGE_S3)->put('', $uploadedFile);
-                        unlink($path);
-                        $path = Storage::disk(self::STORAGE_S3)->url($aws_path);
-                    } catch (Exception $e) {
-                        return response()->json(['status' => 'error', 'message' => 'AWS Error - ' . $e->getMessage()]);
-                    }
-                }
-                $entry = UserOpenai::create([
-                    'team_id'   => $user?->team_id,
-                    'title'     => __('New Video'),
-                    'slug'      => Str::random(7) . Str::slug($user?->fullName()) . '-workbsook',
-                    'user_id'   => Auth::id(),
-                    'openai_id' => OpenAIGenerator::where('slug', 'ai_video')->first()->id,
-                    'input'     => $request->url,
-                    'response'  => 'VIDEO',
-                    'output'    => $imageStorage === self::STORAGE_S3 ? $path : '/' . $path,
-                    'hash'      => Str::random(256),
-                    'credits'   => 5,
-                    'words'     => 0,
-                    'storage'   => $imageStorage === self::STORAGE_S3 ? UserOpenai::STORAGE_AWS : UserOpenai::STORAGE_LOCAL,
-                    'payload'   => request()?->all(),
-                    'engine'	   => EngineEnum::STABLE_DIFFUSION?->value,
-                ]);
-
-                return response()->json(['status' => 'finished', 'url' => $path, 'video' => $entry]);
-            }
-
-            if ($response->getStatusCode() === 202) {
-                return response()->json(['success', 'status' => 'in-progress']);
-            }
-        } catch (Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()]);
-        }
-
-        return response()->json(['status' => 'error', 'message' => __('Failed, Try Again')]);
     }
 
     /**
@@ -1549,8 +1402,7 @@ class AIController extends Controller
             $engine === EngineEnum::FAL_AI && $model === EntityEnum::NANO_BANANA,
             $engine === EngineEnum::FAL_AI && $model === EntityEnum::NANO_BANANA_PRO,
             $engine === EngineEnum::FAL_AI && $model === EntityEnum::NANO_BANANA_2                                                                                => $this->processFalAINanoBananaImage($model, $param),
-            $engine === EngineEnum::OPEN_AI && ($model === EntityEnum::GPT_IMAGE_1 || $model === EntityEnum::GPT_IMAGE_1_5 || $model === EntityEnum::GPT_IMAGE_2) => $this->processOpenAIGptImage1($model, $param),
-            $engine === EngineEnum::OPEN_AI                                                                                                                       => $this->processOpenAIImage($model, $param),
+            $engine === EngineEnum::OPEN_AI                                                                                                                       => $this->processOpenAIGptImage1($model, $param),
             $engine === EngineEnum::STABLE_DIFFUSION                                                                                                              => $this->processStableDiffusionImage($model, $param),
             $engine === EngineEnum::FAL_AI                                                                                                                        => $this->processFalAIImage($model, $param),
             $engine === EngineEnum::PI_API                                                                                                                        => $this->processPiAPIImage($model, $param),
@@ -1577,28 +1429,12 @@ class AIController extends Controller
             return __('You have no credits left. Please consider upgrading your plan.');
         }
 
-        $param = [
-            'description' => $prompt,
-            'size'        => $this->getDemoImageSize($model),
-            'quality'     => 'standard',
-        ];
-
-        $imageDetails = $this->isGptImageModel($model)
-            ? $this->processGptImageForChat($model, $param)
-            : $this->processOpenAIImage($model, $param);
+        $imageDetails = $this->processGptImageForChat($model, ['description' => $prompt]);
         Usage::getSingle()->updateImageCounts($driver->calculate());
         $driver->decreaseCredit();
         $savePath = $this->saveImageOutputToStorage($imageDetails);
 
         return '![Image](/' . $savePath . ')';
-    }
-
-    /**
-     * Check if the model is a GPT Image model (gpt-image-1, gpt-image-1.5, or gpt-image-2).
-     */
-    private function isGptImageModel(?EntityEnum $model): bool
-    {
-        return $model === EntityEnum::GPT_IMAGE_1 || $model === EntityEnum::GPT_IMAGE_1_5 || $model === EntityEnum::GPT_IMAGE_2;
     }
 
     /**
@@ -1638,13 +1474,8 @@ class AIController extends Controller
      */
     public function processOpenAIGptImage1(?EntityEnum $model, array $param): array
     {
-        $images = request('image_src');
-
-        $prompt = request('description') ?: request('stable_description');
-
-        if (is_null($prompt)) {
-            throw new RuntimeException(__('Invalid Image Prompt'));
-        }
+        $images = $param['image_src'] ?? null;
+        $prompt = $this->resolveOpenAIImagePrompt($param);
 
         $imageContent = null;
 
@@ -1684,49 +1515,28 @@ class AIController extends Controller
         ]);
     }
 
-    private function processOpenAIImage(?EntityEnum $model, array $param): array
+    /**
+     * @throws ValidationException
+     */
+    private function resolveOpenAIImagePrompt(array $param): string
     {
-        $is_demo = Helper::appIsDemo();
-        $size = $param['size'];
-        $description = $param['description'];
-        $style = $param['image_style'] ?? null;
-        $lighting = $param['image_lighting'] ?? null;
-        $mood = $param['mood'] ?? null;
-        $quality = $param['quality'];
-        $prompt = $description;
-        if (is_null($prompt)) {
-            throw new RuntimeException(__('You must provide a prompt'));
-        }
-        $attributes = [
-            'style'    => $style ? "$style style" : null,
-            'lighting' => $lighting ? "$lighting lighting" : null,
-            'mood'     => $mood ? "$mood mood" : null,
-        ];
-        $prompt .= ' ' . implode(' ', array_filter($attributes));
+        foreach (['description', 'stable_description'] as $field) {
+            $prompt = $param[$field] ?? null;
 
-        $data = [
-            'model'           => $model,
-            'prompt'          => $prompt,
-            'size'            => $is_demo ? $this->getDemoImageSize($model) : $size,
-            'response_format' => 'b64_json',
-            'n'               => 1,
-        ];
+            if (! is_string($prompt)) {
+                continue;
+            }
 
-        if ($model !== EntityEnum::DALL_E_2) {
-            $data['quality'] = $is_demo ? 'standard' : $quality;
-            $data['size'] = '1024x1024';
+            $prompt = trim($prompt);
+
+            if ($prompt !== '' && Str::lower($prompt) !== 'undefined') {
+                return $prompt;
+            }
         }
 
-        $response = FacadesOpenAI::images()->create($data);
-
-        $contents = base64_decode($response['data'][0]['b64_json']);
-        $nameOfImage = Str::random(12) . '-DALL-E-' . Str::slug(explode(' ', mb_substr($prompt, 0, 15))[0]) . '.png';
-
-        return [
-            'prompt'                => $prompt,
-            'imageContent'          => $contents,
-            'nameOfImage'           => $nameOfImage,
-        ];
+        throw ValidationException::withMessages([
+            'message' => trans('Invalid Image Prompt'),
+        ]);
     }
 
     /**
@@ -1905,11 +1715,11 @@ class AIController extends Controller
 
         try {
             if ($isV2BetaModels && in_array($stable_type, ['text-to-image', 'image-to-image'], true)) {
-                $defaultSdModel = 'sd3';
+                // 'sd3' is the v2beta endpoint path; the selected model goes in the model field.
                 if ($stable_type !== 'image-to-image') {
                     $sd3Payload[] = ['name' => 'model', 'contents' => $defaultSdModel];
                 }
-                $response = $client->post($defaultSdModel, [
+                $response = $client->post('sd3', [
                     'headers'   => ['accept' => 'application/json'],
                     'multipart' => $sd3Payload,
                 ]);
@@ -2247,29 +2057,14 @@ class AIController extends Controller
         };
     }
 
-    private function getDemoImageSize(?EntityEnum $model): string
-    {
-        return match ($model) {
-            EntityEnum::DALL_E_3 => '1024x1024',
-            EntityEnum::DALL_E_2 => '256x256',
-            default              => '512x512',
-        };
-    }
-
     private function getDefaultOpenAiImageModel(): EntityEnum
     {
-        $default = match ($this->settings_two->dalle) {
-            'dalle3' => EntityEnum::DALL_E_3->slug(),
-            'dalle2' => EntityEnum::DALL_E_2->slug(),
-            default  => $this->settings_two->dalle,
-        };
-
-        return EntityEnum::fromSlug($default) ?? EntityEnum::DALL_E_2;
+        return DefaultOpenAiImageModel::resolve($this->settings_two);
     }
 
     private function getStableDiffusionDefaultModel(): EntityEnum
     {
-        return EntityEnum::fromSlug($this->settings_two?->stablediffusion_default_model) ?? EntityEnum::SD_3;
+        return EntityEnum::fromSlug($this->settings_two?->stablediffusion_default_model) ?? EntityEnum::SD_3_5_LARGE;
     }
 
     private function getDefaultFalAiModel(): EntityEnum

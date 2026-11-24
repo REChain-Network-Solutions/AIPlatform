@@ -42,6 +42,7 @@
 
                 <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <x-forms.input
+                        class="capitalize"
                         type="select"
                         x-model="filters.language"
                     >
@@ -58,6 +59,7 @@
                     </x-forms.input>
 
                     <x-forms.input
+                        class="capitalize"
                         type="select"
                         x-model="filters.gender"
                     >
@@ -98,12 +100,14 @@
 
                                 <div class="min-w-0 flex-1">
                                     <p
-                                        class="mb-0.5 truncate text-2xs font-medium"
+                                        class="mb-0.5 truncate text-2xs font-medium capitalize"
                                         x-text="voice.name"
+                                        :title="voice.name"
                                     ></p>
                                     <p
-                                        class="m-0 truncate text-2xs font-medium opacity-50"
-                                        x-text="[voice.gender, voice.age, voice.accent, voice.languageLabel].filter(Boolean).join(' · ')"
+                                        class="m-0 truncate text-2xs font-medium capitalize opacity-50"
+                                        x-text="[voice.gender, voice.age, voice.accent, displayLanguageFor(voice)].filter(Boolean).join(' · ')"
+                                        :title="[voice.gender, voice.age, voice.accent, displayLanguageFor(voice)].filter(Boolean).join(' · ')"
                                     ></p>
                                 </div>
 
@@ -133,7 +137,7 @@
                             <div class="flex grow flex-col p-4">
                                 <p
                                     class="mb-3 line-clamp-3 text-2xs"
-                                    x-show="voice.description.trim()"
+                                    x-show="voice.description?.trim()"
                                     x-text="voice.description || ''"
                                 ></p>
 
@@ -194,6 +198,17 @@
                     if (!select) return code;
                     const opt = Array.from(select.options).find((o) => o.value === code);
                     return opt ? (opt.textContent || '').trim() : code;
+                },
+
+                // When the user has picked a specific language, show that label on each card.
+                // ElevenLabs voices are stored prefix-only ("en") and inflated to every "en-*"
+                // variant for filter membership, so without this the card would show a baked-in
+                // arbitrary region (e.g. "English (Australia)") that contradicts the filter.
+                displayLanguageFor(voice) {
+                    if (this.filters.language && (voice.languages || []).includes(this.filters.language)) {
+                        return this.languageLabel(this.filters.language);
+                    }
+                    return voice.languageLabel || '';
                 },
 
                 get voices() {
@@ -290,14 +305,17 @@
                                     return pref === voicePrefix;
                                 }) : [];
 
-                            const primary = matchingLangs[0] || voicePrefix || '';
+                            // Use the voice's actual prefix as its primary language so the
+                            // card label doesn't lie about a specific region. Filter membership
+                            // still uses the inflated matchingLangs list below.
+                            const primary = voicePrefix || '';
 
                             pushUnique({
                                 platform: 'elevenlabs',
                                 value: v.voice_id,
                                 name: v.name,
                                 language: primary,
-                                languageLabel: primary ? (this.languageLabel(primary) || primary) : '',
+                                languageLabel: primary ? (this.languageLabel(primary) || '') : '',
                                 languages: matchingLangs.length ? matchingLangs : (voicePrefix ? [voicePrefix] : []),
                                 preview_url: v.preview_url || null,
                                 gender: v.gender || null,

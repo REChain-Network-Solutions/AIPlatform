@@ -39,6 +39,11 @@
             @endif
         </div>
 
+        @includeIf('ai-chat-pro::admin.plan.connectors')
+        @includeIf('phone-call-agent::admin.plan.options')
+        @includeIf('video-agent::admin.plan.options')
+        @includeIf('auto-edit-videos::admin.plan.options')
+
         <hr class="col-span-2 border-border" />
 
         <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
@@ -62,7 +67,7 @@
                     />
                 </x-form.group>
             @endif
-            
+
             @if (collect($planAiToolsMenu)->contains('key', \App\Enums\Introduction::AI_VIDEO_DUBBING->value))
                 <x-form.group
                     class="col-span-2 sm:col-span-1"

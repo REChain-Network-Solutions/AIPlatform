@@ -67,13 +67,11 @@
                                     name="xai_api_secret"
                                     multiple
                                 >
-                                    @foreach (explode(',', setting('xai_api_secret','')) ?? [] as $secret)
-                                        <option
-                                            value="{{ $secret }}"
-                                            selected
-                                        >{{ $secret }}</option>
-                                    @endforeach
                                 </select>
+
+                                @if (filled(setting('xai_api_secret', '')))
+                                    <small>{{ __('An API key is configured. Leave this field empty to keep it unchanged.') }}</small>
+                                @endif
 
                                 <x-alert class="mt-2">
                                     <p class="text-justify">

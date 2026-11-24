@@ -113,10 +113,13 @@
                                 </svg>
                                 {{ __('Edit Strings') }}
                             </a>
-                            <a
-                                class="dropdown-item text-heading border-l-0 border-r-0 border-t-0 border-solid border-[--tblr-border-color] px-3 py-2 transition-colors last:border-b-0 hover:bg-[--tblr-border-color] hover:no-underline"
-                                @if ($app_is_demo) href="javascript:void(0);" onclick="return toastr.info('This feature is disabled in Demo version.')" @else href="{{ route('elseyyid.translations.lang.generateJson', $lang) }}" @endif
-                            >
+                            <form method="POST" action="{{ route('elseyyid.translations.lang.generateJson', $lang) }}">
+                                @csrf
+                                <button
+                                    type="{{ $app_is_demo ? 'button' : 'submit' }}"
+                                    class="dropdown-item text-heading w-full border-l-0 border-r-0 border-t-0 border-solid border-[--tblr-border-color] px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-[--tblr-border-color] hover:no-underline"
+                                    @if ($app_is_demo) onclick="return toastr.info('This feature is disabled in Demo version.')" @endif
+                                >
                                 <svg
                                     class="mr-2"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -139,7 +142,8 @@
                                     <path d="M14 4l0 4l-6 0l0 -4"></path>
                                 </svg>
                                 <div>{{ __('Generate JSON File') }}</div>
-                            </a>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

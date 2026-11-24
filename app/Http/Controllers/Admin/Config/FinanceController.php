@@ -48,9 +48,12 @@ class FinanceController extends Controller
 
         setting(
             [
-                'onetime_commission'         => $request->has('onetime_commission') ? 1 : 0,
-                'soft_plan_cancellation'     => $request->has('soft_plan_cancellation') ? 1 : 0,
-                'affiliate_plan_restriction' => $request->has('affiliate_plan_restriction') ? 1 : 0,
+                'onetime_commission'              => $request->has('onetime_commission') ? 1 : 0,
+                'soft_plan_cancellation'          => $request->has('soft_plan_cancellation') ? 1 : 0,
+                'affiliate_plan_restriction'      => $request->has('affiliate_plan_restriction') ? 1 : 0,
+                'shared_credit_system_enabled'    => $request->has('shared_credit_system_enabled') ? 1 : 0,
+                'shared_credit_show_cost_preview' => $request->has('shared_credit_show_cost_preview') ? 1 : 0,
+                'shared_credit_allow_negative'    => $request->has('shared_credit_allow_negative') ? 1 : 0,
             ]
         )->save();
 

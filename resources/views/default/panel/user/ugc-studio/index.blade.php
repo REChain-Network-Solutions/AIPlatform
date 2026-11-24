@@ -19,16 +19,16 @@
         'ugc-marketing' => [
             'label' => __('UGC Marketing'),
             'description' => __('Promote your products and apps'),
-            'entryRoute' => MarketplaceHelper::isRegistered('ugc-marketing') ? 'dashboard.user.ugc-marketing.index' : null,
+            'entryRoute' => MarketplaceHelper::isRegistered('ugc-creator') ? 'dashboard.user.ugc-creator.index' : null,
             'cardImage' => custom_theme_url('/assets/img/ugc-studio/ugc-marketing-card.webp'),
-            'status' => MarketplaceHelper::isRegistered('ugc-marketing') ? 'installed' : 'coming-soon',
+            'status' => MarketplaceHelper::isRegistered('ugc-creator') ? 'installed' : 'not-installed',
         ],
         'digital-twin' => [
             'label' => __('Digital Twin'),
             'description' => __('Create your own UGC Avatar'),
-            'entryRoute' => MarketplaceHelper::isRegistered('digital-twin') ? 'dashboard.user.digital-twin.index' : null,
+            'entryRoute' => MarketplaceHelper::isRegistered('ai-persona') ? 'dashboard.user.ai-persona.index' : null,
             'cardImage' => custom_theme_url('/assets/img/ugc-studio/digital-twin-card.webp'),
-            'status' => MarketplaceHelper::isRegistered('digital-twin') ? 'installed' : 'coming-soon',
+            'status' => MarketplaceHelper::isRegistered('ai-persona') ? 'installed' : 'not-installed',
         ],
     ];
 @endphp
@@ -139,12 +139,8 @@
                                         @if ($extension['status'] !== 'installed')
                                             <div
                                                 class="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border-foreground/5 bg-background/85 px-2.5 py-[5px] text-[12px] font-medium shadow-xl shadow-black/10 backdrop-blur-lg">
-                                                <span @class([
-                                                    'inline-flex size-1.5 rounded-full',
-                                                    'bg-foreground/80' => $extension['status'] === 'coming-soon',
-                                                    'bg-yellow-600' => $extension['status'] === 'not-installed',
-                                                ])></span>
-                                                {{ $extension['status'] === 'not-installed' && Auth::user()->isAdmin() ? __('Install Now') : __('Not Available') }}
+                                                <span class="inline-flex size-1.5 rounded-full bg-foreground/80"></span>
+                                                {{ Auth::user()->isAdmin() ? __('Install Now') : __('Not Available') }}
                                             </div>
                                         @endif
                                     </figure>

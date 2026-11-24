@@ -112,7 +112,7 @@ class TTSController extends Controller
 
         foreach ($speeches as $speech) {
             $model = $this->getAIModel($speech['platform'], $speech['pace']);
-            $driver = Entity::driver($model)->inputVoiceCount(1)->calculateCredit();
+            $driver = Entity::driver($model)->input($speech['content'])->calculateCredit();
             $langsAndVoices['language'][] = $speech['lang'];
             $langsAndVoices['voices'][] = $speech['voice'];
 
@@ -341,8 +341,10 @@ class TTSController extends Controller
         $selectedModel = setting('tts_elevenlabs_model', EntityEnum::ELEVENLABS->value);
 
         return match ($selectedModel) {
-            EntityEnum::ELEVENLABS_V3->value => EntityEnum::ELEVENLABS_V3,
-            default                          => EntityEnum::ELEVENLABS,
+            EntityEnum::ELEVENLABS_V3->value       => EntityEnum::ELEVENLABS_V3,
+            EntityEnum::ELEVENLABS_V4->value       => EntityEnum::ELEVENLABS_V4,
+            EntityEnum::ELEVENLABS_V4_TURBO->value => EntityEnum::ELEVENLABS_V4_TURBO,
+            default                                => EntityEnum::ELEVENLABS,
         };
     }
 
@@ -351,8 +353,10 @@ class TTSController extends Controller
         $modelEntity ??= $this->resolveElevenLabsEntity();
 
         return match ($modelEntity) {
-            EntityEnum::ELEVENLABS_V3 => EntityEnum::ELEVENLABS_V3->value,
-            default                   => 'eleven_multilingual_v2',
+            EntityEnum::ELEVENLABS_V3       => EntityEnum::ELEVENLABS_V3->value,
+            EntityEnum::ELEVENLABS_V4       => EntityEnum::ELEVENLABS_V4->value,
+            EntityEnum::ELEVENLABS_V4_TURBO => EntityEnum::ELEVENLABS_V4_TURBO->value,
+            default                         => 'eleven_multilingual_v2',
         };
     }
 
@@ -362,7 +366,7 @@ class TTSController extends Controller
 
         return [
             'similarity_boost'  => 0.75,
-            'stability'         => $modelEntity === EntityEnum::ELEVENLABS_V3 ? 0.5 : 0.95,
+            'stability'         => in_array($modelEntity, [EntityEnum::ELEVENLABS_V3, EntityEnum::ELEVENLABS_V4, EntityEnum::ELEVENLABS_V4_TURBO], true) ? 0.5 : 0.95,
             'style'             => (float) $speech['pace'] / 100,
             'use_speaker_boost' => true,
         ];

@@ -47,12 +47,13 @@
                 <x-tabler-search />
             </button> --}}
             <x-header-search
-                class="bg-transparent lg:hidden"
+                class="flex items-center justify-center bg-transparent lg:hidden"
                 class:icon="start-1/2 -translate-x-1/2 opacity-100 rtl:translate-x-1/2 size-[22px] opacity-100 stroke-2"
                 class:arrow="hidden"
                 class:kbd="hidden"
                 class:input="p-0 opacity-0 cursor-pointer"
                 style="modern"
+                :show-trigger-kbd="false"
             />
         </li>
         <li class="w-full">

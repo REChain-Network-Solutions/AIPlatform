@@ -116,7 +116,6 @@ class SettingsController extends Controller
             $settings->feature_ai_rewriter = $request->feature_ai_rewriter;
             $settings->feature_ai_chat_image = $request->feature_ai_chat_image;
             $settings->feature_ai_image = $request->feature_ai_image;
-            $settings_two->feature_ai_video = $request->feature_ai_video;
             $settings->feature_ai_chat = $request->feature_ai_chat;
             $settings->feature_ai_code = $request->feature_ai_code;
             $settings->feature_ai_speech_to_text = $request->feature_ai_speech_to_text;
@@ -166,7 +165,7 @@ class SettingsController extends Controller
 
             $settings_two->daily_limit_enabled = $request->limit;
             $settings_two->allowed_images_count = $request->daily_limit_count;
-            $settings_two->openai_default_stream_server = $request->openai_default_stream_server;
+            $settings_two->openai_default_stream_server = 'backend';
             $settings_two->daily_voice_limit_enabled = $request->voice_limit;
             $settings_two->allowed_voice_count = $request->daily_voice_limit_count;
 
@@ -293,12 +292,18 @@ class SettingsController extends Controller
     public function deepseekSave(Request $request)
     {
         $data = $request->validate([
-            'deepseek_api_secret'         => 'required',
+            'deepseek_api_secret'         => 'nullable',
             'deepseek_default_model'      => 'required|string',
             'deepseek_max_output_length'  => 'required|string',
         ]);
 
-        $data['deepseek_api_secret'] = implode(',', $data['deepseek_api_secret']);
+        $secret = self::normalizeSecrets($data['deepseek_api_secret'] ?? null);
+
+        if ($secret === null) {
+            unset($data['deepseek_api_secret']);
+        } else {
+            $data['deepseek_api_secret'] = $secret;
+        }
 
         setting($data)->save();
 
@@ -328,9 +333,9 @@ class SettingsController extends Controller
 
         // Yanıtı Kontrol Etme
         if ($response->successful()) {
-            echo ' <br>' . $token . ' - SUCCESS <br>';
+            echo ' <br>Connection successful.<br>';
         } else {
-            echo $response->json('error.message') . ' - ' . $token . ' -FAILED <br>';
+            echo e((string) $response->json('error.message')) . ' - FAILED<br>';
         }
     }
 
@@ -362,21 +367,25 @@ class SettingsController extends Controller
         ]);
 
         if ($request->ok()) {
-            echo ' <br>' . $token . ' - SUCCESS <br>';
+            echo ' <br>Connection successful.<br>';
         } else {
-            echo $request->json('error.message') . ' - ' . $token . ' -FAILED <br>';
+            echo e((string) $request->json('error.message')) . ' - FAILED<br>';
         }
     }
 
     public function anthropicSave(Request $request)
     {
         $data = $request->validate([
-            'anthropic_api_secret'        => 'required|string',
+            'anthropic_api_secret'        => 'nullable|string',
             'anthropic_default_model'     => 'required|string',
             'anthropic_max_input_length'  => 'required|string',
             'anthropic_max_output_length' => 'required|string',
             'anthropic_bedrock_model'     => 'string',
         ]);
+
+        if (blank($data['anthropic_api_secret'] ?? null)) {
+            unset($data['anthropic_api_secret']);
+        }
 
         setting($data)->save();
 
@@ -415,26 +424,35 @@ class SettingsController extends Controller
             ],
         ];
 
-        $randomToken = ApiHelper::setGeminiKey();
         $client = app(GeminiService::class);
+        ApiHelper::setGeminiKey();
         $response = $client
             ->setHistory($newhistory)
             ->generateContent();
         if ($response->ok()) {
-            echo ' <br>' . $randomToken . ' - SUCCESS <br>';
+            echo ' <br>Connection successful.<br>';
         } else {
-            echo $response->json('error.message') . ' -FAILED <br>';
+            echo e((string) $response->json('error.message')) . ' - FAILED<br>';
         }
     }
 
     public function geminiSave(Request $request)
     {
         $data = $request->validate([
-            'gemini_api_secret'        => 'required|string',
+            'gemini_api_secret'        => 'nullable',
             'gemini_default_model'     => 'required|string',
             'gemini_max_input_length'  => 'required|string',
             'gemini_max_output_length' => 'required|string',
         ]);
+
+        $secret = self::normalizeSecrets($data['gemini_api_secret'] ?? null);
+
+        if ($secret === null) {
+            unset($data['gemini_api_secret']);
+        } else {
+            $data['gemini_api_secret'] = $secret;
+        }
+
         setting($data)->save();
 
         return response()->json([], 200);
@@ -490,9 +508,9 @@ class SettingsController extends Controller
 
         try {
             $response = $client->get("https://api.unsplash.com/search/photos?query=Google&count=1&client_id=$apiKey");
-            echo ' <br>' . $apiKey . ' - SUCCESS <br>';
+            echo ' <br>Connection successful.<br>';
         } catch (Exception $e) {
-            echo $e->getMessage() . ' - ' . $apiKey . ' -FAILED <br>';
+            echo 'Connection failed. Verify the configured credential.<br>';
         }
     }
 
@@ -532,9 +550,9 @@ class SettingsController extends Controller
                     'Authorization' => $apiKey,
                 ],
             ]);
-            echo ' <br>' . $apiKey . ' - SUCCESS <br>';
+            echo ' <br>Connection successful.<br>';
         } catch (Exception $e) {
-            echo $e->getMessage() . ' - ' . $apiKey . ' -FAILED <br>';
+            echo 'Connection failed. Verify the configured credential.<br>';
         }
     }
 
@@ -573,9 +591,9 @@ class SettingsController extends Controller
 
         try {
             $response = $client->get("https://pixabay.com/api/?key=$apiKey&q=Google");
-            echo ' <br>' . $apiKey . ' - SUCCESS <br>';
+            echo ' <br>Connection successful.<br>';
         } catch (Exception $e) {
-            echo $e->getMessage() . ' - ' . $apiKey . ' -FAILED <br>';
+            echo 'Connection failed. Verify the configured credential.<br>';
         }
     }
 
@@ -602,7 +620,9 @@ class SettingsController extends Controller
     {
         $settings = SettingTwo::getCache();
         if (Helper::appIsNotDemo()) {
-            $settings->serper_api_key = $request->serper_api_key;
+            if ($request->filled('serper_api_key')) {
+                $settings->serper_api_key = $request->string('serper_api_key')->toString();
+            }
             $settings->save();
 
             if ($request->hasAny(['serper_seo_tool_improve', 'serper_seo_aw_anlyze', 'seo_ai_tool', 'serper_seo_aw_improve', 'serper_seo_aw_sq', 'serper_seo_aw_keyword', 'serper_seo_blog_title_desc', 'serper_seo_site_meta'])) {
@@ -653,9 +673,9 @@ class SettingsController extends Controller
                 ],
             ]);
             $responseData = json_decode($response->getBody(), true);
-            echo ' <br>' . $settings->serper_api_key . ' - SUCCESS <br><hr> Example about "Coffee": <br>' . $responseData['organic'][0]['snippet'] . '<br>';
+            echo ' <br>Connection successful.<br><hr> Example about "Coffee": <br>' . e($responseData['organic'][0]['snippet'] ?? '') . '<br>';
         } catch (Exception $e) {
-            echo $e->getMessage() . ' - ' . $settings->serper_api_key . ' -FAILED <br>';
+            echo 'Connection failed. Verify the configured credential.<br>';
         }
     }
 
@@ -688,9 +708,9 @@ class SettingsController extends Controller
                     ]
                 );
                 echo '<hr>' . $c['choices'][0]['message']['content'];
-                echo '<br>' . $apiKey . ' - SUCCESS <br>';
+                echo '<br>Connection successful.<br>';
             } catch (Exception|Throwable $e) {
-                echo __('Something went wrong. Please check your API key or Credit balance.') . ' <br> ' . $apiKey . ' -FAILED <br>';
+                echo __('Something went wrong. Please check your API key or credit balance.') . '<br>';
             }
         }
     }
@@ -725,9 +745,9 @@ class SettingsController extends Controller
                     ],
                 ]);
 
-                echo ' <br>' . $apiKey . ' - SUCCESS <br>';
+                echo ' <br>Connection successful.<br>';
             } catch (Exception $e) {
-                echo $e->getMessage() . ' - ' . $apiKey . ' -FAILED <br>';
+                echo 'Connection failed. Verify the configured credential.<br>';
             }
         }
     }
@@ -742,6 +762,11 @@ class SettingsController extends Controller
         }
 
         $apiKeys = explode(',', $settings->stable_diffusion_api_key);
+
+        $configuredModel = EntityEnum::tryFrom(
+            (string) ($settings->stablediffusion_default_model ?? $settings->stable_diffusion_default_model)
+        ) ?? EntityEnum::SD_3_5_LARGE;
+        $testModel = $configuredModel->isV2BetaSdEntity() ? $configuredModel : EntityEnum::SD_3_5_LARGE;
 
         foreach ($apiKeys as $apiKey) {
 
@@ -768,16 +793,17 @@ class SettingsController extends Controller
                 ],
                 [
                     'name'     => 'model',
-                    'contents' => 'sd3',
+                    'contents' => $testModel->value,
                 ],
             ];
 
             try {
+                // 'sd3' is the v2beta endpoint path, not the model id.
                 $response = $client->post('sd3', [
                     'headers'   => ['accept' => 'application/json'],
                     'multipart' => $sd3Payload,
                 ]);
-                echo ' <br>' . $apiKey . ' - SUCCESS <br>';
+                echo ' <br>Connection successful.<br>';
             } catch (Exception $e) {
                 if ($e->hasResponse()) {
                     try {
@@ -785,12 +811,12 @@ class SettingsController extends Controller
                         $errorData = json_decode($responseBody, true);
                         $errorMessage = $errorData['message'] ?? ($errorData['errors'][0] ?? 'Unknown error');
 
-                        echo $errorMessage . ' - ' . $apiKey . ' -FAILED <br>';
+                        echo e((string) $errorMessage) . ' - FAILED<br>';
                     } catch (JsonException $jsonException) {
-                        echo 'Failed to decode error response.' . ' - ' . $apiKey . ' -FAILED <br>';
+                        echo 'Failed to decode error response.<br>';
                     }
                 } else {
-                    echo 'An unexpected error occurred: ' . $e->getMessage() . ' - ' . $apiKey . ' -FAILED <br>';
+                    echo 'An unexpected provider error occurred.<br>';
                 }
             }
         }
@@ -799,10 +825,22 @@ class SettingsController extends Controller
     public function xAiSave(Request $request): JsonResponse
     {
         if (Helper::appIsNotDemo()) {
-            setting([
-                'xai_api_secret'    => $request->xai_api_secret,
-                'xai_default_model' => $request->xai_default_model,
-            ])->save();
+            $data = $request->validate([
+                'xai_api_secret'    => 'nullable',
+                'xai_default_model' => 'required|string',
+            ]);
+
+            $payload = [
+                'xai_default_model' => $data['xai_default_model'],
+            ];
+
+            $secret = self::normalizeSecrets($data['xai_api_secret'] ?? null);
+
+            if ($secret !== null) {
+                $payload['xai_api_secret'] = $secret;
+            }
+
+            setting($payload)->save();
         }
 
         return response()->json([], 200);
@@ -813,7 +851,9 @@ class SettingsController extends Controller
         $settings = Setting::getCache();
         $settings_two = SettingTwo::getCache();
         if (Helper::appIsNotDemo()) {
-            $settings->openai_api_secret = $request->openai_api_secret;
+            if ($request->filled('openai_api_secret')) {
+                $settings->openai_api_secret = $request->openai_api_secret;
+            }
             $settings->openai_default_model = $request->openai_default_model;
             $settings->openai_default_language = $request->openai_default_language;
             $settings->openai_default_tone_of_voice = $request->openai_default_tone_of_voice;
@@ -821,7 +861,7 @@ class SettingsController extends Controller
             $settings->openai_max_input_length = $request->openai_max_input_length;
             $settings->openai_max_output_length = $request->openai_max_output_length;
             $settings_two->dalle = $request->dalle_default_model;
-            $settings_two->openai_default_stream_server = $request->openai_default_stream_server;
+            $settings_two->openai_default_stream_server = 'backend';
             $settings->save();
             $settings_two->save();
             setting(key: [
@@ -831,10 +871,13 @@ class SettingsController extends Controller
                 'dalle_hidden'                   => $request->dalle_hidden,
                 'realtime_voice_chat'            => $request->realtime_voice_chat,
                 'sora_active'                    => $request->sora_active,
+                'gemini_omni_flash_active'       => $request->gemini_omni_flash_active,
                 'openai_file_search'             => $request->openai_file_search,
                 'enabled_gpt_image_1'            => $request->enabled_gpt_image_1,
                 'enabled_gpt_image_1_5'          => $request->enabled_gpt_image_1_5,
                 'enabled_gpt_image_2'            => $request->enabled_gpt_image_2,
+                'enabled_gpt_image_2_5_sunburst' => $request->enabled_gpt_image_2_5_sunburst,
+                'enabled_gpt_image_2_5_flare'    => $request->enabled_gpt_image_2_5_flare,
                 'openai_reasoning_models_effort' => $request->openai_reasoning_models_effort,
             ])->save();
 
@@ -868,7 +911,15 @@ class SettingsController extends Controller
     {
         $settings = SettingTwo::getCache();
         if (Helper::appIsNotDemo()) {
-            $settings->stable_diffusion_api_key = $request->stable_diffusion_api_key;
+            $data = $request->validate([
+                'stable_diffusion_api_key' => 'nullable',
+            ]);
+
+            $secret = self::normalizeSecrets($data['stable_diffusion_api_key'] ?? null);
+
+            if ($secret !== null) {
+                $settings->stable_diffusion_api_key = $secret;
+            }
             $settings->stablediffusion_default_language = $request->stablediffusion_default_language;
             $settings->stablediffusion_default_model = $request->stablediffusion_default_model;
 
@@ -960,7 +1011,7 @@ class SettingsController extends Controller
             $settings_two->feature_tts_elevenlabs = $request->feature_tts_elevenlabs;
             $ttsElevenLabsModel = in_array(
                 $request->tts_elevenlabs_model,
-                [EntityEnum::ELEVENLABS->value, EntityEnum::ELEVENLABS_V3->value],
+                [EntityEnum::ELEVENLABS->value, EntityEnum::ELEVENLABS_V3->value, EntityEnum::ELEVENLABS_V4->value, EntityEnum::ELEVENLABS_V4_TURBO->value],
                 true
             ) ? $request->tts_elevenlabs_model : EntityEnum::ELEVENLABS->value;
 
@@ -1118,5 +1169,25 @@ class SettingsController extends Controller
         }
 
         return response()->json($content);
+    }
+
+    /**
+     * Normalize a provider secret field that may arrive as a string or an
+     * array of keys (multi-select). Returns null when no key was provided so
+     * callers can preserve the stored value.
+     */
+    private static function normalizeSecrets(mixed $value): ?string
+    {
+        if (is_array($value)) {
+            $value = implode(',', $value);
+        }
+
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $value = trim($value, " \t\n\r\0\x0B,");
+
+        return $value === '' ? null : $value;
     }
 }

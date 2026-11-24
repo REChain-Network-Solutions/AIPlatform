@@ -17,11 +17,19 @@ class Team extends Model
         'used_image_credit',
         'word_credit',
         'entity_credits',
+        'credit_system_type',
+        'shared_credits',
     ];
 
     protected $casts = [
         'entity_credits'    => 'array',
+        'shared_credits'    => 'float',
     ];
+
+    public function isSharedCreditTeam(): bool
+    {
+        return $this->credit_system_type === 'shared';
+    }
 
     public function user(): BelongsTo
     {

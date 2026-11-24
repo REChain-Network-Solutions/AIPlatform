@@ -399,15 +399,17 @@
     let leftKeys = Object.keys(left);
     let rightKeys = Object.keys(right);
     if (isObject(left) && leftKeys.length === rightKeys.length && leftKeys.some((key, i) => key !== rightKeys[i])) {
-      diffs[path] = right;
-      return diffs;
+      if (path !== "") {
+        diffs[path] = right;
+        return diffs;
+      }
     }
     Object.entries(right).forEach(([key, value]) => {
       diffs = { ...diffs, ...diff(left[key], right[key], diffs, path === "" ? key : `${path}.${key}`) };
       leftKeys = leftKeys.filter((i) => i !== key);
     });
     leftKeys.forEach((key) => {
-      diffs[`${path}.${key}`] = "__rm__";
+      diffs[path === "" ? key : `${path}.${key}`] = "__rm__";
     });
     return diffs;
   }
@@ -616,6 +618,9 @@
           errors = request.response;
         }
         this.component.$wire.call("_uploadErrored", name, errors, this.uploadBag.first(name).multiple);
+      });
+      request.addEventListener("error", () => {
+        this.component.$wire.call("_uploadErrored", name, null, this.uploadBag.first(name).multiple);
       });
       this.uploadBag.first(name).request = request;
       request.send(formData);
@@ -1451,8 +1456,8 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
   var directiveOrder = [
     "ignore",
     "ref",
-    "data",
     "id",
+    "data",
     "anchor",
     "bind",
     "init",
@@ -2384,7 +2389,7 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     get transaction() {
       return transaction;
     },
-    version: "3.15.9",
+    version: "3.15.12",
     flushAndStopDeferringMutations,
     dontAutoEvaluateFunctions,
     disableEffectScheduling,
@@ -3233,8 +3238,8 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
       }
     };
     mutateDom(() => {
-      placeInDom(clone2, target, modifiers);
       skipDuringClone(() => {
+        placeInDom(clone2, target, modifiers);
         initTree(clone2);
       })();
     });
@@ -3817,7 +3822,7 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     evaluateItems((items) => {
       if (isNumeric3(items))
         items = Array.from({ length: items }, (_, i) => i + 1);
-      if (items === void 0)
+      if (items === void 0 || items === null)
         items = [];
       if (items instanceof Set)
         items = Array.from(items);
@@ -3867,6 +3872,8 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
             }
             return;
           }
+          if (templateEl.content.children.length > 1)
+            warn("x-for templates require a single root element, additional elements will be ignored.", templateEl);
           let clone2 = document.importNode(templateEl.content, true).firstElementChild;
           let reactiveScope = reactive(scope2);
           addScopeToNode(clone2, reactiveScope, templateEl);
@@ -3924,20 +3931,22 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     return scopeVariables;
   }
   function isNumeric3(subject) {
-    return !Array.isArray(subject) && !isNaN(subject);
+    return typeof subject !== "object" && !isNaN(subject);
   }
   function isObject22(subject) {
     return typeof subject === "object" && !Array.isArray(subject);
   }
   function handler3() {
   }
-  handler3.inline = skipDuringClone((el, { expression }, { cleanup: cleanup2 }) => {
+  handler3.inline = (el, { expression }, { cleanup: cleanup2 }) => {
     let root = closestRoot(el);
+    if (!root)
+      return;
     if (!root._x_refs)
       root._x_refs = {};
     root._x_refs[expression] = el;
     cleanup2(() => delete root._x_refs[expression]);
-  });
+  };
   directive("ref", handler3);
   directive("if", (el, { expression }, { effect: effect3, cleanup: cleanup2 }) => {
     if (el.tagName.toLowerCase() !== "template")
@@ -4260,9 +4269,11 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
       let handleResponse = (response) => {
         let { snapshot, effects } = response;
         respond();
-        this.component.mergeNewSnapshot(snapshot, effects, updates);
-        this.component.processEffects(this.component.effects);
-        if (effects["returns"]) {
+        module_default.transaction(() => {
+          this.component.mergeNewSnapshot(snapshot, effects, updates);
+          this.component.processEffects(this.component.effects);
+        });
+        if (Object.prototype.hasOwnProperty.call(effects, "returns") && effects["returns"]) {
           let returns = effects["returns"];
           let returnHandlerStack = this.calls.map(({ handleReturn }) => handleReturn);
           returnHandlerStack.forEach((handleReturn, index) => {
@@ -4455,6 +4466,8 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     }
     if (response.redirected) {
       window.location.href = response.url;
+      finishProfile({ content, failed: false });
+      return;
     }
     if (contentIsFromDump(content)) {
       let dump;
@@ -4749,11 +4762,14 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     inscribeSnapshotAndEffectsOnElement() {
       let el = this.el;
       el.setAttribute("wire:snapshot", this.snapshotEncoded);
-      let effects = this.originalEffects.listeners ? { listeners: this.originalEffects.listeners } : {};
-      if (this.originalEffects.url) {
+      let effects = {};
+      if (Object.prototype.hasOwnProperty.call(this.originalEffects, "listeners") && this.originalEffects.listeners) {
+        effects.listeners = this.originalEffects.listeners;
+      }
+      if (Object.prototype.hasOwnProperty.call(this.originalEffects, "url") && this.originalEffects.url) {
         effects.url = this.originalEffects.url;
       }
-      if (this.originalEffects.scripts) {
+      if (Object.prototype.hasOwnProperty.call(this.originalEffects, "scripts") && this.originalEffects.scripts) {
         effects.scripts = this.originalEffects.scripts;
       }
       el.setAttribute("wire:effects", JSON.stringify(effects));
@@ -6686,7 +6702,13 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     let overflow = document.documentElement.style.overflow;
     let paddingRight = document.documentElement.style.paddingRight;
     let scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    let scrollbarGutter = window.getComputedStyle(document.documentElement).scrollbarGutter;
     document.documentElement.style.overflow = "hidden";
+    if (scrollbarGutter && scrollbarGutter !== "auto") {
+      return () => {
+        document.documentElement.style.overflow = overflow;
+      };
+    }
     document.documentElement.style.paddingRight = `${scrollbarWidth}px`;
     return () => {
       document.documentElement.style.overflow = overflow;
@@ -8043,14 +8065,14 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
       }
     });
     Alpine3.directive("anchor", Alpine3.skipDuringClone((el, { expression, modifiers, value }, { evaluate: evaluate22, effect: effect3, cleanup: cleanup2 }) => {
-      let { placement, offsetValue, unstyled } = getOptions(modifiers);
+      let { placement, offsetValue, unstyled, strategy, allowFlip } = getOptions(modifiers);
       el._x_anchor = Alpine3.reactive({ x: 0, y: 0 });
       let previousReference = null;
       let release2 = null;
-      let effector = effect3(() => {
+      effect3(() => {
         let reference = evaluate22(expression);
         if (!reference)
-          throw "Alpine: no element provided to x-anchor...";
+          return;
         if (previousReference !== reference) {
           if (release2)
             release2();
@@ -8059,9 +8081,10 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
             let previousValue;
             computePosition2(reference, el, {
               placement,
-              middleware: [flip(), shift({ padding: 5 }), offset(offsetValue)]
+              strategy,
+              middleware: [allowFlip && flip(), shift({ padding: 5 }), offset(offsetValue)]
             }).then(({ x, y }) => {
-              unstyled || setStyles2(el, x, y);
+              unstyled || setStyles2(el, x, y, strategy);
               if (JSON.stringify({ x, y }) !== previousValue) {
                 el._x_anchor.x = x;
                 el._x_anchor.y = y;
@@ -8073,22 +8096,21 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
         }
       });
       cleanup2(() => {
-        effector();
         if (release2)
           release2();
       });
     }, (el, { expression, modifiers, value }, { cleanup: cleanup2, evaluate: evaluate22 }) => {
-      let { placement, offsetValue, unstyled } = getOptions(modifiers);
+      let { placement, offsetValue, unstyled, strategy } = getOptions(modifiers);
       if (el._x_anchor) {
-        unstyled || setStyles2(el, el._x_anchor.x, el._x_anchor.y);
+        unstyled || setStyles2(el, el._x_anchor.x, el._x_anchor.y, strategy);
       }
     }));
   }
-  function setStyles2(el, x, y) {
+  function setStyles2(el, x, y, strategy = "absolute") {
     Object.assign(el.style, {
       left: x + "px",
       top: y + "px",
-      position: "absolute"
+      position: strategy
     });
   }
   function getOptions(modifiers) {
@@ -8100,7 +8122,9 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
       offsetValue = modifiers[idx + 1] !== void 0 ? Number(modifiers[idx + 1]) : offsetValue;
     }
     let unstyled = modifiers.includes("no-style");
-    return { placement, offsetValue, unstyled };
+    let allowFlip = !modifiers.includes("noflip");
+    let strategy = modifiers.includes("fixed") ? "fixed" : "absolute";
+    return { placement, offsetValue, unstyled, strategy, allowFlip };
   }
   var module_default7 = src_default7;
 
@@ -8231,7 +8255,9 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
       callback((whenReleased) => {
         let handler4 = (e2) => {
           e2.preventDefault();
-          whenReleased();
+          requestAnimationFrame(() => {
+            whenReleased();
+          });
           el.removeEventListener("mouseup", handler4);
         };
         el.addEventListener("mouseup", handler4);
@@ -8261,6 +8287,12 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
   }
   function createUrlObjectFromString(urlString) {
     return urlString !== null && new URL(urlString, document.baseURI);
+  }
+  function isSameOrigin(destination) {
+    return !!destination && destination.origin === window.location.origin;
+  }
+  function visitNatively(destination) {
+    window.location.href = destination.href;
   }
   function getUriStringFromUrlObject(urlObject) {
     return urlObject.pathname + urlObject.search + urlObject.hash;
@@ -8386,10 +8418,27 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     };
     queueMicrotask(() => {
       queueMicrotask(() => {
+        let shouldScrollToFragment = !document.body.hasAttribute("data-scroll-x");
         scroll(document.body);
         document.querySelectorAll(["[x-navigate\\:scroll]", "[wire\\:scroll]"]).forEach(scroll);
+        if (shouldScrollToFragment) {
+          getFragmentTarget()?.scrollIntoView({ behavior: "instant" });
+        }
       });
     });
+  }
+  function getFragmentTarget() {
+    let fragment = window.location.hash.substring(1);
+    if (!fragment)
+      return;
+    let target = document.getElementById(fragment);
+    if (target)
+      return target;
+    try {
+      fragment = decodeURIComponent(fragment);
+    } catch (e) {
+    }
+    return document.getElementById(fragment) || Array.from(document.getElementsByName(fragment)).find((el) => el.tagName === "A");
   }
 
   // js/plugins/navigate/persist.js
@@ -8406,17 +8455,19 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
   }
   function putPersistantElementsBack(callback) {
     let usedPersists = [];
+    let putBacks = [];
     document.querySelectorAll("[x-persist]").forEach((i) => {
       let old = els[i.getAttribute("x-persist")];
       if (!old)
         return;
       usedPersists.push(i.getAttribute("x-persist"));
       old._x_wasPersisted = true;
-      callback(old, i);
       module_default.mutateDom(() => {
         i.replaceWith(old);
       });
+      putBacks.push([old, i]);
     });
+    putBacks.forEach(([old, i]) => callback(old, i));
     Object.entries(els).forEach(([key, el]) => {
       if (usedPersists.includes(key))
         return;
@@ -8758,7 +8809,7 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
       let preserveScroll = modifiers.includes("preserve-scroll");
       shouldPrefetchOnHover && whenThisLinkIsHoveredFor(el, 60, () => {
         let destination = extractDestinationFromLink(el);
-        if (!destination)
+        if (!isSameOrigin(destination))
           return;
         prefetchHtml(destination, (html, finalDestination) => {
           storeThePrefetchedHtmlForWhenALinkIsClicked(html, destination, finalDestination);
@@ -8768,7 +8819,7 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
         let destination = extractDestinationFromLink(el);
         if (!destination)
           return;
-        prefetchHtml(destination, (html, finalDestination) => {
+        isSameOrigin(destination) && prefetchHtml(destination, (html, finalDestination) => {
           storeThePrefetchedHtmlForWhenALinkIsClicked(html, destination, finalDestination);
         });
         whenItIsReleased(() => {
@@ -8784,8 +8835,12 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
       });
     });
     function navigateTo(destination, { preserveScroll = false, shouldPushToHistoryState = true }) {
+      if (!isSameOrigin(destination))
+        return visitNatively(destination);
       showProgressBar && showAndStartProgressBar();
       fetchHtmlOrUsePrefetchedHtml(destination, (html, finalDestination) => {
+        if (!isSameOrigin(finalDestination))
+          return visitNatively(finalDestination);
         let swapCallbacks = [];
         fireEventForOtherLibrariesToHookInto("alpine:navigating", {
           onSwap: (callback) => swapCallbacks.push(callback)
@@ -9111,10 +9166,12 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
       return {};
     let insertDotNotatedValueIntoData = (key, value, data3) => {
       let [first2, second, ...rest] = key.split(".");
+      if (first2 === "__proto__" || first2 === "constructor" || first2 === "prototype")
+        return;
       if (!second)
         return data3[key] = value;
-      if (data3[first2] === void 0) {
-        data3[first2] = isNaN(second) ? {} : [];
+      if (!Object.prototype.hasOwnProperty.call(data3, first2)) {
+        data3[first2] = isNaN(second) ? /* @__PURE__ */ Object.create(null) : [];
       }
       insertDotNotatedValueIntoData([second, ...rest].join("."), value, data3[first2]);
     };
@@ -9556,6 +9613,10 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
           }
           let updater = el._x_forceModelUpdate;
           el._x_forceModelUpdate = (value2) => {
+            if (value2 === void 0) {
+              lastInputValue = "";
+              return updater(value2);
+            }
             value2 = String(value2);
             let template = templateFn(value2);
             if (template && template !== "false") {
@@ -9754,7 +9815,11 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
 
   // js/features/supportListeners.js
   on2("effect", ({ component, effects }) => {
-    registerListeners(component, effects.listeners || []);
+    let listeners2 = [];
+    if (Object.prototype.hasOwnProperty.call(effects, "listeners") && effects.listeners) {
+      listeners2 = effects.listeners;
+    }
+    registerListeners(component, listeners2);
   });
   function registerListeners(component, listeners2) {
     listeners2.forEach((name) => {
@@ -9800,7 +9865,10 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     }
   });
   on2("effect", ({ component, effects }) => {
-    let scripts = effects.scripts;
+    let scripts;
+    if (Object.prototype.hasOwnProperty.call(effects, "scripts")) {
+      scripts = effects.scripts;
+    }
     if (scripts) {
       Object.entries(scripts).forEach(([key, content]) => {
         onlyIfScriptHasntBeenRunAlreadyForThisComponent(component, key, () => {
@@ -9840,7 +9908,8 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
   async function addAssetsToHeadTagOfPage(rawHtml) {
     let newDocument = new DOMParser().parseFromString(rawHtml, "text/html");
     let newHead = document.adoptNode(newDocument.head);
-    for (let child of newHead.children) {
+    let children = [...newHead.children];
+    for (let child of children) {
       try {
         await runAssetSynchronously(child);
       } catch (error2) {
@@ -9883,8 +9952,14 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     return component.$wire.js;
   });
   on2("effect", ({ component, effects }) => {
-    let js = effects.js;
-    let xjs = effects.xjs;
+    let js;
+    let xjs;
+    if (Object.prototype.hasOwnProperty.call(effects, "js")) {
+      js = effects.js;
+    }
+    if (Object.prototype.hasOwnProperty.call(effects, "xjs")) {
+      xjs = effects.xjs;
+    }
     if (js) {
       Object.entries(js).forEach(([method, body]) => {
         overrideMethod(component, method, () => {
@@ -9997,7 +10072,10 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
 
   // js/features/supportMorphDom.js
   on2("effect", ({ component, effects }) => {
-    let html = effects.html;
+    let html;
+    if (Object.prototype.hasOwnProperty.call(effects, "html")) {
+      html = effects.html;
+    }
     if (!html)
       return;
     queueMicrotask(() => {
@@ -10012,7 +10090,11 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     queueMicrotask(() => {
       queueMicrotask(() => {
         queueMicrotask(() => {
-          dispatchEvents(component, effects.dispatches || []);
+          let dispatches = [];
+          if (Object.prototype.hasOwnProperty.call(effects, "dispatches") && effects.dispatches) {
+            dispatches = effects.dispatches;
+          }
+          dispatchEvents(component, dispatches);
         });
       });
     });
@@ -10164,7 +10246,10 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
   // js/features/supportFileDownloads.js
   on2("commit", ({ succeed }) => {
     succeed(({ effects }) => {
-      let download = effects.download;
+      let download;
+      if (Object.prototype.hasOwnProperty.call(effects, "download")) {
+        download = effects.download;
+      }
       if (!download)
         return;
       let urlObject = window.webkitURL || window.URL;
@@ -10225,7 +10310,10 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
 
   // js/features/supportQueryString.js
   on2("effect", ({ component, effects, cleanup: cleanup2 }) => {
-    let queryString = effects["url"];
+    let queryString;
+    if (Object.prototype.hasOwnProperty.call(effects, "url")) {
+      queryString = effects["url"];
+    }
     if (!queryString)
       return;
     Object.entries(queryString).forEach(([key, value]) => {
@@ -10281,7 +10369,10 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     }
   });
   on2("effect", ({ component, effects }) => {
-    let listeners2 = effects.listeners || [];
+    let listeners2 = [];
+    if (Object.prototype.hasOwnProperty.call(effects, "listeners") && effects.listeners) {
+      listeners2 = effects.listeners;
+    }
     listeners2.forEach((event) => {
       if (event.startsWith("echo")) {
         if (typeof window.Echo === "undefined") {
@@ -10362,7 +10453,10 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     }
   }
   function shouldRedirectUsingNavigateOr(effects, url, or) {
-    let forceNavigate = effects.redirectUsingNavigate;
+    let forceNavigate;
+    if (Object.prototype.hasOwnProperty.call(effects, "redirectUsingNavigate")) {
+      forceNavigate = effects.redirectUsingNavigate;
+    }
     if (forceNavigate) {
       Alpine.navigate(url);
     } else {
@@ -10379,7 +10473,7 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
 
   // js/features/supportRedirects.js
   on2("effect", ({ effects }) => {
-    if (!effects["redirect"])
+    if (!Object.prototype.hasOwnProperty.call(effects, "redirect") || !effects["redirect"])
       return;
     let url = effects["redirect"];
     shouldRedirectUsingNavigateOr(effects, url, () => {
@@ -10617,13 +10711,39 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
   directive2("loading", ({ el, directive: directive3, component, cleanup: cleanup2 }) => {
     let { targets, inverted } = getTargets(el);
     let [delay3, abortDelay] = applyDelay(directive3);
+    let restoreLoadingState = () => toggleBooleanStateDirective(el, directive3, false);
+    let activeLoadingCount = 0;
+    let startLoading = () => {
+      if (activeLoadingCount === 0) {
+        if (directive3.modifiers.includes("class")) {
+          let classes = directive3.expression.split(" ").filter(String);
+          let classStates = classes.map((className) => [className, el.classList.contains(className)]);
+          restoreLoadingState = () => classStates.forEach(([className, wasPresent]) => {
+            el.classList.toggle(className, wasPresent);
+          });
+        } else if (directive3.modifiers.includes("attr")) {
+          let attribute = directive3.expression;
+          let value = el.getAttribute(attribute);
+          restoreLoadingState = value === null ? () => el.removeAttribute(attribute) : () => el.setAttribute(attribute, value);
+        }
+        delay3(() => toggleBooleanStateDirective(el, directive3, true));
+      }
+      activeLoadingCount++;
+    };
+    let endLoading = () => {
+      if (activeLoadingCount === 0)
+        return;
+      activeLoadingCount--;
+      if (activeLoadingCount === 0)
+        abortDelay(restoreLoadingState);
+    };
     let cleanupA = whenTargetsArePartOfRequest(component, targets, inverted, [
-      () => delay3(() => toggleBooleanStateDirective(el, directive3, true)),
-      () => abortDelay(() => toggleBooleanStateDirective(el, directive3, false))
+      startLoading,
+      endLoading
     ]);
     let cleanupB = whenTargetsArePartOfFileUpload(component, targets, [
-      () => delay3(() => toggleBooleanStateDirective(el, directive3, true)),
-      () => abortDelay(() => toggleBooleanStateDirective(el, directive3, false))
+      startLoading,
+      endLoading
     ]);
     cleanup2(() => {
       cleanupA();
@@ -10871,10 +10991,12 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
         isDirty = JSON.stringify(component.canonical) !== JSON.stringify(component.reactive);
       } else {
         for (let i = 0; i < targets.length; i++) {
-          if (isDirty)
-            break;
           let target = targets[i];
-          isDirty = JSON.stringify(dataGet(component.canonical, target)) !== JSON.stringify(dataGet(component.reactive, target));
+          let canonical = JSON.stringify(dataGet(component.canonical, target));
+          let reactive3 = JSON.stringify(dataGet(component.reactive, target));
+          if (canonical !== reactive3) {
+            isDirty = true;
+          }
         }
       }
       if (oldIsDirty !== isDirty) {
@@ -10936,7 +11058,8 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
   function getModifierTail(modifiers) {
     modifiers = modifiers.filter((i) => ![
       "lazy",
-      "defer"
+      "defer",
+      "blur"
     ].includes(i));
     if (modifiers.length === 0)
       return "";
@@ -11068,10 +11191,13 @@ ${expression ? 'Expression: "' + expression + '"\n\n' : ""}`, el);
     let durationInMilliSeconds;
     let durationInMilliSecondsString = modifiers.find((mod) => mod.match(/([0-9]+)ms/));
     let durationInSecondsString = modifiers.find((mod) => mod.match(/([0-9]+)s/));
+    let durationInMinutesString = modifiers.find((mod) => mod.match(/([0-9]+)m/));
     if (durationInMilliSecondsString) {
       durationInMilliSeconds = Number(durationInMilliSecondsString.replace("ms", ""));
     } else if (durationInSecondsString) {
       durationInMilliSeconds = Number(durationInSecondsString.replace("s", "")) * 1e3;
+    } else if (durationInMinutesString) {
+      durationInMilliSeconds = Number(durationInMinutesString.replace("m", "")) * 60 * 1e3;
     }
     return durationInMilliSeconds || defaultDuration;
   }

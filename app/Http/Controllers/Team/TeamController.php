@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Team;
 
+use App\Extensions\Chatbot\System\Models\ChatbotConversation;
 use App\Helpers\Classes\Helper;
+use App\Helpers\Classes\MarketplaceHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Team\TeamInviteRequest;
 use App\Jobs\SendTeamInviteEmail;
@@ -87,6 +89,9 @@ class TeamController extends Controller
 
     public function teamMember(Team $team, TeamMember $teamMember)
     {
+        abort_if(auth()->id() !== $team->user_id, 404);
+        abort_if($teamMember->team_id !== $team->id, 404);
+
         return view('panel.user.team.edit', [
             'filter'           => 'all',
             'team'             => $team,
@@ -106,15 +111,21 @@ class TeamController extends Controller
             ]);
         }
 
+        abort_if(auth()->id() !== $team->user_id, 404);
+        abort_if($teamMember->team_id !== $team->id, 404);
+
         $request['allow_unlimited_credits'] = (bool) $request->get('allow_unlimited_credits', false);
+        $request['is_human_agent'] = (bool) $request->get('is_human_agent', false);
 
         // $user = $team->user;
         // $manager_remaining_images = $user->remaining_images;
         // $manager_remaining_words = $user->remaining_words;
 
         $data = $request->validate([
-            'role'             => 'required',
-            'status'           => 'required',
+            'role'                      => 'required',
+            'status'                    => 'required',
+            'is_human_agent'            => 'sometimes|boolean',
+            'daily_shared_credit_limit' => 'sometimes|nullable|numeric|min:0',
             // 'remaining_images' => $request['allow_unlimited_credits']
             //     ? 'sometimes|nullable|numeric'
             //     : 'required|numeric|max:' . $manager_remaining_images,
@@ -145,6 +156,20 @@ class TeamController extends Controller
 
         if ($teamMember->user) {
             $teamMember->user->update(['team_id' => null, 'team_member_id' => null]);
+        }
+
+        $conversationClass = ChatbotConversation::class;
+
+        if ($teamMember->user_id
+            && MarketplaceHelper::isRegistered('chatbot')
+            && class_exists($conversationClass)
+        ) {
+            $conversationClass::query()
+                ->where('assigned_agent_id', $teamMember->user_id)
+                ->whereHas('chatbot', function ($query) use ($team) {
+                    $query->where('user_id', $team->user_id);
+                })
+                ->update(['assigned_agent_id' => null]);
         }
 
         $teamMember->delete();

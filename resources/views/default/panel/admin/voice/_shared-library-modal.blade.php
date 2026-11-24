@@ -46,6 +46,7 @@
 
                 <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <x-forms.input
+                        class="capitalize"
                         type="select"
                         x-model="filters.gender"
                         @change="reload()"
@@ -57,6 +58,7 @@
                     </x-forms.input>
 
                     <x-forms.input
+                        class="capitalize"
                         type="select"
                         x-model="filters.age"
                         @change="reload()"
@@ -68,6 +70,7 @@
                     </x-forms.input>
 
                     <x-forms.input
+                        class="capitalize"
                         type="select"
                         x-model="filters.language"
                         @change="reload()"
@@ -173,6 +176,7 @@
                     </x-forms.input>
 
                     <x-forms.input
+                        class="capitalize"
                         type="select"
                         x-model="filters.use_cases"
                         @change="reload()"
@@ -212,12 +216,14 @@
 
                                 <div class="min-w-0 flex-1">
                                     <p
-                                        class="m-0 truncate text-sm font-semibold"
+                                        class="m-0 truncate text-sm font-semibold capitalize"
                                         x-text="voice.name"
+										:title="voice.name"
                                     ></p>
                                     <p
-                                        class="m-0 truncate text-2xs opacity-60"
+                                        class="m-0 truncate text-2xs opacity-60 capitalize"
                                         x-text="[voice.gender, voice.age, voice.accent, voice.locale].filter(Boolean).join(' · ')"
+										:title="[voice.gender, voice.age, voice.accent, voice.locale].filter(Boolean).join(' · ')"
                                     ></p>
                                 </div>
 
@@ -247,7 +253,7 @@
                             <div class="flex grow flex-col p-4">
                                 <p
                                     class="mb-3 line-clamp-3 text-2xs"
-                                    x-show="voice.description.trim()"
+                                    x-show="voice.description?.trim()"
                                     x-text="voice.description || ''"
                                 ></p>
 

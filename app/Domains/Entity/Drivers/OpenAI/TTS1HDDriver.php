@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace App\Domains\Entity\Drivers\OpenAI;
 
 use App\Domains\Entity\BaseDriver;
-use App\Domains\Entity\Concerns\Calculate\HasTextToSpeech;
-use App\Domains\Entity\Concerns\Input\HasInputVoice;
-use App\Domains\Entity\Contracts\Calculate\WithTextToSpeechInterface;
-use App\Domains\Entity\Contracts\Input\WithInputVoiceInterface;
+use App\Domains\Entity\Concerns\Calculate\HasCharacters;
+use App\Domains\Entity\Concerns\Input\HasInput;
+use App\Domains\Entity\Contracts\Calculate\WithCharsInterface;
+use App\Domains\Entity\Contracts\Input\WithInputInterface;
 use App\Domains\Entity\Enums\EntityEnum;
 
-class TTS1HDDriver extends BaseDriver implements WithInputVoiceInterface, WithTextToSpeechInterface
+class TTS1HDDriver extends BaseDriver implements WithCharsInterface, WithInputInterface
 {
-    use HasInputVoice;
-    use HasTextToSpeech;
+    use HasCharacters;
+    use HasInput;
 
     public function enum(): EntityEnum
     {

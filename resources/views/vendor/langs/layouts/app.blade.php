@@ -4,16 +4,16 @@
 @section('titlebar_actions')
     <div class="flex flex-wrap items-center gap-3">
         @if (!activeRoute('elseyyid.translations.lang'))
-            <x-button
-                href="{{ route('elseyyid.translations.lang.reinstall') }}"
-                variant="ghost-shadow"
-            >
-                <x-tabler-rotate-clockwise class="size-5" />
-                {{ __('Reinstall Language Files') }}
-            </x-button>
+            <form method="POST" action="{{ route('elseyyid.translations.lang.reinstall') }}">
+                @csrf
+                <x-button type="submit" variant="ghost-shadow">
+                    <x-tabler-rotate-clockwise class="size-5" />
+                    {{ __('Reinstall Language Files') }}
+                </x-button>
+            </form>
         @else
             <x-button
-                href="{{ route('elseyyid.translations.lang.reinstall') }}"
+                href="javascript:void(0)"
                 variant="ghost-shadow"
                 type="{{ $app_is_demo ? 'button' : 'submit' }}"
                 onclick="{{ $app_is_demo ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : 'return handlePromptInput()' }}"
@@ -26,8 +26,9 @@
                 class="relative hidden"
                 id="new-string-form"
                 action="{{ route('elseyyid.translations.lang.newString') }}"
-                method="GET"
+                method="POST"
             >
+                @csrf
                 <input
                     class="bg-[#F1EDFF]"
                     id="new-string"
@@ -44,17 +45,22 @@
                         document.getElementById('new-string').value = newString;
                         document.getElementById("new-string-form").submit();
                     }
+
+                    return false;
                 }
             </script>
         @endif
 
-        <x-button
-            href="{{ $app_is_demo ? 'javascript:void(0);' : route('elseyyid.translations.lang.publishAll') }}"
-            onclick="{{ $app_is_demo ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '' }}"
-        >
-            <x-tabler-table-share class="size-5" />
-            {{ __('Publish All JSON Files') }}
-        </x-button>
+        <form method="POST" action="{{ route('elseyyid.translations.lang.publishAll') }}">
+            @csrf
+            <x-button
+                type="{{ $app_is_demo ? 'button' : 'submit' }}"
+                onclick="{{ $app_is_demo ? 'return toastr.info(\'This feature is disabled in Demo version.\')' : '' }}"
+            >
+                <x-tabler-table-share class="size-5" />
+                {{ __('Publish All JSON Files') }}
+            </x-button>
+        </form>
     </div>
 @endsection
 

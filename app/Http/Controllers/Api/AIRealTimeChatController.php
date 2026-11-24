@@ -7,6 +7,7 @@ use App\Helpers\Classes\ApiHelper;
 use App\Helpers\Classes\Helper;
 use App\Helpers\Classes\OpenAiParamHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\OpenAi\RealtimeClientSecretController;
 use App\Models\OpenAIGenerator;
 use App\Models\OpenaiGeneratorChatCategory;
 use App\Models\Plan;
@@ -1067,14 +1068,14 @@ class AIRealTimeChatController extends Controller
     }
 
     /**
-     * Get API key for WebSocket connection for Flutter app
+     * Get a short-lived client secret for a Realtime connection.
      *
      * @OA\Get(
      *      path="/api/airealtimechat/websocket-credentials",
      *      operationId="getWebsocketCredentials",
      *      tags={"Realtime Chat"},
-     *      summary="Get API key for WebSocket connection for Real Time Chat",
-     *      description="Returns the API key parts needed to establish a WebSocket connection",
+     *      summary="Get a short-lived client secret for Real Time Chat",
+     *      description="Returns an ephemeral provider credential without exposing the long-lived API key",
      *      security={{ "passport": {} }},
      *
      *      @OA\Response(
@@ -1084,10 +1085,8 @@ class AIRealTimeChatController extends Controller
      *          @OA\JsonContent(
      *              type="object",
      *
-     *              @OA\Property(property="apikeyPart1", type="string"),
-     *              @OA\Property(property="apikeyPart2", type="string"),
-     *              @OA\Property(property="apikeyPart3", type="string"),
-     *              @OA\Property(property="model", type="string"),
+     *              @OA\Property(property="client_secret", type="string"),
+     *              @OA\Property(property="expires_at", type="integer"),
      *          ),
      *      ),
      *
@@ -1097,27 +1096,9 @@ class AIRealTimeChatController extends Controller
      *      ),
      * )
      */
-    public function getWebsocketCredentials(Request $request)
+    public function getWebsocketCredentials(RealtimeClientSecretController $controller): JsonResponse
     {
-
-        $apiKey = ApiHelper::setOpenAiKey();
-        $len = strlen($apiKey);
-        $len = max($len, 6);
-        $parts = [];
-        $l = [];
-        $parts[] = substr($apiKey, 0, $l[] = random_int(1, $len - 5));
-        $parts[] = substr($apiKey, $l[0], $l[] = random_int(1, $len - $l[0] - 3));
-        $parts[] = substr($apiKey, array_sum($l));
-        $apikeyPart1 = base64_encode($parts[0]);
-        $apikeyPart2 = base64_encode($parts[1]);
-        $apikeyPart3 = base64_encode($parts[2]);
-
-        return response()->json([
-            'key1'  => $apikeyPart1,
-            'key2'  => $apikeyPart2,
-            'key3'  => $apikeyPart3,
-            'model' => 'gpt-4o-realtime-preview-2024-12-17', // Default model used in web frontend
-        ], 200);
+        return $controller();
     }
 
     /**

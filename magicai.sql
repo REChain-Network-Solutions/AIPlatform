@@ -1,73 +1,2116 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1deb3
--- https://www.phpmyadmin.net/
+-- -------------------------------------------------------------
+-- TablePlus 26.10.22(802)
 --
--- Host: localhost:3306
--- Generation Time: May 22, 2026 at 12:53 PM
--- Server version: 10.11.13-MariaDB-0ubuntu0.24.04.1
--- PHP Version: 8.4.7
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
+-- https://tableplus.com/
+--
+-- Database: magicai_1130
+-- Generation Time: 2026-10-07 15:36:12.6290
+-- -------------------------------------------------------------
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
---
--- Database: `magicai`
---
 
--- --------------------------------------------------------
-
---
--- Table structure for table `account_deletion_reqs`
---
-
+DROP TABLE IF EXISTS `account_deletion_reqs`;
 CREATE TABLE `account_deletion_reqs` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `activity`
---
-
-CREATE TABLE `activity` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `url` text DEFAULT NULL,
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `activity_title` varchar(191) DEFAULT NULL,
-  `activity_type` varchar(191) DEFAULT NULL
+  PRIMARY KEY (`id`),
+  KEY `account_deletion_reqs_user_id_foreign` (`user_id`),
+  CONSTRAINT `account_deletion_reqs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `ads`
---
-
-CREATE TABLE `ads` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `type` varchar(191) NOT NULL,
-  `code` longtext NOT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT 0,
+DROP TABLE IF EXISTS `activity`;
+CREATE TABLE `activity` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `url` text COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `activity_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `activity_type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `activity_user_id_foreign` (`user_id`),
+  CONSTRAINT `activity_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `ads`
---
+DROP TABLE IF EXISTS `ads`;
+CREATE TABLE `ads` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `advanced_features_section`;
+CREATE TABLE `advanced_features_section` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `image` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `advertis`;
+CREATE TABLE `advertis` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tracking_code` longtext COLLATE utf8mb4_unicode_ci,
+  `status` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `ai_chat_model_plans`;
+CREATE TABLE `ai_chat_model_plans` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `plan_id` int NOT NULL,
+  `entity_id` bigint unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ai_chat_model_plans_entity_id_foreign` (`entity_id`),
+  CONSTRAINT `ai_chat_model_plans_entity_id_foreign` FOREIGN KEY (`entity_id`) REFERENCES `entities` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `app_settings`;
+CREATE TABLE `app_settings` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `app_settings_key_index` (`key`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `article_wizard`;
+CREATE TABLE `article_wizard` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `keywords` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `extra_keywords` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `topic_keywords` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `extra_titles` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `topic_title` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `language` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `tone` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `image_style` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `image_count` int NOT NULL DEFAULT '0',
+  `outline` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `extra_outlines` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `topic_outline` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `current_step` int NOT NULL DEFAULT '0',
+  `result` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `image` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `extra_images` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `topic_image` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `generated_count` int NOT NULL DEFAULT '0',
+  `creativity` double(8,2) NOT NULL DEFAULT '0.50',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `bad_words`;
+CREATE TABLE `bad_words` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `words` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `banner_bottom_texts`;
+CREATE TABLE `banner_bottom_texts` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `text` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `blogs`;
+CREATE TABLE `blogs` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `feature_image` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `slug` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `seo_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `seo_description` text COLLATE utf8mb4_unicode_ci,
+  `category` text COLLATE utf8mb4_unicode_ci,
+  `tag` text COLLATE utf8mb4_unicode_ci,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `user_id` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `blogs_slug_unique` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `cache`;
+CREATE TABLE `cache` (
+  `key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expiration` int NOT NULL,
+  PRIMARY KEY (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `cache_locks`;
+CREATE TABLE `cache_locks` (
+  `key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `owner` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expiration` int NOT NULL,
+  PRIMARY KEY (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `chat_category`;
+CREATE TABLE `chat_category` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint DEFAULT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `chatbot`;
+CREATE TABLE `chatbot` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint DEFAULT NULL,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `role` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `model` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `first_message` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `instructions` text COLLATE utf8mb4_unicode_ci,
+  `chatbot_interests` text COLLATE utf8mb4_unicode_ci,
+  `image` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `color` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `width` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `height` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'not-trained',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `chatbot_data`;
+CREATE TABLE `chatbot_data` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `chatbot_id` bigint DEFAULT NULL,
+  `content` longtext COLLATE utf8mb4_unicode_ci,
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type_value` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `chatbot_data_vectors`;
+CREATE TABLE `chatbot_data_vectors` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `chatbot_id` bigint DEFAULT NULL,
+  `chatbot_data_id` bigint DEFAULT NULL,
+  `content` longtext COLLATE utf8mb4_unicode_ci,
+  `embedding` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `chatbot_history`;
+CREATE TABLE `chatbot_history` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int DEFAULT NULL,
+  `ip` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_openai_chat_id` int DEFAULT NULL,
+  `openai_chat_category_id` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `clients`;
+CREATE TABLE `clients` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `avatar` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'assets/img/auth/default-avatar.png',
+  `alt` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `companies`;
+CREATE TABLE `companies` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `industry` text COLLATE utf8mb4_unicode_ci,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `target_audience` text COLLATE utf8mb4_unicode_ci,
+  `website` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tagline` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `logo` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `brand_color` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `specific_instructions` text COLLATE utf8mb4_unicode_ci,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `tone_of_voice` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `companies_user_id_foreign` (`user_id`),
+  CONSTRAINT `companies_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `comparison_section_items`;
+CREATE TABLE `comparison_section_items` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `label` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `others` tinyint(1) NOT NULL DEFAULT '0',
+  `ours` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `coupon_users`;
+CREATE TABLE `coupon_users` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `coupon_id` bigint unsigned NOT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `coupon_users_coupon_id_foreign` (`coupon_id`),
+  KEY `coupon_users_user_id_foreign` (`user_id`),
+  CONSTRAINT `coupon_users_coupon_id_foreign` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `coupon_users_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `coupons`;
+CREATE TABLE `coupons` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `discount` decimal(5,2) NOT NULL,
+  `is_offer` tinyint(1) NOT NULL DEFAULT '0',
+  `is_offer_fixed_price` tinyint(1) NOT NULL DEFAULT '0',
+  `limit` int DEFAULT NULL,
+  `duration` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'once',
+  `created_by` bigint unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `offer_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `coupons_created_by_foreign` (`created_by`),
+  CONSTRAINT `coupons_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `currencies`;
+CREATE TABLE `currencies` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `country` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `currency` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `code` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `symbol` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `thousand_separator` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `decimal_separator` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `custom_biling_plans`;
+CREATE TABLE `custom_biling_plans` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `gateway` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `plan_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `main_plan_price_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `custom_plan_price_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `customsettings`;
+CREATE TABLE `customsettings` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `value_str` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `value_text` text COLLATE utf8mb4_unicode_ci,
+  `value_longtext` longtext COLLATE utf8mb4_unicode_ci,
+  `value_html` text COLLATE utf8mb4_unicode_ci,
+  `value_int` int NOT NULL DEFAULT '0',
+  `value_bigint` bigint DEFAULT NULL,
+  `value_ubigint` bigint unsigned DEFAULT NULL,
+  `value_double` double NOT NULL DEFAULT '0',
+  `value_bool` tinyint(1) NOT NULL DEFAULT '0',
+  `value_date` date DEFAULT NULL,
+  `value_timestamp` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `dashboard_widgets`;
+CREATE TABLE `dashboard_widgets` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `order` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `domains`;
+CREATE TABLE `domains` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `domain` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `app_key` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `chatbot_id` bigint unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `domains_chatbot_id_domain_unique` (`chatbot_id`,`domain`),
+  UNIQUE KEY `domains_uuid_unique` (`uuid`),
+  KEY `domains_chatbot_id_index` (`chatbot_id`),
+  CONSTRAINT `domains_chatbot_id_foreign` FOREIGN KEY (`chatbot_id`) REFERENCES `chatbot` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `elevenlab_voices`;
+CREATE TABLE `elevenlab_voices` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint DEFAULT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `voice_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `language` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `email_templates`;
+CREATE TABLE `email_templates` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `system` tinyint(1) NOT NULL DEFAULT '1',
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `slug` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `engines`;
+CREATE TABLE `engines` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'enabled',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_engines_key` (`key`)
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `entities`;
+CREATE TABLE `entities` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `image` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `engine` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'openai',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `selected_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_selected` tinyint(1) NOT NULL DEFAULT '0',
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'enabled',
+  `effort` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_entities_key` (`key`)
+) ENGINE=InnoDB AUTO_INCREMENT=276 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `exported_videos`;
+CREATE TABLE `exported_videos` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `task_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'in_progress',
+  `video_url` text COLLATE utf8mb4_unicode_ci,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `used_ai_tool` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'topview',
+  `cover_url` text COLLATE utf8mb4_unicode_ci,
+  `video_duration` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `user_id` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `exported_videos_task_id_unique` (`task_id`),
+  KEY `exported_videos_user_id_foreign` (`user_id`),
+  CONSTRAINT `exported_videos_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `extensions`;
+CREATE TABLE `extensions` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `version` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `slug` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `installed` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `is_theme` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `failed_jobs`;
+CREATE TABLE `failed_jobs` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `faq`;
+CREATE TABLE `faq` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `question` text COLLATE utf8mb4_unicode_ci,
+  `answer` text COLLATE utf8mb4_unicode_ci,
+  `image` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `favourite_list`;
+CREATE TABLE `favourite_list` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `item_id` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `features_marquees`;
+CREATE TABLE `features_marquees` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `position` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `folders`;
+CREATE TABLE `folders` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `team_id` bigint DEFAULT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_by` bigint unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `folders_created_by_foreign` (`created_by`),
+  CONSTRAINT `folders_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `footer_items`;
+CREATE TABLE `footer_items` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `item` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `frontend_channel_settings`;
+CREATE TABLE `frontend_channel_settings` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `image` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `logo` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `frontend_content_boxes`;
+CREATE TABLE `frontend_content_boxes` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `emoji` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `background` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `foreground` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `frontend_curtains`;
+CREATE TABLE `frontend_curtains` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title_icon` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sliders` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `frontend_footer_settings`;
+CREATE TABLE `frontend_footer_settings` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `header_title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Limited Offer',
+  `header_text` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Sign up and receive 20% bonus discount on checkout.',
+  `hero_subtitle` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Unleash the Power of AI',
+  `hero_title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Ultimate AI',
+  `hero_description` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'All-in-one platform to generate AI content and start making money in minutes.',
+  `hero_scroll_text` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Discover MagicAI',
+  `hero_button` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Start Making Money',
+  `hero_button_url` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `hero_image` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '/themes/dark/assets/landing-page/banner-img.jpg',
+  `hero_button_type` int NOT NULL DEFAULT '1',
+  `footer_header` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Start your free trial.',
+  `footer_text_small` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pay once, own forever.',
+  `footer_text` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Unlock your business potential by letting the AI work and generate money for you.',
+  `footer_button_text` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Join our community',
+  `footer_button_url` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'https://codecanyon.net/item/magicai-openai-content-text-image-chat-code-generator-as-saas/45408109',
+  `footer_copyright` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'All images are for demo purposes.',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `hero_title_text_rotator` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'Generator,Chatbot,Assistant',
+  `sign_in` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Sign In',
+  `join_hub` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Join Hub',
+  `floating_button_small_text` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `floating_button_bold_text` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `floating_button_link` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `floating_button_active` tinyint(1) NOT NULL DEFAULT '0',
+  `footer_text_color` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `no_credit_cart_required` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT 'No credit cart required.',
+  `faster_content_creation` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT '<span class="font-heading text-[1.857em]/[1em] font-bold">10x</span>Faster Content Creation',
+  `over_5000_businesses` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT 'over <u>5000+</u> businesses trust us to boost their social media precense',
+  `join_the_ranks` longtext COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `frontend_future`;
+CREATE TABLE `frontend_future` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `image` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `frontend_generators`;
+CREATE TABLE `frontend_generators` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `menu_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subtitle_one` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subtitle_two` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `text` text COLLATE utf8mb4_unicode_ci,
+  `image` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_subtitle` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `color` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `icon` text COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `frontend_sections_statuses_titles`;
+CREATE TABLE `frontend_sections_statuses_titles` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `features_active` tinyint(1) NOT NULL DEFAULT '1',
+  `features_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'The future of AI.',
+  `features_subtitle` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Unleash the Power of AI',
+  `features_description` text COLLATE utf8mb4_unicode_ci,
+  `generators_active` tinyint(1) NOT NULL DEFAULT '1',
+  `who_is_for_active` tinyint(1) NOT NULL DEFAULT '1',
+  `custom_templates_active` tinyint(1) NOT NULL DEFAULT '1',
+  `custom_templates_subtitle_one` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'Custom',
+  `custom_templates_subtitle_two` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'Prompts',
+  `custom_templates_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'Custom Templates.',
+  `custom_templates_learn_more_link_url` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#templates',
+  `custom_templates_learn_more_link` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Discover MagicAI',
+  `custom_templates_description` text COLLATE utf8mb4_unicode_ci,
+  `tools_active` tinyint(1) NOT NULL DEFAULT '1',
+  `tools_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'Magic Tools.',
+  `tools_subtitle` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Unleash the Power of AI',
+  `tools_description` text COLLATE utf8mb4_unicode_ci,
+  `how_it_works_active` tinyint(1) NOT NULL DEFAULT '1',
+  `how_it_works_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'So, how does it work?',
+  `how_it_works_link_label` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Learn More',
+  `how_it_works_link` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#',
+  `how_it_works_description` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'To create content quickly and effectively, <strong>here are the steps you can follow:</strong>',
+  `how_it_works_subtitle` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Unleash the Power of AI',
+  `testimonials_active` tinyint(1) NOT NULL DEFAULT '1',
+  `testimonials_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'Trusted by millions.',
+  `testimonials_description` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Content and <strong>kickstart your earnings</strong> in minutes  kickstart your earnings in minutes',
+  `testimonials_subtitle_one` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Testimonials',
+  `testimonials_subtitle_two` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'Trustpilot',
+  `pricing_active` tinyint(1) NOT NULL DEFAULT '1',
+  `pricing_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'Flexible Pricing.',
+  `pricing_subtitle` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Unleash the Power of AI',
+  `pricing_description` text COLLATE utf8mb4_unicode_ci,
+  `pricing_save_percent` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'Save 30%',
+  `faq_active` tinyint(1) NOT NULL DEFAULT '1',
+  `faq_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'Have a question?',
+  `faq_subtitle` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'Our support team will get assistance from AI-powered suggestions, making it quicker than ever to handle support requests.',
+  `faq_text_one` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'FAQ',
+  `faq_text_two` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'Help Center',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `preheader_active` tinyint(1) NOT NULL DEFAULT '1',
+  `blog_active` tinyint(1) NOT NULL DEFAULT '0',
+  `blog_title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Latest News',
+  `blog_subtitle` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Stay up-to-date',
+  `blog_posts_per_page` int NOT NULL DEFAULT '3',
+  `blog_button_text` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Show more',
+  `blog_a_title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Blog Posts',
+  `blog_a_subtitle` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Latest News',
+  `blog_a_description` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Welcome to our cozy corner of the internet, where you will find a delightful collection of our heartfelt and thought-provoking blog posts.',
+  `blog_a_posts_per_page` int NOT NULL DEFAULT '6',
+  `marquee_items` text COLLATE utf8mb4_unicode_ci,
+  `generators_subtitle` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `generators_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `generators_description` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `plan_footer_text` text COLLATE utf8mb4_unicode_ci,
+  `advanced_features_section_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `advanced_features_section_description` text COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `frontend_tools`;
+CREATE TABLE `frontend_tools` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `image` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `buy_link` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Start Making Money',
+  `buy_link_url` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'https://codecanyon.net/item/magicai-openai-content-text-image-chat-code-generator-as-saas/45408109',
+  `learn_more_link` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Discover MagicAI',
+  `learn_more_link_url` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#templates',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `frontend_who_is_for`;
+CREATE TABLE `frontend_who_is_for` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `color` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `gateway_taxes`;
+CREATE TABLE `gateway_taxes` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `gateway_id` int DEFAULT NULL,
+  `country_code` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tax` decimal(8,2) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `gatewayproducts`;
+CREATE TABLE `gatewayproducts` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `plan_id` int NOT NULL DEFAULT '0',
+  `plan_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `gateway_code` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `gateway_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `product_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payload` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `gateways`;
+CREATE TABLE `gateways` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `code` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` int NOT NULL DEFAULT '0',
+  `mode` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sandbox_client_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sandbox_client_secret` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sandbox_app_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `live_client_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `live_client_secret` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `live_app_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payment_action` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `currency` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `currency_locale` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notify_url` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `base_url` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sandbox_url` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `locale` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `validate_ssl` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `webhook_secret` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `logger` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `webhook_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tax` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT '0',
+  `automate_tax` tinyint(1) NOT NULL DEFAULT '0',
+  `bank_account_details` text COLLATE utf8mb4_unicode_ci,
+  `bank_account_other` text COLLATE utf8mb4_unicode_ci,
+  `country_tax_enabled` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `health_check_result_history_items`;
+CREATE TABLE `health_check_result_history_items` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `check_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `check_label` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `notification_message` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `short_summary` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `meta` json NOT NULL,
+  `ended_at` timestamp NOT NULL,
+  `batch` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `health_check_result_history_items_created_at_index` (`created_at`),
+  KEY `health_check_result_history_items_batch_index` (`batch`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `howitworks`;
+CREATE TABLE `howitworks` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `order` int NOT NULL DEFAULT '0',
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `bg_color` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bg_image` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `text_color` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `integrations`;
+CREATE TABLE `integrations` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `app` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `image` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `slug` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` tinyint NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `introductions`;
+CREATE TABLE `introductions` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `intro` text COLLATE utf8mb4_unicode_ci,
+  `order` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `title` text COLLATE utf8mb4_unicode_ci,
+  `file_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file_url` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file_type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `parent_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `jobs`;
+CREATE TABLE `jobs` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `queue` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `attempts` tinyint unsigned NOT NULL,
+  `reserved_at` int unsigned DEFAULT NULL,
+  `available_at` int unsigned NOT NULL,
+  `created_at` int unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `jobs_queue_index` (`queue`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `menus`;
+CREATE TABLE `menus` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `parent_id` int unsigned DEFAULT NULL,
+  `key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `route` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `route_slug` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `label` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `icon` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `svg` text COLLATE utf8mb4_unicode_ci,
+  `order` int NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `params` longtext COLLATE utf8mb4_unicode_ci,
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `badge` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `extension` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bolt_menu` tinyint(1) DEFAULT '0',
+  `bolt_background` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bolt_foreground` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `letter_icon` tinyint(1) DEFAULT '0',
+  `letter_icon_bg` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `custom_menu` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `menus_key_unique` (`key`),
+  KEY `idx_menus_parent_id` (`parent_id`),
+  KEY `idx_menus_parent_id_order` (`parent_id`,`order`),
+  KEY `idx_menus_is_active` (`is_active`)
+) ENGINE=InnoDB AUTO_INCREMENT=305 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `migrations`;
+CREATE TABLE `migrations` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `migration` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch` int NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=416 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `model_has_permissions`;
+CREATE TABLE `model_has_permissions` (
+  `permission_id` bigint unsigned NOT NULL,
+  `model_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_id` bigint unsigned NOT NULL,
+  PRIMARY KEY (`permission_id`,`model_id`,`model_type`),
+  KEY `model_has_permissions_model_id_model_type_index` (`model_id`,`model_type`),
+  CONSTRAINT `model_has_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `model_has_roles`;
+CREATE TABLE `model_has_roles` (
+  `role_id` bigint unsigned NOT NULL,
+  `model_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_id` bigint unsigned NOT NULL,
+  PRIMARY KEY (`role_id`,`model_id`,`model_type`),
+  KEY `model_has_roles_model_id_model_type_index` (`model_id`,`model_type`),
+  CONSTRAINT `model_has_roles_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `notifications`;
+CREATE TABLE `notifications` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `notifiable_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `notifiable_id` bigint unsigned NOT NULL,
+  `data` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `read_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `notifications_notifiable_type_notifiable_id_index` (`notifiable_type`,`notifiable_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `oldgatewayproducts`;
+CREATE TABLE `oldgatewayproducts` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `plan_id` int NOT NULL DEFAULT '0',
+  `plan_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `gateway_code` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `product_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `old_price_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `new_price_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `old_product_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `openai`;
+CREATE TABLE `openai` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint DEFAULT NULL,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  `questions` text COLLATE utf8mb4_unicode_ci,
+  `image` text COLLATE utf8mb4_unicode_ci,
+  `premium` tinyint(1) NOT NULL DEFAULT '0',
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'text',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `prompt` text COLLATE utf8mb4_unicode_ci,
+  `custom_template` tinyint(1) NOT NULL DEFAULT '0',
+  `tone_of_voice` tinyint(1) NOT NULL DEFAULT '0',
+  `color` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `filters` text COLLATE utf8mb4_unicode_ci,
+  `package` text COLLATE utf8mb4_unicode_ci,
+  `access_type` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'regular',
+  PRIMARY KEY (`id`),
+  KEY `openai_access_type_index` (`access_type`),
+  KEY `idx_openai_active_title` (`active`,`title`)
+) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `openai_chat_category`;
+CREATE TABLE `openai_chat_category` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint DEFAULT NULL,
+  `chatbot_id` bigint DEFAULT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `short_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `slug` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `instructions` text COLLATE utf8mb4_unicode_ci,
+  `first_message` text COLLATE utf8mb4_unicode_ci,
+  `role` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `human_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `helps_with` text COLLATE utf8mb4_unicode_ci,
+  `prompt_prefix` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `color` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `chat_completions` text COLLATE utf8mb4_unicode_ci,
+  `plan` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `category` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `assistant` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `openai_filters`;
+CREATE TABLE `openai_filters` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint DEFAULT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `pages`;
+CREATE TABLE `pages` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` tinyint(1) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `titlebar_status` tinyint NOT NULL DEFAULT '1',
+  `is_custom` tinyint(1) NOT NULL DEFAULT '0',
+  `show_on_footer` tinyint NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `password_reset_tokens`;
+CREATE TABLE `password_reset_tokens` (
+  `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `payment_proofs`;
+CREATE TABLE `payment_proofs` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `order_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `plan_id` bigint unsigned NOT NULL,
+  `total_amount` decimal(15,2) DEFAULT NULL,
+  `proof_image` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `payment_proofs_user_id_foreign` (`user_id`),
+  KEY `payment_proofs_plan_id_foreign` (`plan_id`),
+  CONSTRAINT `payment_proofs_plan_id_foreign` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `payment_proofs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `paystack_payment_infos`;
+CREATE TABLE `paystack_payment_infos` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `email` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reference` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `trans` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `message` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `transaction` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `trxref` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `amount` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `currency` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `plan_code` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customer_code` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `other` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `paystack_payment_infos_user_id_foreign` (`user_id`),
+  CONSTRAINT `paystack_payment_infos_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `pdf_data`;
+CREATE TABLE `pdf_data` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `chat_id` int NOT NULL,
+  `content` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `vector` json NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `pebblely`;
+CREATE TABLE `pebblely` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `image` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `permissions`;
+CREATE TABLE `permissions` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `guard_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permissions_name_guard_name_unique` (`name`,`guard_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `personal_access_tokens`;
+CREATE TABLE `personal_access_tokens` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `tokenable_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tokenable_id` bigint unsigned NOT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `abilities` text COLLATE utf8mb4_unicode_ci,
+  `last_used_at` timestamp NULL DEFAULT NULL,
+  `expires_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
+  KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `photo_studios`;
+CREATE TABLE `photo_studios` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint DEFAULT NULL,
+  `photo` text COLLATE utf8mb4_unicode_ci,
+  `payload` text COLLATE utf8mb4_unicode_ci,
+  `credits` int NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `request_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `plans`;
+CREATE TABLE `plans` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price` double NOT NULL DEFAULT '0',
+  `price_tax_included` tinyint(1) DEFAULT '0',
+  `currency` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'USD',
+  `frequency` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'monthly',
+  `is_featured` tinyint(1) NOT NULL DEFAULT '0',
+  `stripe_product_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ai_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `max_tokens` bigint DEFAULT NULL,
+  `can_create_ai_images` tinyint(1) DEFAULT NULL,
+  `plan_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'all',
+  `features` text COLLATE utf8mb4_unicode_ci,
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'subscription',
+  `credit_system_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'separated',
+  `shared_credits_amount` decimal(12,4) NOT NULL DEFAULT '0.0000',
+  `shared_credit_model_overrides` json DEFAULT NULL,
+  `shared_credit_feature_limits` json DEFAULT NULL,
+  `is_team_plan` tinyint(1) NOT NULL DEFAULT '0',
+  `plan_allow_seat` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `trial_days` int NOT NULL DEFAULT '0',
+  `open_ai_items` json DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `plan_ai_tools` json NOT NULL,
+  `plan_features` json NOT NULL,
+  `social_media_agent_limits` json DEFAULT NULL,
+  `social_media_automation_limits` json DEFAULT NULL,
+  `blogpilot_limits` json DEFAULT NULL,
+  `marketing_bot_limits` json DEFAULT NULL,
+  `default_ai_model` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'gpt-3.5-turbo',
+  `ai_models` json DEFAULT NULL,
+  `user_api` tinyint(1) NOT NULL DEFAULT '0',
+  `hidden_url` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `hidden` tinyint(1) NOT NULL DEFAULT '0',
+  `max_subscribe` int DEFAULT NULL,
+  `chatbot_limit` int DEFAULT NULL,
+  `chatbot_channels` json DEFAULT NULL,
+  `chatbot_human_agent` tinyint(1) NOT NULL DEFAULT '1',
+  `last_date` date DEFAULT NULL,
+  `reset_credits_on_renewal` tinyint(1) NOT NULL DEFAULT '0',
+  `multi_model_support` tinyint(1) DEFAULT '0',
+  `voice_call_seconds_limit` int NOT NULL DEFAULT '-1',
+  `phone_call_agent_seconds_limit` int NOT NULL DEFAULT '-1',
+  `ai_chat_pro_connectors` json DEFAULT NULL,
+  `affiliate_status` tinyint(1) NOT NULL DEFAULT '1',
+  `model_council_support` tinyint(1) DEFAULT '0',
+  `deep_research_request_limit` int NOT NULL DEFAULT '5',
+  `ai_agent_workflow_limit` int DEFAULT NULL,
+  `ai_agent_channel_limit` int DEFAULT NULL,
+  `ai_agent_message_limit` int DEFAULT NULL,
+  `ai_agent_memory_limit` int DEFAULT NULL,
+  `video_dubbing_seconds_limit` int NOT NULL DEFAULT '20',
+  `ugc_videos_limit` int NOT NULL DEFAULT '-1',
+  `ai_captions_access` tinyint(1) NOT NULL DEFAULT '1',
+  `ai_captions_minutes` int NOT NULL DEFAULT '30',
+  `ugc_creator_videos_limit` int NOT NULL DEFAULT '-1',
+  `phone_call_agent_follow_up_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `phone_call_agent_outbound_enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `video_agent_seconds_limit` int NOT NULL DEFAULT '-1',
+  `video_agent_videos_limit` int NOT NULL DEFAULT '-1',
+  `auto_edit_videos_seconds_limit` int NOT NULL DEFAULT '-1',
+  `auto_edit_videos_renders_limit` int NOT NULL DEFAULT '-1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `privacy_terms`;
+CREATE TABLE `privacy_terms` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lang` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `content` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `products`;
+CREATE TABLE `products` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` int DEFAULT NULL,
+  `key_features` text COLLATE utf8mb4_unicode_ci,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `company_id` bigint unsigned DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `products_user_id_foreign` (`user_id`),
+  KEY `products_company_id_foreign` (`company_id`),
+  CONSTRAINT `products_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `products_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `prompt_library`;
+CREATE TABLE `prompt_library` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `prompt` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `user_id` int NOT NULL,
+  `show_for_all` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `rate_limits`;
+CREATE TABLE `rate_limits` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `ip_address` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `attempts` int NOT NULL DEFAULT '0',
+  `last_attempt_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'image',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `recent_search_keys`;
+CREATE TABLE `recent_search_keys` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `keyword` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `recent_search_keys_keyword_index` (`keyword`),
+  KEY `recent_search_keys_user_keyword_index` (`user_id`,`keyword`),
+  KEY `recent_search_keys_user_created_index` (`user_id`,`created_at`),
+  CONSTRAINT `recent_search_keys_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `referers`;
+CREATE TABLE `referers` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `session_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `referer` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `domain` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `referers_domain_index` (`domain`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `revenuecat_products`;
+CREATE TABLE `revenuecat_products` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `plan_id` bigint unsigned DEFAULT NULL,
+  `gatewayproduct_id` bigint unsigned DEFAULT NULL,
+  `entitlement_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `package_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `google_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `apple_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `amazon_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `revenuecat_products_plan_id_foreign` (`plan_id`),
+  KEY `revenuecat_products_gatewayproduct_id_foreign` (`gatewayproduct_id`),
+  CONSTRAINT `revenuecat_products_gatewayproduct_id_foreign` FOREIGN KEY (`gatewayproduct_id`) REFERENCES `gatewayproducts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `revenuecat_products_plan_id_foreign` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `role_has_permissions`;
+CREATE TABLE `role_has_permissions` (
+  `permission_id` bigint unsigned NOT NULL,
+  `role_id` bigint unsigned NOT NULL,
+  PRIMARY KEY (`permission_id`,`role_id`),
+  KEY `role_has_permissions_role_id_foreign` (`role_id`),
+  CONSTRAINT `role_has_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `role_has_permissions_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `roles`;
+CREATE TABLE `roles` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `guard_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roles_name_guard_name_unique` (`name`,`guard_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `settings`;
+CREATE TABLE `settings` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `invoice_currency` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `invoice_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `invoice_website` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `invoice_address` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `invoice_city` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `invoice_state` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `invoice_postal` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `invoice_country` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `invoice_phone` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `invoice_vat` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `default_currency` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '2',
+  `tax_rate` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `stripe_active` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
+  `stripe_key` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `stripe_secret` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `stripe_base_url` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'https://api.stripe.com',
+  `bank_transfer_active` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
+  `bank_transfer_instructions` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bank_transfer_informations` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `site_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'MagicAI',
+  `site_url` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'https://liquid-themes.com',
+  `site_email` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `google_analytics_active` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
+  `google_analytics_code` text COLLATE utf8mb4_unicode_ci,
+  `logo` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'magicAI-logo.svg',
+  `favicon` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `meta_title` text COLLATE utf8mb4_unicode_ci,
+  `meta_description` text COLLATE utf8mb4_unicode_ci,
+  `facebook_active` tinyint(1) NOT NULL DEFAULT '0',
+  `facebook_api_key` text COLLATE utf8mb4_unicode_ci,
+  `facebook_api_secret` text COLLATE utf8mb4_unicode_ci,
+  `facebook_redirect_url` text COLLATE utf8mb4_unicode_ci,
+  `github_active` tinyint(1) NOT NULL DEFAULT '0',
+  `github_api_key` text COLLATE utf8mb4_unicode_ci,
+  `github_api_secret` text COLLATE utf8mb4_unicode_ci,
+  `github_redirect_url` text COLLATE utf8mb4_unicode_ci,
+  `google_active` tinyint(1) NOT NULL DEFAULT '0',
+  `google_api_key` text COLLATE utf8mb4_unicode_ci,
+  `google_api_secret` text COLLATE utf8mb4_unicode_ci,
+  `google_redirect_url` text COLLATE utf8mb4_unicode_ci,
+  `twitter_active` tinyint(1) NOT NULL DEFAULT '0',
+  `twitter_api_key` text COLLATE utf8mb4_unicode_ci,
+  `twitter_api_secret` text COLLATE utf8mb4_unicode_ci,
+  `twitter_redirect_url` text COLLATE utf8mb4_unicode_ci,
+  `register_active` tinyint(1) NOT NULL DEFAULT '1',
+  `default_country` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'United States',
+  `smtp_host` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `smtp_port` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `smtp_username` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `smtp_password` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `smtp_email` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `smtp_sender_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `smtp_encryption` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'TLS',
+  `openai_api_secret` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `logo_path` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'assets/img/logo/magicAI-logo.svg',
+  `favicon_path` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `openai_default_model` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'gpt-3.5-turbo',
+  `openai_default_language` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en-US',
+  `openai_default_tone_of_voice` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'professional',
+  `openai_default_creativity` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0.75',
+  `openai_max_input_length` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '300',
+  `openai_max_output_length` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '200',
+  `affiliate_minimum_withdrawal` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '10',
+  `affiliate_commission_percentage` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '10',
+  `frontend_pricing_section` tinyint(1) NOT NULL DEFAULT '1',
+  `frontend_custom_templates_section` tinyint(1) NOT NULL DEFAULT '1',
+  `frontend_business_partners_section` tinyint(1) NOT NULL DEFAULT '1',
+  `frontend_additional_url` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `frontend_custom_js` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `frontend_custom_css` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `frontend_footer_facebook` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `frontend_footer_twitter` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `frontend_footer_instagram` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `script_version` double NOT NULL DEFAULT '10',
+  `logo_collapsed` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'magicAI-logo-Collapsed.png',
+  `logo_collapsed_path` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'assets/img/logo/magicAI-logo-Collapsed.png',
+  `stripe_status_for_now` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'disabled',
+  `logo_dark` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'magicAI-logo-dark.svg',
+  `logo_dashboard` text COLLATE utf8mb4_unicode_ci,
+  `logo_dashboard_dark` text COLLATE utf8mb4_unicode_ci,
+  `logo_collapsed_dark` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'magicAI-logo-collapsed-dark.svg',
+  `logo_2x` text COLLATE utf8mb4_unicode_ci,
+  `logo_dark_2x` text COLLATE utf8mb4_unicode_ci,
+  `logo_dashboard_2x` text COLLATE utf8mb4_unicode_ci,
+  `logo_dashboard_dark_2x` text COLLATE utf8mb4_unicode_ci,
+  `logo_collapsed_2x` text COLLATE utf8mb4_unicode_ci,
+  `logo_collapsed_dark_2x` text COLLATE utf8mb4_unicode_ci,
+  `logo_dark_path` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'assets/img/logo/magicAI-logo-dark.svg',
+  `logo_dashboard_path` text COLLATE utf8mb4_unicode_ci,
+  `logo_dashboard_dark_path` text COLLATE utf8mb4_unicode_ci,
+  `logo_collapsed_dark_path` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'assets/img/logo/magicAI-logo-collapsed-dark.svg',
+  `logo_2x_path` text COLLATE utf8mb4_unicode_ci,
+  `logo_dark_2x_path` text COLLATE utf8mb4_unicode_ci,
+  `logo_dashboard_2x_path` text COLLATE utf8mb4_unicode_ci,
+  `logo_dashboard_dark_2x_path` text COLLATE utf8mb4_unicode_ci,
+  `logo_collapsed_2x_path` text COLLATE utf8mb4_unicode_ci,
+  `logo_collapsed_dark_2x_path` text COLLATE utf8mb4_unicode_ci,
+  `feature_ai_writer` tinyint(1) NOT NULL DEFAULT '1',
+  `feature_ai_image` tinyint(1) NOT NULL DEFAULT '1',
+  `feature_ai_chat` tinyint(1) NOT NULL DEFAULT '1',
+  `feature_ai_code` tinyint(1) NOT NULL DEFAULT '1',
+  `feature_ai_voice_clone` tinyint(1) NOT NULL DEFAULT '0',
+  `feature_ai_speech_to_text` tinyint(1) NOT NULL DEFAULT '1',
+  `feature_affilates` tinyint(1) NOT NULL DEFAULT '1',
+  `logo_sticky` text COLLATE utf8mb4_unicode_ci,
+  `logo_sticky_path` text COLLATE utf8mb4_unicode_ci,
+  `logo_sticky_2x` text COLLATE utf8mb4_unicode_ci,
+  `logo_sticky_2x_path` text COLLATE utf8mb4_unicode_ci,
+  `meta_keywords` text COLLATE utf8mb4_unicode_ci,
+  `gdpr_status` tinyint(1) NOT NULL DEFAULT '0',
+  `gdpr_button` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Accept',
+  `gdpr_content` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'This website uses cookies to improve your web experience.',
+  `menu_options` text COLLATE utf8mb4_unicode_ci,
+  `privacy_enable` tinyint(1) NOT NULL DEFAULT '0',
+  `privacy_enable_login` tinyint(1) NOT NULL DEFAULT '0',
+  `privacy_content` text COLLATE utf8mb4_unicode_ci,
+  `terms_content` text COLLATE utf8mb4_unicode_ci,
+  `login_without_confirmation` tinyint(1) NOT NULL DEFAULT '1',
+  `feature_ai_voiceover` tinyint(1) DEFAULT '1',
+  `gcs_file` text COLLATE utf8mb4_unicode_ci,
+  `gcs_name` text COLLATE utf8mb4_unicode_ci,
+  `frontend_code_before_head` text COLLATE utf8mb4_unicode_ci,
+  `frontend_code_before_body` text COLLATE utf8mb4_unicode_ci,
+  `dashboard_code_before_head` text COLLATE utf8mb4_unicode_ci,
+  `dashboard_code_before_body` text COLLATE utf8mb4_unicode_ci,
+  `feature_ai_article_wizard` tinyint NOT NULL DEFAULT '1',
+  `feature_ai_vision` tinyint NOT NULL DEFAULT '1',
+  `feature_ai_pdf` tinyint NOT NULL DEFAULT '1',
+  `feature_ai_chat_image` tinyint NOT NULL DEFAULT '1',
+  `mobile_payment_active` tinyint(1) NOT NULL DEFAULT '0',
+  `feature_ai_rewriter` tinyint NOT NULL DEFAULT '1',
+  `feature_ai_youtube` tinyint NOT NULL DEFAULT '1',
+  `feature_ai_rss` tinyint NOT NULL DEFAULT '1',
+  `team_functionality` tinyint(1) NOT NULL DEFAULT '0',
+  `feature_ai_advanced_editor` tinyint(1) NOT NULL DEFAULT '1',
+  `user_count` int NOT NULL DEFAULT '0',
+  `free_open_ai_items` json DEFAULT NULL,
+  `user_api_option` tinyint NOT NULL DEFAULT '0',
+  `auth_view_options` text COLLATE utf8mb4_unicode_ci,
+  `tour_seen` tinyint(1) NOT NULL DEFAULT '1',
+  `recaptcha_login` tinyint(1) NOT NULL DEFAULT '0',
+  `recaptcha_register` tinyint(1) NOT NULL DEFAULT '0',
+  `recaptcha_sitekey` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `recaptcha_secretkey` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `login_with_otp` tinyint(1) NOT NULL DEFAULT '0',
+  `synthesia_secret_key` text COLLATE utf8mb4_unicode_ci,
+  `pebblely_key` text COLLATE utf8mb4_unicode_ci,
+  `mrrobot_name` text COLLATE utf8mb4_unicode_ci,
+  `mrrobot_search_words` text COLLATE utf8mb4_unicode_ci,
+  `aimlapi_key` text COLLATE utf8mb4_unicode_ci,
+  `ai_music_model` text COLLATE utf8mb4_unicode_ci,
+  `x_logo` text COLLATE utf8mb4_unicode_ci,
+  `xx_logo` text COLLATE utf8mb4_unicode_ci,
+  `heygen_secret_key` text COLLATE utf8mb4_unicode_ci,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `settings_two`;
+CREATE TABLE `settings_two` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `theme` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'default',
+  `stable_diffusion_api_key` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `stable_diffusion_default_model` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `google_recaptcha_status` tinyint(1) NOT NULL DEFAULT '0',
+  `google_recaptcha_site_key` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `google_recaptcha_secret_key` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `languages` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'en',
+  `languages_default` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
+  `liquid_license_type` text COLLATE utf8mb4_unicode_ci,
+  `liquid_license_domain_key` text COLLATE utf8mb4_unicode_ci,
+  `openai_default_stream_server` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'backend',
+  `ai_image_storage` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'public',
+  `stablediffusion_default_language` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en-US',
+  `stablediffusion_default_model` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'stable-diffusion-xl-1024-v1-0',
+  `unsplash_api_key` text COLLATE utf8mb4_unicode_ci,
+  `dalle` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'gpt-image-2',
+  `daily_limit_enabled` tinyint(1) NOT NULL DEFAULT '0',
+  `allowed_images_count` int NOT NULL DEFAULT '2',
+  `daily_voice_limit_enabled` tinyint(1) NOT NULL DEFAULT '0',
+  `allowed_voice_count` int NOT NULL DEFAULT '1',
+  `serper_api_key` text COLLATE utf8mb4_unicode_ci,
+  `elevenlabs_api_key` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `twilio_account_sid` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `twilio_auth_token` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `feature_tts_google` tinyint(1) NOT NULL DEFAULT '0',
+  `feature_tts_openai` tinyint(1) NOT NULL DEFAULT '1',
+  `feature_tts_elevenlabs` tinyint(1) NOT NULL DEFAULT '0',
+  `fine_tune_list` json DEFAULT NULL,
+  `chatbot_status` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'disabled',
+  `chatbot_template` int DEFAULT NULL,
+  `chatbot_position` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'bottom-left',
+  `chatbot_login_require` tinyint NOT NULL DEFAULT '1',
+  `chatbot_rate_limit` int DEFAULT '10',
+  `feature_ai_video` tinyint(1) NOT NULL DEFAULT '1',
+  `chatbot_show_timestamp` tinyint(1) NOT NULL DEFAULT '0',
+  `stablediffusion_bedrock_model` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'stability.stable-diffusion-xl-v1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `share_links`;
+CREATE TABLE `share_links` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `url` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `category` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `chat` int NOT NULL,
+  `message` int NOT NULL,
+  `time` bigint NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `shared_credit_costs`;
+CREATE TABLE `shared_credit_costs` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `entity_key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `engine_key` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `feature_type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `base_cost` decimal(10,4) NOT NULL,
+  `quality_high_multiplier` decimal(6,2) NOT NULL DEFAULT '1.00',
+  `quality_low_multiplier` decimal(6,2) NOT NULL DEFAULT '1.00',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `shared_credit_costs_entity_key_unique` (`entity_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `shared_credit_transactions`;
+CREATE TABLE `shared_credit_transactions` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `entity_key` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `engine_key` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `feature_type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `action_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `amount` decimal(12,4) NOT NULL,
+  `balance_after` decimal(12,4) NOT NULL,
+  `unit_cost` decimal(10,4) NOT NULL DEFAULT '0.0000',
+  `quantity` decimal(10,4) NOT NULL DEFAULT '0.0000',
+  `quality` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `metadata` json DEFAULT NULL,
+  `description` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `shared_credit_transactions_user_id_created_at_index` (`user_id`,`created_at`),
+  KEY `shared_credit_transactions_user_id_action_type_index` (`user_id`,`action_type`),
+  CONSTRAINT `shared_credit_transactions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `social_media_accounts`;
+CREATE TABLE `social_media_accounts` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subtitle` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `link` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `icon` longtext COLLATE utf8mb4_unicode_ci,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `social_media_accounts_key_unique` (`key`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `subscription_items`;
+CREATE TABLE `subscription_items` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `subscription_id` bigint unsigned NOT NULL,
+  `stripe_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `stripe_product` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `stripe_price` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `quantity` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `subscription_items_subscription_id_stripe_price_unique` (`subscription_id`,`stripe_price`),
+  UNIQUE KEY `subscription_items_stripe_id_unique` (`stripe_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `subscriptions`;
+CREATE TABLE `subscriptions` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `plan_id` bigint unsigned DEFAULT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `stripe_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `stripe_status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `stripe_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `quantity` int DEFAULT NULL,
+  `trial_ends_at` timestamp NULL DEFAULT NULL,
+  `ends_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `paid_with` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'stripe',
+  `tax_rate` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tax_value` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `coupon` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `total_amount` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `auto_renewal` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `subscriptions_stripe_id_unique` (`stripe_id`),
+  KEY `subscriptions_plan_id_foreign` (`plan_id`),
+  KEY `subscriptions_user_id_stripe_status_index` (`user_id`,`stripe_status`),
+  KEY `idx_subscriptions_user_status` (`user_id`,`stripe_status`),
+  CONSTRAINT `subscriptions_plan_id_foreign` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `subscriptions_yokassa`;
+CREATE TABLE `subscriptions_yokassa` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `plan_id` bigint unsigned DEFAULT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payment_method_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subscription_status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `trial_ends_at` timestamp NULL DEFAULT NULL,
+  `ends_at` timestamp NULL DEFAULT NULL,
+  `next_pay_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `tax_rate` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tax_value` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `coupon` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `total_amount` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `auto_renewal` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `subscriptions_yokassa_plan_id_foreign` (`plan_id`),
+  KEY `subscriptions_yokassa_user_id_subscription_status_index` (`user_id`,`subscription_status`),
+  CONSTRAINT `subscriptions_yokassa_plan_id_foreign` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `team_members`;
+CREATE TABLE `team_members` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `team_id` bigint unsigned NOT NULL,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `role` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'member',
+  `email` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'waiting',
+  `is_human_agent` tinyint(1) NOT NULL DEFAULT '0',
+  `allow_unlimited_credits` tinyint(1) NOT NULL DEFAULT '1',
+  `daily_shared_credit_limit` decimal(10,4) DEFAULT NULL,
+  `remaining_images` decimal(15,2) DEFAULT NULL,
+  `remaining_words` decimal(15,2) DEFAULT NULL,
+  `used_image_credit` int NOT NULL DEFAULT '0',
+  `used_word_credit` int NOT NULL DEFAULT '0',
+  `joined_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `team_members_team_id_foreign` (`team_id`),
+  KEY `team_members_user_id_foreign` (`user_id`),
+  CONSTRAINT `team_members_team_id_foreign` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `team_members_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `teams`;
+CREATE TABLE `teams` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `entity_credits` json DEFAULT NULL,
+  `credit_system_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'separated',
+  `shared_credits` decimal(12,4) NOT NULL DEFAULT '0.0000',
+  `user_id` bigint unsigned DEFAULT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `allow_seats` int NOT NULL DEFAULT '0',
+  `used_image_credit` int NOT NULL DEFAULT '0',
+  `word_credit` int NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_teams_user_id` (`user_id`),
+  CONSTRAINT `teams_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `testimonials`;
+CREATE TABLE `testimonials` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `avatar` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'assets/img/auth/default-avatar.png',
+  `full_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `job_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `words` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `tokens`;
+CREATE TABLE `tokens` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'word',
+  `entity_id` bigint unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tokens_entity_id_foreign` (`entity_id`),
+  CONSTRAINT `tokens_entity_id_foreign` FOREIGN KEY (`entity_id`) REFERENCES `entities` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=276 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `usage`;
+CREATE TABLE `usage` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `total_user_count` int unsigned NOT NULL DEFAULT '0',
+  `this_week_user_count` int unsigned NOT NULL DEFAULT '0',
+  `last_week_user_count` int unsigned NOT NULL DEFAULT '0',
+  `total_word_count` int unsigned NOT NULL DEFAULT '0',
+  `this_week_word_count` int unsigned NOT NULL DEFAULT '0',
+  `last_week_word_count` int unsigned NOT NULL DEFAULT '0',
+  `total_image_count` int unsigned NOT NULL DEFAULT '0',
+  `this_week_image_count` int unsigned NOT NULL DEFAULT '0',
+  `last_week_image_count` int unsigned NOT NULL DEFAULT '0',
+  `total_sales` int unsigned NOT NULL DEFAULT '0',
+  `this_week_sales` int unsigned NOT NULL DEFAULT '0',
+  `last_week_sales` int unsigned NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `user_affiliates`;
+CREATE TABLE `user_affiliates` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `amount` double NOT NULL DEFAULT '0',
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Waiting',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_affiliates_user_id_foreign` (`user_id`),
+  CONSTRAINT `user_affiliates_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `user_credits`;
+CREATE TABLE `user_credits` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint DEFAULT NULL,
+  `credits` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `user_docs_favorite`;
+CREATE TABLE `user_docs_favorite` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `user_openai_id` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_docs_favorite_user_id_foreign` (`user_id`),
+  KEY `user_docs_favorite_user_openai_id_foreign` (`user_openai_id`),
+  CONSTRAINT `user_docs_favorite_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `user_docs_favorite_user_openai_id_foreign` FOREIGN KEY (`user_openai_id`) REFERENCES `user_openai` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `user_favorites`;
+CREATE TABLE `user_favorites` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `openai_id` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_favorites_user_id_foreign` (`user_id`),
+  KEY `user_favorites_openai_id_foreign` (`openai_id`),
+  CONSTRAINT `user_favorites_openai_id_foreign` FOREIGN KEY (`openai_id`) REFERENCES `openai` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `user_favorites_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `user_integrations`;
+CREATE TABLE `user_integrations` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `integration_id` int DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `credentials` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `user_openai`;
+CREATE TABLE `user_openai` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `is_demo` tinyint(1) DEFAULT '0',
+  `request_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `team_id` bigint DEFAULT NULL,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `openai_id` bigint unsigned DEFAULT NULL,
+  `input` text COLLATE utf8mb4_unicode_ci,
+  `response` text COLLATE utf8mb4_unicode_ci,
+  `output` text COLLATE utf8mb4_unicode_ci,
+  `hash` text COLLATE utf8mb4_unicode_ci,
+  `credits` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `words` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `slug` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `storage` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `folder_id` bigint unsigned DEFAULT NULL,
+  `payload` json DEFAULT NULL,
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT 'COMPLETED',
+  `engine` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `model` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_openai_openai_id_foreign` (`openai_id`),
+  KEY `user_openai_folder_id_foreign` (`folder_id`),
+  KEY `user_openai_user_id_updated_at_index` (`user_id`,`updated_at` DESC),
+  KEY `idx_user_id_updated_at` (`user_id`,`updated_at`),
+  KEY `idx_user_openai_user_team` (`user_id`,`team_id`),
+  CONSTRAINT `user_openai_folder_id_foreign` FOREIGN KEY (`folder_id`) REFERENCES `folders` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `user_openai_openai_id_foreign` FOREIGN KEY (`openai_id`) REFERENCES `openai` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `user_openai_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `user_openai_chat`;
+CREATE TABLE `user_openai_chat` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `team_id` bigint DEFAULT NULL,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `chat_type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `chatbot_id` bigint DEFAULT NULL,
+  `openai_chat_category_id` bigint unsigned DEFAULT NULL,
+  `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `total_credits` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `total_words` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `is_chatbot` tinyint NOT NULL DEFAULT '0',
+  `website_url` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT '',
+  `reference_url` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `doc_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `thread_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_pinned` tinyint(1) NOT NULL DEFAULT '0',
+  `openai_vector_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `openai_file_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_empty` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  KEY `user_openai_chat_user_id_foreign` (`user_id`),
+  KEY `user_openai_chat_openai_chat_category_id_foreign` (`openai_chat_category_id`),
+  KEY `user_openai_chat_is_empty_index` (`is_empty`),
+  CONSTRAINT `user_openai_chat_openai_chat_category_id_foreign` FOREIGN KEY (`openai_chat_category_id`) REFERENCES `openai_chat_category` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `user_openai_chat_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `user_openai_chat_messages`;
+CREATE TABLE `user_openai_chat_messages` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_openai_chat_id` bigint unsigned DEFAULT NULL,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `input` text COLLATE utf8mb4_unicode_ci,
+  `response` text COLLATE utf8mb4_unicode_ci,
+  `output` text COLLATE utf8mb4_unicode_ci,
+  `hash` text COLLATE utf8mb4_unicode_ci,
+  `credits` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `words` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `images` text COLLATE utf8mb4_unicode_ci,
+  `pdfName` text COLLATE utf8mb4_unicode_ci,
+  `pdfPath` text COLLATE utf8mb4_unicode_ci,
+  `outputImage` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `realtime` tinyint(1) NOT NULL DEFAULT '0',
+  `is_chatbot` tinyint NOT NULL DEFAULT '0',
+  `used_skills` json DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_openai_chat_messages_user_openai_chat_id_foreign` (`user_openai_chat_id`),
+  KEY `user_openai_chat_messages_user_id_foreign` (`user_id`),
+  CONSTRAINT `user_openai_chat_messages_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `user_openai_chat_messages_user_openai_chat_id_foreign` FOREIGN KEY (`user_openai_chat_id`) REFERENCES `user_openai_chat` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `user_orders`;
+CREATE TABLE `user_orders` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `plan_id` bigint unsigned DEFAULT NULL,
+  `payment_type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price` double DEFAULT NULL,
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Waiting',
+  `country` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'United States of America',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'subscription',
+  `affiliate_earnings` double NOT NULL DEFAULT '0',
+  `tax_rate` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tax_value` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payload` json DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_orders_plan_id_foreign` (`plan_id`),
+  KEY `user_orders_user_id_foreign` (`user_id`),
+  CONSTRAINT `user_orders_plan_id_foreign` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `user_orders_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `user_support`;
+CREATE TABLE `user_support` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `subject` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Waiting for answer',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `ticket_id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `priority` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Low',
+  `category` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_support_user_id_foreign` (`user_id`),
+  CONSTRAINT `user_support_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `user_support_messages`;
+CREATE TABLE `user_support_messages` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_support_id` bigint unsigned DEFAULT NULL,
+  `sender` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'user',
+  `message` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `attachment` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_support_messages_user_support_id_foreign` (`user_support_id`),
+  CONSTRAINT `user_support_messages_user_support_id_foreign` FOREIGN KEY (`user_support_id`) REFERENCES `user_support` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `user_uploads`;
+CREATE TABLE `user_uploads` (
+  `id` char(26) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  `disk` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `path` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `original_name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mime_type` varchar(127) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `extension` varchar(16) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `size` bigint unsigned NOT NULL,
+  `sha256` char(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_uploads_user_id_created_at_index` (`user_id`,`created_at`),
+  KEY `user_uploads_sha256_index` (`sha256`),
+  CONSTRAINT `user_uploads_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `user_usage_credits`;
+CREATE TABLE `user_usage_credits` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `model_key` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `credit` int NOT NULL,
+  `unit_price` decimal(8,2) NOT NULL,
+  `total` decimal(10,2) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_usage_credits_user_id_foreign` (`user_id`),
+  CONSTRAINT `user_usage_credits_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE `users` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `entity_credits` json DEFAULT NULL,
+  `credit_system_type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'separated',
+  `shared_credits` decimal(12,4) NOT NULL DEFAULT '0.0000',
+  `coingate_subscriber_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `team_id` bigint unsigned DEFAULT NULL,
+  `team_manager_id` bigint unsigned DEFAULT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `surname` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'user',
+  `password` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `avatar` varchar(1055) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'assets/img/auth/default-avatar.png',
+  `company_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `company_website` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `country` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `address` text COLLATE utf8mb4_unicode_ci,
+  `city` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `state` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `postal` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `remaining_words` decimal(15,2) DEFAULT '0.00',
+  `remaining_images` decimal(15,2) DEFAULT '0.00',
+  `last_seen` date DEFAULT NULL,
+  `github_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `github_token` text COLLATE utf8mb4_unicode_ci,
+  `google_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `google_token` text COLLATE utf8mb4_unicode_ci,
+  `facebook_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `facebook_token` text COLLATE utf8mb4_unicode_ci,
+  `twitter_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `twitter_token` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `google2fa_secret` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `stripe_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `two_checkout_customer_reference` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pm_type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pm_last_four` varchar(4) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `trial_ends_at` timestamp NULL DEFAULT NULL,
+  `affiliate_code` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `affiliate_earnings` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
+  `affiliate_bank_account` text COLLATE utf8mb4_unicode_ci,
+  `affiliate_id` bigint unsigned DEFAULT NULL,
+  `email_confirmation_code` text COLLATE utf8mb4_unicode_ci,
+  `email_confirmed` tinyint(1) NOT NULL DEFAULT '0',
+  `password_reset_code` text COLLATE utf8mb4_unicode_ci,
+  `github_refresh_token` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `google_refresh_token` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `iyzico_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `revenuecat_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `apple_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `apple_token` text COLLATE utf8mb4_unicode_ci,
+  `apple_refresh_token` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `razorpay_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `api_keys` text COLLATE utf8mb4_unicode_ci,
+  `gemini_api_keys` text COLLATE utf8mb4_unicode_ci,
+  `anthropic_api_keys` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT '',
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `defi_setting` text COLLATE utf8mb4_unicode_ci,
+  `affiliate_status` tinyint DEFAULT '1',
+  `tour_seen` tinyint(1) NOT NULL DEFAULT '0',
+  `otp` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dash_notify_seen` tinyint(1) NOT NULL DEFAULT '0',
+  `xai_api_keys` text COLLATE utf8mb4_unicode_ci,
+  `last_activity_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`),
+  KEY `users_stripe_id_index` (`stripe_id`),
+  KEY `users_affiliate_id_foreign` (`affiliate_id`),
+  KEY `users_razorpay_id_index` (`razorpay_id`),
+  KEY `users_last_activity_at_index` (`last_activity_at`),
+  KEY `idx_users_team_id` (`team_id`),
+  KEY `idx_users_team_manager_id` (`team_manager_id`),
+  KEY `idx_users_type` (`type`),
+  KEY `idx_users_last_activity_at` (`last_activity_at`),
+  CONSTRAINT `users_affiliate_id_foreign` FOREIGN KEY (`affiliate_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `users_activity`;
+CREATE TABLE `users_activity` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `email` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `connection` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `webhookhistory`;
+CREATE TABLE `webhookhistory` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `gatewaycode` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `webhook_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `create_time` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `resource_type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `event_type` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `summary` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `resource_id` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `resource_state` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `parent_payment` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `amount_total` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `amount_currency` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `incoming_json` text COLLATE utf8mb4_unicode_ci,
+  `status` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `ads` (`id`, `type`, `code`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'landing-header-section', '', 0, '2023-08-30 13:10:37', '2023-08-30 13:10:37'),
@@ -79,25 +2122,6 @@ INSERT INTO `ads` (`id`, `type`, `code`, `status`, `created_at`, `updated_at`) V
 (7, 'landing-pricing-section-728x90', '', 0, '2023-08-30 13:10:37', '2023-08-30 13:10:37'),
 (8, 'landing-faq-section-728x90', '', 0, '2023-08-30 13:10:37', '2023-08-30 13:10:37');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `advanced_features_section`
---
-
-CREATE TABLE `advanced_features_section` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(191) NOT NULL,
-  `description` text NOT NULL,
-  `image` varchar(191) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `advanced_features_section`
---
-
 INSERT INTO `advanced_features_section` (`id`, `title`, `description`, `image`, `created_at`, `updated_at`) VALUES
 (1, 'Article Wizard', 'Create a social media post and schedule it to be published directly on Linkedin or X.', '/themes/default/assets/landing-page/advanced-feature-1.png', NULL, NULL),
 (2, 'Intelligent AI Assistant', 'Create a social media post and schedule it to be published directly on Linkedin or X.', '/themes/default/assets/landing-page/advanced-feature-1.png', NULL, NULL),
@@ -106,283 +2130,18 @@ INSERT INTO `advanced_features_section` (`id`, `title`, `description`, `image`, 
 (5, 'Real-Time Data', 'Create a social media post and schedule it to be published directly on Linkedin or X.', '/themes/default/assets/landing-page/advanced-feature-1.png', NULL, NULL),
 (6, 'AI Photo Editor', 'Create a social media post and schedule it to be published directly on Linkedin or X.', '/themes/default/assets/landing-page/advanced-feature-1.png', NULL, NULL);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `advertis`
---
-
-CREATE TABLE `advertis` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `key` varchar(191) NOT NULL,
-  `title` varchar(191) NOT NULL,
-  `tracking_code` longtext DEFAULT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ai_chat_model_plans`
---
-
-CREATE TABLE `ai_chat_model_plans` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `plan_id` int(11) NOT NULL,
-  `entity_id` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `app_settings`
---
-
-CREATE TABLE `app_settings` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `key` varchar(191) NOT NULL,
-  `value` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `app_settings`
---
-
 INSERT INTO `app_settings` (`id`, `key`, `value`) VALUES
 (1, 'frontend_additional_url_type', 'default'),
 (2, 'front_theme', 'default'),
 (3, 'dash_theme', 'default');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `article_wizard`
---
-
-CREATE TABLE `article_wizard` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `keywords` text NOT NULL,
-  `extra_keywords` text NOT NULL,
-  `topic_keywords` text NOT NULL,
-  `title` text NOT NULL,
-  `extra_titles` text NOT NULL,
-  `topic_title` text NOT NULL,
-  `language` varchar(191) NOT NULL DEFAULT '',
-  `tone` varchar(191) NOT NULL DEFAULT '',
-  `image_style` varchar(191) NOT NULL DEFAULT '',
-  `image_count` int(11) NOT NULL DEFAULT 0,
-  `outline` text NOT NULL,
-  `extra_outlines` text NOT NULL,
-  `topic_outline` text NOT NULL,
-  `current_step` int(11) NOT NULL DEFAULT 0,
-  `result` text NOT NULL,
-  `image` text NOT NULL,
-  `extra_images` text NOT NULL,
-  `topic_image` text NOT NULL,
-  `generated_count` int(11) NOT NULL DEFAULT 0,
-  `creativity` double(8,2) NOT NULL DEFAULT 0.50,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `bad_words`
---
-
-CREATE TABLE `bad_words` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `words` varchar(191) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `banner_bottom_texts`
---
-
-CREATE TABLE `banner_bottom_texts` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `text` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `banner_bottom_texts`
---
 
 INSERT INTO `banner_bottom_texts` (`id`, `text`, `created_at`, `updated_at`) VALUES
 (1, 'No Credit Card Required', NULL, NULL),
 (2, 'Free Trial', NULL, NULL),
 (3, '30 Day Money Back Guarentee', NULL, NULL);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `blogs`
---
-
-CREATE TABLE `blogs` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(191) NOT NULL,
-  `content` text NOT NULL,
-  `feature_image` varchar(191) DEFAULT NULL,
-  `slug` varchar(191) NOT NULL,
-  `seo_title` varchar(191) DEFAULT NULL,
-  `seo_description` text DEFAULT NULL,
-  `category` text DEFAULT NULL,
-  `tag` text DEFAULT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT 1,
-  `user_id` int(11) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `cache`
---
-
-CREATE TABLE `cache` (
-  `key` varchar(191) NOT NULL,
-  `value` mediumtext NOT NULL,
-  `expiration` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `cache_locks`
---
-
-CREATE TABLE `cache_locks` (
-  `key` varchar(191) NOT NULL,
-  `owner` varchar(191) NOT NULL,
-  `expiration` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `chatbot`
---
-
-CREATE TABLE `chatbot` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) DEFAULT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `role` varchar(191) DEFAULT NULL,
-  `model` varchar(191) DEFAULT NULL,
-  `first_message` varchar(191) DEFAULT NULL,
-  `instructions` text DEFAULT NULL,
-  `chatbot_interests` text DEFAULT NULL,
-  `image` varchar(191) DEFAULT NULL,
-  `color` varchar(191) DEFAULT NULL,
-  `width` varchar(191) DEFAULT NULL,
-  `height` varchar(191) DEFAULT NULL,
-  `status` varchar(191) DEFAULT 'not-trained',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `chatbot`
---
-
 INSERT INTO `chatbot` (`id`, `user_id`, `title`, `role`, `model`, `first_message`, `instructions`, `chatbot_interests`, `image`, `color`, `width`, `height`, `status`, `created_at`, `updated_at`) VALUES
 (1, NULL, 'Default', 'Support', 'gpt-3.5-turbo-16k', 'I am AI Assistant. How can I help you?', 'Your name is John Doe. Remember that you are an assistant who only gives information about wordpress and don\'t give any other information.', NULL, NULL, NULL, NULL, NULL, 'not-trained', NULL, NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `chatbot_data`
---
-
-CREATE TABLE `chatbot_data` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `chatbot_id` bigint(20) DEFAULT NULL,
-  `content` longtext DEFAULT NULL,
-  `type` varchar(191) DEFAULT NULL,
-  `type_value` varchar(191) DEFAULT NULL,
-  `path` varchar(191) DEFAULT NULL,
-  `status` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `chatbot_data_vectors`
---
-
-CREATE TABLE `chatbot_data_vectors` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `chatbot_id` bigint(20) DEFAULT NULL,
-  `chatbot_data_id` bigint(20) DEFAULT NULL,
-  `content` longtext DEFAULT NULL,
-  `embedding` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`embedding`)),
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `chatbot_history`
---
-
-CREATE TABLE `chatbot_history` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `ip` varchar(191) DEFAULT NULL,
-  `user_openai_chat_id` int(11) DEFAULT NULL,
-  `openai_chat_category_id` int(11) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `chat_category`
---
-
-CREATE TABLE `chat_category` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) DEFAULT NULL,
-  `name` varchar(191) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `clients`
---
-
-CREATE TABLE `clients` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `avatar` varchar(191) NOT NULL DEFAULT 'assets/img/auth/default-avatar.png',
-  `alt` varchar(191) DEFAULT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `clients`
---
 
 INSERT INTO `clients` (`id`, `avatar`, `alt`, `title`, `created_at`, `updated_at`) VALUES
 (1, '1c.svg', 'Envato', 'Envato', '2023-06-02 17:09:35', '2023-06-02 17:09:35'),
@@ -390,48 +2149,6 @@ INSERT INTO `clients` (`id`, `avatar`, `alt`, `title`, `created_at`, `updated_at
 (3, '4c.svg', 'Envato', 'Envato', '2023-06-02 17:09:35', '2023-06-02 17:09:35'),
 (4, '5c.svg', 'Envato', 'Envato', '2023-06-02 17:09:35', '2023-06-02 17:09:35'),
 (5, '6c.svg', 'Envato', 'Envato', '2023-06-02 17:09:35', '2023-06-02 17:09:35');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `companies`
---
-
-CREATE TABLE `companies` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(191) DEFAULT NULL,
-  `industry` text DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `target_audience` text DEFAULT NULL,
-  `website` varchar(191) DEFAULT NULL,
-  `tagline` varchar(191) DEFAULT NULL,
-  `logo` varchar(191) DEFAULT NULL,
-  `brand_color` varchar(191) DEFAULT NULL,
-  `specific_instructions` text DEFAULT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `tone_of_voice` varchar(191) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `comparison_section_items`
---
-
-CREATE TABLE `comparison_section_items` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `label` varchar(191) NOT NULL,
-  `others` tinyint(1) NOT NULL DEFAULT 0,
-  `ours` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `comparison_section_items`
---
 
 INSERT INTO `comparison_section_items` (`id`, `label`, `others`, `ours`, `created_at`, `updated_at`) VALUES
 (1, 'Multiple AI Tools', 0, 1, NULL, NULL),
@@ -441,61 +2158,6 @@ INSERT INTO `comparison_section_items` (`id`, `label`, `others`, `ours`, `create
 (5, 'Intelligent AI Assistant', 0, 1, NULL, NULL),
 (6, 'PrePaid', 0, 1, NULL, NULL),
 (7, 'Lifetime Access', 0, 1, NULL, NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `coupons`
---
-
-CREATE TABLE `coupons` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(191) NOT NULL,
-  `code` varchar(191) NOT NULL,
-  `discount` decimal(5,2) NOT NULL,
-  `is_offer` tinyint(1) NOT NULL DEFAULT 0,
-  `is_offer_fixed_price` tinyint(1) NOT NULL DEFAULT 0,
-  `limit` int(11) DEFAULT NULL,
-  `duration` varchar(191) DEFAULT 'once',
-  `created_by` bigint(20) UNSIGNED NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `offer_id` varchar(191) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `coupon_users`
---
-
-CREATE TABLE `coupon_users` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `coupon_id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `currencies`
---
-
-CREATE TABLE `currencies` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `country` varchar(191) DEFAULT NULL,
-  `currency` varchar(191) DEFAULT NULL,
-  `code` varchar(191) DEFAULT NULL,
-  `symbol` varchar(191) DEFAULT NULL,
-  `thousand_separator` varchar(191) DEFAULT NULL,
-  `decimal_separator` varchar(191) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `currencies`
---
 
 INSERT INTO `currencies` (`id`, `country`, `currency`, `code`, `symbol`, `thousand_separator`, `decimal_separator`) VALUES
 (1, 'Albania', 'Leke', 'ALL', 'Lek', ',', '.'),
@@ -631,529 +2293,345 @@ INSERT INTO `currencies` (`id`, `country`, `currency`, `code`, `symbol`, `thousa
 (131, 'Zimbabwe', 'Zimbabwe Dollars', 'ZWD', 'Z$', ',', '.'),
 (132, 'West African CFA franc', 'Francs', 'XOF', 'CFA', ',', '.');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `customsettings`
---
-
-CREATE TABLE `customsettings` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `key` varchar(191) NOT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `value_str` varchar(191) DEFAULT NULL,
-  `value_text` text DEFAULT NULL,
-  `value_longtext` longtext DEFAULT NULL,
-  `value_html` text DEFAULT NULL,
-  `value_int` int(11) NOT NULL DEFAULT 0,
-  `value_bigint` bigint(20) DEFAULT NULL,
-  `value_ubigint` bigint(20) UNSIGNED DEFAULT NULL,
-  `value_double` double NOT NULL DEFAULT 0,
-  `value_bool` tinyint(1) NOT NULL DEFAULT 0,
-  `value_date` date DEFAULT NULL,
-  `value_timestamp` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `custom_biling_plans`
---
-
-CREATE TABLE `custom_biling_plans` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `gateway` varchar(191) DEFAULT NULL,
-  `plan_id` varchar(191) DEFAULT NULL,
-  `main_plan_price_id` varchar(191) DEFAULT NULL,
-  `custom_plan_price_id` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `dashboard_widgets`
---
-
-CREATE TABLE `dashboard_widgets` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `enabled` tinyint(1) NOT NULL DEFAULT 1,
-  `order` int(11) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `dashboard_widgets`
---
+INSERT INTO `customsettings` (`id`, `key`, `title`, `value_str`, `value_text`, `value_longtext`, `value_html`, `value_int`, `value_bigint`, `value_ubigint`, `value_double`, `value_bool`, `value_date`, `value_timestamp`, `created_at`, `updated_at`) VALUES
+(1, 'howitworks_bottomline', 'Used in How it Works section bottom line. Controls visibility and HTML value of line.', NULL, NULL, NULL, 'Want to see? <a class=\"text-[#FCA7FF]\" href=\"https://codecanyon.net/item/magicai-openai-content-text-image-chat-code-generator-as-saas/45408109\">Join Magic</a>', 1, NULL, NULL, 0, 0, NULL, NULL, '2026-10-07 12:35:37', '2026-10-07 12:35:37');
 
 INSERT INTO `dashboard_widgets` (`id`, `name`, `enabled`, `order`, `created_at`, `updated_at`) VALUES
-(1, 'premium-advantages', 1, 0, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(2, 'what-is-new', 1, 1, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(3, 'usage-overview', 1, 2, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(4, 'finance', 1, 3, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(5, 'revenue-source', 1, 4, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(6, 'api-cost-distribution', 1, 5, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(7, 'top-countries', 1, 6, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(8, 'cost-management', 1, 7, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(9, 'new-customers', 1, 8, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(10, 'recent-transactions', 1, 9, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(11, 'users-and-platform', 1, 10, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(12, 'user-traffic', 1, 11, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(13, 'popular-ai-tools', 1, 12, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(14, 'generated-content', 1, 13, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(15, 'users', 1, 14, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(16, 'user-client', 1, 15, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(17, 'recent-activity', 1, 16, '2026-05-22 12:53:17', '2026-05-22 12:53:17'),
-(18, 'system-status', 1, 17, '2026-05-22 12:53:17', '2026-05-22 12:53:17');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `domains`
---
-
-CREATE TABLE `domains` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `uuid` char(36) NOT NULL,
-  `domain` varchar(191) NOT NULL,
-  `app_key` char(36) NOT NULL,
-  `chatbot_id` bigint(20) UNSIGNED NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `elevenlab_voices`
---
-
-CREATE TABLE `elevenlab_voices` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) DEFAULT NULL,
-  `name` varchar(191) NOT NULL,
-  `voice_id` varchar(191) DEFAULT NULL,
-  `language` varchar(16) DEFAULT NULL,
-  `path` varchar(191) DEFAULT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `email_templates`
---
-
-CREATE TABLE `email_templates` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `system` tinyint(1) NOT NULL DEFAULT 1,
-  `title` varchar(191) NOT NULL,
-  `subject` varchar(191) NOT NULL,
-  `content` text NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `slug` varchar(191) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `email_templates`
---
+(1, 'premium-advantages', 1, 0, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(2, 'what-is-new', 1, 1, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(3, 'usage-overview', 1, 2, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(4, 'finance', 1, 3, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(5, 'revenue-source', 1, 4, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(6, 'api-cost-distribution', 1, 5, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(7, 'top-countries', 1, 6, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(8, 'cost-management', 1, 7, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(9, 'new-customers', 1, 8, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(10, 'recent-transactions', 1, 9, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(11, 'users-and-platform', 1, 10, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(12, 'user-traffic', 1, 11, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(13, 'popular-ai-tools', 1, 12, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(14, 'generated-content', 1, 13, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(15, 'users', 1, 14, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(16, 'user-client', 1, 15, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(17, 'recent-activity', 1, 16, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(18, 'system-status', 1, 17, '2026-10-07 12:35:26', '2026-10-07 12:35:26');
 
 INSERT INTO `email_templates` (`id`, `system`, `title`, `subject`, `content`, `created_at`, `updated_at`, `slug`) VALUES
 (1, 1, 'Successful Subscription', 'Successful Subscription Email', '<div style=\"padding: 0 19px\">\r\n    <h1>Hello, {user_name}!</h1>\r\n    <h2>You have successfully subscribed to {site_name}!</h2>\r\n\r\n    <p>Thank you for subscribing to our {plan_name} plan. Your subscription is now active.</p>\r\n      <p>Thank you for choosing {site_name}.</p>\r\n    <p>Click <a href=\"{login_url}\">here</a> to login to your account.</p>\r\n    <p>Click <a href=\"{site_url}\">here</a> to visit our site.</p>\r\n</div>\r\n\r\n<br>\r\n\r\n<a href=\"{login_url}\" class=\"btn btn-lg btn-block btn-round\">\r\n    Login to Your Account\r\n</a>\r\n\r\n<p class=\"need-help-p\">Need help? <a href=\"{site_url}\">Contact us.</a></p>', NULL, NULL, 'subscription-successful'),
 (2, 1, 'Successful Payment', 'Successful Payment Email', '<div style=\"padding: 0 19px\">\r\n    <h1>Hello, {user_name}!</h1>\r\n    <h2>Your payment was successful!</h2>\r\n\r\n    <p>Thank you for your payment. Your payment has been successfully processed for our {plan_name} plan.</p>\r\n    <ul>\r\n    <p>Thank you for choosing {site_name}.</p>\r\n    <p>Click <a href=\"{login_url}\">here</a> to login to your account.</p>\r\n    <p>Click <a href=\"{site_url}\">here</a> to visit our site.</p>\r\n</div>\r\n\r\n<br>\r\n\r\n<a href=\"{login_url}\" class=\"btn btn-lg btn-block btn-round\">\r\n    Login to Your Account\r\n</a>\r\n\r\n<p class=\"need-help-p\">Need help? <a href=\"{site_url}\">Contact us.</a></p>', NULL, NULL, 'payment-successful');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `engines`
---
-
-CREATE TABLE `engines` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `key` varchar(191) NOT NULL,
-  `status` varchar(191) NOT NULL DEFAULT 'enabled',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `engines`
---
-
 INSERT INTO `engines` (`id`, `key`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'openai', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(2, 'piapi', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(3, 'deep_seek', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(4, 'stable_diffusion', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(5, 'anthropic', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(6, 'gemini', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(7, 'unsplash', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(8, 'pexels', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(9, 'pixabay', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(10, 'elevenlabs', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(11, 'google', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(12, 'azure', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(13, 'speechify', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(14, 'serper', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(15, 'perplexity', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(16, 'clipdrop', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(17, 'novita', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(18, 'freepik', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(19, 'plagiarism_check', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(20, 'synthesia', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(21, 'heygen', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(22, 'pebblely', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(23, 'fal_ai', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(24, 'gamma_ai', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(25, 'x_ai', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(26, 'minimax', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(27, 'open_router', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(28, 'together', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(29, 'creatify', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(30, 'topview', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(31, 'vizard', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10'),
-(32, 'klap', 'enabled', '2026-05-22 12:53:10', '2026-05-22 12:53:10');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `entities`
---
-
-CREATE TABLE `entities` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `key` varchar(191) NOT NULL,
-  `title` varchar(191) NOT NULL,
-  `image` varchar(191) DEFAULT NULL,
-  `engine` varchar(191) NOT NULL DEFAULT 'openai',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `selected_title` varchar(191) DEFAULT NULL,
-  `is_selected` tinyint(1) NOT NULL DEFAULT 0,
-  `status` varchar(191) NOT NULL DEFAULT 'enabled',
-  `effort` varchar(191) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `entities`
---
+(1, 'openai', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(2, 'piapi', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(3, 'deep_seek', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(4, 'stable_diffusion', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(5, 'anthropic', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(6, 'gemini', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(7, 'unsplash', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(8, 'pexels', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(9, 'pixabay', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(10, 'elevenlabs', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(11, 'google', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(12, 'azure', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(13, 'speechify', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(14, 'serper', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(15, 'perplexity', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(16, 'clipdrop', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(17, 'novita', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(18, 'freepik', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(19, 'plagiarism_check', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(20, 'synthesia', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(21, 'heygen', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(22, 'pebblely', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(23, 'fal_ai', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(24, 'gamma_ai', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(25, 'x_ai', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(26, 'minimax', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(27, 'open_router', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(28, 'together', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(29, 'creatify', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(30, 'topview', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(31, 'vizard', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(32, 'klap', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(33, 'captions', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(34, 'rendley', 'enabled', '2026-10-07 12:35:19', '2026-10-07 12:35:19');
 
 INSERT INTO `entities` (`id`, `key`, `title`, `image`, `engine`, `created_at`, `updated_at`, `selected_title`, `is_selected`, `status`, `effort`) VALUES
-(1, 'claude-sonnet-4-5-20250929', 'Claude Sonnet 4.5', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude Sonnet 4.5', 0, 'enabled', NULL),
-(2, 'claude-sonnet-4-6', 'Claude Sonnet 4.6', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude Sonnet 4.6', 0, 'enabled', NULL),
-(3, 'claude-sonnet-4-20250514', 'Claude Sonnet 4', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude Sonnet 4', 0, 'enabled', NULL),
-(4, 'claude-3-7-sonnet-20250219', 'Claude 3.7 Sonnet', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude 3.7 Sonnet', 0, 'enabled', NULL),
-(5, 'claude-3-5-sonnet-20241022', 'Claude 3.5 Sonnet V2', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude 3.5 Sonnet V2', 0, 'enabled', NULL),
-(6, 'claude-3-5-sonnet-20240620', 'Claude 3.5 Sonnet', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude 3.5 Sonnet', 0, 'enabled', NULL),
-(7, 'claude-3-sonnet-20240229', 'Claude 3 Sonnet', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude 3 Sonnet', 0, 'enabled', NULL),
-(8, 'claude-opus-4-7', 'Claude Opus 4.7', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude Opus 4.7', 0, 'enabled', NULL),
-(9, 'claude-opus-4-6', 'Claude Opus 4.6', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude Opus 4.6', 0, 'enabled', NULL),
-(10, 'claude-opus-4-5-20251101', 'Claude Opus 4.5', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude Opus 4.5', 0, 'enabled', NULL),
-(11, 'claude-opus-4-1-20250805', 'Claude Opus 4.1', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude Opus 4.1', 0, 'enabled', NULL),
-(12, 'claude-opus-4-20250514', 'Claude Opus 4', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude Opus 4', 0, 'enabled', NULL),
-(13, 'claude-3-opus-20240229', 'Claude 3 Opus', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude 3 Opus', 0, 'enabled', NULL),
-(14, 'claude-3-haiku-20241022', 'Claude 3.5 Haiku', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude 3.5 Haiku', 0, 'enabled', NULL),
-(15, 'claude-3-haiku-20240307', 'Claude 3 Haiku', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude 3 Haiku', 0, 'enabled', NULL),
-(16, 'claude-2.1', 'Claude 2.1', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude 2.1', 0, 'enabled', NULL),
-(17, 'claude-2.0', 'Claude 2', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Claude 2', 0, 'enabled', NULL),
-(18, 'voyage-2', 'Voyage 2', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Voyage 2', 0, 'enabled', NULL),
-(19, 'voyage-large-2', 'Voyage Large 2', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Voyage Large 2', 0, 'enabled', NULL),
-(20, 'voyage-code-2', 'Voyage Code 2', NULL, 'anthropic', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Voyage Code 2', 0, 'enabled', NULL),
-(21, 'davinci-002', 'Davinci 002 (Expensive &amp; Capable)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Davinci 002 (Expensive &amp; Capable)', 0, 'enabled', NULL),
-(22, 'text-davinci-003', 'Davinci 003 (Expensive &amp; Capable)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'Davinci 003 (Expensive &amp; Capable)', 0, 'enabled', NULL),
-(23, 'gpt-3.5-turbo', 'GPT 3.5-turbo (Most Expensive & Fastest & Most Capable)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT 3.5-turbo (Most Expensive & Fastest & Most Capable)', 0, 'enabled', NULL),
-(24, 'gpt-3.5-turbo-0125', 'GTP 3.5-turbo-0125 (Updated Knowleddge cutoff of Sep 2021, 16k)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GTP 3.5-turbo-0125 (Updated Knowleddge cutoff of Sep 2021, 16k)', 0, 'enabled', NULL),
-(25, 'gpt-3.5-turbo-1106', 'GTP 3.5-turbo-1106 (Updated Knowleddge cutoff of Nov 2021, 16k)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GTP 3.5-turbo-1106 (Updated Knowleddge cutoff of Nov 2021, 16k)', 0, 'enabled', NULL),
-(26, 'gpt-4', 'GPT-4 (Most Expensive & Fastest & Most Capable)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-4 (Most Expensive & Fastest & Most Capable)', 0, 'enabled', NULL),
-(27, 'gpt-4-turbo', 'GPT-4 Turbo (Most Expensive & Fastest & Most Capable)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-4 Turbo (Most Expensive & Fastest & Most Capable)', 0, 'enabled', NULL),
-(28, 'gpt-4-1106-preview', 'GPT-4-1106 Turbo (Updated Knowleddge cutoff of April 2023, 128k)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-4-1106 Turbo (Updated Knowleddge cutoff of April 2023, 128k)', 0, 'enabled', NULL),
-(29, 'gpt-4-0125-preview', 'GPT-4-0125 Turbo (Updated Knowleddge cutoff of Dec 2023, 128k)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-4-0125 Turbo (Updated Knowleddge cutoff of Dec 2023, 128k)', 0, 'enabled', NULL),
-(30, 'gpt-4o', 'GPT-4o Most advanced works for Vision, multimodal flagship model that’s cheaper and faster than GPT-4 Turbo.  (Updated Knowleddge cutoff of Oct 2023, 128k)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-4o Most advanced works for Vision, multimodal flagship model that’s cheaper and faster than GPT-4 Turbo.  (Updated Knowleddge cutoff of Oct 2023, 128k)', 0, 'enabled', NULL),
-(31, 'gpt-4o-mini', 'GPT-4o mini Our affordable and intelligent small model for fast, lightweight tasks. GPT-4o mini is cheaper and more capable than GPT-3.5 Turbo.', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-4o mini Our affordable and intelligent small model for fast, lightweight tasks. GPT-4o mini is cheaper and more capable than GPT-3.5 Turbo.', 0, 'enabled', NULL),
-(32, 'gpt-4o-search-preview', 'GPT-4o Search Preview', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-4o Search Preview', 0, 'enabled', NULL),
-(33, 'gpt-4o-mini-search-preview', 'GPT-4o Mini Search Preview', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-4o Mini Search Preview', 0, 'enabled', NULL),
-(34, 'o1-preview', 'GPT o1-preview (Updated Knowledge cutoff of Dec 2023, 128k)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT o1-preview (Updated Knowledge cutoff of Dec 2023, 128k)', 0, 'enabled', NULL),
-(35, 'o1-mini', 'GPT o1-mini (Updated Knowledge cutoff of Dec 2023, 128k)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT o1-mini (Updated Knowledge cutoff of Dec 2023, 128k)', 0, 'enabled', NULL),
-(36, 'o1', 'GPT o1 (Updated Knowledge cutoff of Dec 2023, 128k)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT o1 (Updated Knowledge cutoff of Dec 2023, 128k)', 0, 'enabled', NULL),
-(37, 'o3-mini', 'GPT o3-mini (Updated Knowledge cutoff of October 2023, 200k)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT o3-mini (Updated Knowledge cutoff of October 2023, 200k)', 0, 'enabled', NULL),
-(38, 'gpt-4o-realtime-preview-2024-12-17', 'GPT-4o Realtime Preview (Updated Knowledge cutoff of December 2024, 128k)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-4o Realtime Preview (Updated Knowledge cutoff of December 2024, 128k)', 0, 'enabled', NULL),
-(39, 'gpt-4.1', 'GPT-4.1 (Jun 01, 2024 knowledge cutoff, 32k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-4.1 (Jun 01, 2024 knowledge cutoff, 32k max output tokens.)', 0, 'enabled', NULL),
-(40, 'gpt-4.1-mini', 'GPT-4.1 Mini (Jun 01, 2024 knowledge cutoff, 32k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-4.1 Mini (Jun 01, 2024 knowledge cutoff, 32k max output tokens.)', 0, 'enabled', NULL),
-(41, 'gpt-4.1-nano', 'GPT-4.1 Nano (Jun 01, 2024 knowledge cutoff, 32k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-4.1 Nano (Jun 01, 2024 knowledge cutoff, 32k max output tokens.)', 0, 'enabled', NULL),
-(42, 'o4-mini', 'GPT o4-mini (Jun 01, 2024 knowledge cutoff, 100k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT o4-mini (Jun 01, 2024 knowledge cutoff, 100k max output tokens.)', 0, 'enabled', NULL),
-(43, 'o3', 'GPT o3 (Jun 01, 2024 knowledge cutoff, 100k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT o3 (Jun 01, 2024 knowledge cutoff, 100k max output tokens.)', 0, 'enabled', NULL),
-(44, 'gpt-5', 'GPT-5 (Oct 01, 2024 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-5 (Oct 01, 2024 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
-(45, 'gpt-5-mini', 'GPT-5 Mini (May 31, 2024 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-5 Mini (May 31, 2024 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
-(46, 'gpt-5-nano', 'GPT-5 Nano (May 31, 2024 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-5 Nano (May 31, 2024 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
-(47, 'gpt-5-chat-latest', 'GPT-5 Chat (Sep 30, 2024 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-5 Chat (Sep 30, 2024 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
-(48, 'gpt-5-pro', 'GPT-5 Pro (Sep 30, 2024 knowledge cutoff, 272k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-5 Pro (Sep 30, 2024 knowledge cutoff, 272k max output tokens.)', 0, 'enabled', NULL),
-(49, 'gpt-5.1', 'GPT-5.1 (Sep 30, 2024 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-5.1 (Sep 30, 2024 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
-(50, 'gpt-5.1-chat-latest', 'GPT-5.1 Chat (Sep 30, 2024 knowledge cutoff, 16k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:09', '2026-05-22 12:53:16', 'GPT-5.1 Chat (Sep 30, 2024 knowledge cutoff, 16k max output tokens.)', 0, 'enabled', NULL),
-(51, 'gpt-5.2', 'GPT-5.2 (Aug 31, 2025 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'GPT-5.2 (Aug 31, 2025 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
-(52, 'gpt-5.2-pro', 'GPT-5.2 Pro (Aug 31, 2025 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'GPT-5.2 Pro (Aug 31, 2025 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
-(53, 'gpt-5.3-chat-latest', 'GPT-5.3 Instant (Aug 31, 2025 knowledge cutoff, 16k max output tokens.)', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'GPT-5.3 Instant (Aug 31, 2025 knowledge cutoff, 16k max output tokens.)', 0, 'enabled', NULL),
-(54, 'gpt-5.4', 'GPT-5.4 (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'GPT-5.4 (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', 0, 'enabled', NULL),
-(55, 'gpt-5.4-mini', 'GPT-5.4 Mini (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'GPT-5.4 Mini (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', 0, 'enabled', NULL),
-(56, 'gpt-5.4-nano', 'GPT-5.4 Nano (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'GPT-5.4 Nano (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', 0, 'enabled', NULL),
-(57, 'gpt-5.5', 'GPT-5.5 (Dec 01, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'GPT-5.5 (Dec 01, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', 0, 'enabled', NULL),
-(58, 'o3-deep-research', 'o3 Deep Research (Multi-step web research with detailed reports)', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'o3 Deep Research (Multi-step web research with detailed reports)', 0, 'enabled', NULL),
-(59, 'o4-mini-deep-research', 'o4-mini Deep Research (Fast multi-step web research with reports)', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'o4-mini Deep Research (Fast multi-step web research with reports)', 0, 'enabled', NULL),
-(60, 'sora-2', 'Sora 2 (Flagship video generation with synced audio)', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Sora 2 (Flagship video generation with synced audio)', 0, 'enabled', NULL),
-(61, 'sora-2-pro', 'Sora 2 Pro (Most advanced synced-audio video generation)', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Sora 2 Pro (Most advanced synced-audio video generation)', 0, 'enabled', NULL),
-(62, 'text-embedding-ada-002', 'Text Embedding Ada (Expensive &amp; Capable)', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Text Embedding Ada (Expensive &amp; Capable)', 0, 'enabled', NULL),
-(63, 'text-embedding-3-small', 'Text Embedding Small', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Text Embedding Small', 0, 'enabled', NULL),
-(64, 'text-embedding-3-large', 'Text Embedding Large', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Text Embedding Large', 0, 'enabled', NULL),
-(65, 'image-to-video', 'AI Video', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'AI Video', 0, 'enabled', NULL),
-(66, 'stable-diffusion-xl-1024-v1-0', 'Stable Diffusion XL 1.0', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Stable Diffusion XL 1.0', 0, 'enabled', NULL),
-(67, 'stable-diffusion-v1-6', 'Stable Diffusion 1.6', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Stable Diffusion 1.6', 0, 'enabled', NULL),
-(68, 'sd3', 'Stable Diffusion 3', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Stable Diffusion 3', 0, 'enabled', NULL),
-(69, 'sd3-turbo', 'Stable Diffusion 3 turbo', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Stable Diffusion 3 turbo', 0, 'enabled', NULL),
-(70, 'sd3-medium', 'Stable Diffusion 3 Medium', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Stable Diffusion 3 Medium', 0, 'enabled', NULL),
-(71, 'sd3-large', 'Stable Diffusion 3 Large', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Stable Diffusion 3 Large', 0, 'enabled', NULL),
-(72, 'sd3-large-turbo', 'Stable Diffusion 3 Large Turbo', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Stable Diffusion 3 Large Turbo', 0, 'enabled', NULL),
-(73, 'sd3.5-large', 'Stable Diffusion 3.5 Large', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Stable Diffusion 3.5 Large', 0, 'enabled', NULL),
-(74, 'sd3.5-large-turbo', 'Stable Diffusion 3.5 Large Turbo', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Stable Diffusion 3.5 Large Turbo', 0, 'enabled', NULL),
-(75, 'sd3.5-medium', 'Stable Diffusion 3.5 Medium', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Stable Diffusion 3.5 Medium', 0, 'enabled', NULL),
-(76, 'core', 'Core', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Core', 0, 'enabled', NULL),
-(77, 'ultra', 'Ultra', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Ultra', 0, 'enabled', NULL),
-(78, 'aws_bedrock', 'AWS Bedrock', NULL, 'stable_diffusion', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'AWS Bedrock', 0, 'enabled', NULL),
-(79, 'gemini-2.5-flash-preview-05-20', 'Gemini 2.5 Flash Preview 05-20 Adaptive thinking, cost efficiency', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gemini 2.5 Flash Preview 05-20 Adaptive thinking, cost efficiency', 0, 'enabled', NULL),
-(80, 'gemini-3-pro-preview', 'Gemini 3 Pro Preview The most intelligent model family to date, built on a foundation of state-of-the-art reasoning.', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gemini 3 Pro Preview The most intelligent model family to date, built on a foundation of state-of-the-art reasoning.', 0, 'enabled', NULL),
-(81, 'gemini-3.1-pro-preview', 'Gemini 3.1 Pro Preview Refined performance and reliability, thinking, multimodal, function calling, structured outputs.', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gemini 3.1 Pro Preview Refined performance and reliability, thinking, multimodal, function calling, structured outputs.', 0, 'enabled', NULL),
-(82, 'gemini-2.5-pro', 'Gemini 2.5 Pro Preview Enhanced thinking and reasoning, multimodal understanding, advanced coding, and more', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gemini 2.5 Pro Preview Enhanced thinking and reasoning, multimodal understanding, advanced coding, and more', 0, 'enabled', NULL),
-(83, 'gemini-deep-research', 'Gemini Deep Research (Multi-step web research with detailed reports)', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gemini Deep Research (Multi-step web research with detailed reports)', 0, 'enabled', NULL),
-(84, 'gemini-2.0-flash', 'Gemini 2.0 Flash Next generation features, speed, thinking, realtime streaming, and multimodal generation', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gemini 2.0 Flash Next generation features, speed, thinking, realtime streaming, and multimodal generation', 0, 'enabled', NULL),
-(85, 'gemini-2.0-flash-lite', 'Gemini 2.0 Flash-Lite Cost efficiency and low latency', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gemini 2.0 Flash-Lite Cost efficiency and low latency', 0, 'enabled', NULL),
-(86, 'gemini-1.5-pro', 'Gemini 1.5 Pro Complex reasoning tasks requiring more intelligence', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gemini 1.5 Pro Complex reasoning tasks requiring more intelligence', 0, 'enabled', NULL),
-(87, 'gemini-embedding-exp', 'Gemini Embedding Measuring the relatedness of text strings', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gemini Embedding Measuring the relatedness of text strings', 0, 'enabled', NULL),
-(88, 'gemini-1.5-flash', 'Gemini 1.5 Flash Fast and versatile performance across a diverse variety of tasks', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gemini 1.5 Flash Fast and versatile performance across a diverse variety of tasks', 0, 'enabled', NULL),
-(89, 'gemini-3-flash-preview', 'Gemini 3 Flash Advanced reasoning, coding, and multimodal capabilities with high speed', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gemini 3 Flash Advanced reasoning, coding, and multimodal capabilities with high speed', 0, 'enabled', NULL),
-(90, 'gemini-3.1-flash-live-preview', 'Gemini 3.1 Flash Live Preview Low-latency audio-to-audio model for real-time dialogue', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gemini 3.1 Flash Live Preview Low-latency audio-to-audio model for real-time dialogue', 0, 'enabled', NULL),
-(91, 'text-embedding-004', 'Gemini Text Embeding 004', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gemini Text Embeding 004', 0, 'enabled', NULL),
-(92, 'clipdrop', 'Clipdrop for Photo Studio', NULL, 'clipdrop', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Clipdrop for Photo Studio', 0, 'enabled', NULL),
-(93, 'novita', 'Novita for Photo Studio', NULL, 'novita', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Novita for Photo Studio', 0, 'enabled', NULL),
-(94, 'freepik', 'Novita for Image Editor', NULL, 'freepik', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Novita for Image Editor', 0, 'enabled', NULL),
-(95, 'plagiarismcheck', 'Plagiarism Check', NULL, 'plagiarism_check', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Plagiarism Check', 0, 'enabled', NULL),
-(96, 'synthesia', 'Synthesia', NULL, 'synthesia', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Synthesia', 0, 'enabled', NULL),
-(97, 'heygen', 'Heygen', NULL, 'heygen', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Heygen', 0, 'enabled', NULL),
-(98, 'pebblely', 'Pebblely', NULL, 'pebblely', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Pebblely', 0, 'enabled', NULL),
-(99, 'deepseek-chat', 'Deepseek Chat', NULL, 'deep_seek', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Deepseek Chat', 0, 'enabled', NULL),
-(100, 'deepseek-reasoner', 'Deepseek DeepSeek-R1', NULL, 'deep_seek', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Deepseek DeepSeek-R1', 0, 'enabled', NULL),
-(101, 'unsplash', 'Unsplash for AI Article Wizard', NULL, 'unsplash', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Unsplash for AI Article Wizard', 0, 'enabled', NULL),
-(102, 'pexels', 'Pexels for AI Article Wizard', NULL, 'pexels', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Pexels for AI Article Wizard', 0, 'enabled', NULL),
-(103, 'pixabay', 'Pixabay for AI Article Wizard', NULL, 'pixabay', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Pixabay for AI Article Wizard', 0, 'enabled', NULL),
-(104, 'elevenlabs', 'Elevenlabs for TTS', NULL, 'elevenlabs', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Elevenlabs for TTS', 0, 'enabled', NULL),
-(105, 'eleven_v3', 'ElevenLabs v3 for TTS', NULL, 'elevenlabs', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'ElevenLabs v3 for TTS', 0, 'enabled', NULL),
-(106, 'elevenlabs-voice-chatbot', 'Elevenlabs Voice Chatbots', NULL, 'elevenlabs', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Elevenlabs Voice Chatbots', 0, 'enabled', NULL),
-(107, 'isolator', 'Voice Isolator (1 word = 5 used characters of elevenlabs) X 1 token', NULL, 'elevenlabs', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Voice Isolator (1 word = 5 used characters of elevenlabs) X 1 token', 0, 'enabled', NULL),
-(108, 'elevenlabs-ai-music', 'Elevenlabs for AI Music Pro', NULL, 'elevenlabs', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Elevenlabs for AI Music Pro', 0, 'enabled', NULL),
-(109, 'lyria-3-clip', 'Google Lyria 3 Clip for AI Music Pro', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Google Lyria 3 Clip for AI Music Pro', 0, 'enabled', NULL),
-(110, 'lyria-3-pro', 'Google Lyria 3 Pro for AI Music Pro', NULL, 'gemini', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Google Lyria 3 Pro for AI Music Pro', 0, 'enabled', NULL),
-(111, 'google', 'Google for TTS', NULL, 'google', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Google for TTS', 0, 'enabled', NULL),
-(112, 'azure', 'Azure for TTS', NULL, 'azure', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Azure for TTS', 0, 'enabled', NULL),
-(113, 'azure-openai', 'Azure OpenAI Model', NULL, 'azure', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Azure OpenAI Model', 0, 'enabled', NULL),
-(114, 'speechify', 'Speechify for TTS', NULL, 'speechify', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Speechify for TTS', 0, 'enabled', NULL),
-(115, 'serper', 'Serper for Realtime Data', NULL, 'serper', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Serper for Realtime Data', 0, 'enabled', NULL),
-(116, 'perplexity', 'Perplexity for Realtime Data', NULL, 'perplexity', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Perplexity for Realtime Data', 0, 'enabled', NULL),
-(117, 'whisper-1', 'WHISPER 1 The latest text to speech model, optimized for speed.', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'WHISPER 1 The latest text to speech model, optimized for speed.', 0, 'enabled', NULL),
-(118, 'dall-e-2', 'DALL-E 2 The previous DALL·E model released in Nov 2022.', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'DALL-E 2 The previous DALL·E model released in Nov 2022.', 0, 'enabled', NULL),
-(119, 'dall-e-3', 'DALL-E 3 The latest DALL·E model released in Nov 2023.', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'DALL-E 3 The latest DALL·E model released in Nov 2023.', 0, 'enabled', NULL),
-(120, 'gpt-image-1', 'GPT-IMAGE-1 The latest image model released in Nov 2025.', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'GPT-IMAGE-1 The latest image model released in Nov 2025.', 0, 'enabled', NULL),
-(121, 'gpt-image-1.5', 'GPT-IMAGE-1.5 The latest image model released in Dec 2025.', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'GPT-IMAGE-1.5 The latest image model released in Dec 2025.', 0, 'enabled', NULL),
-(122, 'gpt-image-2', 'GPT-IMAGE-2 The latest image model with flexible resolutions and high-fidelity inputs.', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'GPT-IMAGE-2 The latest image model with flexible resolutions and high-fidelity inputs.', 0, 'enabled', NULL),
-(123, 'tts-1', 'TTS 1 The latest text to speech model, optimized for speed.', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'TTS 1 The latest text to speech model, optimized for speed.', 0, 'enabled', NULL),
-(124, 'tts-1-hd', 'TTS 1 HD The latest text to speech model, optimized for quality.', NULL, 'openai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'TTS 1 HD The latest text to speech model, optimized for quality.', 0, 'enabled', NULL),
-(125, 'grok-2-1212', 'Grok 2 1212', NULL, 'x_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Grok 2 1212', 0, 'enabled', NULL),
-(126, 'grok-2-vision-1212', 'Grok 2 Vision 1212', NULL, 'x_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Grok 2 Vision 1212', 0, 'enabled', NULL),
-(127, 'grok-3', 'Grok 3', NULL, 'x_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Grok 3', 0, 'enabled', NULL),
-(128, 'grok-3-mini', 'Grok 3 Mini', NULL, 'x_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Grok 3 Mini', 0, 'enabled', NULL),
-(129, 'grok-3-fast', 'Grok 3 Fast', NULL, 'x_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Grok 3 Fast', 0, 'enabled', NULL),
-(130, 'grok-3-mini-fast', 'Grok 3 Mini Fast', NULL, 'x_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Grok 3 Mini Fast', 0, 'enabled', NULL),
-(131, 'grok-4-0709', 'Grok 4', NULL, 'x_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Grok 4', 0, 'enabled', NULL),
-(132, 'grok-4-fast-reasoning', 'Grok 4 Fast', NULL, 'x_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Grok 4 Fast', 0, 'enabled', NULL),
-(133, 'grok-4-1-fast-reasoning', 'Grok 4.1 Fast Reasoning', NULL, 'x_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Grok 4.1 Fast Reasoning', 0, 'enabled', NULL),
-(134, 'grok-4-1-fast-non-reasoning', 'Grok 4.1 Fast Non-Reasoning', NULL, 'x_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Grok 4.1 Fast Non-Reasoning', 0, 'enabled', NULL),
-(135, 'gamma-ai', 'Gamma AI', NULL, 'gamma_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Gamma AI', 0, 'enabled', NULL),
-(136, 'veed', 'Veed', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Veed', 0, 'enabled', NULL),
-(137, 'veed/fabric-1.0', 'Veed Fabric 1.0', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Veed Fabric 1.0', 0, 'enabled', NULL),
-(138, 'veo2', 'Veo 2', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Veo 2', 0, 'enabled', NULL),
-(139, 'veo3', 'Veo 3', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Veo 3', 0, 'enabled', NULL),
-(140, 'veo3.1/text-to-video', 'Veo 3.1 Text To Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Veo 3.1 Text To Video', 0, 'enabled', NULL),
-(141, 'veo3.1/fast/text-to-video', 'Fast Veo 3.1 Text To Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Fast Veo 3.1 Text To Video', 0, 'enabled', NULL),
-(142, 'veo3.1/first-last-frame-to-video', 'Veo 3.1 First Last Frame To Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Veo 3.1 First Last Frame To Video', 0, 'enabled', NULL),
-(143, 'veo3.1/fast/first-last-frame-to-video', 'Fast Veo 3.1 First Last Frame To Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Fast Veo 3.1 First Last Frame To Video', 0, 'enabled', NULL),
-(144, 'veo3.1/image-to-video', 'Veo 3.1 Image To Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Veo 3.1 Image To Video', 0, 'enabled', NULL),
-(145, 'veo3.1/fast/image-to-video', 'Fast Veo 3.1 Image To Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Fast Veo 3.1 Image To Video', 0, 'enabled', NULL),
-(146, 'veo3.1/reference-to-video', 'Veo 3.1 Reference To Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Veo 3.1 Reference To Video', 0, 'enabled', NULL),
-(147, 'veo3.1/lite', 'Veo 3.1 Lite Text To Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Veo 3.1 Lite Text To Video', 0, 'enabled', NULL),
-(148, 'veo3.1/lite/image-to-video', 'Veo 3.1 Lite Image To Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:16', 'Veo 3.1 Lite Image To Video', 0, 'enabled', NULL),
-(149, 'veo3.1/lite/first-last-frame-to-video', 'Veo 3.1 Lite First Last Frame To Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Veo 3.1 Lite First Last Frame To Video', 0, 'enabled', NULL),
-(150, 'veo3-fast', 'Fast Veo 3', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Fast Veo 3', 0, 'enabled', NULL),
-(151, 'nano-banana', 'Nano Banana', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Nano Banana', 0, 'enabled', NULL),
-(152, 'nano-banana/edit', 'Nano Banana Edit', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Nano Banana Edit', 0, 'enabled', NULL),
-(153, 'nano-banana-pro', 'Nano Banana Pro', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Nano Banana Pro', 0, 'enabled', NULL),
-(154, 'nano-banana-pro/edit', 'Nano Banana Pro Edit', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Nano Banana Pro Edit', 0, 'enabled', NULL),
-(155, 'nano-banana-2', 'Nano Banana 2', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Nano Banana 2', 0, 'enabled', NULL),
-(156, 'nano-banana-2/edit', 'Nano Banana 2 Edit', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Nano Banana 2 Edit', 0, 'enabled', NULL),
-(157, 'xai/grok-imagine-image', 'Grok Imagine Image', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Grok Imagine Image', 0, 'enabled', NULL),
-(158, 'xai/grok-imagine-image/edit', 'Grok Imagine Image Edit', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Grok Imagine Image Edit', 0, 'enabled', NULL),
-(159, 'xai/grok-imagine-video/text-to-video', 'Grok Imagine Video Text-to-Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Grok Imagine Video Text-to-Video', 0, 'enabled', NULL),
-(160, 'xai/grok-imagine-video/image-to-video', 'Grok Imagine Video Image-to-Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Grok Imagine Video Image-to-Video', 0, 'enabled', NULL),
-(161, 'seedream/v4/text-to-image', 'SeeDream v4 ', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'SeeDream v4 ', 0, 'enabled', NULL),
-(162, 'seedream/v4/edit', 'SeeDream v4 Edit', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'SeeDream v4 Edit', 0, 'enabled', NULL),
-(163, 'bytedance/seedance-2.0/text-to-video', 'Seedance 2.0 Text-to-Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Seedance 2.0 Text-to-Video', 0, 'enabled', NULL),
-(164, 'bytedance/seedance-2.0/image-to-video', 'Seedance 2.0 Image-to-Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Seedance 2.0 Image-to-Video', 0, 'enabled', NULL),
-(165, 'bytedance/seedance-2.0/reference-to-video', 'Seedance 2.0 Reference-to-Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Seedance 2.0 Reference-to-Video', 0, 'enabled', NULL),
-(166, 'bytedance/seedance-2.0/fast/text-to-video', 'Seedance 2.0 Fast Text-to-Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Seedance 2.0 Fast Text-to-Video', 0, 'enabled', NULL),
-(167, 'bytedance/seedance-2.0/fast/image-to-video', 'Seedance 2.0 Fast Image-to-Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Seedance 2.0 Fast Image-to-Video', 0, 'enabled', NULL),
-(168, 'bytedance/seedance-2.0/fast/reference-to-video', 'Seedance 2.0 Fast Reference-to-Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Seedance 2.0 Fast Reference-to-Video', 0, 'enabled', NULL),
-(169, 'flux-pro', 'Flux Pro', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Flux Pro', 0, 'enabled', NULL),
-(170, 'flux-pro/kontext/max/multi', 'Flux Pro Kontext Max Multi', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Flux Pro Kontext Max Multi', 0, 'enabled', NULL),
-(171, 'flux-pro/kontext/text-to-image', 'Flux Pro Kontext Max Text to Image', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Flux Pro Kontext Max Text to Image', 0, 'enabled', NULL),
-(172, 'flux-pro/kontext', 'Flux Pro Kontext Max', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Flux Pro Kontext Max', 0, 'enabled', NULL),
-(173, 'imagen4', 'Google Imagen 4', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Google Imagen 4', 0, 'enabled', NULL),
-(174, 'ideogram-v2', 'Ideogram V2', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Ideogram V2', 0, 'enabled', NULL),
-(175, 'flux-pro/v1.1', 'Flux Pro 1.1', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Flux Pro 1.1', 0, 'enabled', NULL),
-(176, 'flux-realism', 'Flux Realism', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Flux Realism', 0, 'enabled', NULL),
-(177, 'flux/schnell', 'Flux Schnell', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Flux Schnell', 0, 'enabled', NULL),
-(178, 'flux-2-flex', 'Flux 2 Flex', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Flux 2 Flex', 0, 'enabled', NULL),
-(179, 'flux-2-flex/edit', 'Flux 2 Flex Edit', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Flux 2 Flex Edit', 0, 'enabled', NULL),
-(180, 'kling', 'Kling 1.0', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling 1.0', 0, 'enabled', NULL),
-(181, 'klingV21', 'Kling 2.1', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling 2.1', 0, 'enabled', NULL),
-(182, 'kling-2.5-turbo/pro/text-to-video', 'Kling 2.5 Turbo Pro Text to Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling 2.5 Turbo Pro Text to Video', 0, 'enabled', NULL),
-(183, 'kling-2.5-turbo/pro/image-to-video', 'Kling 2.5 Turbo Pro Image to Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling 2.5 Turbo Pro Image to Video', 0, 'enabled', NULL),
-(184, 'kling-2.5-turbo/standard/image-to-video', 'Kling 2.5 Turbo Standard Image to Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling 2.5 Turbo Standard Image to Video', 0, 'enabled', NULL),
-(185, 'kling-video/v2.6/pro/text-to-video', 'Kling Video v2.6 Pro Text to Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling Video v2.6 Pro Text to Video', 0, 'enabled', NULL),
-(186, 'kling-video/v2.6/pro/image-to-video', 'Kling Video v2.6 Pro Image to Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling Video v2.6 Pro Image to Video', 0, 'enabled', NULL),
-(187, 'kling-video/v2.6/pro/motion-control', 'Kling Video v2.6 Pro Motion Control', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling Video v2.6 Pro Motion Control', 0, 'enabled', NULL),
-(188, 'kling-video/v2.6/standard/motion-control', 'Kling Video v2.6 Standard Motion Control', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling Video v2.6 Standard Motion Control', 0, 'enabled', NULL),
-(189, 'kling-video/v3/pro/text-to-video', 'Kling Video v3 Pro Text to Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling Video v3 Pro Text to Video', 0, 'enabled', NULL),
-(190, 'kling-video/v3/pro/image-to-video', 'Kling Video v3 Pro Image to Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling Video v3 Pro Image to Video', 0, 'enabled', NULL),
-(191, 'kling-video/v3/standard/text-to-video', 'Kling Video v3 Standard Text to Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling Video v3 Standard Text to Video', 0, 'enabled', NULL),
-(192, 'kling-video/v3/standard/image-to-video', 'Kling Video v3 Standard Image to Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling Video v3 Standard Image to Video', 0, 'enabled', NULL),
-(193, 'klingImage', 'Kling Image to Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling Image to Video', 0, 'enabled', NULL),
-(194, 'kling-video', 'Kling Video', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Kling Video', 0, 'enabled', NULL),
-(195, 'luma-dream-machine', 'Luma Dream Machine', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Luma Dream Machine', 0, 'enabled', NULL),
-(196, 'haiper', 'Haiper', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Haiper', 0, 'enabled', NULL),
-(197, 'minimax', 'Minimax', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Minimax', 0, 'enabled', NULL),
-(198, 'music-01', 'Music 01', NULL, 'minimax', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Music 01', 0, 'enabled', NULL),
-(199, 'anthropic/claude-3-5-haiku-20241022', 'Anthropic: Claude 3.5 Haiku (2024-10-22)', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Anthropic: Claude 3.5 Haiku (2024-10-22)', 0, 'enabled', NULL),
-(200, 'anthropic/claude-3-5-haiku-20241022:beta', 'Anthropic: Claude 3.5 Haiku (2024-10-22) (self-moderated)', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Anthropic: Claude 3.5 Haiku (2024-10-22) (self-moderated)', 0, 'enabled', NULL),
-(201, 'anthropic/claude-3-5-haiku', 'Anthropic: Claude 3.5 Haiku', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Anthropic: Claude 3.5 Haiku', 0, 'enabled', NULL),
-(202, 'anthropic/claude-3-5-haiku:beta', 'Anthropic: Claude 3.5 Haiku (self-moderated)', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Anthropic: Claude 3.5 Haiku (self-moderated)', 0, 'enabled', NULL),
-(203, 'neversleep/llama-3.1-lumimaid-70b', 'Lumimaid v0.2 70B', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Lumimaid v0.2 70B', 0, 'enabled', NULL),
-(204, 'anthracite-org/magnum-v4-72b', 'Magnum v4 72B', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Magnum v4 72B', 0, 'enabled', NULL),
-(205, 'x-ai/grok-beta', 'xAI: Grok Beta', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'xAI: Grok Beta', 0, 'enabled', NULL),
-(206, 'mistralai/ministral-8b', 'Ministral 8B', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Ministral 8B', 0, 'enabled', NULL),
-(207, 'mistralai/ministral-3b', 'Ministral 3B', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Ministral 3B', 0, 'enabled', NULL),
-(208, 'qwen/qwen-2.5-7b-instruct', 'Qwen2.5 7B Instruct', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Qwen2.5 7B Instruct', 0, 'enabled', NULL),
-(209, 'nvidia/llama-3.1-nemotron-70b-instruct', 'NVIDIA: Llama 3.1 Nemotron 70B Instruct', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'NVIDIA: Llama 3.1 Nemotron 70B Instruct', 0, 'enabled', NULL),
-(210, 'inflection/inflection-3-pi', 'Inflection: Inflection 3 Pi', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Inflection: Inflection 3 Pi', 0, 'enabled', NULL),
-(211, 'inflection/inflection-3-productivity', 'Inflection: Inflection 3 Productivity', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Inflection: Inflection 3 Productivity', 0, 'enabled', NULL),
-(212, 'liquid/lfm-40b:free', 'Liquid: LFM 40B MoE (free)', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Liquid: LFM 40B MoE (free)', 0, 'enabled', NULL),
-(213, 'liquid/lfm-40b', 'Liquid: LFM 40B MoE', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Liquid: LFM 40B MoE', 0, 'enabled', NULL),
-(214, 'thedrummer/rocinante-12b', 'Rocinante 12B', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Rocinante 12B', 0, 'enabled', NULL),
-(215, 'eva-unit-01/eva-qwen-2.5-14b', 'EVA Qwen2.5 14B', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'EVA Qwen2.5 14B', 0, 'enabled', NULL),
-(216, 'anthracite-org/magnum-v2-72b', 'Magnum v2 72B', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Magnum v2 72B', 0, 'enabled', NULL),
-(217, 'meta-llama/llama-3.2-3b-instruct:free', 'Meta: Llama 3.2 3B Instruct (free)', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Meta: Llama 3.2 3B Instruct (free)', 0, 'enabled', NULL),
-(218, 'meta-llama/llama-3.2-1b-instruct:free', 'Meta: Llama 3.2 1B Instruct (free)', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Meta: Llama 3.2 1B Instruct (free)', 0, 'enabled', NULL),
-(219, 'meta-llama/llama-3.2-3b-instruct', 'Meta: Llama 3.2 3B Instruct', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Meta: Llama 3.2 3B Instruct', 0, 'enabled', NULL),
-(220, 'meta-llama/llama-3.2-1b-instruct', 'Meta: Llama 3.2 1B Instruct', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Meta: Llama 3.2 1B Instruct', 0, 'enabled', NULL),
-(221, 'perplexity/llama-3.1-sonar-huge-128k-online', 'Perplexity: Llama 3.1 Sonar 405B Online', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Perplexity: Llama 3.1 Sonar 405B Online', 0, 'enabled', NULL),
-(222, 'perplexity/llama-3.1-sonar-large-128k-online', 'Perplexity: Llama 3.1 Sonar 70B Online', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Perplexity: Llama 3.1 Sonar 70B Online', 0, 'enabled', NULL),
-(223, 'perplexity/llama-3.1-sonar-large-128k-chat', 'Perplexity: Llama 3.1 Sonar 70B', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Perplexity: Llama 3.1 Sonar 70B', 0, 'enabled', NULL),
-(224, 'perplexity/llama-3.1-sonar-small-128k-online', 'Perplexity: Llama 3.1 Sonar 8B Online', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Perplexity: Llama 3.1 Sonar 8B Online', 0, 'enabled', NULL),
-(225, 'perplexity/llama-3.1-sonar-small-128k-chat', 'Perplexity: Llama 3.1 Sonar 8B', NULL, 'open_router', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Perplexity: Llama 3.1 Sonar 8B', 0, 'enabled', NULL),
-(226, 'midjourney', 'Midjourney', NULL, 'piapi', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Midjourney', 0, 'enabled', NULL),
-(227, 'video-upscaler', 'Video Upscaler', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Video Upscaler', 0, 'enabled', NULL),
-(228, 'cogvideox-5b/video-to-video', 'Cogvideox 5B', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Cogvideox 5B', 0, 'enabled', NULL),
-(229, 'animatediff-v2v', 'Animatediff V2V', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Animatediff V2V', 0, 'enabled', NULL),
-(230, 'fast-animatediff/turbo/video-to-video', 'Fast Animatediff Turbo', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Fast Animatediff Turbo', 0, 'enabled', NULL),
-(231, 'veed/video-background-removal', 'Video Background Removal', NULL, 'fal_ai', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Video Background Removal', 0, 'enabled', NULL),
-(232, 'black-forest-labs/FLUX.1-schnell', 'Black Forest Labs Flux 1 Schnell', NULL, 'together', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Black Forest Labs Flux 1 Schnell', 0, 'enabled', NULL),
-(233, 'ad-marketing-video', 'Ad Marketing Video', NULL, 'creatify', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Ad Marketing Video', 0, 'enabled', NULL),
-(234, 'ad-marketing-video-topview', 'Topview Ad Video', NULL, 'topview', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Topview Ad Video', 0, 'enabled', NULL),
-(235, 'ai-clip-vizard', 'Vizard AI Clip', NULL, 'vizard', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Vizard AI Clip', 0, 'enabled', NULL),
-(236, 'ai-clip-klap', 'Klap AI Clip', NULL, 'klap', '2026-05-22 12:53:10', '2026-05-22 12:53:17', 'Klap AI Clip', 0, 'enabled', NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `exported_videos`
---
-
-CREATE TABLE `exported_videos` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `task_id` varchar(191) NOT NULL,
-  `status` varchar(191) NOT NULL DEFAULT 'in_progress',
-  `video_url` text DEFAULT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `used_ai_tool` varchar(191) NOT NULL DEFAULT 'topview',
-  `cover_url` text DEFAULT NULL,
-  `video_duration` int(11) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `extensions`
---
-
-CREATE TABLE `extensions` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `version` varchar(191) DEFAULT NULL,
-  `slug` varchar(191) DEFAULT NULL,
-  `installed` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `is_theme` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `failed_jobs`
---
-
-CREATE TABLE `failed_jobs` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `uuid` varchar(191) NOT NULL,
-  `connection` text NOT NULL,
-  `queue` text NOT NULL,
-  `payload` longtext NOT NULL,
-  `exception` longtext NOT NULL,
-  `failed_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `faq`
---
-
-CREATE TABLE `faq` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `question` text DEFAULT NULL,
-  `answer` text DEFAULT NULL,
-  `image` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `faq`
---
+(1, 'gemini-3.7-flash', 'Gemini 3.7 Flash Frontier multimodal intelligence with a 1M token context window, built for agentic and high-throughput workloads', 'upload/enginelogo/gemini_logo.svg', 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 3.7 Flash Frontier multimodal intelligence with a 1M token context window, built for agentic and high-throughput workloads', 0, 'enabled', NULL),
+(2, 'grok-4.6', 'Grok 4.6 (Jan 2026 knowledge cutoff, 500k context. Pricing doubles for prompts of 200k tokens or more.)', 'upload/enginelogo/Grok_logo.svg', 'x_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok 4.6 (Jan 2026 knowledge cutoff, 500k context. Pricing doubles for prompts of 200k tokens or more.)', 0, 'enabled', NULL),
+(3, 'gpt-5.6-cyber', 'GPT-5.6 Cyber (Security research model, 128k max output tokens, 400k context. Requires separate OpenAI approval via the Daybreak program.)', 'upload/enginelogo/openai.svg', 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5.6 Cyber (Security research model, 128k max output tokens, 400k context. Requires separate OpenAI approval via the Daybreak program.)', 0, 'enabled', NULL),
+(4, 'deepseek-v4-flash', 'DeepSeek V4 Flash Fast, low-cost model with a 1M token context window for high-throughput tasks', 'upload/enginelogo/deepseek_logo.svg', 'deep_seek', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'DeepSeek V4 Flash Fast, low-cost model with a 1M token context window for high-throughput tasks', 0, 'enabled', NULL),
+(5, 'deepseek-v4-pro', 'DeepSeek V4 Pro Flagship reasoning model with a 1M token context window', 'upload/enginelogo/deepseek_logo.svg', 'deep_seek', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'DeepSeek V4 Pro Flagship reasoning model with a 1M token context window', 0, 'enabled', NULL),
+(6, 'deepseek-v4-flash-vision-exp', 'DeepSeek V4 Flash Vision Experimental multimodal model with image understanding', 'upload/enginelogo/deepseek_logo.svg', 'deep_seek', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'DeepSeek V4 Flash Vision Experimental multimodal model with image understanding', 0, 'enabled', NULL),
+(7, 'gpt-6-astra', 'GPT-6 Astra (OpenAI\'s most capable model, 1M+ context, reasoning with low/medium/high/xhigh/max effort, vision, computer use.)', 'upload/enginelogo/openai.svg', 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-6 Astra (OpenAI\'s most capable model, 1M+ context, reasoning with low/medium/high/xhigh/max effort, vision, computer use.)', 0, 'enabled', NULL),
+(8, 'lyria-3.5', 'Google Lyria 3.5 for AI Music Pro (Full-length song generation, improved vocals and lyrics)', 'upload/enginelogo/gemini_logo.svg', 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Google Lyria 3.5 for AI Music Pro (Full-length song generation, improved vocals and lyrics)', 0, 'enabled', NULL),
+(9, 'gemini-3.8-flash', 'Gemini 3.8 Flash Enhanced agentic reasoning and coding, 1M token context, multimodal input', 'upload/enginelogo/gemini_logo.svg', 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 3.8 Flash Enhanced agentic reasoning and coding, 1M token context, multimodal input', 0, 'enabled', NULL),
+(10, 'gpt-image-2.5-sunburst', 'GPT-IMAGE-2.5 Sunburst Most capable image model for generation and editing with precision control.', 'upload/enginelogo/openai.svg', 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-IMAGE-2.5 Sunburst Most capable image model for generation and editing with precision control.', 0, 'enabled', NULL),
+(11, 'gpt-image-2.5-flare', 'GPT-IMAGE-2.5 Flare Fast, high-quality everyday image generation.', 'upload/enginelogo/openai.svg', 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-IMAGE-2.5 Flare Fast, high-quality everyday image generation.', 0, 'enabled', NULL),
+(12, 'claude-fable-5-1', 'Claude Fable 5.1', 'upload/enginelogo/claude_logo.svg', 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Fable 5.1', 0, 'enabled', NULL),
+(13, 'openai/gpt-image-2', 'GPT Image 2', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT Image 2', 0, 'enabled', NULL),
+(14, 'openai/gpt-image-2.5/sunburst/text-to-image', 'GPT Image 2.5 Sunburst', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT Image 2.5 Sunburst', 0, 'enabled', NULL),
+(15, 'openai/gpt-image-2.5/flare/text-to-image', 'GPT Image 2.5 Flare', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT Image 2.5 Flare', 0, 'enabled', NULL),
+(16, 'claude-opus-5-5', 'Claude Opus 5.5', 'upload/enginelogo/claude_logo.svg', 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Opus 5.5', 0, 'enabled', NULL),
+(17, 'claude-sonnet-5-5', 'Claude Sonnet 5.5', 'upload/enginelogo/claude_logo.svg', 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Sonnet 5.5', 0, 'enabled', NULL),
+(18, 'gpt-6-luna', 'GPT-6 Luna (May 18, 2026 knowledge cutoff, 128k max output tokens, 1.05M context.)', 'upload/enginelogo/openai.svg', 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-6 Luna (May 18, 2026 knowledge cutoff, 128k max output tokens, 1.05M context.)', 0, 'enabled', NULL),
+(19, 'gpt-6-sol', 'GPT-6 Sol (Apr 20, 2026 knowledge cutoff, 128k max output tokens, 1.05M context.)', 'upload/enginelogo/openai.svg', 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-6 Sol (Apr 20, 2026 knowledge cutoff, 128k max output tokens, 1.05M context.)', 0, 'enabled', NULL),
+(20, 'eleven_v4', 'ElevenLabs v4 for TTS', NULL, 'elevenlabs', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'ElevenLabs v4 for TTS', 0, 'enabled', NULL),
+(21, 'eleven_v4_turbo', 'ElevenLabs v4 Turbo for TTS', NULL, 'elevenlabs', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'ElevenLabs v4 Turbo for TTS', 0, 'enabled', NULL),
+(22, 'claude-fable-5', 'Claude Fable 5', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Fable 5', 0, 'enabled', NULL),
+(23, 'claude-sonnet-5', 'Claude Sonnet 5', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Sonnet 5', 0, 'enabled', NULL),
+(24, 'claude-sonnet-4-5-20250929', 'Claude Sonnet 4.5', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Sonnet 4.5', 0, 'enabled', NULL),
+(25, 'claude-sonnet-4-6', 'Claude Sonnet 4.6', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Sonnet 4.6', 0, 'enabled', NULL),
+(26, 'claude-sonnet-4-20250514', 'Claude Sonnet 4', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Sonnet 4', 0, 'enabled', NULL),
+(27, 'claude-3-7-sonnet-20250219', 'Claude 3.7 Sonnet', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude 3.7 Sonnet', 0, 'enabled', NULL),
+(28, 'claude-3-5-sonnet-20241022', 'Claude 3.5 Sonnet V2', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude 3.5 Sonnet V2', 0, 'enabled', NULL),
+(29, 'claude-3-5-sonnet-20240620', 'Claude 3.5 Sonnet', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude 3.5 Sonnet', 0, 'enabled', NULL),
+(30, 'claude-3-sonnet-20240229', 'Claude 3 Sonnet', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude 3 Sonnet', 0, 'enabled', NULL),
+(31, 'claude-opus-5', 'Claude Opus 5', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Opus 5', 0, 'enabled', NULL),
+(32, 'claude-opus-4-8', 'Claude Opus 4.8', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Opus 4.8', 0, 'enabled', NULL),
+(33, 'claude-opus-4-7', 'Claude Opus 4.7', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Opus 4.7', 0, 'enabled', NULL),
+(34, 'claude-opus-4-6', 'Claude Opus 4.6', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Opus 4.6', 0, 'enabled', NULL),
+(35, 'claude-opus-4-5-20251101', 'Claude Opus 4.5', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Opus 4.5', 0, 'enabled', NULL),
+(36, 'claude-opus-4-1-20250805', 'Claude Opus 4.1', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Opus 4.1', 0, 'enabled', NULL),
+(37, 'claude-opus-4-20250514', 'Claude Opus 4', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude Opus 4', 0, 'enabled', NULL),
+(38, 'claude-3-opus-20240229', 'Claude 3 Opus', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude 3 Opus', 0, 'enabled', NULL),
+(39, 'claude-3-haiku-20241022', 'Claude 3.5 Haiku', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude 3.5 Haiku', 0, 'enabled', NULL),
+(40, 'claude-3-haiku-20240307', 'Claude 3 Haiku', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude 3 Haiku', 0, 'enabled', NULL),
+(41, 'claude-2.1', 'Claude 2.1', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude 2.1', 0, 'enabled', NULL),
+(42, 'claude-2.0', 'Claude 2', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Claude 2', 0, 'enabled', NULL),
+(43, 'voyage-2', 'Voyage 2', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Voyage 2', 0, 'enabled', NULL),
+(44, 'voyage-large-2', 'Voyage Large 2', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Voyage Large 2', 0, 'enabled', NULL),
+(45, 'voyage-code-2', 'Voyage Code 2', NULL, 'anthropic', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Voyage Code 2', 0, 'enabled', NULL),
+(46, 'davinci-002', 'Davinci 002 (Expensive &amp; Capable)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Davinci 002 (Expensive &amp; Capable)', 0, 'enabled', NULL),
+(47, 'text-davinci-003', 'Davinci 003 (Expensive &amp; Capable)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Davinci 003 (Expensive &amp; Capable)', 0, 'enabled', NULL),
+(48, 'gpt-3.5-turbo', 'GPT 3.5-turbo (Most Expensive & Fastest & Most Capable)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT 3.5-turbo (Most Expensive & Fastest & Most Capable)', 0, 'enabled', NULL),
+(49, 'gpt-3.5-turbo-0125', 'GTP 3.5-turbo-0125 (Updated Knowleddge cutoff of Sep 2021, 16k)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GTP 3.5-turbo-0125 (Updated Knowleddge cutoff of Sep 2021, 16k)', 0, 'enabled', NULL),
+(50, 'gpt-3.5-turbo-1106', 'GTP 3.5-turbo-1106 (Updated Knowleddge cutoff of Nov 2021, 16k)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GTP 3.5-turbo-1106 (Updated Knowleddge cutoff of Nov 2021, 16k)', 0, 'enabled', NULL),
+(51, 'gpt-4', 'GPT-4 (Most Expensive & Fastest & Most Capable)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-4 (Most Expensive & Fastest & Most Capable)', 0, 'enabled', NULL),
+(52, 'gpt-4-turbo', 'GPT-4 Turbo (Most Expensive & Fastest & Most Capable)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-4 Turbo (Most Expensive & Fastest & Most Capable)', 0, 'enabled', NULL),
+(53, 'gpt-4-1106-preview', 'GPT-4-1106 Turbo (Updated Knowleddge cutoff of April 2023, 128k)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-4-1106 Turbo (Updated Knowleddge cutoff of April 2023, 128k)', 0, 'enabled', NULL),
+(54, 'gpt-4-0125-preview', 'GPT-4-0125 Turbo (Updated Knowleddge cutoff of Dec 2023, 128k)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-4-0125 Turbo (Updated Knowleddge cutoff of Dec 2023, 128k)', 0, 'enabled', NULL),
+(55, 'gpt-4o', 'GPT-4o Most advanced works for Vision, multimodal flagship model that’s cheaper and faster than GPT-4 Turbo.  (Updated Knowleddge cutoff of Oct 2023, 128k)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-4o Most advanced works for Vision, multimodal flagship model that’s cheaper and faster than GPT-4 Turbo.  (Updated Knowleddge cutoff of Oct 2023, 128k)', 0, 'enabled', NULL),
+(56, 'gpt-4o-mini', 'GPT-4o mini Our affordable and intelligent small model for fast, lightweight tasks. GPT-4o mini is cheaper and more capable than GPT-3.5 Turbo.', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-4o mini Our affordable and intelligent small model for fast, lightweight tasks. GPT-4o mini is cheaper and more capable than GPT-3.5 Turbo.', 0, 'enabled', NULL),
+(57, 'gpt-4o-search-preview', 'GPT-4o Search Preview', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-4o Search Preview', 0, 'enabled', NULL),
+(58, 'gpt-4o-mini-search-preview', 'GPT-4o Mini Search Preview', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-4o Mini Search Preview', 0, 'enabled', NULL),
+(59, 'o1-preview', 'GPT o1-preview (Updated Knowledge cutoff of Dec 2023, 128k)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT o1-preview (Updated Knowledge cutoff of Dec 2023, 128k)', 0, 'enabled', NULL),
+(60, 'o1-mini', 'GPT o1-mini (Updated Knowledge cutoff of Dec 2023, 128k)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT o1-mini (Updated Knowledge cutoff of Dec 2023, 128k)', 0, 'enabled', NULL),
+(61, 'o1', 'GPT o1 (Updated Knowledge cutoff of Dec 2023, 128k)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT o1 (Updated Knowledge cutoff of Dec 2023, 128k)', 0, 'enabled', NULL),
+(62, 'o3-mini', 'GPT o3-mini (Updated Knowledge cutoff of October 2023, 200k)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT o3-mini (Updated Knowledge cutoff of October 2023, 200k)', 0, 'enabled', NULL),
+(63, 'gpt-4o-realtime-preview-2024-12-17', 'GPT-4o Realtime Preview (Updated Knowledge cutoff of December 2024, 128k)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-4o Realtime Preview (Updated Knowledge cutoff of December 2024, 128k)', 0, 'enabled', NULL),
+(64, 'gpt-realtime', 'GPT Realtime (GA, 32k)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT Realtime (GA, 32k)', 0, 'enabled', NULL),
+(65, 'gpt-live-1', 'GPT-Live 1 (Preview — API access pending)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-Live 1 (Preview — API access pending)', 0, 'enabled', NULL),
+(66, 'gpt-live-1-mini', 'GPT-Live 1 Mini (Preview — API access pending)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-Live 1 Mini (Preview — API access pending)', 0, 'enabled', NULL),
+(67, 'gpt-4.1', 'GPT-4.1 (Jun 01, 2024 knowledge cutoff, 32k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-4.1 (Jun 01, 2024 knowledge cutoff, 32k max output tokens.)', 0, 'enabled', NULL),
+(68, 'gpt-4.1-mini', 'GPT-4.1 Mini (Jun 01, 2024 knowledge cutoff, 32k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-4.1 Mini (Jun 01, 2024 knowledge cutoff, 32k max output tokens.)', 0, 'enabled', NULL),
+(69, 'gpt-4.1-nano', 'GPT-4.1 Nano (Jun 01, 2024 knowledge cutoff, 32k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-4.1 Nano (Jun 01, 2024 knowledge cutoff, 32k max output tokens.)', 0, 'enabled', NULL),
+(70, 'o4-mini', 'GPT o4-mini (Jun 01, 2024 knowledge cutoff, 100k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT o4-mini (Jun 01, 2024 knowledge cutoff, 100k max output tokens.)', 0, 'enabled', NULL),
+(71, 'o3', 'GPT o3 (Jun 01, 2024 knowledge cutoff, 100k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT o3 (Jun 01, 2024 knowledge cutoff, 100k max output tokens.)', 0, 'enabled', NULL),
+(72, 'gpt-5', 'GPT-5 (Oct 01, 2024 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5 (Oct 01, 2024 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
+(73, 'gpt-5-mini', 'GPT-5 Mini (May 31, 2024 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5 Mini (May 31, 2024 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
+(74, 'gpt-5-nano', 'GPT-5 Nano (May 31, 2024 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5 Nano (May 31, 2024 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
+(75, 'gpt-5-chat-latest', 'GPT-5 Chat (Sep 30, 2024 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5 Chat (Sep 30, 2024 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
+(76, 'gpt-5-pro', 'GPT-5 Pro (Sep 30, 2024 knowledge cutoff, 272k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5 Pro (Sep 30, 2024 knowledge cutoff, 272k max output tokens.)', 0, 'enabled', NULL),
+(77, 'gpt-5.1', 'GPT-5.1 (Sep 30, 2024 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5.1 (Sep 30, 2024 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
+(78, 'gpt-5.1-chat-latest', 'GPT-5.1 Chat (Sep 30, 2024 knowledge cutoff, 16k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5.1 Chat (Sep 30, 2024 knowledge cutoff, 16k max output tokens.)', 0, 'enabled', NULL),
+(79, 'gpt-5.2', 'GPT-5.2 (Aug 31, 2025 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5.2 (Aug 31, 2025 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
+(80, 'gpt-5.2-pro', 'GPT-5.2 Pro (Aug 31, 2025 knowledge cutoff, 128k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5.2 Pro (Aug 31, 2025 knowledge cutoff, 128k max output tokens.)', 0, 'enabled', NULL),
+(81, 'gpt-5.3-chat-latest', 'GPT-5.3 Instant (Aug 31, 2025 knowledge cutoff, 16k max output tokens.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5.3 Instant (Aug 31, 2025 knowledge cutoff, 16k max output tokens.)', 0, 'enabled', NULL),
+(82, 'gpt-5.4', 'GPT-5.4 (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5.4 (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', 0, 'enabled', NULL),
+(83, 'gpt-5.4-mini', 'GPT-5.4 Mini (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5.4 Mini (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', 0, 'enabled', NULL),
+(84, 'gpt-5.4-nano', 'GPT-5.4 Nano (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5.4 Nano (Aug 31, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', 0, 'enabled', NULL),
+(85, 'gpt-5.5', 'GPT-5.5 (Dec 01, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5.5 (Dec 01, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', 0, 'enabled', NULL),
+(86, 'gpt-5.6-sol', 'GPT-5.6 Sol (Dec 01, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5.6 Sol (Dec 01, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', 0, 'enabled', NULL),
+(87, 'gpt-5.6-terra', 'GPT-5.6 Terra (Dec 01, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5.6 Terra (Dec 01, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', 0, 'enabled', NULL),
+(88, 'gpt-5.6-luna', 'GPT-5.6 Luna (Dec 01, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-5.6 Luna (Dec 01, 2025 knowledge cutoff, 128k max output tokens, 1.05M context.)', 0, 'enabled', NULL),
+(89, 'o3-deep-research', 'o3 Deep Research (Multi-step web research with detailed reports)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'o3 Deep Research (Multi-step web research with detailed reports)', 0, 'enabled', NULL),
+(90, 'o4-mini-deep-research', 'o4-mini Deep Research (Fast multi-step web research with reports)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'o4-mini Deep Research (Fast multi-step web research with reports)', 0, 'enabled', NULL),
+(91, 'sora-2', 'Sora 2 (Flagship video generation with synced audio)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Sora 2 (Flagship video generation with synced audio)', 0, 'enabled', NULL),
+(92, 'sora-2-pro', 'Sora 2 Pro (Most advanced synced-audio video generation)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Sora 2 Pro (Most advanced synced-audio video generation)', 0, 'enabled', NULL),
+(93, 'text-embedding-ada-002', 'Text Embedding Ada (Expensive &amp; Capable)', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Text Embedding Ada (Expensive &amp; Capable)', 0, 'enabled', NULL),
+(94, 'text-embedding-3-small', 'Text Embedding Small', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Text Embedding Small', 0, 'enabled', NULL),
+(95, 'text-embedding-3-large', 'Text Embedding Large', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Text Embedding Large', 0, 'enabled', NULL),
+(96, 'stable-diffusion-xl-1024-v1-0', 'Stable Diffusion XL 1.0', NULL, 'stable_diffusion', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Stable Diffusion XL 1.0', 0, 'enabled', NULL),
+(97, 'sd3.5-large', 'Stable Diffusion 3.5 Large', NULL, 'stable_diffusion', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Stable Diffusion 3.5 Large', 0, 'enabled', NULL),
+(98, 'sd3.5-large-turbo', 'Stable Diffusion 3.5 Large Turbo', NULL, 'stable_diffusion', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Stable Diffusion 3.5 Large Turbo', 0, 'enabled', NULL),
+(99, 'sd3.5-medium', 'Stable Diffusion 3.5 Medium', NULL, 'stable_diffusion', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Stable Diffusion 3.5 Medium', 0, 'enabled', NULL),
+(100, 'core', 'Core', NULL, 'stable_diffusion', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Core', 0, 'enabled', NULL),
+(101, 'ultra', 'Ultra', NULL, 'stable_diffusion', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Ultra', 0, 'enabled', NULL),
+(102, 'aws_bedrock', 'AWS Bedrock', NULL, 'stable_diffusion', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'AWS Bedrock', 0, 'enabled', NULL),
+(103, 'gemini-2.5-flash-preview-05-20', 'Gemini 2.5 Flash Preview 05-20 Adaptive thinking, cost efficiency', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 2.5 Flash Preview 05-20 Adaptive thinking, cost efficiency', 0, 'enabled', NULL),
+(104, 'gemini-3-pro-preview', 'Gemini 3 Pro Preview The most intelligent model family to date, built on a foundation of state-of-the-art reasoning.', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 3 Pro Preview The most intelligent model family to date, built on a foundation of state-of-the-art reasoning.', 0, 'enabled', NULL),
+(105, 'gemini-3.1-pro-preview', 'Gemini 3.1 Pro Preview Refined performance and reliability, thinking, multimodal, function calling, structured outputs.', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 3.1 Pro Preview Refined performance and reliability, thinking, multimodal, function calling, structured outputs.', 0, 'enabled', NULL),
+(106, 'gemini-2.5-pro', 'Gemini 2.5 Pro Preview Enhanced thinking and reasoning, multimodal understanding, advanced coding, and more', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 2.5 Pro Preview Enhanced thinking and reasoning, multimodal understanding, advanced coding, and more', 0, 'enabled', NULL),
+(107, 'gemini-deep-research', 'Gemini Deep Research (Multi-step web research with detailed reports)', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini Deep Research (Multi-step web research with detailed reports)', 0, 'enabled', NULL),
+(108, 'gemini-2.0-flash', 'Gemini 2.0 Flash Next generation features, speed, thinking, realtime streaming, and multimodal generation', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 2.0 Flash Next generation features, speed, thinking, realtime streaming, and multimodal generation', 0, 'enabled', NULL),
+(109, 'gemini-2.0-flash-lite', 'Gemini 2.0 Flash-Lite Cost efficiency and low latency', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 2.0 Flash-Lite Cost efficiency and low latency', 0, 'enabled', NULL),
+(110, 'gemini-1.5-pro', 'Gemini 1.5 Pro Complex reasoning tasks requiring more intelligence', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 1.5 Pro Complex reasoning tasks requiring more intelligence', 0, 'enabled', NULL),
+(111, 'gemini-embedding-exp', 'Gemini Embedding Measuring the relatedness of text strings', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini Embedding Measuring the relatedness of text strings', 0, 'enabled', NULL),
+(112, 'gemini-1.5-flash', 'Gemini 1.5 Flash Fast and versatile performance across a diverse variety of tasks', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 1.5 Flash Fast and versatile performance across a diverse variety of tasks', 0, 'enabled', NULL),
+(113, 'gemini-3-flash-preview', 'Gemini 3 Flash Advanced reasoning, coding, and multimodal capabilities with high speed', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 3 Flash Advanced reasoning, coding, and multimodal capabilities with high speed', 0, 'enabled', NULL),
+(114, 'gemini-3.1-flash-live-preview', 'Gemini 3.1 Flash Live Preview Low-latency audio-to-audio model for real-time dialogue', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 3.1 Flash Live Preview Low-latency audio-to-audio model for real-time dialogue', 0, 'enabled', NULL),
+(115, 'gemini-3.5-flash', 'Gemini 3.5 Flash Frontier intelligence at higher speed and lower cost, built for agentic deployment and multi-step workflows', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 3.5 Flash Frontier intelligence at higher speed and lower cost, built for agentic deployment and multi-step workflows', 0, 'enabled', NULL),
+(116, 'gemini-3.5-flash-lite', 'Gemini 3.5 Flash-Lite Low-latency, cost-effective multimodal model for high-throughput subagent tasks and document parsing', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 3.5 Flash-Lite Low-latency, cost-effective multimodal model for high-throughput subagent tasks and document parsing', 0, 'enabled', NULL),
+(117, 'gemini-3.6-flash', 'Gemini 3.6 Flash Frontier intelligence for code generation, agentic execution, and spatial reasoning', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini 3.6 Flash Frontier intelligence for code generation, agentic execution, and spatial reasoning', 0, 'enabled', NULL),
+(118, 'text-embedding-004', 'Gemini Text Embeding 004', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini Text Embeding 004', 0, 'enabled', NULL),
+(119, 'clipdrop', 'Clipdrop for Photo Studio', NULL, 'clipdrop', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Clipdrop for Photo Studio', 0, 'enabled', NULL),
+(120, 'novita', 'Novita for Photo Studio', NULL, 'novita', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Novita for Photo Studio', 0, 'enabled', NULL),
+(121, 'freepik', 'Novita for Image Editor', NULL, 'freepik', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Novita for Image Editor', 0, 'enabled', NULL),
+(122, 'plagiarismcheck', 'Plagiarism Check', NULL, 'plagiarism_check', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Plagiarism Check', 0, 'enabled', NULL),
+(123, 'synthesia', 'Synthesia', NULL, 'synthesia', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Synthesia', 0, 'enabled', NULL),
+(124, 'heygen', 'Heygen', NULL, 'heygen', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Heygen', 0, 'enabled', NULL),
+(125, 'heygen-video-agent', 'HeyGen Video Agent', NULL, 'heygen', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'HeyGen Video Agent', 0, 'enabled', NULL),
+(126, 'heygen-video-v3', 'HeyGen Video', NULL, 'heygen', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'HeyGen Video', 0, 'enabled', NULL),
+(127, 'heygen-lipsync', 'HeyGen Lipsync', NULL, 'heygen', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'HeyGen Lipsync', 0, 'enabled', NULL),
+(128, 'heygen-tts', 'HeyGen Text to Speech', NULL, 'heygen', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'HeyGen Text to Speech', 0, 'enabled', NULL),
+(129, 'video-dubbing', 'Video Dubbing', NULL, 'heygen', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Video Dubbing', 0, 'enabled', NULL),
+(130, 'ai-captions', 'AI Captions', NULL, 'captions', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'AI Captions', 0, 'enabled', NULL),
+(131, 'rendley-auto-edit', 'Rendley Auto Edit', NULL, 'rendley', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Rendley Auto Edit', 0, 'enabled', NULL),
+(132, 'pebblely', 'Pebblely', NULL, 'pebblely', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Pebblely', 0, 'enabled', NULL),
+(133, 'deepseek-chat', 'Deepseek Chat (Retired by DeepSeek on Jul 24, 2026 — use DeepSeek V4)', NULL, 'deep_seek', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Deepseek Chat (Retired by DeepSeek on Jul 24, 2026 — use DeepSeek V4)', 0, 'enabled', NULL),
+(134, 'deepseek-reasoner', 'Deepseek DeepSeek-R1 (Retired by DeepSeek on Jul 24, 2026 — use DeepSeek V4)', NULL, 'deep_seek', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Deepseek DeepSeek-R1 (Retired by DeepSeek on Jul 24, 2026 — use DeepSeek V4)', 0, 'enabled', NULL),
+(135, 'unsplash', 'Unsplash for AI Article Wizard', NULL, 'unsplash', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Unsplash for AI Article Wizard', 0, 'enabled', NULL),
+(136, 'pexels', 'Pexels for AI Article Wizard', NULL, 'pexels', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Pexels for AI Article Wizard', 0, 'enabled', NULL),
+(137, 'pixabay', 'Pixabay for AI Article Wizard', NULL, 'pixabay', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Pixabay for AI Article Wizard', 0, 'enabled', NULL),
+(138, 'elevenlabs', 'Elevenlabs for TTS', NULL, 'elevenlabs', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Elevenlabs for TTS', 0, 'enabled', NULL),
+(139, 'eleven_v3', 'ElevenLabs v3 for TTS', NULL, 'elevenlabs', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'ElevenLabs v3 for TTS', 0, 'enabled', NULL),
+(140, 'elevenlabs-voice-chatbot', 'Elevenlabs Voice Chatbots', NULL, 'elevenlabs', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Elevenlabs Voice Chatbots', 0, 'enabled', NULL),
+(141, 'isolator', 'Voice Isolator (1 word = 5 used characters of elevenlabs) X 1 token', NULL, 'elevenlabs', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Voice Isolator (1 word = 5 used characters of elevenlabs) X 1 token', 0, 'enabled', NULL),
+(142, 'elevenlabs-ai-music', 'Elevenlabs for AI Music Pro', NULL, 'elevenlabs', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Elevenlabs for AI Music Pro', 0, 'enabled', NULL),
+(143, 'lyria-3-clip', 'Google Lyria 3 Clip for AI Music Pro', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Google Lyria 3 Clip for AI Music Pro', 0, 'enabled', NULL),
+(144, 'lyria-3-pro', 'Google Lyria 3 Pro for AI Music Pro', NULL, 'gemini', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Google Lyria 3 Pro for AI Music Pro', 0, 'enabled', NULL),
+(145, 'google', 'Google for TTS', NULL, 'google', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Google for TTS', 0, 'enabled', NULL),
+(146, 'azure', 'Azure for TTS', NULL, 'azure', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Azure for TTS', 0, 'enabled', NULL),
+(147, 'azure-openai', 'Azure OpenAI Model', NULL, 'azure', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Azure OpenAI Model', 0, 'enabled', NULL),
+(148, 'speechify', 'Speechify for TTS', NULL, 'speechify', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Speechify for TTS', 0, 'enabled', NULL),
+(149, 'serper', 'Serper for Realtime Data', NULL, 'serper', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Serper for Realtime Data', 0, 'enabled', NULL),
+(150, 'perplexity', 'Perplexity for Realtime Data', NULL, 'perplexity', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Perplexity for Realtime Data', 0, 'enabled', NULL),
+(151, 'whisper-1', 'WHISPER 1 The latest text to speech model, optimized for speed.', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'WHISPER 1 The latest text to speech model, optimized for speed.', 0, 'enabled', NULL),
+(152, 'gpt-image-1', 'GPT-IMAGE-1 The latest image model released in Nov 2025.', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-IMAGE-1 The latest image model released in Nov 2025.', 0, 'enabled', NULL),
+(153, 'gpt-image-1.5', 'GPT-IMAGE-1.5 The latest image model released in Dec 2025.', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-IMAGE-1.5 The latest image model released in Dec 2025.', 0, 'enabled', NULL),
+(154, 'gpt-image-2', 'GPT-IMAGE-2 The latest image model with flexible resolutions and high-fidelity inputs.', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'GPT-IMAGE-2 The latest image model with flexible resolutions and high-fidelity inputs.', 0, 'enabled', NULL),
+(155, 'tts-1', 'TTS 1 The latest text to speech model, optimized for speed.', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'TTS 1 The latest text to speech model, optimized for speed.', 0, 'enabled', NULL),
+(156, 'tts-1-hd', 'TTS 1 HD The latest text to speech model, optimized for quality.', NULL, 'openai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'TTS 1 HD The latest text to speech model, optimized for quality.', 0, 'enabled', NULL),
+(157, 'grok-2-1212', 'Grok 2 1212', NULL, 'x_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok 2 1212', 0, 'enabled', NULL),
+(158, 'grok-2-vision-1212', 'Grok 2 Vision 1212', NULL, 'x_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok 2 Vision 1212', 0, 'enabled', NULL),
+(159, 'grok-3', 'Grok 3', NULL, 'x_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok 3', 0, 'enabled', NULL),
+(160, 'grok-3-mini', 'Grok 3 Mini', NULL, 'x_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok 3 Mini', 0, 'enabled', NULL),
+(161, 'grok-3-fast', 'Grok 3 Fast', NULL, 'x_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok 3 Fast', 0, 'enabled', NULL),
+(162, 'grok-3-mini-fast', 'Grok 3 Mini Fast', NULL, 'x_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok 3 Mini Fast', 0, 'enabled', NULL),
+(163, 'grok-4-0709', 'Grok 4', NULL, 'x_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok 4', 0, 'enabled', NULL),
+(164, 'grok-4-fast-reasoning', 'Grok 4 Fast', NULL, 'x_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok 4 Fast', 0, 'enabled', NULL),
+(165, 'grok-4-1-fast-reasoning', 'Grok 4.1 Fast Reasoning', NULL, 'x_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok 4.1 Fast Reasoning', 0, 'enabled', NULL),
+(166, 'grok-4-1-fast-non-reasoning', 'Grok 4.1 Fast Non-Reasoning', NULL, 'x_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok 4.1 Fast Non-Reasoning', 0, 'enabled', NULL),
+(167, 'grok-4.5', 'Grok 4.5', NULL, 'x_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok 4.5', 0, 'enabled', NULL),
+(168, 'gamma-ai', 'Gamma AI', NULL, 'gamma_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gamma AI', 0, 'enabled', NULL),
+(169, 'veed', 'Veed', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Veed', 0, 'enabled', NULL),
+(170, 'veed/fabric-1.0', 'Veed Fabric 1.0', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Veed Fabric 1.0', 0, 'enabled', NULL),
+(171, 'veo2', 'Veo 2', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Veo 2', 0, 'enabled', NULL),
+(172, 'veo3', 'Veo 3', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Veo 3', 0, 'enabled', NULL),
+(173, 'veo3.1/text-to-video', 'Veo 3.1 Text To Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Veo 3.1 Text To Video', 0, 'enabled', NULL),
+(174, 'veo3.1/fast/text-to-video', 'Fast Veo 3.1 Text To Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Fast Veo 3.1 Text To Video', 0, 'enabled', NULL),
+(175, 'veo3.1/first-last-frame-to-video', 'Veo 3.1 First Last Frame To Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Veo 3.1 First Last Frame To Video', 0, 'enabled', NULL),
+(176, 'veo3.1/fast/first-last-frame-to-video', 'Fast Veo 3.1 First Last Frame To Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Fast Veo 3.1 First Last Frame To Video', 0, 'enabled', NULL),
+(177, 'veo3.1/image-to-video', 'Veo 3.1 Image To Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Veo 3.1 Image To Video', 0, 'enabled', NULL),
+(178, 'veo3.1/fast/image-to-video', 'Fast Veo 3.1 Image To Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Fast Veo 3.1 Image To Video', 0, 'enabled', NULL),
+(179, 'veo3.1/reference-to-video', 'Veo 3.1 Reference To Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Veo 3.1 Reference To Video', 0, 'enabled', NULL),
+(180, 'veo3.1/lite', 'Veo 3.1 Lite Text To Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Veo 3.1 Lite Text To Video', 0, 'enabled', NULL),
+(181, 'veo3.1/lite/image-to-video', 'Veo 3.1 Lite Image To Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Veo 3.1 Lite Image To Video', 0, 'enabled', NULL),
+(182, 'veo3.1/lite/first-last-frame-to-video', 'Veo 3.1 Lite First Last Frame To Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Veo 3.1 Lite First Last Frame To Video', 0, 'enabled', NULL),
+(183, 'veo3-fast', 'Fast Veo 3', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Fast Veo 3', 0, 'enabled', NULL),
+(184, 'nano-banana', 'Nano Banana', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Nano Banana', 0, 'enabled', NULL),
+(185, 'nano-banana/edit', 'Nano Banana Edit', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Nano Banana Edit', 0, 'enabled', NULL),
+(186, 'nano-banana-pro', 'Nano Banana Pro', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Nano Banana Pro', 0, 'enabled', NULL),
+(187, 'nano-banana-pro/edit', 'Nano Banana Pro Edit', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Nano Banana Pro Edit', 0, 'enabled', NULL),
+(188, 'nano-banana-2', 'Nano Banana 2', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Nano Banana 2', 0, 'enabled', NULL),
+(189, 'nano-banana-2/edit', 'Nano Banana 2 Edit', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Nano Banana 2 Edit', 0, 'enabled', NULL),
+(190, 'xai/grok-imagine-image', 'Grok Imagine Image', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok Imagine Image', 0, 'enabled', NULL),
+(191, 'xai/grok-imagine-image/edit', 'Grok Imagine Image Edit', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok Imagine Image Edit', 0, 'enabled', NULL),
+(192, 'xai/grok-imagine-video/text-to-video', 'Grok Imagine Video Text-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok Imagine Video Text-to-Video', 0, 'enabled', NULL),
+(193, 'xai/grok-imagine-video/image-to-video', 'Grok Imagine Video Image-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Grok Imagine Video Image-to-Video', 0, 'enabled', NULL),
+(194, 'seedream/v4/text-to-image', 'SeeDream v4 ', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'SeeDream v4 ', 0, 'enabled', NULL),
+(195, 'seedream/v4/edit', 'SeeDream v4 Edit', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'SeeDream v4 Edit', 0, 'enabled', NULL),
+(196, 'bytedance/seedance-2.0/text-to-video', 'Seedance 2.0 Text-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Seedance 2.0 Text-to-Video', 0, 'enabled', NULL),
+(197, 'bytedance/seedance-2.0/image-to-video', 'Seedance 2.0 Image-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Seedance 2.0 Image-to-Video', 0, 'enabled', NULL),
+(198, 'bytedance/seedance-2.0/reference-to-video', 'Seedance 2.0 Reference-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Seedance 2.0 Reference-to-Video', 0, 'enabled', NULL),
+(199, 'bytedance/seedance-2.0/fast/text-to-video', 'Seedance 2.0 Fast Text-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Seedance 2.0 Fast Text-to-Video', 0, 'enabled', NULL),
+(200, 'bytedance/seedance-2.0/fast/image-to-video', 'Seedance 2.0 Fast Image-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Seedance 2.0 Fast Image-to-Video', 0, 'enabled', NULL),
+(201, 'bytedance/seedance-2.0/fast/reference-to-video', 'Seedance 2.0 Fast Reference-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Seedance 2.0 Fast Reference-to-Video', 0, 'enabled', NULL),
+(202, 'bytedance/seedance-2.5/text-to-video', 'Seedance 2.5 Text-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Seedance 2.5 Text-to-Video', 0, 'enabled', NULL),
+(203, 'bytedance/seedance-2.5/image-to-video', 'Seedance 2.5 Image-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Seedance 2.5 Image-to-Video', 0, 'enabled', NULL),
+(204, 'bytedance/seedance-2.5/reference-to-video', 'Seedance 2.5 Reference-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Seedance 2.5 Reference-to-Video', 0, 'enabled', NULL),
+(205, 'google/gemini-omni-flash', 'Gemini Omni Flash Text-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini Omni Flash Text-to-Video', 0, 'enabled', NULL),
+(206, 'google/gemini-omni-flash/image-to-video', 'Gemini Omni Flash Image-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini Omni Flash Image-to-Video', 0, 'enabled', NULL),
+(207, 'google/gemini-omni-flash/reference-to-video', 'Gemini Omni Flash Reference-to-Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Gemini Omni Flash Reference-to-Video', 0, 'enabled', NULL),
+(208, 'flux-pro', 'Flux Pro', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Flux Pro', 0, 'enabled', NULL),
+(209, 'flux-pro/kontext/max/multi', 'Flux Pro Kontext Max Multi', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Flux Pro Kontext Max Multi', 0, 'enabled', NULL),
+(210, 'flux-pro/kontext/text-to-image', 'Flux Pro Kontext Max Text to Image', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Flux Pro Kontext Max Text to Image', 0, 'enabled', NULL),
+(211, 'flux-pro/kontext', 'Flux Pro Kontext Max', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Flux Pro Kontext Max', 0, 'enabled', NULL),
+(212, 'imagen4', 'Google Imagen 4', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Google Imagen 4', 0, 'enabled', NULL),
+(213, 'ideogram-v2', 'Ideogram V2', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Ideogram V2', 0, 'enabled', NULL),
+(214, 'flux-pro/v1.1', 'Flux Pro 1.1', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Flux Pro 1.1', 0, 'enabled', NULL),
+(215, 'flux-realism', 'Flux Realism', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Flux Realism', 0, 'enabled', NULL),
+(216, 'flux/schnell', 'Flux Schnell', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Flux Schnell', 0, 'enabled', NULL),
+(217, 'flux-2-flex', 'Flux 2 Flex', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Flux 2 Flex', 0, 'enabled', NULL),
+(218, 'flux-2-flex/edit', 'Flux 2 Flex Edit', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Flux 2 Flex Edit', 0, 'enabled', NULL),
+(219, 'kling', 'Kling 1.0', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling 1.0', 0, 'enabled', NULL),
+(220, 'klingV21', 'Kling 2.1', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling 2.1', 0, 'enabled', NULL),
+(221, 'kling-2.5-turbo/pro/text-to-video', 'Kling 2.5 Turbo Pro Text to Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling 2.5 Turbo Pro Text to Video', 0, 'enabled', NULL),
+(222, 'kling-2.5-turbo/pro/image-to-video', 'Kling 2.5 Turbo Pro Image to Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling 2.5 Turbo Pro Image to Video', 0, 'enabled', NULL),
+(223, 'kling-2.5-turbo/standard/image-to-video', 'Kling 2.5 Turbo Standard Image to Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling 2.5 Turbo Standard Image to Video', 0, 'enabled', NULL),
+(224, 'kling-video/v2.6/pro/text-to-video', 'Kling Video v2.6 Pro Text to Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling Video v2.6 Pro Text to Video', 0, 'enabled', NULL),
+(225, 'kling-video/v2.6/pro/image-to-video', 'Kling Video v2.6 Pro Image to Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling Video v2.6 Pro Image to Video', 0, 'enabled', NULL),
+(226, 'kling-video/v2.6/pro/motion-control', 'Kling Video v2.6 Pro Motion Control', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling Video v2.6 Pro Motion Control', 0, 'enabled', NULL),
+(227, 'kling-video/v2.6/standard/motion-control', 'Kling Video v2.6 Standard Motion Control', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling Video v2.6 Standard Motion Control', 0, 'enabled', NULL),
+(228, 'kling-video/v3/pro/text-to-video', 'Kling Video v3 Pro Text to Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling Video v3 Pro Text to Video', 0, 'enabled', NULL),
+(229, 'kling-video/v3/pro/image-to-video', 'Kling Video v3 Pro Image to Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling Video v3 Pro Image to Video', 0, 'enabled', NULL),
+(230, 'kling-video/v3/standard/text-to-video', 'Kling Video v3 Standard Text to Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling Video v3 Standard Text to Video', 0, 'enabled', NULL),
+(231, 'kling-video/v3/standard/image-to-video', 'Kling Video v3 Standard Image to Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling Video v3 Standard Image to Video', 0, 'enabled', NULL),
+(232, 'klingImage', 'Kling Image to Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling Image to Video', 0, 'enabled', NULL),
+(233, 'kling-video', 'Kling Video', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Kling Video', 0, 'enabled', NULL),
+(234, 'luma-dream-machine', 'Luma Dream Machine', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Luma Dream Machine', 0, 'enabled', NULL),
+(235, 'haiper', 'Haiper', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Haiper', 0, 'enabled', NULL),
+(236, 'minimax', 'Minimax', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Minimax', 0, 'enabled', NULL),
+(237, 'music-01', 'Music 01', NULL, 'minimax', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Music 01', 0, 'enabled', NULL),
+(238, 'anthropic/claude-3-5-haiku-20241022', 'Anthropic: Claude 3.5 Haiku (2024-10-22)', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Anthropic: Claude 3.5 Haiku (2024-10-22)', 0, 'enabled', NULL),
+(239, 'anthropic/claude-3-5-haiku-20241022:beta', 'Anthropic: Claude 3.5 Haiku (2024-10-22) (self-moderated)', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Anthropic: Claude 3.5 Haiku (2024-10-22) (self-moderated)', 0, 'enabled', NULL),
+(240, 'anthropic/claude-3-5-haiku', 'Anthropic: Claude 3.5 Haiku', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Anthropic: Claude 3.5 Haiku', 0, 'enabled', NULL),
+(241, 'anthropic/claude-3-5-haiku:beta', 'Anthropic: Claude 3.5 Haiku (self-moderated)', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Anthropic: Claude 3.5 Haiku (self-moderated)', 0, 'enabled', NULL),
+(242, 'neversleep/llama-3.1-lumimaid-70b', 'Lumimaid v0.2 70B', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Lumimaid v0.2 70B', 0, 'enabled', NULL),
+(243, 'anthracite-org/magnum-v4-72b', 'Magnum v4 72B', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Magnum v4 72B', 0, 'enabled', NULL),
+(244, 'x-ai/grok-beta', 'xAI: Grok Beta', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'xAI: Grok Beta', 0, 'enabled', NULL),
+(245, 'mistralai/ministral-8b', 'Ministral 8B', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Ministral 8B', 0, 'enabled', NULL),
+(246, 'mistralai/ministral-3b', 'Ministral 3B', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Ministral 3B', 0, 'enabled', NULL),
+(247, 'qwen/qwen-2.5-7b-instruct', 'Qwen2.5 7B Instruct', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Qwen2.5 7B Instruct', 0, 'enabled', NULL),
+(248, 'nvidia/llama-3.1-nemotron-70b-instruct', 'NVIDIA: Llama 3.1 Nemotron 70B Instruct', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'NVIDIA: Llama 3.1 Nemotron 70B Instruct', 0, 'enabled', NULL),
+(249, 'inflection/inflection-3-pi', 'Inflection: Inflection 3 Pi', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Inflection: Inflection 3 Pi', 0, 'enabled', NULL),
+(250, 'inflection/inflection-3-productivity', 'Inflection: Inflection 3 Productivity', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Inflection: Inflection 3 Productivity', 0, 'enabled', NULL),
+(251, 'liquid/lfm-40b:free', 'Liquid: LFM 40B MoE (free)', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Liquid: LFM 40B MoE (free)', 0, 'enabled', NULL),
+(252, 'liquid/lfm-40b', 'Liquid: LFM 40B MoE', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Liquid: LFM 40B MoE', 0, 'enabled', NULL),
+(253, 'thedrummer/rocinante-12b', 'Rocinante 12B', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Rocinante 12B', 0, 'enabled', NULL),
+(254, 'eva-unit-01/eva-qwen-2.5-14b', 'EVA Qwen2.5 14B', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'EVA Qwen2.5 14B', 0, 'enabled', NULL),
+(255, 'anthracite-org/magnum-v2-72b', 'Magnum v2 72B', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Magnum v2 72B', 0, 'enabled', NULL),
+(256, 'meta-llama/llama-3.2-3b-instruct:free', 'Meta: Llama 3.2 3B Instruct (free)', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Meta: Llama 3.2 3B Instruct (free)', 0, 'enabled', NULL),
+(257, 'meta-llama/llama-3.2-1b-instruct:free', 'Meta: Llama 3.2 1B Instruct (free)', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Meta: Llama 3.2 1B Instruct (free)', 0, 'enabled', NULL),
+(258, 'meta-llama/llama-3.2-3b-instruct', 'Meta: Llama 3.2 3B Instruct', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Meta: Llama 3.2 3B Instruct', 0, 'enabled', NULL),
+(259, 'meta-llama/llama-3.2-1b-instruct', 'Meta: Llama 3.2 1B Instruct', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Meta: Llama 3.2 1B Instruct', 0, 'enabled', NULL),
+(260, 'perplexity/llama-3.1-sonar-huge-128k-online', 'Perplexity: Llama 3.1 Sonar 405B Online', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Perplexity: Llama 3.1 Sonar 405B Online', 0, 'enabled', NULL),
+(261, 'perplexity/llama-3.1-sonar-large-128k-online', 'Perplexity: Llama 3.1 Sonar 70B Online', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Perplexity: Llama 3.1 Sonar 70B Online', 0, 'enabled', NULL),
+(262, 'perplexity/llama-3.1-sonar-large-128k-chat', 'Perplexity: Llama 3.1 Sonar 70B', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Perplexity: Llama 3.1 Sonar 70B', 0, 'enabled', NULL),
+(263, 'perplexity/llama-3.1-sonar-small-128k-online', 'Perplexity: Llama 3.1 Sonar 8B Online', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Perplexity: Llama 3.1 Sonar 8B Online', 0, 'enabled', NULL),
+(264, 'perplexity/llama-3.1-sonar-small-128k-chat', 'Perplexity: Llama 3.1 Sonar 8B', NULL, 'open_router', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Perplexity: Llama 3.1 Sonar 8B', 0, 'enabled', NULL),
+(265, 'midjourney', 'Midjourney', NULL, 'piapi', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Midjourney', 0, 'enabled', NULL),
+(266, 'video-upscaler', 'Video Upscaler', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Video Upscaler', 0, 'enabled', NULL),
+(267, 'cogvideox-5b/video-to-video', 'Cogvideox 5B', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Cogvideox 5B', 0, 'enabled', NULL),
+(268, 'animatediff-v2v', 'Animatediff V2V', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Animatediff V2V', 0, 'enabled', NULL),
+(269, 'fast-animatediff/turbo/video-to-video', 'Fast Animatediff Turbo', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Fast Animatediff Turbo', 0, 'enabled', NULL),
+(270, 'veed/video-background-removal', 'Video Background Removal', NULL, 'fal_ai', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Video Background Removal', 0, 'enabled', NULL),
+(271, 'black-forest-labs/FLUX.1-schnell', 'Black Forest Labs Flux 1 Schnell', NULL, 'together', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Black Forest Labs Flux 1 Schnell', 0, 'enabled', NULL),
+(272, 'ad-marketing-video', 'Ad Marketing Video', NULL, 'creatify', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Ad Marketing Video', 0, 'enabled', NULL),
+(273, 'ad-marketing-video-topview', 'Topview Ad Video', NULL, 'topview', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Topview Ad Video', 0, 'enabled', NULL),
+(274, 'ai-clip-vizard', 'Vizard AI Clip', NULL, 'vizard', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Vizard AI Clip', 0, 'enabled', NULL),
+(275, 'ai-clip-klap', 'Klap AI Clip', NULL, 'klap', '2026-10-07 12:35:19', '2026-10-07 12:35:26', 'Klap AI Clip', 0, 'enabled', NULL);
 
 INSERT INTO `faq` (`id`, `question`, `answer`, `image`, `created_at`, `updated_at`) VALUES
 (1, 'How does it generate responses?', 'MagicAI uses the most popular AI models such as GPT, Dall-E, Ada to create text, image, code and more within seconds. The process is simple. All you have to do is provide a topic or idea, and our AI-based generator will take care of the rest.', NULL, '2023-06-02 12:14:35', '2023-06-02 12:14:35'),
@@ -1161,39 +2639,6 @@ INSERT INTO `faq` (`id`, `question`, `answer`, `image`, `created_at`, `updated_a
 (3, 'Should I buy regular or extended license?', 'If you plan to charge end users for the final product or service, you should buy the extended license in compliance with Envato’s terms of service, same as other projects: https://codecanyon.net/licenses/standard', NULL, '2023-06-02 12:16:02', '2023-06-02 12:16:02'),
 (4, 'Can I translate the script into another language?', 'Yes! MagicAI\'s multilingual capabilities apply to both content generation and dashboard language. You can easily translate it into other languages. A built-in translation tool is coming soon!', NULL, '2023-06-02 12:16:25', '2023-06-02 12:16:25'),
 (5, 'Is there a mobile app for MagicAI?', 'MagicAI provides an almost native-app experience thanks to its mobile-first approach. The entire layout is responsive and works great on any device regardless of the size.', NULL, '2023-06-02 12:16:53', '2023-06-02 12:16:53');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `favourite_list`
---
-
-CREATE TABLE `favourite_list` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `type` varchar(191) NOT NULL,
-  `item_id` int(11) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `features_marquees`
---
-
-CREATE TABLE `features_marquees` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `position` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `features_marquees`
---
 
 INSERT INTO `features_marquees` (`id`, `title`, `position`, `created_at`, `updated_at`) VALUES
 (1, 'Designed for mobile', 'top', NULL, NULL),
@@ -1205,38 +2650,6 @@ INSERT INTO `features_marquees` (`id`, `title`, `position`, `created_at`, `updat
 (7, 'No watermarks', 'bottom', NULL, NULL),
 (8, 'No hidden fees', 'bottom', NULL, NULL);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `folders`
---
-
-CREATE TABLE `folders` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `team_id` bigint(20) DEFAULT NULL,
-  `name` varchar(191) NOT NULL,
-  `created_by` bigint(20) UNSIGNED NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `footer_items`
---
-
-CREATE TABLE `footer_items` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `item` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `footer_items`
---
-
 INSERT INTO `footer_items` (`id`, `item`, `created_at`, `updated_at`) VALUES
 (1, 'Premium Support 30-Day', NULL, NULL),
 (2, 'Money Back Guarantee', NULL, NULL),
@@ -1244,148 +2657,24 @@ INSERT INTO `footer_items` (`id`, `item`, `created_at`, `updated_at`) VALUES
 (4, 'Free Trial', NULL, NULL),
 (5, 'Lifetime Updates', NULL, NULL);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `frontend_channel_settings`
---
-
-CREATE TABLE `frontend_channel_settings` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(191) NOT NULL,
-  `key` varchar(191) NOT NULL,
-  `description` text DEFAULT NULL,
-  `image` varchar(191) DEFAULT NULL,
-  `logo` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `frontend_channel_settings`
---
-
 INSERT INTO `frontend_channel_settings` (`id`, `title`, `key`, `description`, `image`, `logo`, `created_at`, `updated_at`) VALUES
-(1, 'Facebook', 'facebook', 'Our AI tool helps you craft compelling content that resonates with your audience Whether it\'s a status update, promotional post, or a simple interaction.', '/themes/social-media-front/assets/landing-page/card-fb.jpg', 'assets/landing-page/logo-fb.png', '2026-05-22 12:53:09', '2026-05-22 12:53:09'),
-(2, 'Twitter / X', 'x', 'Create impactful X posts with our AI tool in seconds! Whether it\'s a quick update, an engaging tweet, or a conversation starter, generate posts that drive conversations and keep your followers engaged on X.', '/themes/social-media-front/assets/landing-page/card-x.jpg', 'assets/landing-page/logo-x.png', '2026-05-22 12:53:09', '2026-05-22 12:53:09'),
-(3, 'Instagram', 'instagram', 'Design eye-catching Instagram posts in no time with our AI-powered generator. From beautiful visuals to captivating captions, create Instagram content that stands out and grabs your followers\' attention.', '/themes/social-media-front/assets/landing-page/card-ig.jpg', 'assets/landing-page/logo-ig.png', '2026-05-22 12:53:09', '2026-05-22 12:53:09'),
-(4, 'LinkedIn', 'linkedin', 'Build your professional presence with polished LinkedIn posts. Our AI helps you write insightful articles, thought-provoking updates, and attention-grabbing headlines that engage with your network.', '/themes/social-media-front/assets/landing-page/card-in.jpg', 'assets/landing-page/logo-in.png', '2026-05-22 12:53:09', '2026-05-22 12:53:09');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `frontend_content_boxes`
---
-
-CREATE TABLE `frontend_content_boxes` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `emoji` varchar(191) DEFAULT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `background` varchar(191) DEFAULT NULL,
-  `foreground` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `frontend_content_boxes`
---
+(1, 'Facebook', 'facebook', 'Our AI tool helps you craft compelling content that resonates with your audience Whether it\'s a status update, promotional post, or a simple interaction.', '/themes/social-media-front/assets/landing-page/card-fb.jpg', 'assets/landing-page/logo-fb.png', '2026-10-07 12:35:17', '2026-10-07 12:35:17'),
+(2, 'Twitter / X', 'x', 'Create impactful X posts with our AI tool in seconds! Whether it\'s a quick update, an engaging tweet, or a conversation starter, generate posts that drive conversations and keep your followers engaged on X.', '/themes/social-media-front/assets/landing-page/card-x.jpg', 'assets/landing-page/logo-x.png', '2026-10-07 12:35:17', '2026-10-07 12:35:17'),
+(3, 'Instagram', 'instagram', 'Design eye-catching Instagram posts in no time with our AI-powered generator. From beautiful visuals to captivating captions, create Instagram content that stands out and grabs your followers\' attention.', '/themes/social-media-front/assets/landing-page/card-ig.jpg', 'assets/landing-page/logo-ig.png', '2026-10-07 12:35:17', '2026-10-07 12:35:17'),
+(4, 'LinkedIn', 'linkedin', 'Build your professional presence with polished LinkedIn posts. Our AI helps you write insightful articles, thought-provoking updates, and attention-grabbing headlines that engage with your network.', '/themes/social-media-front/assets/landing-page/card-in.jpg', 'assets/landing-page/logo-in.png', '2026-10-07 12:35:17', '2026-10-07 12:35:17');
 
 INSERT INTO `frontend_content_boxes` (`id`, `emoji`, `title`, `description`, `background`, `foreground`, `created_at`, `updated_at`) VALUES
-(1, '😎', 'Partner', 'Invite your colleagues and collaborators to join a team and maximize the benefits of AI.', '#615C5A', '#fff', '2026-05-22 12:53:09', '2026-05-22 12:53:09'),
-(2, '🚀', 'Collaborate', 'Invite your colleagues and collaborators to join a team and maximize the benefits of AI.', '#EB6434', '#fff', '2026-05-22 12:53:09', '2026-05-22 12:53:09'),
-(3, '👥', 'Invite', 'Invite your colleagues and collaborators to join a team and maximize the benefits of AI.', '#3B4F99', '#fff', '2026-05-22 12:53:09', '2026-05-22 12:53:09');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `frontend_curtains`
---
-
-CREATE TABLE `frontend_curtains` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `title_icon` varchar(191) DEFAULT NULL,
-  `sliders` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`sliders`)),
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `frontend_curtains`
---
+(1, '😎', 'Partner', 'Invite your colleagues and collaborators to join a team and maximize the benefits of AI.', '#615C5A', '#fff', '2026-10-07 12:35:17', '2026-10-07 12:35:17'),
+(2, '🚀', 'Collaborate', 'Invite your colleagues and collaborators to join a team and maximize the benefits of AI.', '#EB6434', '#fff', '2026-10-07 12:35:17', '2026-10-07 12:35:17'),
+(3, '👥', 'Invite', 'Invite your colleagues and collaborators to join a team and maximize the benefits of AI.', '#3B4F99', '#fff', '2026-10-07 12:35:17', '2026-10-07 12:35:17');
 
 INSERT INTO `frontend_curtains` (`id`, `title`, `title_icon`, `sliders`, `created_at`, `updated_at`) VALUES
-(1, 'Sarah J.', '', '[{\"title\":\"Sarah J.\",\"description\":\"Translates Podcasts into different languages.\",\"bg_color\":\"\",\"bg_image\":\"\",\"bg_video\":\"\\/themes\\/social-media-front\\/assets\\/landing-page\\/demo-vid-1.webm\",\"title_color\":\"\",\"description_color\":\"\"},{\"title\":\"Sarah J.\",\"description\":\"\",\"bg_color\":\"\",\"bg_image\":\"\",\"bg_video\":\"\\/themes\\/social-media-front\\/assets\\/landing-page\\/demo-vid-1.webm\",\"title_color\":\"\",\"description_color\":\"\"},{\"title\":\"Sarah J.\",\"description\":\"\",\"bg_color\":\"\",\"bg_image\":\"\",\"bg_video\":\"\\/themes\\/social-media-front\\/assets\\/landing-page\\/demo-vid-1.webm\",\"title_color\":\"\",\"description_color\":\"\"}]', '2026-05-22 12:53:09', '2026-05-22 12:53:09'),
-(2, 'Jason R.', '', '[{\"title\":\"Jason R.\",\"description\":\"\",\"bg_color\":\"#aea397\",\"bg_image\":\"\",\"bg_video\":\"\\/themes\\/social-media-front\\/assets\\/landing-page\\/demo-vid-1.webm\",\"title_color\":\"\",\"description_color\":\"\"},{\"title\":\"Jason R.\",\"description\":\"\",\"bg_color\":\"#aea397\",\"bg_image\":\"\\/themes\\/social-media-front\\/assets\\/landing-page\\/banner-img.jpg\",\"bg_video\":\"\",\"title_color\":\"\",\"description_color\":\"\"}]', '2026-05-22 12:53:09', '2026-05-22 12:53:09'),
-(3, 'Mary J.', '', '[{\"title\":\"Mary J.\",\"description\":\"\",\"bg_color\":\"#496e8f\",\"bg_image\":\"\",\"bg_video\":\"\\/themes\\/social-media-front\\/assets\\/landing-page\\/demo-vid-1.webm\",\"title_color\":\"\",\"description_color\":\"\"}]', '2026-05-22 12:53:09', '2026-05-22 12:53:09');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `frontend_footer_settings`
---
-
-CREATE TABLE `frontend_footer_settings` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `header_title` varchar(191) NOT NULL DEFAULT 'Limited Offer',
-  `header_text` varchar(191) NOT NULL DEFAULT 'Sign up and receive 20% bonus discount on checkout.',
-  `hero_subtitle` varchar(191) NOT NULL DEFAULT 'Unleash the Power of AI',
-  `hero_title` varchar(191) NOT NULL DEFAULT 'Ultimate AI',
-  `hero_description` varchar(191) NOT NULL DEFAULT 'All-in-one platform to generate AI content and start making money in minutes.',
-  `hero_scroll_text` varchar(191) NOT NULL DEFAULT 'Discover MagicAI',
-  `hero_button` varchar(191) NOT NULL DEFAULT 'Start Making Money',
-  `hero_button_url` varchar(191) DEFAULT NULL,
-  `hero_image` varchar(191) NOT NULL DEFAULT '/themes/dark/assets/landing-page/banner-img.jpg',
-  `hero_button_type` int(11) NOT NULL DEFAULT 1,
-  `footer_header` varchar(191) NOT NULL DEFAULT 'Start your free trial.',
-  `footer_text_small` varchar(191) NOT NULL DEFAULT 'Pay once, own forever.',
-  `footer_text` varchar(191) NOT NULL DEFAULT 'Unlock your business potential by letting the AI work and generate money for you.',
-  `footer_button_text` varchar(191) NOT NULL DEFAULT 'Join our community',
-  `footer_button_url` varchar(191) NOT NULL DEFAULT 'https://codecanyon.net/item/magicai-openai-content-text-image-chat-code-generator-as-saas/45408109',
-  `footer_copyright` varchar(191) NOT NULL DEFAULT 'All images are for demo purposes.',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `hero_title_text_rotator` varchar(191) DEFAULT 'Generator,Chatbot,Assistant',
-  `sign_in` varchar(191) NOT NULL DEFAULT 'Sign In',
-  `join_hub` varchar(191) NOT NULL DEFAULT 'Join Hub',
-  `floating_button_small_text` varchar(191) DEFAULT NULL,
-  `floating_button_bold_text` varchar(191) DEFAULT NULL,
-  `floating_button_link` varchar(191) DEFAULT NULL,
-  `floating_button_active` tinyint(1) NOT NULL DEFAULT 0,
-  `footer_text_color` varchar(191) DEFAULT NULL,
-  `no_credit_cart_required` varchar(500) DEFAULT 'No credit cart required.',
-  `faster_content_creation` varchar(500) DEFAULT '<span class="font-heading text-[1.857em]/[1em] font-bold">10x</span>Faster Content Creation',
-  `over_5000_businesses` varchar(500) DEFAULT 'over <u>5000+</u> businesses trust us to boost their social media precense',
-  `join_the_ranks` longtext DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `frontend_footer_settings`
---
+(1, 'Sarah J.', '', '[{\"title\": \"Sarah J.\", \"bg_color\": \"\", \"bg_image\": \"\", \"bg_video\": \"/themes/social-media-front/assets/landing-page/demo-vid-1.webm\", \"description\": \"Translates Podcasts into different languages.\", \"title_color\": \"\", \"description_color\": \"\"}, {\"title\": \"Sarah J.\", \"bg_color\": \"\", \"bg_image\": \"\", \"bg_video\": \"/themes/social-media-front/assets/landing-page/demo-vid-1.webm\", \"description\": \"\", \"title_color\": \"\", \"description_color\": \"\"}, {\"title\": \"Sarah J.\", \"bg_color\": \"\", \"bg_image\": \"\", \"bg_video\": \"/themes/social-media-front/assets/landing-page/demo-vid-1.webm\", \"description\": \"\", \"title_color\": \"\", \"description_color\": \"\"}]', '2026-10-07 12:35:17', '2026-10-07 12:35:17'),
+(2, 'Jason R.', '', '[{\"title\": \"Jason R.\", \"bg_color\": \"#aea397\", \"bg_image\": \"\", \"bg_video\": \"/themes/social-media-front/assets/landing-page/demo-vid-1.webm\", \"description\": \"\", \"title_color\": \"\", \"description_color\": \"\"}, {\"title\": \"Jason R.\", \"bg_color\": \"#aea397\", \"bg_image\": \"/themes/social-media-front/assets/landing-page/banner-img.jpg\", \"bg_video\": \"\", \"description\": \"\", \"title_color\": \"\", \"description_color\": \"\"}]', '2026-10-07 12:35:17', '2026-10-07 12:35:17'),
+(3, 'Mary J.', '', '[{\"title\": \"Mary J.\", \"bg_color\": \"#496e8f\", \"bg_image\": \"\", \"bg_video\": \"/themes/social-media-front/assets/landing-page/demo-vid-1.webm\", \"description\": \"\", \"title_color\": \"\", \"description_color\": \"\"}]', '2026-10-07 12:35:17', '2026-10-07 12:35:17');
 
 INSERT INTO `frontend_footer_settings` (`id`, `header_title`, `header_text`, `hero_subtitle`, `hero_title`, `hero_description`, `hero_scroll_text`, `hero_button`, `hero_button_url`, `hero_image`, `hero_button_type`, `footer_header`, `footer_text_small`, `footer_text`, `footer_button_text`, `footer_button_url`, `footer_copyright`, `created_at`, `updated_at`, `hero_title_text_rotator`, `sign_in`, `join_hub`, `floating_button_small_text`, `floating_button_bold_text`, `floating_button_link`, `floating_button_active`, `footer_text_color`, `no_credit_cart_required`, `faster_content_creation`, `over_5000_businesses`, `join_the_ranks`) VALUES
-(1, 'Limited Offer', 'Sign up and receive 20% bonus discount on checkout.', 'Unleash the Power of AI', 'Ultimate AI', 'All-in-one platform to generate AI content and start making money in minutes.', 'Discover MagicAI', 'Start Making Money', NULL, '/themes/dark/assets/landing-page/banner-img.jpg', 1, 'Start your free trial.', 'Pay once, own forever.', 'Unlock your business potential by letting the AI work and generate money for you.', 'Join our community', 'https://codecanyon.net/item/magicai-openai-content-text-image-chat-code-generator-as-saas/45408109', 'All images are for demo purposes.', '2026-05-22 12:53:09', '2026-05-22 12:53:09', 'Generator,Chatbot,Assistant', 'Sign In', 'Join Hub', NULL, NULL, NULL, 0, NULL, 'No credit cart required.', '<span class=\"font-heading text-[1.857em]/[1em] font-bold\">10x</span>Faster Content Creation', 'over <u>5000+</u> businesses trust us to boost their social media precense', NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `frontend_future`
---
-
-CREATE TABLE `frontend_future` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `image` text DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `frontend_future`
---
+(1, 'Limited Offer', 'Sign up and receive 20% bonus discount on checkout.', 'Unleash the Power of AI', 'Ultimate AI', 'All-in-one platform to generate AI content and start making money in minutes.', 'Discover MagicAI', 'Start Making Money', NULL, '/themes/dark/assets/landing-page/banner-img.jpg', 1, 'Start your free trial.', 'Pay once, own forever.', 'Unlock your business potential by letting the AI work and generate money for you.', 'Join our community', 'https://codecanyon.net/item/magicai-openai-content-text-image-chat-code-generator-as-saas/45408109', 'All images are for demo purposes.', '2026-10-07 12:35:19', '2026-10-07 12:35:19', 'Generator,Chatbot,Assistant', 'Sign In', 'Join Hub', NULL, NULL, NULL, 0, NULL, 'No credit cart required.', '<span class=\"font-heading text-[1.857em]/[1em] font-bold\">10x</span>Faster Content Creation', 'over <u>5000+</u> businesses trust us to boost their social media precense', NULL);
 
 INSERT INTO `frontend_future` (`id`, `title`, `description`, `image`, `created_at`, `updated_at`) VALUES
 (1, 'AI Generator', 'Generate <strong>text, image, code, chat</strong> and even more with', ' <svg width=\"20\" height=\"21\" viewBox=\"0 0 20 21\" fill=\"none\" stroke=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\">\n                                <path d=\"M2.333 14.204L14.571 1.966C15.0509 1.48609 15.7018 1.21648 16.3805 1.21648C16.7166 1.21648 17.0493 1.28267 17.3598 1.41127C17.6703 1.53988 17.9524 1.72837 18.19 1.966C18.4276 2.20363 18.6161 2.48573 18.7447 2.79621C18.8733 3.10668 18.9395 3.43944 18.9395 3.7755C18.9395 4.11156 18.8733 4.44432 18.7447 4.75479C18.6161 5.06527 18.4276 5.34737 18.19 5.585L5.952 17.823C5.6728 18.1022 5.31719 18.2926 4.93 18.37L1 19.156L1.786 15.226C1.86345 14.8388 2.05378 14.4832 2.333 14.204Z\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n                                <path d=\"M12.5 4.656L15.5 7.656\" stroke-width=\"2\"/>\n                            </svg>', '2023-06-02 15:32:56', '2023-06-02 15:32:56'),
@@ -1395,32 +2684,6 @@ INSERT INTO `frontend_future` (`id`, `title`, `description`, `image`, `created_a
 (5, 'Custom Templates', 'Add unlimited number of custom prompts for your customers.', '  <svg width=\"19\" height=\"16\" viewBox=\"0 0 19 16\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\">\n                                <path d=\"M14.84 6.509H7.29C6.571 6.509 6.509 7.091 6.509 7.809C6.509 8.527 6.571 9.109 7.29 9.109H14.84C15.559 9.109 15.621 8.527 15.621 7.809C15.621 7.091 15.558 6.509 14.84 6.509ZM17.44 13.018H7.29C6.571 13.018 6.509 13.6 6.509 14.318C6.509 15.036 6.571 15.618 7.29 15.618H17.443C18.162 15.618 18.224 15.036 18.224 14.318C18.224 13.6 18.162 13.018 17.443 13.018H17.44ZM7.29 2.6H17.443C18.162 2.6 18.224 2.018 18.224 1.3C18.224 0.582 18.162 0 17.443 0H7.29C6.571 0 6.509 0.582 6.509 1.3C6.509 2.018 6.571 2.6 7.29 2.6ZM3.124 6.509H0.781C0.0619999 6.509 0 7.091 0 7.809C0 8.527 0.0619999 9.109 0.781 9.109H3.124C3.843 9.109 3.905 8.527 3.905 7.809C3.905 7.091 3.843 6.509 3.124 6.509ZM3.124 13.018H0.781C0.0619999 13.018 0 13.6 0 14.318C0 15.036 0.0619999 15.618 0.781 15.618H3.124C3.843 15.618 3.905 15.036 3.905 14.318C3.905 13.6 3.843 13.018 3.124 13.018ZM3.124 0H0.781C0.0619999 0 0 0.582 0 1.3C0 2.018 0.0619999 2.6 0.781 2.6H3.124C3.843 2.6 3.905 2.018 3.905 1.3C3.905 0.582 3.843 0 3.124 0Z\"/>\n                            </svg>', '2023-06-02 15:32:56', '2023-06-02 15:32:56'),
 (6, 'Support Platform', 'Access and manage your support tickets from your dashboard.', '<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\">\n                                <path d=\"M9.217 1.068L9.635 7.968M13.818 7.968L14.236 1.068M9.217 22.191L9.635 15.291M13.818 15.291L14.236 22.191M22.287 9.121L15.387 9.539M15.387 13.722L22.287 14.14M1.164 9.121L8.064 9.539M8.064 13.722L1.164 14.14M22.85 11.85C22.85 17.9251 17.9251 22.85 11.85 22.85C5.77487 22.85 0.849998 17.9251 0.849998 11.85C0.849998 5.77487 5.77487 0.849998 11.85 0.849998C17.9251 0.849998 22.85 5.77487 22.85 11.85ZM15.85 11.85C15.85 14.0591 14.0591 15.85 11.85 15.85C9.64086 15.85 7.85 14.0591 7.85 11.85C7.85 9.64086 9.64086 7.85 11.85 7.85C14.0591 7.85 15.85 9.64086 15.85 11.85Z\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n                            </svg>', '2023-06-02 15:32:56', '2023-06-02 15:32:56');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `frontend_generators`
---
-
-CREATE TABLE `frontend_generators` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `menu_title` varchar(191) DEFAULT NULL,
-  `subtitle_one` varchar(191) DEFAULT NULL,
-  `subtitle_two` varchar(191) DEFAULT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `text` text DEFAULT NULL,
-  `image` varchar(191) DEFAULT NULL,
-  `image_title` varchar(191) DEFAULT NULL,
-  `image_subtitle` varchar(191) DEFAULT NULL,
-  `color` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `icon` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `frontend_generators`
---
-
 INSERT INTO `frontend_generators` (`id`, `menu_title`, `subtitle_one`, `subtitle_two`, `title`, `text`, `image`, `image_title`, `image_subtitle`, `color`, `created_at`, `updated_at`, `icon`) VALUES
 (1, 'AI Text Generator', 'Say goodbye to writer\'s block', 'AI', 'Intelligent Writing Assistant', 'Writer is designed to help you <strong>generate high-quality texts instantly</strong>, without breaking a sweat. With our intuitive interface and powerful features, you can easily edit, export, or publish your AI-generated result.', 'assets/img/site/text-generator.jpg', 'Generate, edit, export.', 'Powered by OpenAI.', '#EADDF9', '2023-06-02 15:33:09', '2023-06-02 15:33:09', NULL),
 (2, 'AI Image Generator', 'Unleash your creativity', 'AI', 'Create eye-catching images and graphics.', 'Generate high-quality images for a wide range of applications.', 'assets/img/site/image-generator.jpg', 'Imagine, Generate, Publish.', 'Powered by Dall-E.', '#DFE5EB', '2023-06-02 15:33:09', '2023-06-02 15:33:09', NULL),
@@ -1429,102 +2692,8 @@ INSERT INTO `frontend_generators` (`id`, `menu_title`, `subtitle_one`, `subtitle
 (5, 'AI Speech To Text', 'Say goodbye to writer\'s block', 'AI', 'Transcribe your speech into text.', 'Accurately transcribe your recordings in just minutes. With our user-friendly interface, you can upload your files and have them transcribed in a matter of clicks.', 'assets/img/site/ai-speech.jpg', 'Upload, Analyze, Generate.', 'Powered by OpenAI.', '#FFF8EB', '2023-06-02 15:33:09', '2023-06-02 15:33:09', NULL),
 (6, 'Empower Your Message with AI', 'Say goodbye to writer\'s block', 'AI', 'Transcribe your speech into text.', 'From captivating commercials to engaging narrations, our AI voice will bring your words to life. With its seamless delivery, natural intonation, and unrivaled versatility, our AI VoiceOver is the perfect choice for any project. Effortlessly choose from a variety of voices and languages while adjusting the pace to your preference.', 'assets/img/site/voiceover.jpg', 'Upload, Analyze, Generate.', 'Powered by OpenAI.', '#FFF8EB', '2023-06-02 15:33:09', '2023-06-02 15:33:09', NULL);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `frontend_sections_statuses_titles`
---
-
-CREATE TABLE `frontend_sections_statuses_titles` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `features_active` tinyint(1) NOT NULL DEFAULT 1,
-  `features_title` varchar(191) DEFAULT 'The future of AI.',
-  `features_subtitle` varchar(191) NOT NULL DEFAULT 'Unleash the Power of AI',
-  `features_description` text DEFAULT NULL,
-  `generators_active` tinyint(1) NOT NULL DEFAULT 1,
-  `who_is_for_active` tinyint(1) NOT NULL DEFAULT 1,
-  `custom_templates_active` tinyint(1) NOT NULL DEFAULT 1,
-  `custom_templates_subtitle_one` varchar(191) DEFAULT 'Custom',
-  `custom_templates_subtitle_two` varchar(191) DEFAULT 'Prompts',
-  `custom_templates_title` varchar(191) DEFAULT 'Custom Templates.',
-  `custom_templates_learn_more_link_url` varchar(191) NOT NULL DEFAULT '#templates',
-  `custom_templates_learn_more_link` varchar(191) NOT NULL DEFAULT 'Discover MagicAI',
-  `custom_templates_description` text DEFAULT NULL,
-  `tools_active` tinyint(1) NOT NULL DEFAULT 1,
-  `tools_title` varchar(191) DEFAULT 'Magic Tools.',
-  `tools_subtitle` varchar(191) NOT NULL DEFAULT 'Unleash the Power of AI',
-  `tools_description` text DEFAULT NULL,
-  `how_it_works_active` tinyint(1) NOT NULL DEFAULT 1,
-  `how_it_works_title` varchar(191) DEFAULT 'So, how does it work?',
-  `how_it_works_link_label` varchar(191) NOT NULL DEFAULT 'Learn More',
-  `how_it_works_link` varchar(191) NOT NULL DEFAULT '#',
-  `how_it_works_description` varchar(191) NOT NULL DEFAULT 'To create content quickly and effectively, <strong>here are the steps you can follow:</strong>',
-  `how_it_works_subtitle` varchar(191) NOT NULL DEFAULT 'Unleash the Power of AI',
-  `testimonials_active` tinyint(1) NOT NULL DEFAULT 1,
-  `testimonials_title` varchar(191) DEFAULT 'Trusted by millions.',
-  `testimonials_description` varchar(191) NOT NULL DEFAULT 'Content and <strong>kickstart your earnings</strong> in minutes  kickstart your earnings in minutes',
-  `testimonials_subtitle_one` varchar(191) NOT NULL DEFAULT 'Testimonials',
-  `testimonials_subtitle_two` varchar(191) DEFAULT 'Trustpilot',
-  `pricing_active` tinyint(1) NOT NULL DEFAULT 1,
-  `pricing_title` varchar(191) DEFAULT 'Flexible Pricing.',
-  `pricing_subtitle` varchar(191) NOT NULL DEFAULT 'Unleash the Power of AI',
-  `pricing_description` text DEFAULT NULL,
-  `pricing_save_percent` varchar(191) DEFAULT 'Save 30%',
-  `faq_active` tinyint(1) NOT NULL DEFAULT 1,
-  `faq_title` varchar(191) DEFAULT 'Have a question?',
-  `faq_subtitle` varchar(191) DEFAULT 'Our support team will get assistance from AI-powered suggestions, making it quicker than ever to handle support requests.',
-  `faq_text_one` varchar(191) DEFAULT 'FAQ',
-  `faq_text_two` varchar(191) DEFAULT 'Help Center',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `preheader_active` tinyint(1) NOT NULL DEFAULT 1,
-  `blog_active` tinyint(1) NOT NULL DEFAULT 0,
-  `blog_title` varchar(191) NOT NULL DEFAULT 'Latest News',
-  `blog_subtitle` varchar(191) NOT NULL DEFAULT 'Stay up-to-date',
-  `blog_posts_per_page` int(11) NOT NULL DEFAULT 3,
-  `blog_button_text` varchar(191) NOT NULL DEFAULT 'Show more',
-  `blog_a_title` varchar(191) NOT NULL DEFAULT 'Blog Posts',
-  `blog_a_subtitle` varchar(191) NOT NULL DEFAULT 'Latest News',
-  `blog_a_description` varchar(191) NOT NULL DEFAULT 'Welcome to our cozy corner of the internet, where you will find a delightful collection of our heartfelt and thought-provoking blog posts.',
-  `blog_a_posts_per_page` int(11) NOT NULL DEFAULT 6,
-  `marquee_items` text DEFAULT NULL,
-  `generators_subtitle` varchar(191) DEFAULT NULL,
-  `generators_title` varchar(191) DEFAULT NULL,
-  `generators_description` varchar(191) DEFAULT NULL,
-  `plan_footer_text` text DEFAULT NULL,
-  `advanced_features_section_title` varchar(191) DEFAULT NULL,
-  `advanced_features_section_description` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `frontend_sections_statuses_titles`
---
-
 INSERT INTO `frontend_sections_statuses_titles` (`id`, `features_active`, `features_title`, `features_subtitle`, `features_description`, `generators_active`, `who_is_for_active`, `custom_templates_active`, `custom_templates_subtitle_one`, `custom_templates_subtitle_two`, `custom_templates_title`, `custom_templates_learn_more_link_url`, `custom_templates_learn_more_link`, `custom_templates_description`, `tools_active`, `tools_title`, `tools_subtitle`, `tools_description`, `how_it_works_active`, `how_it_works_title`, `how_it_works_link_label`, `how_it_works_link`, `how_it_works_description`, `how_it_works_subtitle`, `testimonials_active`, `testimonials_title`, `testimonials_description`, `testimonials_subtitle_one`, `testimonials_subtitle_two`, `pricing_active`, `pricing_title`, `pricing_subtitle`, `pricing_description`, `pricing_save_percent`, `faq_active`, `faq_title`, `faq_subtitle`, `faq_text_one`, `faq_text_two`, `created_at`, `updated_at`, `preheader_active`, `blog_active`, `blog_title`, `blog_subtitle`, `blog_posts_per_page`, `blog_button_text`, `blog_a_title`, `blog_a_subtitle`, `blog_a_description`, `blog_a_posts_per_page`, `marquee_items`, `generators_subtitle`, `generators_title`, `generators_description`, `plan_footer_text`, `advanced_features_section_title`, `advanced_features_section_description`) VALUES
-(1, 1, 'The future of AI.', 'Unleash the Power of AI', NULL, 1, 1, 1, 'Custom', 'Prompts', 'Custom Templates.', '#templates', 'Discover MagicAI', NULL, 1, 'Magic Tools.', 'Unleash the Power of AI', NULL, 1, 'So, how does it work?', 'Learn More', '#', 'To create content quickly and effectively, <strong>here are the steps you can follow:</strong>', 'Unleash the Power of AI', 1, 'Trusted by millions.', 'Content and <strong>kickstart your earnings</strong> in minutes  kickstart your earnings in minutes', 'Testimonials', 'Trustpilot', 1, 'Flexible Pricing.', 'Unleash the Power of AI', NULL, 'Save 30%', 1, 'Have a question?', 'Our support team will get assistance from AI-powered suggestions, making it quicker than ever to handle support requests.', 'FAQ', 'Help Center', '2026-05-22 12:53:17', '2026-05-22 12:53:17', 1, 0, 'Latest News', 'Stay up-to-date', 3, 'Show more', 'Blog Posts', 'Latest News', 'Welcome to our cozy corner of the internet, where you will find a delightful collection of our heartfelt and thought-provoking blog posts.', 6, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `frontend_tools`
---
-
-CREATE TABLE `frontend_tools` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `image` text DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `buy_link` varchar(191) NOT NULL DEFAULT 'Start Making Money',
-  `buy_link_url` varchar(191) NOT NULL DEFAULT 'https://codecanyon.net/item/magicai-openai-content-text-image-chat-code-generator-as-saas/45408109',
-  `learn_more_link` varchar(191) NOT NULL DEFAULT 'Discover MagicAI',
-  `learn_more_link_url` varchar(191) NOT NULL DEFAULT '#templates'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `frontend_tools`
---
+(1, 1, 'The future of AI.', 'Unleash the Power of AI', NULL, 1, 1, 1, 'Custom', 'Prompts', 'Custom Templates.', '#templates', 'Discover MagicAI', NULL, 1, 'Magic Tools.', 'Unleash the Power of AI', NULL, 1, 'So, how does it work?', 'Learn More', '#', 'To create content quickly and effectively, <strong>here are the steps you can follow:</strong>', 'Unleash the Power of AI', 1, 'Trusted by millions.', 'Content and <strong>kickstart your earnings</strong> in minutes  kickstart your earnings in minutes', 'Testimonials', 'Trustpilot', 1, 'Flexible Pricing.', 'Unleash the Power of AI', NULL, 'Save 30%', 1, 'Have a question?', 'Our support team will get assistance from AI-powered suggestions, making it quicker than ever to handle support requests.', 'FAQ', 'Help Center', '2026-10-07 12:35:26', '2026-10-07 12:35:26', 1, 0, 'Latest News', 'Stay up-to-date', 3, 'Show more', 'Blog Posts', 'Latest News', 'Welcome to our cozy corner of the internet, where you will find a delightful collection of our heartfelt and thought-provoking blog posts.', 6, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 INSERT INTO `frontend_tools` (`id`, `title`, `description`, `image`, `created_at`, `updated_at`, `buy_link`, `buy_link_url`, `learn_more_link`, `learn_more_link_url`) VALUES
 (1, 'Advanced Dashboard', 'Track a wide range of data points, including user traffic and sales.', 'upload/images/frontent/tools/v6sP-test.png', '2023-05-29 14:18:13', '2023-05-29 14:18:31', 'Start Making Money', 'https://codecanyon.net/item/magicai-openai-content-text-image-chat-code-generator-as-saas/45408109', 'Discover MagicAI', '#templates'),
@@ -1534,24 +2703,6 @@ INSERT INTO `frontend_tools` (`id`, `title`, `description`, `image`, `created_at
 (5, 'Easy Export', 'Export generated content as plain text, PDF, Word or HTML easily.', 'upload/images/frontent/tools/mPWB-easy-export.png', '2023-05-29 14:21:05', '2023-05-29 14:21:05', 'Start Making Money', 'https://codecanyon.net/item/magicai-openai-content-text-image-chat-code-generator-as-saas/45408109', 'Discover MagicAI', '#templates'),
 (6, 'Support Platform', 'Access and mage support tickets from your dashboard.', 'upload/images/frontent/tools/rIwa-support-platform.png', '2023-05-29 14:21:21', '2023-05-29 14:21:21', 'Start Making Money', 'https://codecanyon.net/item/magicai-openai-content-text-image-chat-code-generator-as-saas/45408109', 'Discover MagicAI', '#templates');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `frontend_who_is_for`
---
-
-CREATE TABLE `frontend_who_is_for` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `color` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `frontend_who_is_for`
---
-
 INSERT INTO `frontend_who_is_for` (`id`, `title`, `color`, `created_at`, `updated_at`) VALUES
 (1, 'Digital Agencies', 'orange', '2023-06-02 13:16:34', '2023-06-02 10:38:34'),
 (2, 'Product Designers', 'purple', '2023-06-02 13:16:34', '2023-06-02 13:16:34'),
@@ -1560,521 +2711,328 @@ INSERT INTO `frontend_who_is_for` (`id`, `title`, `color`, `created_at`, `update
 (5, 'Digital Marketers', 'green', '2023-06-02 13:16:34', '2023-06-02 13:16:34'),
 (6, 'Developers', 'red', '2023-06-02 13:16:34', '2023-06-02 13:16:34');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `gatewayproducts`
---
-
-CREATE TABLE `gatewayproducts` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `plan_id` int(11) NOT NULL DEFAULT 0,
-  `plan_name` varchar(191) DEFAULT NULL,
-  `gateway_code` varchar(191) DEFAULT NULL,
-  `gateway_title` varchar(191) DEFAULT NULL,
-  `product_id` varchar(191) DEFAULT NULL,
-  `price_id` varchar(191) DEFAULT NULL,
-  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`payload`)),
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `gateways`
---
-
-CREATE TABLE `gateways` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `code` varchar(191) DEFAULT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `is_active` int(11) NOT NULL DEFAULT 0,
-  `mode` varchar(191) DEFAULT NULL,
-  `sandbox_client_id` varchar(191) DEFAULT NULL,
-  `sandbox_client_secret` varchar(191) DEFAULT NULL,
-  `sandbox_app_id` varchar(191) DEFAULT NULL,
-  `live_client_id` varchar(191) DEFAULT NULL,
-  `live_client_secret` varchar(191) DEFAULT NULL,
-  `live_app_id` varchar(191) DEFAULT NULL,
-  `payment_action` varchar(191) DEFAULT NULL,
-  `currency` varchar(191) DEFAULT NULL,
-  `currency_locale` varchar(191) DEFAULT NULL,
-  `notify_url` varchar(191) DEFAULT NULL,
-  `base_url` varchar(191) DEFAULT NULL,
-  `sandbox_url` varchar(191) DEFAULT NULL,
-  `locale` varchar(191) DEFAULT NULL,
-  `validate_ssl` varchar(191) DEFAULT NULL,
-  `webhook_secret` varchar(191) DEFAULT NULL,
-  `logger` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `webhook_id` varchar(191) DEFAULT NULL,
-  `tax` varchar(191) DEFAULT '0',
-  `automate_tax` tinyint(1) NOT NULL DEFAULT 0,
-  `bank_account_details` text DEFAULT NULL,
-  `bank_account_other` text DEFAULT NULL,
-  `country_tax_enabled` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `gateway_taxes`
---
-
-CREATE TABLE `gateway_taxes` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `gateway_id` int(11) DEFAULT NULL,
-  `country_code` varchar(191) DEFAULT NULL,
-  `tax` decimal(8,2) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `health_check_result_history_items`
---
-
-CREATE TABLE `health_check_result_history_items` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `check_name` varchar(191) NOT NULL,
-  `check_label` varchar(191) NOT NULL,
-  `status` varchar(191) NOT NULL,
-  `notification_message` text NOT NULL,
-  `short_summary` varchar(191) DEFAULT NULL,
-  `meta` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`meta`)),
-  `ended_at` timestamp NOT NULL,
-  `batch` char(36) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `howitworks`
---
-
-CREATE TABLE `howitworks` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `order` int(11) NOT NULL DEFAULT 0,
-  `title` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `bg_color` varchar(191) DEFAULT NULL,
-  `bg_image` varchar(191) DEFAULT NULL,
-  `text_color` varchar(191) DEFAULT NULL,
-  `image` varchar(191) DEFAULT NULL,
-  `description` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `howitworks`
---
-
 INSERT INTO `howitworks` (`id`, `order`, `title`, `created_at`, `updated_at`, `bg_color`, `bg_image`, `text_color`, `image`, `description`) VALUES
 (1, 1, 'Simply explain what your content is about and adjust settings according to your needs.', '2023-06-02 08:41:26', '2023-06-02 08:41:26', NULL, NULL, NULL, NULL, NULL),
 (2, 2, 'Simply input some basic information or keywords about your brand or product, and let our AI algorithms do the rest.', '2023-06-02 08:41:34', '2023-06-02 08:41:34', NULL, NULL, NULL, NULL, NULL),
 (3, 3, 'View, edit or export your result with a few clicks. And you’re done!', '2023-06-02 08:41:41', '2023-06-02 08:41:41', NULL, NULL, NULL, NULL, NULL);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `integrations`
---
-
-CREATE TABLE `integrations` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `app` varchar(191) DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `image` varchar(191) DEFAULT NULL,
-  `slug` varchar(191) DEFAULT NULL,
-  `status` tinyint(4) NOT NULL DEFAULT 1,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `integrations`
---
-
 INSERT INTO `integrations` (`id`, `app`, `description`, `image`, `slug`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'Wordpress', 'Wordpress integration', 'images/integrations/wordpress.png', 'wordpress', 0, '2024-03-08 23:28:43', '2024-03-08 23:28:44');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `introductions`
---
-
-CREATE TABLE `introductions` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `key` varchar(191) NOT NULL,
-  `intro` text DEFAULT NULL,
-  `order` int(11) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT 1,
-  `title` text DEFAULT NULL,
-  `file_path` varchar(191) DEFAULT NULL,
-  `file_url` varchar(191) DEFAULT NULL,
-  `file_type` varchar(191) DEFAULT NULL,
-  `parent_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `introductions`
---
-
 INSERT INTO `introductions` (`id`, `key`, `intro`, `order`, `created_at`, `updated_at`, `status`, `title`, `file_path`, `file_url`, `file_type`, `parent_id`) VALUES
-(1, 'initialize', 'Welcome to MagicAI. Let\'s take a quick tour', 1, '2026-05-22 12:53:16', '2026-05-22 12:53:16', 1, NULL, NULL, NULL, NULL, NULL),
-(2, 'ai_writer', 'A great tool for using the Text Generator & AI Copywriting Assistant.', 2, '2026-05-22 12:53:16', '2026-05-22 12:53:16', 1, NULL, NULL, NULL, NULL, NULL),
-(3, 'ai_image', 'Create stunning images with just a few words.', 3, '2026-05-22 12:53:16', '2026-05-22 12:53:16', 1, NULL, NULL, NULL, NULL, NULL),
-(4, 'ai_pdf', 'Simply upload a PDF, find specific information. extract key insights or summarize the entire document.', 4, '2026-05-22 12:53:16', '2026-05-22 12:53:16', 1, NULL, NULL, NULL, NULL, NULL),
-(5, 'ai_code', 'Generate high quality code in seconds.', 5, '2026-05-22 12:53:16', '2026-05-22 12:53:16', 1, NULL, NULL, NULL, NULL, NULL),
-(6, 'select_plan', 'Choose the plan that suits you and start creating right away.', 6, '2026-05-22 12:53:16', '2026-05-22 12:53:16', 1, NULL, NULL, NULL, NULL, NULL),
-(7, 'affiliate_send', 'Invite your friends and start earning commissions.', 7, '2026-05-22 12:53:16', '2026-05-22 12:53:16', 1, NULL, NULL, NULL, NULL, NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `jobs`
---
-
-CREATE TABLE `jobs` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `queue` varchar(191) NOT NULL,
-  `payload` longtext NOT NULL,
-  `attempts` tinyint(3) UNSIGNED NOT NULL,
-  `reserved_at` int(10) UNSIGNED DEFAULT NULL,
-  `available_at` int(10) UNSIGNED NOT NULL,
-  `created_at` int(10) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `menus`
---
-
-CREATE TABLE `menus` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `parent_id` int(10) UNSIGNED DEFAULT NULL,
-  `key` varchar(191) NOT NULL,
-  `route` varchar(191) DEFAULT NULL,
-  `route_slug` varchar(191) DEFAULT NULL,
-  `label` varchar(191) DEFAULT NULL,
-  `icon` varchar(191) DEFAULT NULL,
-  `svg` text DEFAULT NULL,
-  `order` int(11) NOT NULL DEFAULT 0,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `params` longtext DEFAULT NULL,
-  `type` varchar(191) DEFAULT NULL,
-  `badge` varchar(191) DEFAULT NULL,
-  `extension` varchar(191) DEFAULT NULL,
-  `bolt_menu` tinyint(1) DEFAULT 0,
-  `bolt_background` varchar(191) DEFAULT NULL,
-  `bolt_foreground` varchar(191) DEFAULT NULL,
-  `letter_icon` tinyint(1) DEFAULT 0,
-  `letter_icon_bg` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `custom_menu` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `menus`
---
+(1, 'initialize', 'Welcome to MagicAI. Let\'s take a quick tour', 1, '2026-10-07 12:35:26', '2026-10-07 12:35:26', 1, NULL, NULL, NULL, NULL, NULL),
+(2, 'ai_writer', 'A great tool for using the Text Generator & AI Copywriting Assistant.', 2, '2026-10-07 12:35:26', '2026-10-07 12:35:26', 1, NULL, NULL, NULL, NULL, NULL),
+(3, 'ai_image', 'Create stunning images with just a few words.', 3, '2026-10-07 12:35:26', '2026-10-07 12:35:26', 1, NULL, NULL, NULL, NULL, NULL),
+(4, 'ai_pdf', 'Simply upload a PDF, find specific information. extract key insights or summarize the entire document.', 4, '2026-10-07 12:35:26', '2026-10-07 12:35:26', 1, NULL, NULL, NULL, NULL, NULL),
+(5, 'ai_code', 'Generate high quality code in seconds.', 5, '2026-10-07 12:35:26', '2026-10-07 12:35:26', 1, NULL, NULL, NULL, NULL, NULL),
+(6, 'select_plan', 'Choose the plan that suits you and start creating right away.', 6, '2026-10-07 12:35:26', '2026-10-07 12:35:26', 1, NULL, NULL, NULL, NULL, NULL),
+(7, 'affiliate_send', 'Invite your friends and start earning commissions.', 7, '2026-10-07 12:35:26', '2026-10-07 12:35:26', 1, NULL, NULL, NULL, NULL, NULL);
 
 INSERT INTO `menus` (`id`, `parent_id`, `key`, `route`, `route_slug`, `label`, `icon`, `svg`, `order`, `is_active`, `params`, `type`, `badge`, `extension`, `bolt_menu`, `bolt_background`, `bolt_foreground`, `letter_icon`, `letter_icon_bg`, `created_at`, `updated_at`, `custom_menu`) VALUES
-(1, NULL, 'user_label', NULL, NULL, 'User', NULL, NULL, 1, 1, '[]', 'label', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(2, NULL, 'dashboard', 'dashboard.user.index', NULL, 'Dashboard', 'tabler-layout-2', NULL, 2, 1, '[]', 'item', NULL, NULL, 1, '#9A6FFD', '#fff', NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:17', 0),
-(3, NULL, 'creative_suite', 'dashboard.user.creative-suite.index', NULL, 'Creative Suite', 'tabler-image-in-picture', NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(4, NULL, 'ext_chat_bot', 'dashboard.chatbot.index', NULL, 'AI Chat Bots', 'tabler-message-chatbot', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(5, NULL, 'ext_chatbot_analytics', 'dashboard.chatbot.analytics.index', NULL, 'AI Bot Analytics', 'tabler-chart-bar', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(6, NULL, 'ext_chatbot_knowledge_base_article', 'dashboard.chatbot.knowledge-base-article.index', NULL, 'AI Bot Knowledge Base', 'tabler-library', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(7, NULL, 'ext_chatbot_canned_response', 'dashboard.chatbot.canned-response.index', NULL, 'AI Bot Canned Responses', 'tabler-message-reply', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(8, NULL, 'ext_chatbot_chatbot_customer_article', 'dashboard.chatbot.chatbot-customer.index', NULL, 'AI Bot Contacts', 'tabler-library', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(9, NULL, 'ext_voice_chatbot', 'dashboard.chatbot-voice.index', NULL, 'AI Voice Bots', 'tabler-message-chatbot', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(10, NULL, 'marketing_bot_dashboard', 'dashboard.user.marketing-bot.dashboard', NULL, 'Marketing Bot', 'tabler-dashboard', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(11, NULL, 'marketing_bot_settings', 'dashboard.user.marketing-bot.settings.index', NULL, 'Marketing Bot Settings', 'tabler-settings-code', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(12, NULL, 'marketing_bot', NULL, NULL, 'Marketing bot', NULL, NULL, 4, 1, '[]', 'label', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(13, NULL, 'marketing_bot_inbox', 'dashboard.user.marketing-bot.inbox.index', NULL, 'Inbox', 'tabler-inbox', NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(14, NULL, 'marketing_bot_campaigns', 'dashboard.user.marketing-bot.whatsapp-campaign.index', NULL, 'Campaigns', 'tabler-flag-share', NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(15, 14, 'marketing_bot_campaigns_whatsapp', 'dashboard.user.marketing-bot.whatsapp-campaign.index', NULL, 'Whatsapp', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(16, 14, 'marketing_bot_campaigns_telegram', 'dashboard.user.marketing-bot.telegram-campaign.index', NULL, 'Telegram', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(17, NULL, 'marketing_bot_telegram', 'dashboard.user.marketing-bot.telegram-group.index', NULL, 'Telegram', 'tabler-brand-telegram', NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(18, 17, 'marketing_bot_telegram_group', 'dashboard.user.marketing-bot.telegram-group.index', NULL, 'Telegram Groups', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(19, 17, 'marketing_bot_telegram_subscribers', 'dashboard.user.marketing-bot.telegram-subscriber.index', NULL, 'Telegram Subscribers', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(20, NULL, 'marketing_bot_whatsapp', 'dashboard.user.marketing-bot.contact.index', NULL, 'Whatsapp', 'tabler-brand-whatsapp', NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(21, 20, 'marketing_bot_whatsapp_contact', 'dashboard.user.marketing-bot.contact.index', NULL, 'Contact Lists', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(22, 20, 'marketing_bot_whatsapp_segment', 'dashboard.user.marketing-bot.segment.index', NULL, 'Segments', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(23, 20, 'marketing_bot_whatsapp_contact_list', 'dashboard.user.marketing-bot.contact-list.index', NULL, 'Contacts', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(24, NULL, 'ext_chat_bot_agent', 'dashboard.chatbot-agent.index', NULL, 'Human Agent', 'tabler-message', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:15', 0),
-(25, NULL, 'ext_ai_photo_studio_dropdown', 'dashboard.user.ai-photoshoot.index', NULL, 'AI Photoshoot', 'tabler-camera', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(26, 25, 'ext_ai_photo_studio', 'dashboard.user.ai-photoshoot.index', NULL, 'Dashboard', 'tabler-layout-dashboard', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(27, 25, 'ext_ai_photo_studio_custom', 'dashboard.user.ai-photoshoot.custom.index', NULL, 'Custom Photoshoot', 'tabler-wand', NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(28, 25, 'ext_ai_photo_studio_templates', 'dashboard.user.ai-photoshoot.templates.index', NULL, 'Template Photoshoot', 'tabler-template', NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(29, 25, 'ext_ai_photo_studio_replace_background', 'dashboard.user.ai-photoshoot.replace-background.index', NULL, 'Replace Background', 'tabler-replace', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(30, 25, 'ext_ai_photo_studio_edit_image', 'dashboard.user.ai-photoshoot.edit_image.index', NULL, 'Edit Image', 'tabler-pencil', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(31, 25, 'ext_ai_photo_studio_my_photoshoots', 'dashboard.user.ai-photoshoot.photo_shoots.my', NULL, 'My Photoshoots', 'tabler-photo', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(32, NULL, 'ext_fashion_studio_dropdown', 'dashboard.user.fashion-studio.index', NULL, 'AI Fashion Studio', 'tabler-tie', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(33, 32, 'ext_fashion_studio', 'dashboard.user.fashion-studio.index', NULL, 'Dashboard', 'tabler-layout-dashboard', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(34, 32, 'ext_fashion_studio_photo_shoot', 'dashboard.user.fashion-studio.photo_shoots.index', NULL, 'PhotoShoot', 'tabler-camera', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(35, 32, 'ext_fashion_studio_virtual_try_on', 'dashboard.user.fashion-studio.virtual_try_on.index', NULL, 'Virtual Try-on', 'tabler-shirt', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(36, 32, 'ext_fashion_studio_change_model', 'dashboard.user.fashion-studio.change_model.index', NULL, 'Change Model', 'tabler-user-square-rounded', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(37, 32, 'ext_fashion_studio_edit_image', 'dashboard.user.fashion-studio.edit_image.index', NULL, 'Edit Image', 'tabler-pencil', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(38, 32, 'ext_fashion_studio_create_video', 'dashboard.user.fashion-studio.create_video.index', NULL, 'Create Video', 'tabler-video', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(39, 32, 'ext_fashion_studio_photo_shoots', 'dashboard.user.fashion-studio.photo_shoots.my', NULL, 'My Photo Shoots', 'tabler-copy', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(40, 32, 'ext_fashion_studio_wardrobe', 'dashboard.user.fashion-studio.wardrobe.index', NULL, 'My Wardrobe', 'tabler-hanger-2', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(41, 32, 'ext_fashion_studio_user_settings', 'dashboard.user.fashion-studio.user_settings.index', NULL, 'Settings', 'tabler-settings', NULL, 99, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(42, NULL, 'ext_ugc_dropdown', 'dashboard.user.ugc-studio.index', NULL, 'UGC', 'tabler-video', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(43, 42, 'ext_ugc_studio', 'dashboard.user.ugc-studio.index', NULL, 'Studio', 'tabler-layout-dashboard', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(44, 42, 'ext_ugc_factory', 'dashboard.user.ugc-factory.index', NULL, 'Factory', 'tabler-wand', NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(45, 42, 'ext_ugc_creator', 'dashboard.user.ugc-creator.index', NULL, 'Creator', 'tabler-movie', NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(46, NULL, 'ext_chatbot_customer_tag', 'dashboard.chatbot-customer-tags.index', NULL, 'Customer Tags', 'tabler-tags', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:16', 0),
-(47, NULL, 'ext_social_media_dropdown', 'dashboard.user.social-media.index', NULL, 'AI Social Media', 'tabler-thumb-up', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(48, 47, 'ext_social_media', 'dashboard.user.social-media.index', NULL, 'Dashboard', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(49, 47, 'ext_social_media_campaign', 'dashboard.user.social-media.campaign.index', NULL, 'Campaigns', NULL, NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(50, 47, 'ext_social_media_platform', 'dashboard.user.social-media.platforms', NULL, 'Platforms', NULL, NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(51, 47, 'ext_social_media_post', 'dashboard.user.social-media.post.index', NULL, 'Social Media Posts', NULL, NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(52, 47, 'ext_social_media_calendar', 'dashboard.user.social-media.calendar', NULL, 'Calendar', NULL, NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(53, 47, 'ext_social_media_automation', 'dashboard.user.social-media.automation.index', NULL, 'Automation', NULL, NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(54, NULL, 'ext_social_media_agent_dropdown', 'dashboard.user.social-media.agent.index', NULL, 'AI Social Media Agent', 'tabler-thumb-up', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(55, 54, 'ext_social_media_agent_dashboard', 'dashboard.user.social-media.agent.index', NULL, 'Dashboard', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(56, 54, 'ext_social_media_agent_agents', 'dashboard.user.social-media.agent.agents', NULL, 'Agents', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(57, 54, 'ext_social_media_agent_agents_archived_posts', 'dashboard.user.social-media.agent.posts', NULL, 'Archived Posts', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(58, 54, 'ext_social_media_agent_calendar', 'dashboard.user.social-media.agent.calendar', NULL, 'Calendar', NULL, NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(59, 54, 'ext_social_media_agent_analytics', 'dashboard.user.social-media.agent.analytics', NULL, 'Analytics', NULL, NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(60, 54, 'ext_social_media_agent_accounts', 'dashboard.user.social-media.agent.accounts', NULL, 'Accounts', NULL, NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(61, 54, 'ext_social_media_agent_chat', 'dashboard.user.social-media.agent.chat.index', NULL, 'Chat', NULL, NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(62, NULL, 'ext_blogpilot_dropdown', 'dashboard.user.blogpilot.agent.index', NULL, 'AI BlogPilot', 'tabler-file-text-ai', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(63, 62, 'ext_blogpilot_dashboard', 'dashboard.user.blogpilot.agent.index', NULL, 'Dashboard', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(64, 62, 'ext_blogpilot_agents', 'dashboard.user.blogpilot.agent.agents', NULL, 'Agents', NULL, NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(65, 62, 'ext_blogpilot_agents_archived_posts', 'dashboard.user.blogpilot.agent.posts', NULL, 'Posts', NULL, NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(66, 62, 'ext_blogpilot_calendar', 'dashboard.user.blogpilot.agent.calendar', NULL, 'Calendar', NULL, NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(67, 62, 'ext_blogpilot_analytics', 'dashboard.user.blogpilot.agent.analytics', NULL, 'Analytics', NULL, NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(68, NULL, 'ai_influencer', 'dashboard.user.ai-influencer.index', NULL, 'AI Influencer', 'tabler-star', NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:15', 0),
-(69, NULL, 'url_to_video', 'dashboard.user.url-to-video.index', NULL, 'Url To Video', 'tabler-photo-video', NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(70, NULL, 'viral_clips', 'dashboard.user.viral-clips.index', NULL, 'AI Viral Clips', 'tabler-movie', NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(71, NULL, 'influencer_avatar', 'dashboard.user.influencer-avatar.index', NULL, 'Influencer Avatar', 'tabler-device-mobile-star', NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(72, NULL, 'documents', 'dashboard.user.openai.documents.all', NULL, 'Documents', 'tabler-archive', NULL, 3, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(73, NULL, 'ai_editor', 'dashboard.user.generator.index', NULL, 'AI Editor', 'tabler-notebook', NULL, 4, 1, '[]', 'item', NULL, NULL, 1, '#E29CB6', '#fff', NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:17', 0),
-(74, NULL, 'ai_writer', 'dashboard.user.openai.list', NULL, 'AI Writer', 'tabler-notes', NULL, 5, 1, '[]', 'item', NULL, NULL, 1, '#468EA6', '#fff', NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:17', 0),
-(75, NULL, 'ai_video', 'dashboard.user.openai.generator', 'ai_video', 'AI Video', 'tabler-video', NULL, 6, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(76, NULL, 'ai_video_to_video', 'dashboard.user.openai.generator', 'ai_video_to_video', 'AI Video To Video', 'tabler-video', NULL, 7, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(77, NULL, 'ai_image_generator', 'dashboard.user.openai.generator', 'ai_image_generator', 'AI Image', 'tabler-photo', NULL, 7, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(78, NULL, 'ai_article_wizard', 'dashboard.user.openai.articlewizard.new', 'ai_article_wizard', 'AI Article Wizard', 'tabler-ad-2', NULL, 8, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(79, NULL, 'ai_pdf', 'dashboard.user.openai.generator.workbook', 'ai_pdf', 'AI File Chat', 'tabler-file-pencil', NULL, 9, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(80, NULL, 'ai_vision', 'dashboard.user.openai.generator.workbook', 'ai_vision', 'AI Vision', 'tabler-scan-eye', NULL, 10, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(81, NULL, 'ai_realtime_voice_chat', 'dashboard.user.openai.chat.chat', 'ai_realtime_voice_chat', 'AI Realtime Voice Chat', 'tabler-wave-sine', NULL, 10, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(82, NULL, 'ai_realtime_image', 'dashboard.user.ai-realtime-image.index', 'ai_realtime_image', 'AI Realtime Image', 'tabler-image-in-picture', NULL, 10, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(83, NULL, 'ai_rewriter', 'dashboard.user.openai.rewriter', 'ai_rewriter', 'AI ReWriter', 'tabler-ballpen', NULL, 11, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(84, NULL, 'ai_chat_image', 'dashboard.user.openai.generator.workbook', 'ai_chat_image', 'AI Chat Image', 'tabler-photo', NULL, 12, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(85, NULL, 'ai_chat_all', 'dashboard.user.openai.chat.chat', NULL, 'AI Chat', 'tabler-message-dots', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(86, NULL, 'ai_chat_pro', 'dashboard.user.openai.chat.pro.index', NULL, 'AI Chat Pro', 'tabler-message-plus', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(87, NULL, 'ai_chat_pro_image_chat', 'ai-chat-image.index', NULL, 'Image Assistant', 'tabler-photo-up', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(88, NULL, 'ai_image_pro', 'dashboard.user.ai-image-pro.index', NULL, 'AI Image Pro', 'tabler-photo-up', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(89, NULL, 'ai_image_pro_bookmark', 'dashboard.user.ai-image-pro.index', 'slug=bookmarks', 'Bookmark', 'tabler-bookmark', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(90, NULL, 'ai_image_pro_real_time', 'dashboard.user.ai-image-pro.realtime', NULL, 'Realtime Image', 'tabler-aperture', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:17', 0),
-(91, NULL, 'ai_image_pro_edit', 'dashboard.user.ai-image-pro.edit', NULL, 'Smart Edit', 'tabler-vector-bezier', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(92, NULL, 'ai_image_pro_get_inspired', 'dashboard.user.ai-image-pro.index', 'slug=inspired', 'Get Inspired', 'tabler-wand', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(93, NULL, 'ai_image_pro_media_library', 'ai-image-pro.media-library', NULL, 'Media Library', 'tabler-inbox', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(94, NULL, 'ai_code_generator', 'dashboard.user.openai.generator.workbook', 'ai_code_generator', 'AI Code', 'tabler-terminal-2', NULL, 14, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(95, NULL, 'ai_presentation', 'dashboard.user.ai-presentation.index', NULL, 'AI Presentation', 'tabler-presentation', NULL, 14, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(96, NULL, 'ai_youtube', 'dashboard.user.openai.generator.workbook', 'ai_youtube', 'AI YouTube', 'tabler-brand-youtube', NULL, 15, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(97, NULL, 'ai_rss', 'dashboard.user.openai.generator.workbook', 'ai_rss', 'AI RSS', 'tabler-rss', NULL, 15, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(98, NULL, 'ai_speech_to_text', 'dashboard.user.openai.generator', 'ai_speech_to_text', 'AI Speech to Text', 'tabler-microphone', NULL, 16, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(99, NULL, 'ai_voiceover', 'dashboard.user.openai.generator', 'ai_voiceover', 'AI Voiceover', 'tabler-volume', NULL, 17, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(100, NULL, 'ai_voice_isolator', 'dashboard.user.openai.generator', 'ai_voice_isolator', 'AI Voice Isolator', 'tabler-ear-scan', NULL, 18, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(101, NULL, 'ai_voiceover_clone', 'dashboard.user.voice.index', NULL, 'AI Voice Clone', 'tabler-microphone-2', NULL, 18, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(102, NULL, 'team_menu', 'dashboard.user.team.index', NULL, 'Team', 'tabler-user-plus', NULL, 19, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(103, NULL, 'brand_voice', 'dashboard.user.brand.index', NULL, 'Brand Voice', 'tabler-brand-trello', NULL, 20, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(104, NULL, 'advanced_image', 'dashboard.user.advanced-image.index', NULL, 'AI Image Editor', 'tabler-photo-edit', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(105, NULL, 'ai_avatar', 'dashboard.user.ai-avatar.index', NULL, 'AI Avatar', 'tabler-slideshow', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(106, NULL, 'ai_persona', 'dashboard.user.ai-persona.index', NULL, 'AI Persona', 'tabler-camera-star', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(107, NULL, 'video_studio', 'dashboard.user.video-studio.index', NULL, 'Video Studio', 'tabler-layout-dashboard', NULL, 19, 1, '[]', 'item', NULL, '0', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(108, NULL, 'ai_video_pro', 'dashboard.user.ai-video-pro.index', NULL, 'AI Video Pro', 'tabler-video', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(109, NULL, 'video_dubbing', 'dashboard.user.video-dubbing.index', NULL, 'Video Dubbing', 'tabler-language', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(110, NULL, 'ai_captions', 'dashboard.user.ai-captions.index', NULL, 'AI Captions', 'tabler-quote', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(111, NULL, 'ai_music', 'dashboard.user.ai-music.index', NULL, 'AI Music', 'tabler-slideshow', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(112, NULL, 'ext_ai_music_pro', 'dashboard.user.ai-music-pro.index', NULL, 'AI Music Pro', 'tabler-music', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(113, NULL, 'ai_product_shot', 'dashboard.user.ai-product-shot.index', NULL, 'AI Product Photography', 'tabler-photo-star', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(114, NULL, 'api_keys', 'dashboard.user.apikeys.index', NULL, 'API Keys', 'tabler-key', NULL, 21, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(115, NULL, 'affiliates', 'dashboard.user.affiliates.index', NULL, 'Affiliates', 'tabler-currency-dollar', NULL, 22, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(116, NULL, 'support', 'dashboard.support.list', NULL, 'Support', 'tabler-lifebuoy', NULL, 23, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(117, NULL, 'integration', 'dashboard.user.integration.index', NULL, 'Integration', 'tabler-webhook', NULL, 24, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(118, NULL, 'divider_one', NULL, NULL, NULL, NULL, NULL, 25, 1, '[]', 'divider', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(119, NULL, 'links', NULL, NULL, 'Links', NULL, NULL, 26, 1, '[]', 'label', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(120, NULL, 'favorites', 'dashboard.user.openai.list', 'filter=favorite', 'Favorites', NULL, NULL, 27, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, 1, 'bg-[#7A8193] text-white', '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(121, NULL, 'workbook', 'dashboard.user.openai.documents.all', '?filter=favorites', 'Workbook', NULL, NULL, 28, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, 1, 'bg-[#658C8E] text-white', '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(122, NULL, 'divider_two', NULL, NULL, NULL, NULL, NULL, 29, 1, '[]', 'divider', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(123, NULL, 'admin_label', NULL, NULL, 'Admin', NULL, NULL, 30, 1, '[]', 'label', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(124, NULL, 'admin_dashboard', 'dashboard.admin.index', NULL, 'Dashboard', 'tabler-layout-2', NULL, 31, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(125, NULL, 'marketplace', 'dashboard.admin.marketplace.index', NULL, 'Marketplace', 'tabler-building-store', NULL, 32, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(126, NULL, 'themes', 'dashboard.admin.themes.index', NULL, 'Themes', 'tabler-palette', NULL, 33, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(127, NULL, 'ext_migration', 'migration::welcome', NULL, 'Migration', 'tabler-transfer-in', NULL, 33, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(128, NULL, 'user_management', 'dashboard.admin.users.index', NULL, 'User Management', 'tabler-users', NULL, 34, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(129, 128, 'user_list', 'dashboard.admin.users.index', NULL, 'Users List', NULL, NULL, 34, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(130, 128, 'user_activity', 'dashboard.admin.users.activity', NULL, 'Users Activities', NULL, NULL, 34, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(131, 128, 'user_dashboard', 'dashboard.admin.users.dashboard', NULL, 'Users Dashboard', NULL, NULL, 34, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(132, 128, 'user_deletion', 'dashboard.admin.users.deletion.reqs', NULL, 'User Deletion Requests', NULL, NULL, 34, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(133, 128, 'user_permission', 'dashboard.admin.users.permissions', NULL, 'User Permissions', NULL, NULL, 34, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(134, NULL, 'announcements', 'dashboard.admin.announcements.index', NULL, 'Announcements', 'tabler-speakerphone', NULL, 35, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(135, NULL, 'discount-manager', 'dashboard.admin.discount-manager.index', NULL, 'Discount & Offer Manager', 'tabler-shopping-bag-discount', NULL, 37, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(136, NULL, 'site_promo', 'dashboard.admin.ads.index', NULL, 'Google adsense', 'tabler-ad-circle', NULL, 35, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(137, NULL, 'support_requests', 'dashboard.support.list', NULL, 'Support Requests', 'tabler-lifebuoy', NULL, 36, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(138, NULL, 'templates', 'dashboard.admin.openai.list', NULL, 'Templates', 'tabler-list-details', NULL, 37, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(139, 138, 'built_in_templates', 'dashboard.admin.openai.list', NULL, 'Built-in Templates', NULL, NULL, 38, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(140, 138, 'custom_templates', 'dashboard.admin.openai.custom.list', NULL, 'Custom Templates', NULL, NULL, 39, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(141, 138, 'ai_writer_categories', 'dashboard.admin.openai.categories.list', NULL, 'AI Writer Categories', NULL, NULL, 40, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(142, NULL, 'chat_settings', 'dashboard.admin.openai.chat.category', NULL, 'Chat Settings', 'tabler-message-circle', NULL, 41, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(143, 142, 'chat_categories', 'dashboard.admin.openai.chat.category', NULL, 'Chat Categories', NULL, NULL, 42, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(144, 142, 'chat_templates', 'dashboard.admin.openai.chat.list', NULL, 'Chat Templates', NULL, NULL, 43, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(145, 142, 'chatbot_training', 'dashboard.admin.chatbot.index', NULL, 'Chatbot Training', NULL, NULL, 44, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(146, 142, 'voice_chatbot_training', 'dashboard.admin.voice-chatbot.index', NULL, 'Voice Chatbot Training', NULL, NULL, 44, 1, '[]', 'item', NULL, '0', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(147, 142, 'ai_assistant', 'dashboard.admin.ai-assistant.index', NULL, 'Assistant Training', NULL, NULL, 44, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(148, 217, 'ai_chat_models', 'dashboard.admin.ai-chat-model.index', NULL, 'AI Models', NULL, NULL, 3, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:16', 0),
-(149, 142, 'ai_engines', 'dashboard.admin.ai-chat-model.models.index', NULL, 'AI Engines', NULL, NULL, 45, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(150, 142, 'floating_chat_settings', 'dashboard.admin.chatbot.setting', NULL, 'Floating Chat Settings', NULL, NULL, 45, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(151, 142, 'social_media_agent_chat_settings', 'dashboard.admin.social-media.agent.chat.settings', NULL, 'Social Media Agent Chat', NULL, NULL, 46, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(152, 142, 'external_chat_settings', 'dashboard.admin.chatbot.external_settings', NULL, 'External Chat Settings', NULL, NULL, 47, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(153, NULL, 'frontend', 'dashboard.admin.frontend.settings', NULL, 'Frontend', 'tabler-device-laptop', NULL, 47, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(154, 153, 'frontend_settings', 'dashboard.admin.frontend.settings', NULL, 'Frontend Settings', NULL, NULL, 48, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(155, 153, 'frontend_section_settings', 'dashboard.admin.frontend.sectionsettings', NULL, 'Frontend Section Settings', NULL, NULL, 49, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(156, 153, 'frontend_menu', 'dashboard.admin.frontend.menusettings', NULL, 'Menu', NULL, NULL, 50, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(157, 153, 'social_media_accounts', 'dashboard.admin.frontend.socialmedia', NULL, 'Social Media Accounts', NULL, NULL, 50, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(158, 153, 'auth_settings', 'dashboard.admin.frontend.authsettings', NULL, 'Auth Settings', NULL, NULL, 52, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(159, 153, 'f_a_q', 'dashboard.admin.frontend.faq.index', NULL, 'F.A.Q', NULL, NULL, 53, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(160, 153, 'tools_section', 'dashboard.admin.frontend.tools.index', NULL, 'Tools Section', NULL, NULL, 54, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(161, 153, 'channels_section', 'dashboard.admin.frontend.channel-setting.index', NULL, 'Channels Section', NULL, NULL, 54, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(162, 153, 'content_box', 'dashboard.admin.frontend.content-box.index', NULL, 'Content Box Section', NULL, NULL, 54, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(163, 153, 'curtain_section', 'dashboard.admin.frontend.curtain.index', NULL, 'Curtain Section', NULL, NULL, 54, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(164, 153, 'features_section', 'dashboard.admin.frontend.future.index', NULL, 'Features Section', 'tabler-list-details', NULL, 55, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:14', '2026-05-22 12:53:14', 0),
-(165, 153, 'testimonials_section', 'dashboard.admin.testimonials.index', NULL, 'Testimonials Section', NULL, NULL, 56, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(166, 153, 'clients_section', 'dashboard.admin.clients.index', NULL, 'Clients Section', NULL, NULL, 57, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(167, 153, 'how_it_works_section', 'dashboard.admin.howitWorks.index', NULL, 'How it Works Section', NULL, NULL, 58, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(168, 153, 'who_can_use_section', 'dashboard.admin.frontend.whois.index', NULL, 'Who Can Use Section', NULL, NULL, 59, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(169, 153, 'generators_list_section', 'dashboard.admin.frontend.generatorlist.index', NULL, 'Generators List Section', NULL, NULL, 60, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(170, NULL, 'finance', 'dashboard.admin.finance.plans.index', NULL, 'Finance', 'tabler-wallet', NULL, 61, 1, '[]', 'item', NULL, NULL, 1, '#3569F5', '#fff', NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:17', 0),
-(171, 170, 'bank_transactions', 'dashboard.admin.bank.transactions.list', NULL, 'Bank Transactions', NULL, NULL, 62, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(172, 170, 'membership_plans', 'dashboard.admin.finance.plans.index', NULL, 'Membership Plans (old version)', NULL, NULL, 63, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:16', 0),
-(173, 170, 'admin_finance_plan', 'dashboard.admin.finance.plan.index', NULL, 'Pricing Plans', NULL, NULL, 63, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:16', 0),
-(174, 170, 'payment_gateways', 'dashboard.admin.finance.paymentGateways.index', NULL, 'Payment Gateways', NULL, NULL, 64, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(175, 170, 'trial_features', 'dashboard.admin.finance.free.feature', NULL, 'Trial Features', NULL, NULL, 60, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(176, 170, 'mobile_payment', 'dashboard.admin.finance.mobile.index', NULL, 'Mobile Payment', NULL, NULL, 60, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(177, NULL, 'pages', 'dashboard.page.list', NULL, 'Pages', 'tabler-file-description', NULL, 61, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(178, NULL, 'blog', 'dashboard.blog.list', NULL, 'Blog', 'tabler-pencil', NULL, 62, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(179, NULL, 'ai-image-pro-publish-reqs', 'dashboard.admin.ai-image-pro.community-images.index', NULL, 'AI Image Pro Publish Requests', 'tabler-notification', NULL, 63, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(180, NULL, 'affiliates_admin', 'dashboard.admin.affiliates.index', NULL, 'Affiliates', 'tabler-currency-dollar', NULL, 63, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(181, NULL, 'coupons_admin', 'dashboard.admin.coupons.index', NULL, 'Coupons', 'tabler-ticket', NULL, 64, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(182, NULL, 'email_templates', 'dashboard.email-templates.index', NULL, 'Email Templates', 'tabler-mail', NULL, 65, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(183, NULL, 'onboarding_pro_extension', 'dashboard.admin.onboarding-pro.index', NULL, 'Onboarding Pro', 'tabler-message-circle', NULL, 65, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(184, NULL, 'onboarding', 'dashboard.admin.onboarding.index', NULL, 'Onboarding', 'tabler-directions', NULL, 65, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(185, NULL, 'mailchimp_newsletter', 'dashboard.admin.mailchimp-newsletter.index', NULL, 'Mailchimp Newsletter', 'tabler-mailbox', NULL, 65, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(186, NULL, 'hubspot', 'dashboard.admin.hubspot.index', NULL, 'Hubspot', 'tabler-affiliate', NULL, 65, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(187, NULL, 'api_integration', 'default', NULL, 'API Integration', 'tabler-api', NULL, 66, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:16', 0),
-(188, 187, 'api_integration_azure_openai', 'dashboard.admin.settings.azure-openai.index', NULL, 'Azure OpenAI', NULL, NULL, 67, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(189, 187, 'api_integration_openrouter', 'dashboard.admin.settings.open-router.show', NULL, 'Open Router', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(190, 187, 'api_integration_ably', 'dashboard.admin.settings.ably', NULL, 'Ably Setting', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(191, 187, 'api_integration_llama', 'dashboard.admin.settings.llama', NULL, 'Llama', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(192, 187, 'api_integration_searchapi', 'dashboard.admin.settings.searchapi', NULL, 'Search Api', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(193, 187, 'api_integration_openai', 'dashboard.admin.settings.openai', NULL, 'OpenAI', NULL, NULL, 67, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(194, 187, 'api_integration_gemini', 'dashboard.admin.settings.gemini', NULL, 'Gemini', NULL, NULL, 67, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(195, 187, 'api_integration_anthropic', 'dashboard.admin.settings.anthropic', NULL, 'Anthropic', NULL, NULL, 68, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(196, 187, 'api_integration_deepseek', 'dashboard.admin.settings.deepseek', NULL, 'Deepseek', NULL, NULL, 68, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(197, 187, 'api_integration_fal_ai', 'dashboard.admin.settings.fal-ai', NULL, 'Fal AI', NULL, NULL, 68, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:16', 0),
-(198, 187, 'api_integration_gamma_ai', 'dashboard.admin.settings.gamma-ai', NULL, 'Gamma AI', NULL, NULL, 68, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(199, 187, 'api_integration_creatify', 'dashboard.admin.settings.creatify', NULL, 'Creatify', NULL, NULL, 68, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(200, 187, 'api_integration_topview', 'dashboard.admin.settings.topview', NULL, 'Topview', NULL, NULL, 68, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(201, 187, 'api_integration_vizard', 'dashboard.admin.settings.vizard', NULL, 'Vizard', NULL, NULL, 68, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(202, 187, 'api_integration_klap', 'dashboard.admin.settings.klap', NULL, 'Klap', NULL, NULL, 68, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(203, 187, 'api_integration_piapi_ai', 'dashboard.admin.settings.piapi-ai', NULL, 'PiAPI', NULL, NULL, 69, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(204, 187, 'api_integration_stablediffusion', 'dashboard.admin.settings.stablediffusion', NULL, 'StableDiffusion', NULL, NULL, 69, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(205, 187, 'api_integration_unsplashapi', 'dashboard.admin.settings.unsplashapi', NULL, 'Unsplash', NULL, NULL, 70, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(206, 187, 'api_integration_pexelsapi', 'dashboard.admin.settings.pexelsapi', NULL, 'Pexels', NULL, NULL, 71, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(207, 187, 'api_integration_pixabayapi', 'dashboard.admin.settings.pixabayapi', NULL, 'Pixabay', NULL, NULL, 72, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(208, 187, 'api_integration_serperapi', 'dashboard.admin.settings.serperapi', NULL, 'Serper', NULL, NULL, 73, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(209, 187, 'api_integration_perplexity', 'dashboard.admin.settings.perplexity', NULL, 'Perplexity', NULL, NULL, 73, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(210, 187, 'api_integration_tts', 'dashboard.admin.settings.tts', NULL, 'TTS', NULL, NULL, 74, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(211, 187, 'api_integration_synthesia', 'dashboard.admin.settings.synthesia', NULL, 'Synthesia', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(212, 187, 'api_integration_together', 'dashboard.admin.settings.together', NULL, 'Together', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(213, 187, 'api_integration_heygen', 'dashboard.admin.settings.heygen', NULL, 'Heygen', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(214, 187, 'api_integration_aimlapi', 'dashboard.admin.settings.aimlapi', NULL, 'Aimlapi', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(215, 187, 'api_integration_pebblely', 'dashboard.admin.settings.pebblely', NULL, 'Pebblely', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(216, 187, 'plagiarism_extension', 'dashboard.admin.settings.plagiarism', NULL, 'Plagiarism API', NULL, NULL, 77, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(217, NULL, 'settings', 'dashboard.admin.settings.general', NULL, 'Settings', 'tabler-device-laptop', NULL, 75, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(218, 217, 'config', 'dashboard.admin.config.index', NULL, 'General Settings', NULL, NULL, 0, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(219, NULL, 'live_customizer', 'dashboard.admin.live-customizer.setting', NULL, 'Live Customizer ', 'tabler-brush', NULL, 69, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(220, 217, 'thumbnail_system', 'dashboard.admin.settings.thumbnail', NULL, 'Thumbnail System', NULL, NULL, 79, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(221, 217, 'premium_advantages', 'dashboard.admin.config.premium-advantages.index', NULL, 'Premium Advantages', NULL, NULL, 79, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(222, 217, 'advanced_image_setting', 'dashboard.admin.settings.advanced-image.index', NULL, 'AI Image Editor Setting', NULL, NULL, 70, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(223, 217, 'privacy', 'dashboard.admin.settings.privacy', NULL, 'Privacy Policy and Terms', NULL, NULL, 82, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0);
-INSERT INTO `menus` (`id`, `parent_id`, `key`, `route`, `route_slug`, `label`, `icon`, `svg`, `order`, `is_active`, `params`, `type`, `badge`, `extension`, `bolt_menu`, `bolt_background`, `bolt_foreground`, `letter_icon`, `letter_icon_bg`, `created_at`, `updated_at`, `custom_menu`) VALUES
-(224, NULL, 'site_health', 'dashboard.admin.health.index', NULL, 'Site Health', 'tabler-activity-heartbeat', NULL, 85, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(225, NULL, 'license', 'dashboard.admin.license.index', NULL, 'License', 'tabler-checklist', NULL, 86, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(226, NULL, 'update', 'dashboard.admin.update.index', NULL, 'Update', 'tabler-refresh', NULL, 87, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(227, NULL, 'menu_setting', 'dashboard.admin.menu.index', NULL, 'Menu', 'tabler-menu', NULL, 88, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(228, NULL, 'footer_menu_setting', 'dashboard.admin.footer-menu.index', NULL, 'Footer Menu', 'tabler-menu', NULL, 89, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(229, NULL, 'mega_menu_setting', 'dashboard.admin.mega-menu.index', NULL, 'Mega Menu', 'tabler-menu-2', NULL, 88, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(230, NULL, 'openai_generator_extension', 'default', NULL, 'Ai Template', 'tabler-list-details', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(231, 230, 'custom_templates_extension', 'dashboard.user.ai-template.openai-generator.index', NULL, 'Custom Templates', NULL, NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(232, 230, 'ai_writer_categories_extension', 'dashboard.user.ai-template.openai-generator-filter.index', NULL, 'AI Writer Categories', NULL, NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(233, NULL, 'ai_plagiarism_extension', 'dashboard.user.openai.plagiarism.index', NULL, 'AI Plagiarism', 'tabler-progress-check', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(234, NULL, 'ai_detector_extension', 'dashboard.user.openai.detectaicontent.index', NULL, 'AI Detector', 'tabler-text-scan-2', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(235, NULL, 'ai_social_media_extension', 'dashboard.user.automation.index', NULL, 'AI Social Media', 'tabler-share', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(236, NULL, 'scheduled_posts_extension', 'dashboard.user.automation.list', NULL, 'Social Media Posts', 'tabler-report', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(237, 217, 'ai_social_media_settings_extension', 'dashboard.admin.automation.settings', NULL, 'AI Social Media Settings', NULL, NULL, 77, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(238, 217, 'ai_chat_pro_settings_extension', 'dashboard.admin.openai.chat.pro.settings', NULL, 'AI Chat Pro Settings', NULL, NULL, 77, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(239, 217, 'video_dubbing_settings_extension', 'dashboard.admin.video-dubbing.settings', NULL, 'Video Dubbing Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(240, 187, 'ai_captions_settings_extension', 'dashboard.admin.ai-captions.settings', NULL, 'AI Captions', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(241, 217, 'ai_music_pro_settings_extension', 'dashboard.admin.ai-music-pro.settings', NULL, 'AI Music Pro Settings', NULL, NULL, 79, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(242, 217, 'ai_chat_pro_image_chat_settings_extension', 'dashboard.admin.ai-chat-pro-image-chat.settings', NULL, 'AI Chat Pro Image Chat Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(243, 217, 'ai_image_pro_settings_extension', 'dashboard.admin.ai-image-pro.settings', NULL, 'AI Image Pro Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(244, 217, 'social_media_agent_chat_settings_extension', 'dashboard.admin.social-media.agent.chat.settings', NULL, 'Social Media Agent Chat Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(245, 217, 'content_manager_extension', 'content-manager::settings', NULL, 'Content Manager Settings', NULL, NULL, 77, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(246, 217, 'social_media_settings_extension', 'dashboard.admin.social-media.setting.index', NULL, 'Social Media Platform Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(247, 217, 'chatbot_instagram_settings_extension', 'dashboard.admin.chatbot-instagram.settings.index', NULL, 'Instagram Chatbot Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(248, 217, 'chatbot_voice_call_settings_extension', 'dashboard.admin.settings.voice-call', NULL, 'Voice Call Settings', NULL, NULL, 79, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(249, NULL, 'chat_settings_extension', 'default', NULL, 'Chat Settings', 'tabler-message-circle', NULL, 7, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(250, 249, 'chat_categories_extension', 'dashboard.user.chat-setting.chat-category.index', NULL, 'Chat Categories', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(251, 249, 'chat_template_extension', 'dashboard.user.chat-setting.chat-template.index', NULL, 'Chat Templates', NULL, NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(252, 249, 'chat_training_extension', 'dashboard.user.chat-setting.chatbot.index', NULL, 'Chatbot Training', 'tabler-tags', NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:16', 0),
-(253, 217, 'cloudflare_r2_extension', 'dashboard.admin.settings.cloudflare-r2', NULL, 'Cloudflare R2', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(254, NULL, 'photo_studio_extension', 'dashboard.user.photo-studio.index', NULL, 'AI Photoshoot', 'tabler-device-laptop', NULL, 8, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(255, NULL, 'seo_tool_extension', 'dashboard.user.seo.index', NULL, 'SEO Tool', 'tabler-seo', NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(256, NULL, 'ai_web_chat_extension', 'dashboard.user.openai.webchat.workbook', NULL, 'AI Web Chat', 'tabler-world-www', NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(257, 187, 'clipdrop_extension', 'dashboard.admin.settings.clipdrop', NULL, 'Clipdrop', NULL, NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(258, 217, 'creative_suite_settings', 'dashboard.admin.creative-suite.settings', NULL, 'Creative Suite Settings', NULL, NULL, 70, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(259, 187, 'novita_extension', 'dashboard.admin.settings.novita', NULL, 'Novita', NULL, NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(260, 187, 'freepik_extension', 'dashboard.admin.settings.freepik', NULL, 'Freepik', NULL, NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(261, 187, 'x_ai', 'dashboard.admin.settings.x-ai', NULL, 'X AI', NULL, NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(262, 187, 'xero_extension', 'dashboard.admin.settings.xero', NULL, 'Xero API', NULL, NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(263, 217, 'maintenance_setting', 'dashboard.admin.settings.maintenance.index', NULL, 'Maintenance', NULL, NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(264, 217, 'checkout_registration_extension', 'dashboard.admin.checkout.registration.settings.index', NULL, 'Checkout Registration', NULL, NULL, 9, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(265, 217, 'ext_ai_photo_studio_settings', 'dashboard.admin.ai-photoshoot.settings', NULL, 'AI Photoshoot Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(266, 217, 'ext_fashion_studio_settings', 'dashboard.admin.fashion-studio.settings', NULL, 'AI Fashion Studio Settings', NULL, NULL, 79, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(267, 217, 'ext_ugc_factory_settings', 'dashboard.admin.ugc-factory.settings', NULL, 'UGC Factory Settings', NULL, NULL, 80, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0),
-(268, 217, 'ext_ugc_creator_settings', 'dashboard.admin.ugc-creator.settings', NULL, 'UGC Creator Settings', NULL, NULL, 81, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-05-22 12:53:15', '2026-05-22 12:53:15', 0);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `migrations`
---
-
-CREATE TABLE `migrations` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `migration` varchar(191) NOT NULL,
-  `batch` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `migrations`
---
+(1, NULL, 'user_label', NULL, NULL, 'User', NULL, NULL, 1, 1, '[]', 'label', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(2, NULL, 'dashboard', 'dashboard.user.index', NULL, 'Dashboard', 'tabler-layout-2', NULL, 2, 1, '[]', 'item', NULL, NULL, 1, '#9A6FFD', '#fff', NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:26', 0),
+(3, NULL, 'creative_suite', 'dashboard.user.creative-suite.index', NULL, 'Creative Suite', 'tabler-image-in-picture', NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(4, NULL, 'ext_crm_dropdown', 'dashboard.user.crm.index', NULL, 'CRM', 'tabler-briefcase', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(5, 4, 'crm_dashboard', 'dashboard.user.crm.index', NULL, 'Dashboard', 'tabler-layout-dashboard', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(6, 4, 'crm_assistant', 'dashboard.user.crm.ai.index', NULL, 'CRM Assistant', 'tabler-message-chatbot', NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(7, 4, 'crm_contacts', 'dashboard.user.crm.contacts.index', NULL, 'Contacts', 'tabler-address-book', NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(8, 4, 'crm_companies', 'dashboard.user.crm.companies.index', NULL, 'Companies', 'tabler-building', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(9, 4, 'crm_deals', 'dashboard.user.crm.deals.index', NULL, 'Deals', 'tabler-coin', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(10, 4, 'crm_projects', 'dashboard.user.crm.projects.index', NULL, 'Projects', 'tabler-briefcase', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(11, 4, 'crm_tasks', 'dashboard.user.crm.tasks.index', NULL, 'Tasks', 'tabler-checklist', NULL, 7, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(12, 4, 'crm_calendar', 'dashboard.user.crm.calendar.index', NULL, 'Calendar', 'tabler-calendar', NULL, 8, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(13, 4, 'crm_presentations', 'dashboard.user.crm.presentations.index', NULL, 'Presentations', 'tabler-presentation', NULL, 9, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(14, 4, 'crm_reports', 'dashboard.user.crm.reports.index', NULL, 'Reports', 'tabler-chart-bar', NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(15, NULL, 'ext_sales_dropdown', 'dashboard.user.sales.invoices.index', NULL, 'Sales', 'tabler-receipt', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(16, 15, 'crm_sales_invoices', 'dashboard.user.sales.invoices.index', NULL, 'Invoices', 'tabler-file-invoice', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(17, 15, 'crm_sales_payments', 'dashboard.user.sales.payments.index', NULL, 'Payments', 'tabler-cash', NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(18, 15, 'crm_sales_proposals', 'dashboard.user.sales.proposals.index', NULL, 'Proposals', 'tabler-file-text', NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(19, 15, 'crm_sales_estimates', 'dashboard.user.sales.estimates.index', NULL, 'Estimates', 'tabler-calculator', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(20, NULL, 'ext_chat_bot', 'dashboard.chatbot.index', NULL, 'AI Chat Bots', 'tabler-message-chatbot', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(21, NULL, 'ext_chatbot_analytics', 'dashboard.chatbot.analytics.index', NULL, 'AI Bot Analytics', 'tabler-chart-bar', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(22, NULL, 'ext_chatbot_knowledge_base_article', 'dashboard.chatbot.knowledge-base-article.index', NULL, 'AI Bot Knowledge Base', 'tabler-library', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(23, NULL, 'ext_chatbot_canned_response', 'dashboard.chatbot.canned-response.index', NULL, 'AI Bot Canned Responses', 'tabler-message-reply', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(24, NULL, 'ext_chatbot_chatbot_customer_article', 'dashboard.chatbot.chatbot-customer.index', NULL, 'AI Bot Contacts', 'tabler-library', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(25, NULL, 'ext_voice_chatbot', 'dashboard.chatbot-voice.index', NULL, 'AI Voice Bots', 'tabler-message-chatbot', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(26, NULL, 'ext_phone_call_agent', 'dashboard.phone-call-agent.index', NULL, 'Phone Call Agent', 'tabler-phone-call', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(27, 26, 'ext_phone_call_agent_dashboard', 'dashboard.phone-call-agent.index', NULL, 'Dashboard', 'tabler-layout-dashboard', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(28, 26, 'ext_phone_call_agent_history', 'dashboard.phone-call-agent.history', NULL, 'Call History', 'tabler-history', NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(29, 26, 'ext_phone_call_agent_outbound', 'dashboard.phone-call-agent.outbound.index', NULL, 'Outbound Calls', 'tabler-phone-outgoing', NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(30, 26, 'ext_phone_call_agent_new', 'dashboard.phone-call-agent.new', NULL, 'Create Agent', 'tabler-plus', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(31, NULL, 'marketing_bot_dashboard', 'dashboard.user.marketing-bot.dashboard', NULL, 'Marketing Bot', 'tabler-dashboard', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(32, NULL, 'marketing_bot_settings', 'dashboard.user.marketing-bot.settings.index', NULL, 'Marketing Bot Settings', 'tabler-settings-code', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(33, NULL, 'marketing_bot', NULL, NULL, 'Marketing bot', NULL, NULL, 4, 1, '[]', 'label', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(34, NULL, 'marketing_bot_inbox', 'dashboard.user.marketing-bot.inbox.index', NULL, 'Inbox', 'tabler-inbox', NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(35, NULL, 'marketing_bot_campaigns', 'dashboard.user.marketing-bot.whatsapp-campaign.index', NULL, 'Campaigns', 'tabler-flag-share', NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(36, 35, 'marketing_bot_campaigns_whatsapp', 'dashboard.user.marketing-bot.whatsapp-campaign.index', NULL, 'Whatsapp', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(37, 35, 'marketing_bot_campaigns_telegram', 'dashboard.user.marketing-bot.telegram-campaign.index', NULL, 'Telegram', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(38, NULL, 'marketing_bot_telegram', 'dashboard.user.marketing-bot.telegram-group.index', NULL, 'Telegram', 'tabler-brand-telegram', NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(39, 38, 'marketing_bot_telegram_group', 'dashboard.user.marketing-bot.telegram-group.index', NULL, 'Telegram Groups', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(40, 38, 'marketing_bot_telegram_subscribers', 'dashboard.user.marketing-bot.telegram-subscriber.index', NULL, 'Telegram Subscribers', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(41, NULL, 'marketing_bot_whatsapp', 'dashboard.user.marketing-bot.contact.index', NULL, 'Whatsapp', 'tabler-brand-whatsapp', NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(42, 41, 'marketing_bot_whatsapp_contact', 'dashboard.user.marketing-bot.contact.index', NULL, 'Contact Lists', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(43, 41, 'marketing_bot_whatsapp_segment', 'dashboard.user.marketing-bot.segment.index', NULL, 'Segments', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(44, 41, 'marketing_bot_whatsapp_contact_list', 'dashboard.user.marketing-bot.contact-list.index', NULL, 'Contacts', NULL, NULL, 4, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(45, NULL, 'ai_agent', 'dashboard.user.ai-agent.dashboard', NULL, 'AI Agent', 'tabler-robot', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(46, 45, 'ai_agent_dashboard', 'dashboard.user.ai-agent.dashboard', NULL, 'Dashboard', 'tabler-layout-dashboard', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(47, 45, 'ai_agent_workflows', 'dashboard.user.ai-agent.workflows.index', NULL, 'Agents', 'tabler-git-branch', NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(48, 45, 'ai_agent_messages', 'dashboard.user.ai-agent.messages.index', NULL, 'Channel Messages', 'tabler-messages', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(49, NULL, 'ext_chat_bot_agent', 'dashboard.chatbot-agent.index', NULL, 'Human Agent', 'tabler-message', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(50, NULL, 'ext_ai_photo_studio_dropdown', 'dashboard.user.ai-photoshoot.index', NULL, 'AI Photoshoot', 'tabler-camera', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(51, 50, 'ext_ai_photo_studio', 'dashboard.user.ai-photoshoot.index', NULL, 'Dashboard', 'tabler-layout-dashboard', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(52, 50, 'ext_ai_photo_studio_custom', 'dashboard.user.ai-photoshoot.custom.index', NULL, 'Custom Photoshoot', 'tabler-wand', NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(53, 50, 'ext_ai_photo_studio_templates', 'dashboard.user.ai-photoshoot.templates.index', NULL, 'Template Photoshoot', 'tabler-template', NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(54, 50, 'ext_ai_photo_studio_replace_background', 'dashboard.user.ai-photoshoot.replace-background.index', NULL, 'Replace Background', 'tabler-replace', NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(55, 50, 'ext_ai_photo_studio_edit_image', 'dashboard.user.ai-photoshoot.edit_image.index', NULL, 'Edit Image', 'tabler-pencil', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(56, 50, 'ext_ai_photo_studio_my_photoshoots', 'dashboard.user.ai-photoshoot.photo_shoots.my', NULL, 'My Photoshoots', 'tabler-photo', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(57, NULL, 'ext_fashion_studio_dropdown', 'dashboard.user.fashion-studio.index', NULL, 'AI Fashion Studio', 'tabler-tie', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(58, 57, 'ext_fashion_studio', 'dashboard.user.fashion-studio.index', NULL, 'Dashboard', 'tabler-layout-dashboard', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(59, 57, 'ext_fashion_studio_photo_shoot', 'dashboard.user.fashion-studio.photo_shoots.index', NULL, 'PhotoShoot', 'tabler-camera', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(60, 57, 'ext_fashion_studio_virtual_try_on', 'dashboard.user.fashion-studio.virtual_try_on.index', NULL, 'Virtual Try-on', 'tabler-shirt', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(61, 57, 'ext_fashion_studio_change_model', 'dashboard.user.fashion-studio.change_model.index', NULL, 'Change Model', 'tabler-user-square-rounded', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(62, 57, 'ext_fashion_studio_edit_image', 'dashboard.user.fashion-studio.edit_image.index', NULL, 'Edit Image', 'tabler-pencil', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(63, 57, 'ext_fashion_studio_create_video', 'dashboard.user.fashion-studio.create_video.index', NULL, 'Create Video', 'tabler-video', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(64, 57, 'ext_fashion_studio_photo_shoots', 'dashboard.user.fashion-studio.photo_shoots.my', NULL, 'My Photo Shoots', 'tabler-copy', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(65, 57, 'ext_fashion_studio_wardrobe', 'dashboard.user.fashion-studio.wardrobe.index', NULL, 'My Wardrobe', 'tabler-hanger-2', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(66, 57, 'ext_fashion_studio_user_settings', 'dashboard.user.fashion-studio.user_settings.index', NULL, 'Settings', 'tabler-settings', NULL, 99, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(67, NULL, 'ext_ugc_dropdown', 'dashboard.user.ugc-studio.index', NULL, 'UGC', 'tabler-video', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(68, 67, 'ext_ugc_studio', 'dashboard.user.ugc-studio.index', NULL, 'Studio', 'tabler-layout-dashboard', NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(69, 67, 'ext_ugc_factory', 'dashboard.user.ugc-factory.index', NULL, 'Factory', 'tabler-wand', NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(70, 67, 'ext_ugc_creator', 'dashboard.user.ugc-creator.index', NULL, 'Creator', 'tabler-movie', NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(71, NULL, 'ext_chatbot_customer_tag', 'dashboard.chatbot-customer-tags.index', NULL, 'Customer Tags', 'tabler-tags', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:26', 0),
+(72, NULL, 'ext_social_media_dropdown', 'dashboard.user.social-media.index', NULL, 'AI Social Media', 'tabler-thumb-up', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(73, 72, 'ext_social_media', 'dashboard.user.social-media.index', NULL, 'Dashboard', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(74, 72, 'ext_social_media_campaign', 'dashboard.user.social-media.campaign.index', NULL, 'Campaigns', NULL, NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(75, 72, 'ext_social_media_platform', 'dashboard.user.social-media.platforms', NULL, 'Platforms', NULL, NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(76, 72, 'ext_social_media_post', 'dashboard.user.social-media.post.index', NULL, 'Social Media Posts', NULL, NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(77, 72, 'ext_social_media_calendar', 'dashboard.user.social-media.calendar', NULL, 'Calendar', NULL, NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(78, 72, 'ext_social_media_automation', 'dashboard.user.social-media.automation.index', NULL, 'Automation', NULL, NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(79, NULL, 'ext_social_media_agent_dropdown', 'dashboard.user.social-media.agent.index', NULL, 'AI Social Media Agent', 'tabler-thumb-up', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(80, 79, 'ext_social_media_agent_dashboard', 'dashboard.user.social-media.agent.index', NULL, 'Dashboard', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(81, 79, 'ext_social_media_agent_agents', 'dashboard.user.social-media.agent.agents', NULL, 'Agents', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(82, 79, 'ext_social_media_agent_agents_archived_posts', 'dashboard.user.social-media.agent.posts', NULL, 'Archived Posts', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(83, 79, 'ext_social_media_agent_calendar', 'dashboard.user.social-media.agent.calendar', NULL, 'Calendar', NULL, NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(84, 79, 'ext_social_media_agent_analytics', 'dashboard.user.social-media.agent.analytics', NULL, 'Analytics', NULL, NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(85, 79, 'ext_social_media_agent_accounts', 'dashboard.user.social-media.agent.accounts', NULL, 'Accounts', NULL, NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(86, 79, 'ext_social_media_agent_chat', 'dashboard.user.social-media.agent.chat.index', NULL, 'Chat', NULL, NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(87, NULL, 'ext_blogpilot_dropdown', 'dashboard.user.blogpilot.agent.index', NULL, 'AI BlogPilot', 'tabler-file-text-ai', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(88, 87, 'ext_blogpilot_dashboard', 'dashboard.user.blogpilot.agent.index', NULL, 'Dashboard', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(89, 87, 'ext_blogpilot_agents', 'dashboard.user.blogpilot.agent.agents', NULL, 'Agents', NULL, NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(90, 87, 'ext_blogpilot_agents_archived_posts', 'dashboard.user.blogpilot.agent.posts', NULL, 'Posts', NULL, NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(91, 87, 'ext_blogpilot_calendar', 'dashboard.user.blogpilot.agent.calendar', NULL, 'Calendar', NULL, NULL, 4, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(92, 87, 'ext_blogpilot_analytics', 'dashboard.user.blogpilot.agent.analytics', NULL, 'Analytics', NULL, NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(93, NULL, 'ai_influencer', 'dashboard.user.ai-influencer.index', NULL, 'AI Influencer', 'tabler-star', NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(94, NULL, 'url_to_video', 'dashboard.user.url-to-video.index', NULL, 'Url To Video', 'tabler-photo-video', NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(95, NULL, 'viral_clips', 'dashboard.user.viral-clips.index', NULL, 'AI Viral Clips', 'tabler-movie', NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(96, NULL, 'influencer_avatar', 'dashboard.user.influencer-avatar.index', NULL, 'Influencer Avatar', 'tabler-device-mobile-star', NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(97, NULL, 'documents', 'dashboard.user.openai.documents.all', NULL, 'Documents', 'tabler-archive', NULL, 3, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(98, NULL, 'ai_editor', 'dashboard.user.generator.index', NULL, 'AI Editor', 'tabler-notebook', NULL, 4, 1, '[]', 'item', NULL, NULL, 1, '#E29CB6', '#fff', NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:26', 0),
+(99, NULL, 'ai_writer', 'dashboard.user.openai.list', NULL, 'AI Writer', 'tabler-notes', NULL, 5, 1, '[]', 'item', NULL, NULL, 1, '#468EA6', '#fff', NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:26', 0),
+(100, NULL, 'ai_video_to_video', 'dashboard.user.openai.generator', 'ai_video_to_video', 'AI Video To Video', 'tabler-video', NULL, 7, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(101, NULL, 'ai_image_generator', 'dashboard.user.openai.generator', 'ai_image_generator', 'AI Image', 'tabler-photo', NULL, 7, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(102, NULL, 'ai_article_wizard', 'dashboard.user.openai.articlewizard.new', 'ai_article_wizard', 'AI Article Wizard', 'tabler-ad-2', NULL, 8, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(103, NULL, 'ai_pdf', 'dashboard.user.openai.generator.workbook', 'ai_pdf', 'AI File Chat', 'tabler-file-pencil', NULL, 9, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(104, NULL, 'ai_vision', 'dashboard.user.openai.generator.workbook', 'ai_vision', 'AI Vision', 'tabler-scan-eye', NULL, 10, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(105, NULL, 'ai_realtime_voice_chat', 'dashboard.user.openai.chat.chat', 'ai_realtime_voice_chat', 'AI Realtime Voice Chat', 'tabler-wave-sine', NULL, 10, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(106, NULL, 'ai_realtime_image', 'dashboard.user.ai-realtime-image.index', 'ai_realtime_image', 'AI Realtime Image', 'tabler-image-in-picture', NULL, 10, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(107, NULL, 'ai_rewriter', 'dashboard.user.openai.rewriter', 'ai_rewriter', 'AI ReWriter', 'tabler-ballpen', NULL, 11, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(108, NULL, 'ai_chat_image', 'dashboard.user.openai.generator.workbook', 'ai_chat_image', 'AI Chat Image', 'tabler-photo', NULL, 12, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(109, NULL, 'ai_chat_all', 'dashboard.user.openai.chat.chat', NULL, 'AI Chat', 'tabler-message-dots', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(110, NULL, 'ai_chat_pro', 'dashboard.user.openai.chat.pro.index', NULL, 'AI Chat Pro', 'tabler-message-plus', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(111, NULL, 'ai_chat_pro_image_chat', 'ai-chat-image.index', NULL, 'Image Assistant', 'tabler-photo-up', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(112, NULL, 'ai_image_pro', 'dashboard.user.ai-image-pro.index', NULL, 'AI Image Pro', 'tabler-photo-up', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(113, NULL, 'ai_image_pro_bookmark', 'dashboard.user.ai-image-pro.index', 'slug=bookmarks', 'Bookmark', 'tabler-bookmark', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(114, NULL, 'ai_image_pro_real_time', 'dashboard.user.ai-image-pro.realtime', NULL, 'Realtime Image', 'tabler-aperture', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:26', 0),
+(115, NULL, 'ai_image_pro_edit', 'dashboard.user.ai-image-pro.edit', NULL, 'Smart Edit', 'tabler-vector-bezier', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(116, NULL, 'ai_image_pro_get_inspired', 'dashboard.user.ai-image-pro.index', 'slug=inspired', 'Get Inspired', 'tabler-wand', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(117, NULL, 'ai_image_pro_media_library', 'ai-image-pro.media-library', NULL, 'Media Library', 'tabler-inbox', NULL, 13, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(118, NULL, 'ai_code_generator', 'dashboard.user.openai.generator.workbook', 'ai_code_generator', 'AI Code', 'tabler-terminal-2', NULL, 14, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(119, NULL, 'ai_presentation', 'dashboard.user.ai-presentation.index', NULL, 'AI Presentation', 'tabler-presentation', NULL, 14, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(120, NULL, 'ai_youtube', 'dashboard.user.openai.generator.workbook', 'ai_youtube', 'AI YouTube', 'tabler-brand-youtube', NULL, 15, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(121, NULL, 'ai_rss', 'dashboard.user.openai.generator.workbook', 'ai_rss', 'AI RSS', 'tabler-rss', NULL, 15, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(122, NULL, 'ai_speech_to_text', 'dashboard.user.openai.generator', 'ai_speech_to_text', 'AI Speech to Text', 'tabler-microphone', NULL, 16, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(123, NULL, 'ai_voiceover', 'dashboard.user.openai.generator', 'ai_voiceover', 'AI Voiceover', 'tabler-volume', NULL, 17, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(124, NULL, 'ai_voice_isolator', 'dashboard.user.openai.generator', 'ai_voice_isolator', 'AI Voice Isolator', 'tabler-ear-scan', NULL, 18, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(125, NULL, 'ai_voiceover_clone', 'dashboard.user.voice.index', NULL, 'AI Voice Clone', 'tabler-microphone-2', NULL, 18, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(126, NULL, 'team_menu', 'dashboard.user.team.index', NULL, 'Team', 'tabler-user-plus', NULL, 19, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(127, NULL, 'brand_voice', 'dashboard.user.brand.index', NULL, 'Brand Voice', 'tabler-brand-trello', NULL, 20, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(128, NULL, 'advanced_image', 'dashboard.user.advanced-image.index', NULL, 'AI Image Editor', 'tabler-photo-edit', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(129, NULL, 'ai_avatar', 'dashboard.user.ai-avatar.index', NULL, 'AI Avatar', 'tabler-slideshow', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(130, NULL, 'ai_persona', 'dashboard.user.ai-persona.index', NULL, 'AI Persona', 'tabler-camera-star', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(131, NULL, 'video_studio', 'dashboard.user.video-studio.index', NULL, 'Video Studio', 'tabler-layout-dashboard', NULL, 19, 1, '[]', 'item', NULL, '0', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(132, NULL, 'ai_video_pro', 'dashboard.user.ai-video-pro.index', NULL, 'AI Video Pro', 'tabler-video', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(133, NULL, 'video_agent', 'dashboard.user.video-agent.index', NULL, 'Video Agent', 'tabler-sparkles', NULL, 19, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(134, NULL, 'video_dubbing', 'dashboard.user.video-dubbing.index', NULL, 'Video Dubbing', 'tabler-language', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(135, NULL, 'ai_captions', 'dashboard.user.ai-captions.index', NULL, 'AI Captions', 'tabler-quote', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(136, NULL, 'auto_edit_videos', 'dashboard.user.auto-edit-videos.index', NULL, 'Auto Edit Videos', 'tabler-scissors', NULL, 21, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(137, NULL, 'ai_music', 'dashboard.user.ai-music.index', NULL, 'AI Music', 'tabler-slideshow', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(138, NULL, 'ext_ai_music_pro', 'dashboard.user.ai-music-pro.index', NULL, 'AI Music Pro', 'tabler-music', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(139, NULL, 'ai_product_shot', 'dashboard.user.ai-product-shot.index', NULL, 'AI Product Photography', 'tabler-photo-star', NULL, 20, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(140, NULL, 'api_keys', 'dashboard.user.apikeys.index', NULL, 'API Keys', 'tabler-key', NULL, 21, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(141, NULL, 'affiliates', 'dashboard.user.affiliates.index', NULL, 'Affiliates', 'tabler-currency-dollar', NULL, 22, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(142, NULL, 'support', 'dashboard.support.list', NULL, 'Support', 'tabler-lifebuoy', NULL, 23, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(143, NULL, 'integration', 'dashboard.user.integration.index', NULL, 'Integration', 'tabler-webhook', NULL, 24, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(144, NULL, 'divider_one', NULL, NULL, NULL, NULL, NULL, 25, 1, '[]', 'divider', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(145, NULL, 'links', NULL, NULL, 'Links', NULL, NULL, 26, 1, '[]', 'label', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(146, NULL, 'favorites', 'dashboard.user.openai.list', 'filter=favorite', 'Favorites', NULL, NULL, 27, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, 1, 'bg-[#7A8193] text-white', '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(147, NULL, 'workbook', 'dashboard.user.openai.documents.all', '?filter=favorites', 'Workbook', NULL, NULL, 28, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, 1, 'bg-[#658C8E] text-white', '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(148, NULL, 'divider_two', NULL, NULL, NULL, NULL, NULL, 29, 1, '[]', 'divider', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(149, NULL, 'admin_label', NULL, NULL, 'Admin', NULL, NULL, 30, 1, '[]', 'label', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(150, NULL, 'admin_dashboard', 'dashboard.admin.index', NULL, 'Dashboard', 'tabler-layout-2', NULL, 31, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(151, NULL, 'marketplace', 'dashboard.admin.marketplace.index', NULL, 'Marketplace', 'tabler-building-store', NULL, 32, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(152, NULL, 'themes', 'dashboard.admin.themes.index', NULL, 'Themes', 'tabler-palette', NULL, 33, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(153, NULL, 'ext_migration', 'migration::welcome', NULL, 'Migration', 'tabler-transfer-in', NULL, 33, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(154, NULL, 'user_management', 'dashboard.admin.users.index', NULL, 'User Management', 'tabler-users', NULL, 34, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(155, 154, 'user_list', 'dashboard.admin.users.index', NULL, 'Users List', NULL, NULL, 34, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(156, 154, 'user_activity', 'dashboard.admin.users.activity', NULL, 'Users Activities', NULL, NULL, 34, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(157, 154, 'user_dashboard', 'dashboard.admin.users.dashboard', NULL, 'Users Dashboard', NULL, NULL, 34, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(158, 154, 'user_deletion', 'dashboard.admin.users.deletion.reqs', NULL, 'User Deletion Requests', NULL, NULL, 34, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(159, 154, 'user_permission', 'dashboard.admin.users.permissions', NULL, 'User Permissions', NULL, NULL, 34, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(160, NULL, 'announcements', 'dashboard.admin.announcements.index', NULL, 'Announcements', 'tabler-speakerphone', NULL, 35, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(161, NULL, 'discount-manager', 'dashboard.admin.discount-manager.index', NULL, 'Discount & Offer Manager', 'tabler-shopping-bag-discount', NULL, 37, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(162, NULL, 'site_promo', 'dashboard.admin.ads.index', NULL, 'Google adsense', 'tabler-ad-circle', NULL, 35, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(163, NULL, 'support_requests', 'dashboard.support.list', NULL, 'Support Requests', 'tabler-lifebuoy', NULL, 36, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(164, NULL, 'templates', 'dashboard.admin.openai.list', NULL, 'Templates', 'tabler-list-details', NULL, 37, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(165, 164, 'built_in_templates', 'dashboard.admin.openai.list', NULL, 'Built-in Templates', NULL, NULL, 38, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(166, 164, 'custom_templates', 'dashboard.admin.openai.custom.list', NULL, 'Custom Templates', NULL, NULL, 39, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(167, 164, 'ai_writer_categories', 'dashboard.admin.openai.categories.list', NULL, 'AI Writer Categories', NULL, NULL, 40, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(168, NULL, 'chat_settings', 'dashboard.admin.openai.chat.category', NULL, 'Chat Settings', 'tabler-message-circle', NULL, 41, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(169, 168, 'chat_categories', 'dashboard.admin.openai.chat.category', NULL, 'Chat Categories', NULL, NULL, 42, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(170, 168, 'chat_templates', 'dashboard.admin.openai.chat.list', NULL, 'Chat Templates', NULL, NULL, 43, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(171, 168, 'chatbot_training', 'dashboard.admin.chatbot.index', NULL, 'Chatbot Training', NULL, NULL, 44, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(172, 168, 'voice_chatbot_training', 'dashboard.admin.voice-chatbot.index', NULL, 'Voice Chatbot Training', NULL, NULL, 44, 1, '[]', 'item', NULL, '0', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(173, 168, 'ai_assistant', 'dashboard.admin.ai-assistant.index', NULL, 'Assistant Training', NULL, NULL, 44, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(174, 245, 'ai_chat_models', 'dashboard.admin.ai-chat-model.index', NULL, 'AI Models', NULL, NULL, 3, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:26', 0),
+(175, 168, 'ai_engines', 'dashboard.admin.ai-chat-model.models.index', NULL, 'AI Engines', NULL, NULL, 45, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(176, 168, 'floating_chat_settings', 'dashboard.admin.chatbot.setting', NULL, 'Floating Chat Settings', NULL, NULL, 45, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(177, 168, 'social_media_agent_chat_settings', 'dashboard.admin.social-media.agent.chat.settings', NULL, 'Social Media Agent Chat', NULL, NULL, 46, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(178, 168, 'external_chat_settings', 'dashboard.admin.chatbot.external_settings', NULL, 'External Chat Settings', NULL, NULL, 47, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(179, NULL, 'frontend', 'dashboard.admin.frontend.settings', NULL, 'Frontend', 'tabler-device-laptop', NULL, 47, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(180, 179, 'frontend_settings', 'dashboard.admin.frontend.settings', NULL, 'Frontend Settings', NULL, NULL, 48, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(181, 179, 'frontend_section_settings', 'dashboard.admin.frontend.sectionsettings', NULL, 'Frontend Section Settings', NULL, NULL, 49, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(182, 179, 'frontend_menu', 'dashboard.admin.frontend.menusettings', NULL, 'Menu', NULL, NULL, 50, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(183, 179, 'social_media_accounts', 'dashboard.admin.frontend.socialmedia', NULL, 'Social Media Accounts', NULL, NULL, 50, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(184, 179, 'auth_settings', 'dashboard.admin.frontend.authsettings', NULL, 'Auth Settings', NULL, NULL, 52, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(185, 179, 'f_a_q', 'dashboard.admin.frontend.faq.index', NULL, 'F.A.Q', NULL, NULL, 53, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(186, 179, 'tools_section', 'dashboard.admin.frontend.tools.index', NULL, 'Tools Section', NULL, NULL, 54, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(187, 179, 'channels_section', 'dashboard.admin.frontend.channel-setting.index', NULL, 'Channels Section', NULL, NULL, 54, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(188, 179, 'content_box', 'dashboard.admin.frontend.content-box.index', NULL, 'Content Box Section', NULL, NULL, 54, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(189, 179, 'curtain_section', 'dashboard.admin.frontend.curtain.index', NULL, 'Curtain Section', NULL, NULL, 54, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(190, 179, 'features_section', 'dashboard.admin.frontend.future.index', NULL, 'Features Section', 'tabler-list-details', NULL, 55, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(191, 179, 'testimonials_section', 'dashboard.admin.testimonials.index', NULL, 'Testimonials Section', NULL, NULL, 56, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(192, 179, 'clients_section', 'dashboard.admin.clients.index', NULL, 'Clients Section', NULL, NULL, 57, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(193, 179, 'how_it_works_section', 'dashboard.admin.howitWorks.index', NULL, 'How it Works Section', NULL, NULL, 58, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(194, 179, 'who_can_use_section', 'dashboard.admin.frontend.whois.index', NULL, 'Who Can Use Section', NULL, NULL, 59, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(195, 179, 'generators_list_section', 'dashboard.admin.frontend.generatorlist.index', NULL, 'Generators List Section', NULL, NULL, 60, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(196, NULL, 'finance', 'dashboard.admin.finance.plans.index', NULL, 'Finance', 'tabler-wallet', NULL, 61, 1, '[]', 'item', NULL, NULL, 1, '#3569F5', '#fff', NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:26', 0),
+(197, 196, 'bank_transactions', 'dashboard.admin.bank.transactions.list', NULL, 'Bank Transactions', NULL, NULL, 62, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(198, 196, 'membership_plans', 'dashboard.admin.finance.plans.index', NULL, 'Membership Plans (old version)', NULL, NULL, 63, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:26', 0),
+(199, 196, 'admin_finance_plan', 'dashboard.admin.finance.plan.index', NULL, 'Pricing Plans', NULL, NULL, 63, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:26', 0),
+(200, 196, 'payment_gateways', 'dashboard.admin.finance.paymentGateways.index', NULL, 'Payment Gateways', NULL, NULL, 64, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(201, 196, 'trial_features', 'dashboard.admin.finance.free.feature', NULL, 'Trial Features', NULL, NULL, 60, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(202, 196, 'mobile_payment', 'dashboard.admin.finance.mobile.index', NULL, 'Mobile Payment', NULL, NULL, 60, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(203, 196, 'shared_credit_costs', 'dashboard.admin.finance.shared-credit-costs.index', NULL, 'Shared Credit Costs', NULL, NULL, 65, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(204, 196, 'shared_credit_migration', 'dashboard.admin.finance.credit-migration.index', NULL, 'Credit Migration', NULL, NULL, 66, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(205, NULL, 'pages', 'dashboard.page.list', NULL, 'Pages', 'tabler-file-description', NULL, 61, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(206, NULL, 'blog', 'dashboard.blog.list', NULL, 'Blog', 'tabler-pencil', NULL, 62, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(207, NULL, 'ai-image-pro-publish-reqs', 'dashboard.admin.ai-image-pro.community-images.index', NULL, 'AI Image Pro Publish Requests', 'tabler-notification', NULL, 63, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(208, NULL, 'affiliates_admin', 'dashboard.admin.affiliates.index', NULL, 'Affiliates', 'tabler-currency-dollar', NULL, 63, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(209, NULL, 'coupons_admin', 'dashboard.admin.coupons.index', NULL, 'Coupons', 'tabler-ticket', NULL, 64, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(210, NULL, 'email_templates', 'dashboard.email-templates.index', NULL, 'Email Templates', 'tabler-mail', NULL, 65, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(211, NULL, 'onboarding_pro_extension', 'dashboard.admin.onboarding-pro.index', NULL, 'Onboarding Pro', 'tabler-message-circle', NULL, 65, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(212, NULL, 'onboarding', 'dashboard.admin.onboarding.index', NULL, 'Onboarding', 'tabler-directions', NULL, 65, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(213, NULL, 'mailchimp_newsletter', 'dashboard.admin.mailchimp-newsletter.index', NULL, 'Mailchimp Newsletter', 'tabler-mailbox', NULL, 65, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(214, NULL, 'hubspot', 'dashboard.admin.hubspot.index', NULL, 'Hubspot', 'tabler-affiliate', NULL, 65, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(215, NULL, 'api_integration', 'default', NULL, 'API Integration', 'tabler-api', NULL, 66, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:26', 0),
+(216, 215, 'api_integration_azure_openai', 'dashboard.admin.settings.azure-openai.index', NULL, 'Azure OpenAI', NULL, NULL, 67, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(217, 215, 'api_integration_openrouter', 'dashboard.admin.settings.open-router.show', NULL, 'Open Router', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(218, 215, 'api_integration_ably', 'dashboard.admin.settings.ably', NULL, 'Ably Setting', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(219, 215, 'api_integration_llama', 'dashboard.admin.settings.llama', NULL, 'Llama', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(220, 215, 'api_integration_searchapi', 'dashboard.admin.settings.searchapi', NULL, 'Search Api', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(221, 215, 'api_integration_openai', 'dashboard.admin.settings.openai', NULL, 'OpenAI', NULL, NULL, 67, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(222, 215, 'api_integration_gemini', 'dashboard.admin.settings.gemini', NULL, 'Gemini', NULL, NULL, 67, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(223, 215, 'api_integration_anthropic', 'dashboard.admin.settings.anthropic', NULL, 'Anthropic', NULL, NULL, 68, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(224, 215, 'api_integration_deepseek', 'dashboard.admin.settings.deepseek', NULL, 'Deepseek', NULL, NULL, 68, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(225, 215, 'api_integration_fal_ai', 'dashboard.admin.settings.fal-ai', NULL, 'Fal AI', NULL, NULL, 68, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:26', 0),
+(226, 215, 'api_integration_gamma_ai', 'dashboard.admin.settings.gamma-ai', NULL, 'Gamma AI', NULL, NULL, 68, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(227, 215, 'api_integration_creatify', 'dashboard.admin.settings.creatify', NULL, 'Creatify', NULL, NULL, 68, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(228, 215, 'api_integration_topview', 'dashboard.admin.settings.topview', NULL, 'Topview', NULL, NULL, 68, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(229, 215, 'api_integration_vizard', 'dashboard.admin.settings.vizard', NULL, 'Vizard', NULL, NULL, 68, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(230, 215, 'api_integration_klap', 'dashboard.admin.settings.klap', NULL, 'Klap', NULL, NULL, 68, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(231, 215, 'api_integration_piapi_ai', 'dashboard.admin.settings.piapi-ai', NULL, 'PiAPI', NULL, NULL, 69, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(232, 215, 'api_integration_stablediffusion', 'dashboard.admin.settings.stablediffusion', NULL, 'StableDiffusion', NULL, NULL, 69, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(233, 215, 'api_integration_unsplashapi', 'dashboard.admin.settings.unsplashapi', NULL, 'Unsplash', NULL, NULL, 70, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(234, 215, 'api_integration_pexelsapi', 'dashboard.admin.settings.pexelsapi', NULL, 'Pexels', NULL, NULL, 71, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(235, 215, 'api_integration_pixabayapi', 'dashboard.admin.settings.pixabayapi', NULL, 'Pixabay', NULL, NULL, 72, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(236, 215, 'api_integration_serperapi', 'dashboard.admin.settings.serperapi', NULL, 'Serper', NULL, NULL, 73, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(237, 215, 'api_integration_perplexity', 'dashboard.admin.settings.perplexity', NULL, 'Perplexity', NULL, NULL, 73, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(238, 215, 'api_integration_tts', 'dashboard.admin.settings.tts', NULL, 'TTS', NULL, NULL, 74, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(239, 215, 'api_integration_synthesia', 'dashboard.admin.settings.synthesia', NULL, 'Synthesia', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(240, 215, 'api_integration_together', 'dashboard.admin.settings.together', NULL, 'Together', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(241, 215, 'api_integration_heygen', 'dashboard.admin.settings.heygen', NULL, 'Heygen', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(242, 215, 'api_integration_aimlapi', 'dashboard.admin.settings.aimlapi', NULL, 'Aimlapi', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(243, 215, 'api_integration_pebblely', 'dashboard.admin.settings.pebblely', NULL, 'Pebblely', NULL, NULL, 74, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(244, 215, 'plagiarism_extension', 'dashboard.admin.settings.plagiarism', NULL, 'Plagiarism API', NULL, NULL, 77, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(245, NULL, 'settings', 'dashboard.admin.settings.general', NULL, 'Settings', 'tabler-device-laptop', NULL, 75, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(246, 245, 'config', 'dashboard.admin.config.index', NULL, 'General Settings', NULL, NULL, 0, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(247, NULL, 'live_customizer', 'dashboard.admin.live-customizer.setting', NULL, 'Live Customizer ', 'tabler-brush', NULL, 69, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(248, 245, 'thumbnail_system', 'dashboard.admin.settings.thumbnail', NULL, 'Thumbnail System', NULL, NULL, 79, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(249, 245, 'premium_advantages', 'dashboard.admin.config.premium-advantages.index', NULL, 'Premium Advantages', NULL, NULL, 79, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(250, 245, 'advanced_image_setting', 'dashboard.admin.settings.advanced-image.index', NULL, 'AI Image Editor Setting', NULL, NULL, 70, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(251, 245, 'privacy', 'dashboard.admin.settings.privacy', NULL, 'Privacy Policy and Terms', NULL, NULL, 82, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(252, NULL, 'site_health', 'dashboard.admin.health.index', NULL, 'Site Health', 'tabler-activity-heartbeat', NULL, 85, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(253, NULL, 'license', 'dashboard.admin.license.index', NULL, 'License', 'tabler-checklist', NULL, 86, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(254, NULL, 'update', 'dashboard.admin.update.index', NULL, 'Update', 'tabler-refresh', NULL, 87, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(255, NULL, 'menu_setting', 'dashboard.admin.menu.index', NULL, 'Menu', 'tabler-menu', NULL, 88, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(256, NULL, 'footer_menu_setting', 'dashboard.admin.footer-menu.index', NULL, 'Footer Menu', 'tabler-menu', NULL, 89, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(257, NULL, 'mega_menu_setting', 'dashboard.admin.mega-menu.index', NULL, 'Mega Menu', 'tabler-menu-2', NULL, 88, 1, '[]', 'item', NULL, NULL, 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(258, NULL, 'openai_generator_extension', 'default', NULL, 'Ai Template', 'tabler-list-details', NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(259, 258, 'custom_templates_extension', 'dashboard.user.ai-template.openai-generator.index', NULL, 'Custom Templates', NULL, NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(260, 258, 'ai_writer_categories_extension', 'dashboard.user.ai-template.openai-generator-filter.index', NULL, 'AI Writer Categories', NULL, NULL, 5, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(261, NULL, 'ai_plagiarism_extension', 'dashboard.user.openai.plagiarism.index', NULL, 'AI Plagiarism', 'tabler-progress-check', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(262, NULL, 'ai_detector_extension', 'dashboard.user.openai.detectaicontent.index', NULL, 'AI Detector', 'tabler-text-scan-2', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(263, NULL, 'ai_social_media_extension', 'dashboard.user.automation.index', NULL, 'AI Social Media', 'tabler-share', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(264, NULL, 'scheduled_posts_extension', 'dashboard.user.automation.list', NULL, 'Social Media Posts', 'tabler-report', NULL, 6, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(265, 245, 'ai_social_media_settings_extension', 'dashboard.admin.automation.settings', NULL, 'AI Social Media Settings', NULL, NULL, 77, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(266, 245, 'ai_chat_pro_settings_extension', 'dashboard.admin.openai.chat.pro.settings', NULL, 'AI Chat Pro Settings', NULL, NULL, 77, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(267, 245, 'video_agent_settings_extension', 'dashboard.admin.video-agent.settings', NULL, 'Video Agent Settings', NULL, NULL, 77, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(268, 245, 'video_dubbing_settings_extension', 'dashboard.admin.video-dubbing.settings', NULL, 'Video Dubbing Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(269, 215, 'ai_captions_settings_extension', 'dashboard.admin.ai-captions.settings', NULL, 'AI Captions', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(270, 215, 'auto_edit_videos_settings_extension', 'dashboard.admin.auto-edit-videos.settings', NULL, 'Rendley', NULL, NULL, 79, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(271, 245, 'ai_music_pro_settings_extension', 'dashboard.admin.ai-music-pro.settings', NULL, 'AI Music Pro Settings', NULL, NULL, 79, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(272, 245, 'ai_chat_pro_image_chat_settings_extension', 'dashboard.admin.ai-chat-pro-image-chat.settings', NULL, 'AI Chat Pro Image Chat Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(273, 245, 'ai_image_pro_settings_extension', 'dashboard.admin.ai-image-pro.settings', NULL, 'AI Image Pro Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(274, 245, 'social_media_agent_chat_settings_extension', 'dashboard.admin.social-media.agent.chat.settings', NULL, 'Social Media Agent Chat Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(275, 245, 'content_manager_extension', 'content-manager::settings', NULL, 'Content Manager Settings', NULL, NULL, 77, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(276, 245, 'social_media_settings_extension', 'dashboard.admin.social-media.setting.index', NULL, 'Social Media Platform Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(277, 245, 'chatbot_instagram_settings_extension', 'dashboard.admin.chatbot-instagram.settings.index', NULL, 'Instagram Chatbot Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(278, 245, 'chatbot_voice_call_settings_extension', 'dashboard.admin.settings.voice-call', NULL, 'Voice Call Settings', NULL, NULL, 79, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(279, 245, 'phone_call_agent_settings_extension', 'dashboard.phone-call-agent.admin.settings', NULL, 'Phone Call Agent Settings', NULL, NULL, 80, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(280, NULL, 'chat_settings_extension', 'default', NULL, 'Chat Settings', 'tabler-message-circle', NULL, 7, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(281, 280, 'chat_categories_extension', 'dashboard.user.chat-setting.chat-category.index', NULL, 'Chat Categories', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(282, 280, 'chat_template_extension', 'dashboard.user.chat-setting.chat-template.index', NULL, 'Chat Templates', NULL, NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(283, 280, 'chat_training_extension', 'dashboard.user.chat-setting.chatbot.index', NULL, 'Chatbot Training', 'tabler-tags', NULL, 3, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:26', 0),
+(284, 245, 'cloudflare_r2_extension', 'dashboard.admin.settings.cloudflare-r2', NULL, 'Cloudflare R2', NULL, NULL, 1, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(285, NULL, 'photo_studio_extension', 'dashboard.user.photo-studio.index', NULL, 'AI Photoshoot', 'tabler-device-laptop', NULL, 8, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(286, NULL, 'seo_tool_extension', 'dashboard.user.seo.index', NULL, 'SEO Tool', 'tabler-seo', NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(287, NULL, 'ai_web_chat_extension', 'dashboard.user.openai.webchat.workbook', NULL, 'AI Web Chat', 'tabler-world-www', NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(288, 215, 'clipdrop_extension', 'dashboard.admin.settings.clipdrop', NULL, 'Clipdrop', NULL, NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(289, 245, 'creative_suite_settings', 'dashboard.admin.creative-suite.settings', NULL, 'Creative Suite Settings', NULL, NULL, 70, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(290, 215, 'novita_extension', 'dashboard.admin.settings.novita', NULL, 'Novita', NULL, NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(291, 215, 'freepik_extension', 'dashboard.admin.settings.freepik', NULL, 'Freepik', NULL, NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(292, 215, 'x_ai', 'dashboard.admin.settings.x-ai', NULL, 'X AI', NULL, NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(293, 215, 'xero_extension', 'dashboard.admin.settings.xero', NULL, 'Xero API', NULL, NULL, 10, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(294, 245, 'maintenance_setting', 'dashboard.admin.settings.maintenance.index', NULL, 'Maintenance', NULL, NULL, 2, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(295, 245, 'checkout_registration_extension', 'dashboard.admin.checkout.registration.settings.index', NULL, 'Checkout Registration', NULL, NULL, 9, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(296, 245, 'ext_ai_photo_studio_settings', 'dashboard.admin.ai-photoshoot.settings', NULL, 'AI Photoshoot Settings', NULL, NULL, 78, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(297, 245, 'ext_fashion_studio_settings', 'dashboard.admin.fashion-studio.settings', NULL, 'AI Fashion Studio Settings', NULL, NULL, 79, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(298, 245, 'ext_ugc_factory_settings', 'dashboard.admin.ugc-factory.settings', NULL, 'UGC Factory Settings', NULL, NULL, 80, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(299, 245, 'ext_ugc_creator_settings', 'dashboard.admin.ugc-creator.settings', NULL, 'UGC Creator Settings', NULL, NULL, 81, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(300, 245, 'crm_admin_settings', 'dashboard.admin.crm.settings', NULL, 'CRM Settings', NULL, NULL, 79, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(301, 245, 'marketing_bot_admin_settings', 'dashboard.admin.marketing-bot.settings.index', NULL, 'Marketing Bot Settings', NULL, NULL, 79, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(302, 245, 'ext_ai_agent_settings', 'dashboard.admin.ai-agent.settings', NULL, 'AI Agent Settings', NULL, NULL, 80, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(303, 245, 'ext_ai_agent_gmail_settings', 'dashboard.admin.ai-agent.gmail.settings', NULL, 'AI Agent - Gmail Settings', NULL, NULL, 81, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0),
+(304, 245, 'ext_ai_agent_outlook_settings', 'dashboard.admin.ai-agent.outlook.settings', NULL, 'AI Agent - Outlook Settings', NULL, NULL, 82, 1, '[]', 'item', NULL, '1', 0, NULL, NULL, NULL, NULL, '2026-10-07 12:35:25', '2026-10-07 12:35:25', 0);
 
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (1, '2014_01_01_000001_convert_db_tables_engines_from_myisam_to_innodb', 1),
@@ -2455,102 +3413,42 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (377, '2026_02_27_053831_add_social_media_automation_limits_to_plans_table', 1),
 (378, '2026_03_04_090723_add_image_to_entities_table', 1),
 (379, '2026_03_11_110001_add_deep_research_request_limit_to_plans_table', 1),
-(380, '2026_03_26_005526_add_used_skills_to_user_openai_chat_messages_table', 1),
-(381, '2026_05_08_100003_add_ugc_videos_limit_to_plans_table', 1),
-(382, '2026_05_19_084654_add_language_to_elevenlab_voices_table', 1);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `model_has_permissions`
---
-
-CREATE TABLE `model_has_permissions` (
-  `permission_id` bigint(20) UNSIGNED NOT NULL,
-  `model_type` varchar(191) NOT NULL,
-  `model_id` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `model_has_roles`
---
-
-CREATE TABLE `model_has_roles` (
-  `role_id` bigint(20) UNSIGNED NOT NULL,
-  `model_type` varchar(191) NOT NULL,
-  `model_id` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `notifications`
---
-
-CREATE TABLE `notifications` (
-  `id` char(36) NOT NULL,
-  `type` varchar(191) NOT NULL,
-  `notifiable_type` varchar(191) NOT NULL,
-  `notifiable_id` bigint(20) UNSIGNED NOT NULL,
-  `data` text NOT NULL,
-  `read_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `oldgatewayproducts`
---
-
-CREATE TABLE `oldgatewayproducts` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `plan_id` int(11) NOT NULL DEFAULT 0,
-  `plan_name` varchar(191) DEFAULT NULL,
-  `gateway_code` varchar(191) DEFAULT NULL,
-  `product_id` varchar(191) DEFAULT NULL,
-  `old_price_id` varchar(191) DEFAULT NULL,
-  `new_price_id` varchar(191) DEFAULT NULL,
-  `status` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `old_product_id` varchar(191) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `openai`
---
-
-CREATE TABLE `openai` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) DEFAULT NULL,
-  `title` varchar(191) NOT NULL,
-  `description` text NOT NULL,
-  `slug` varchar(191) DEFAULT NULL,
-  `active` tinyint(1) NOT NULL DEFAULT 1,
-  `questions` text DEFAULT NULL,
-  `image` text DEFAULT NULL,
-  `premium` tinyint(1) NOT NULL DEFAULT 0,
-  `type` varchar(191) NOT NULL DEFAULT 'text',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `prompt` text DEFAULT NULL,
-  `custom_template` tinyint(1) NOT NULL DEFAULT 0,
-  `tone_of_voice` tinyint(1) NOT NULL DEFAULT 0,
-  `color` varchar(191) DEFAULT NULL,
-  `filters` text DEFAULT NULL,
-  `package` text DEFAULT NULL,
-  `access_type` varchar(20) NOT NULL DEFAULT 'regular'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `openai`
---
+(380, '2026_03_17_000003_add_video_dubbing_seconds_limit_to_plans', 1),
+(381, '2026_03_26_005526_add_used_skills_to_user_openai_chat_messages_table', 1),
+(382, '2026_03_30_130008_add_marketing_bot_limits_to_plans_table', 1),
+(383, '2026_04_01_000001_add_shared_credit_columns', 1),
+(384, '2026_04_01_000002_create_shared_credit_transactions_table', 1),
+(385, '2026_04_01_000003_create_shared_credit_costs_table', 1),
+(386, '2026_04_01_123529_add_daily_shared_credit_limit_to_team_members_table', 1),
+(387, '2026_04_10_072705_drop_shared_credits_expires_at_from_users', 1),
+(388, '2026_04_28_131234_add_ai_agent_limits_to_plans_table', 1),
+(389, '2026_04_28_133202_add_ai_agent_memory_limit_to_plans_table', 1),
+(390, '2026_05_08_100003_add_ugc_videos_limit_to_plans_table', 1),
+(391, '2026_05_18_000002_add_ai_captions_columns_to_plans_table', 1),
+(392, '2026_05_19_000005_add_phone_call_agent_seconds_limit_to_plans', 1),
+(393, '2026_05_19_084654_add_language_to_elevenlab_voices_table', 1),
+(394, '2026_05_19_100003_add_ugc_creator_videos_limit_to_plans_table', 1),
+(395, '2026_05_22_113556_add_twilio_credentials_to_settings_two', 1),
+(396, '2026_06_05_105707_backfill_image_for_new_claude_opus_entities', 1),
+(397, '2026_06_11_000000_backfill_image_for_claude_fable_5_entity', 1),
+(398, '2026_06_12_153306_drop_ip_column_from_users_activity_table', 1),
+(399, '2026_06_25_115509_add_ai_chat_pro_connectors_to_plans', 1),
+(400, '2026_07_10_000004_add_follow_up_enabled_to_plans_table', 1),
+(401, '2026_07_10_000005_add_outbound_enabled_to_plans_table', 1),
+(402, '2026_07_21_101216_add_is_human_agent_to_team_members_table', 1),
+(403, '2026_07_28_000000_normalize_total_spend_setting', 1),
+(404, '2026_07_29_000000_backfill_image_for_claude_opus_5_entity', 1),
+(405, '2026_08_11_000000_backfill_image_for_new_gemini_and_grok_entities', 1),
+(406, '2026_08_19_000010_add_video_agent_limits_to_plans', 1),
+(407, '2026_08_27_000005_add_auto_edit_videos_limits_to_plans_table', 1),
+(408, '2026_08_28_000000_backfill_image_for_gemini_37_grok_46_gpt_56_cyber_and_deepseek_v4_entities', 1),
+(409, '2026_08_28_100000_remove_deprecated_dalle_and_stable_diffusion_models', 1),
+(410, '2026_09_08_000000_backfill_image_for_gpt6_astra_lyria35_and_gemini38_flash_entities', 1),
+(411, '2026_09_14_135517_add_claude_fable_5_1_entity', 1),
+(412, '2026_09_15_150548_add_fal_gpt_image_models_to_entities', 1),
+(413, '2026_09_22_083715_create_user_uploads_table', 1),
+(414, '2026_09_22_084522_force_backend_openai_streaming', 1),
+(415, '2026_09_29_000000_backfill_image_for_claude_55_gpt_6_eleven_v4_entities', 1);
 
 INSERT INTO `openai` (`id`, `user_id`, `title`, `description`, `slug`, `active`, `questions`, `image`, `premium`, `type`, `created_at`, `updated_at`, `prompt`, `custom_template`, `tone_of_voice`, `color`, `filters`, `package`, `access_type`) VALUES
 (1, NULL, 'Post Title Generator', 'Get captivating post titles instantly with our title generator. Boost engagement and save time.', 'post_title_generator', 1, '[{\"name\":\"your_description\",\"type\":\"textarea\",\"question\":\"Description\",\"select\":\"\"}]', '<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"48\" viewBox=\"0 96 960 960\" width=\"48\"><path d=\"M430 896V356H200V256h560v100H530v540H430Z\"/></svg>', 0, 'text', '2023-03-11 08:26:49', '2023-03-11 08:26:49', NULL, 0, 0, '#A3D6C2', 'blog', NULL, 'regular'),
@@ -2598,41 +3496,7 @@ INSERT INTO `openai` (`id`, `user_id`, `title`, `description`, `slug`, `active`,
 (43, NULL, 'AI Voiceover', 'The AI app that turns text into audio speech with ease. Get ready to generate custom audios from texts quickly and accurately.', 'ai_voiceover', 1, '[{\"name\":\"file\",\"type\":\"file\",\"question\":\"Upload an Audio File (mp3, mp4, mpeg, mpga, m4a, wav, and webm)(Max: 25Mb)\",\"select\":\"\"}]', '<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"48\" viewBox=\"0 96 960 960\" width=\"48\"><path d=\"M140 976q-24.75 0-42.375-17.625T80 916V236q0-24.75 17.625-42.375T140 176h380l-60 60H140v680h480V776h60v140q0 24.75-17.625 42.375T620 976H140Zm100-170v-60h280v60H240Zm0-120v-60h200v60H240Zm380 10L460 536H320V336h140l160-160v520Zm60-92V258q56 21 88 74t32 104q0 51-35 101t-85 67Zm0 142v-62q70-25 125-90t55-158q0-93-55-158t-125-90v-62q102 27 171 112.5T920 436q0 112-69 197.5T680 746Z\"/></svg>', 0, 'voiceover', '2024-03-01 11:35:52', '2024-03-01 11:35:52', '', 0, 0, '#DEFF81', 'voiceover', NULL, 'regular'),
 (44, NULL, 'AI YouTube', 'Simply turn your Youtube videos into Blog post.', 'ai_youtube', 1, '[{\"name\":\"url\",\"type\":\"url\",\"question\":\"YouTube Video URL\",\"select\":\"\"}]', '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"44\" height=\"44\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"#2c3e50\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path stroke=\"none\" d=\"M0 0h24v24H0z\" fill=\"none\"/><path d=\"M2 8a4 4 0 0 1 4 -4h12a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-12a4 4 0 0 1 -4 -4v-8z\" /><path d=\"M10 9l5 3l-5 3z\" /></svg>', 0, 'youtube', '2024-03-01 11:59:52', '2024-03-01 11:59:52', '', 0, 0, '#FFB0B0', 'youtube', NULL, 'regular'),
 (45, NULL, 'AI RSS', 'Generate unique content with RSS Feed.', 'ai_rss', 1, '[{\"name\":\"rss_feed\",\"type\":\"rss_feed\",\"question\":\"URL\",\"select\":\"\"},{\"name\":\"title\",\"type\":\"select\",\"question\":\"Fetched Post Title\",\"select\":\"<option value=\\\"\\\">Enter the Feed URL, please!</option>\"}]', '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"44\" height=\"44\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"#2c3e50\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path stroke=\"none\" d=\"M0 0h24v24H0z\" fill=\"none\"/><path d=\"M5 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0\" /><path d=\"M4 4a16 16 0 0 1 16 16\" /><path d=\"M4 11a9 9 0 0 1 9 9\" /></svg>', 0, 'rss', '2024-02-22 19:43:17', '2024-04-01 11:17:54', NULL, 0, 0, '#FF9E4D', 'rss', NULL, 'regular'),
-(46, NULL, 'AI Voice Isolator', 'Separate voices from background noise in audio recordings.', 'ai_voice_isolator', 1, '[{\"name\":\"file\",\"type\":\"file\",\"question\":\"Upload an Audio File (mp3, mp4, mpeg, mpga, m4a, wav, and webm)(Max: 500Mb)\",\"select\":\"\"}]', '<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"48\" viewBox=\"0 96 960 960\" width=\"48\"><path d=\"M140 976q-24.75 0-42.375-17.625T80 916V236q0-24.75 17.625-42.375T140 176h380l-60 60H140v680h480V776h60v140q0 24.75-17.625 42.375T620 976H140Zm100-170v-60h280v60H240Zm0-120v-60h200v60H240Zm380 10L460 536H320V336h140l160-160v520Zm60-92V258q56 21 88 74t32 104q0 51-35 101t-85 67Zm0 142v-62q70-25 125-90t55-158q0-93-55-158t-125-90v-62q102 27 171 112.5T920 436q0 112-69 197.5T680 746Z\"/></svg>', 0, 'isolator', '2026-05-22 12:53:17', '2026-05-22 12:53:17', '', 0, 0, '#DEFF81', 'voice', NULL, 'regular');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `openai_chat_category`
---
-
-CREATE TABLE `openai_chat_category` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) DEFAULT NULL,
-  `chatbot_id` bigint(20) DEFAULT NULL,
-  `name` varchar(191) DEFAULT NULL,
-  `short_name` varchar(191) DEFAULT NULL,
-  `slug` varchar(191) DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `instructions` text DEFAULT NULL,
-  `first_message` text DEFAULT NULL,
-  `role` varchar(191) DEFAULT NULL,
-  `human_name` varchar(191) DEFAULT NULL,
-  `helps_with` text DEFAULT NULL,
-  `prompt_prefix` varchar(191) DEFAULT NULL,
-  `image` varchar(191) DEFAULT NULL,
-  `color` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `chat_completions` text DEFAULT NULL,
-  `plan` varchar(191) DEFAULT NULL,
-  `category` varchar(191) DEFAULT NULL,
-  `assistant` varchar(191) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `openai_chat_category`
---
+(46, NULL, 'AI Voice Isolator', 'Separate voices from background noise in audio recordings.', 'ai_voice_isolator', 1, '[{\"name\":\"file\",\"type\":\"file\",\"question\":\"Upload an Audio File (mp3, mp4, mpeg, mpga, m4a, wav, and webm)(Max: 500Mb)\",\"select\":\"\"}]', '<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"48\" viewBox=\"0 96 960 960\" width=\"48\"><path d=\"M140 976q-24.75 0-42.375-17.625T80 916V236q0-24.75 17.625-42.375T140 176h380l-60 60H140v680h480V776h60v140q0 24.75-17.625 42.375T620 976H140Zm100-170v-60h280v60H240Zm0-120v-60h200v60H240Zm380 10L460 536H320V336h140l160-160v520Zm60-92V258q56 21 88 74t32 104q0 51-35 101t-85 67Zm0 142v-62q70-25 125-90t55-158q0-93-55-158t-125-90v-62q102 27 171 112.5T920 436q0 112-69 197.5T680 746Z\"/></svg>', 0, 'isolator', '2026-10-07 12:35:26', '2026-10-07 12:35:26', '', 0, 0, '#DEFF81', 'voice', NULL, 'regular');
 
 INSERT INTO `openai_chat_category` (`id`, `user_id`, `chatbot_id`, `name`, `short_name`, `slug`, `description`, `instructions`, `first_message`, `role`, `human_name`, `helps_with`, `prompt_prefix`, `image`, `color`, `created_at`, `updated_at`, `chat_completions`, `plan`, `category`, `assistant`) VALUES
 (1, NULL, NULL, 'Default AI Chat Bot', 'ACB', 'ai-chat-bot', 'Default', NULL, NULL, 'default', '', '', '', '', '#A3D6C2', '2023-05-16 03:34:57', '2023-05-16 03:39:11', NULL, NULL, NULL, NULL),
@@ -2649,25 +3513,9 @@ INSERT INTO `openai_chat_category` (`id`, `user_id`, `chatbot_id`, `name`, `shor
 (12, NULL, NULL, 'Sustainability Expert', 'SE', 'sustainability-expert', 'Sustainability Expert', NULL, NULL, 'Sustainability Expert', 'Viabil Ity', 'I can assist you with your sustainability goals, provide information on sustainable practices, or offer guidance on living a more environmentally friendly lifestyle', 'As a sustainability expert', NULL, '#ECDBC1', '2023-05-16 03:34:57', '2023-05-16 03:34:57', NULL, NULL, NULL, NULL),
 (13, NULL, NULL, 'Event Planner', 'EP', 'event planner', 'Event Planner', NULL, NULL, 'Event Planner', 'Jack Groomer', 'I can assist you with planning and organizing your upcoming event, providing advice on event management, or offering guidance on creating memorable and successful events', 'As an event planner,', NULL, '#E3E3BD', '2023-05-16 03:34:57', '2023-05-16 03:34:57', NULL, NULL, NULL, NULL),
 (14, NULL, NULL, 'VisionAI', 'VI', 'ai_vision', 'Image PDF Expert', NULL, NULL, 'Image Expert', 'VisionAI', 'I can assist you with PDF or Images-related information or questions', 'As a VisionAI,', 'assets/img/vision.png', '#EDBBBE', '2023-05-16 03:34:57', '2023-05-16 03:39:11', '[{\"role\": \"system\", \"content\": \"You are a Vision AI assistant.\"}, {\"role\": \"user\", \"content\": \"What objects are present in this image?\"}, {\"role\": \"assistant\", \"content\": \"The image contains various objects, including a person, a car, and a building.\"}, {\"role\": \"user\", \"content\": \"Can you describe the color of the car?\"}, {\"role\": \"assistant\", \"content\": \"The car in the image appears to be red.\"}]', NULL, NULL, NULL),
-(15, NULL, NULL, 'File Analyzer', 'FA', 'ai_pdf', 'I can assist you with PDF, DOC, DOCX or CSX, XLS, XLSX information or questions', NULL, NULL, 'File Analyzer', 'File Analyzer', 'I can assist you with PDF, DOC, DOCX or CSX, XLS, XLSX information or questions', 'As a File Analyzer', 'assets/img/vision.png', '#EDBBBE', '2023-05-16 03:34:57', '2026-05-22 12:53:17', '[{\"role\": \"system\", \"content\": \"You are a PDF AI assistant.\"}]', NULL, NULL, NULL),
+(15, NULL, NULL, 'File Analyzer', 'FA', 'ai_pdf', 'I can assist you with PDF, DOC, DOCX or CSX, XLS, XLSX information or questions', NULL, NULL, 'File Analyzer', 'File Analyzer', 'I can assist you with PDF, DOC, DOCX or CSX, XLS, XLSX information or questions', 'As a File Analyzer', 'assets/img/vision.png', '#EDBBBE', '2023-05-16 03:34:57', '2026-10-07 12:35:26', '[{\"role\": \"system\", \"content\": \"You are a PDF AI assistant.\"}]', NULL, NULL, NULL),
 (16, NULL, NULL, 'Chat Image', 'CI', 'ai_chat_image', 'Image Generator', NULL, NULL, 'Image Generator', 'Image Generator', 'I can assist to generate image by user input', 'As a Pdf AI,', 'assets/img/vision.png', '#EDBBBE', '2023-05-16 03:34:57', '2023-05-16 03:39:11', '[{\"role\": \"system\", \"content\": \"You are a Chat Image assistant.\"}]', '', '', NULL),
 (17, NULL, NULL, 'WebChat', 'WC', 'ai_webchat', 'AI Web Chat', NULL, NULL, 'Web Analyzer', 'AI Web Chat', 'I can assist you with web page content analyzation', 'As a WebPage analyzer,', 'assets/img/vision.png', '#EDBBBE', '2023-05-16 03:34:57', '2023-05-16 03:39:11', '[{\"role\": \"system\", \"content\": \"You are a Web Page Analyzer assistant.\"}]', '', '', NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `openai_filters`
---
-
-CREATE TABLE `openai_filters` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) DEFAULT NULL,
-  `name` varchar(191) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `openai_filters`
---
 
 INSERT INTO `openai_filters` (`id`, `user_id`, `name`) VALUES
 (1, NULL, 'blog'),
@@ -2680,3130 +3528,352 @@ INSERT INTO `openai_filters` (`id`, `user_id`, `name`) VALUES
 (8, NULL, 'youtube'),
 (9, NULL, 'rss');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `pages`
---
-
-CREATE TABLE `pages` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(191) NOT NULL,
-  `content` longtext NOT NULL,
-  `slug` varchar(191) NOT NULL,
-  `status` tinyint(1) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `titlebar_status` tinyint(4) NOT NULL DEFAULT 1,
-  `is_custom` tinyint(1) NOT NULL DEFAULT 0,
-  `show_on_footer` tinyint(4) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `pages`
---
-
 INSERT INTO `pages` (`id`, `title`, `content`, `slug`, `status`, `created_at`, `updated_at`, `titlebar_status`, `is_custom`, `show_on_footer`) VALUES
 (1, 'About', '<p><img style=\"display: block; border-radius: 25px; margin-left: auto; margin-right: auto;\" src=\"https://aidefault.liquid-themes.com/wp-content/uploads/2023/08/img-1.jpg\" alt=\"\" width=\"1450\" height=\"761\"></p>\r\n<p style=\"text-align: center;\"><span class=\"highlight\">About Us</span></p>\r\n<h1 style=\"text-align: center;\">Shaping the future 🏔️</h1>\r\n<p class=\"leading\" style=\"max-width: 80%; margin-left: auto; margin-right: auto; text-align: center;\">Whether&nbsp;you&rsquo;re&nbsp;a&nbsp;content&nbsp;creator,&nbsp;business&nbsp;owner,&nbsp;or&nbsp;student, <span style=\"color: rgb(89, 89, 89);\">our&nbsp;text&nbsp;generator&nbsp;is&nbsp;an&nbsp;essential&nbsp;tool&nbsp;for&nbsp;boosting&nbsp;your&nbsp;productivity.</span></p>\r\n<hr>\r\n<p>&nbsp;</p>\r\n<p><span class=\"highlight\">Who Are We<br></span></p>\r\n<p class=\"leading\">At MagicAI, we are passionate about harnessing the power of artificial intelligence to unlock limitless creativity and efficiency.<span style=\"color: rgb(89, 89, 89);\"> Our cutting-edge AI Generators are designed to revolutionize the way you create, streamline your workflows, and supercharge your productivity.</span></p>\r\n<p>Our mission is to empower individuals and businesses to unleash their creative potential and achieve extraordinary results.</p>\r\n<p>We believe that AI has the ability to augment human capabilities, enhance decision-making processes, and accelerate innovation.</p>\r\n<p>By developing state-of-the-art AI Generators, we aim to democratize access to advanced AI technologies, enabling users from all backgrounds to excel in their creative endeavors.</p>\r\n<p>&nbsp;</p>\r\n<hr>\r\n<p>&nbsp;</p>\r\n<p><span class=\"highlight\">Invite a Friend</span></p>\r\n<h3>Our Mission</h3>\r\n<p class=\"leading\">We pride ourselves on offering AI Generators that are unmatched in their quality, <span style=\"color: rgb(89, 89, 89);\">versatility, and ease of use. Here&rsquo;s what sets us apart from the competition:</span></p>\r\n<p>With our AI Generators, the possibilities are endless. From generating compelling marketing copy and designing stunning visuals to automating data analysis and creating personalized user experiences, our tools will transform the way you work and help you achieve remarkable outcomes.</p>\r\n<p>Join our community of innovators, creators, and forward-thinkers who are leveraging the power of AI to revolutionize their industries. Start your journey with MagicAI today and unlock the full potential of AI Generators.</p>\r\n<p>Ready to experience the future of creativity? Sign up now and embark on an exciting adventure of limitless possibilities.</p>\r\n<p>&nbsp;</p>\r\n<p style=\"text-align: center;\"><span class=\"info-box\">Still have a question? <span style=\"color: rgb(8, 53, 248);\"><a style=\"color: rgb(8, 53, 248);\" href=\"#\">Browse documentation</a></span> or <span style=\"color: rgb(8, 53, 248);\"><a style=\"color: rgb(8, 53, 248);\" href=\"#\">submit a ticket</a></span>.</span></p>\r\n<p>&nbsp;</p>\r\n<hr>\r\n<p>&nbsp;</p>\r\n<table style=\"border-collapse: collapse; width: 100%; border-width: 0px; border-style: none;\" border=\"1\"><colgroup><col style=\"width: 20%;\"><col style=\"width: 20%;\"><col style=\"width: 20%;\"><col style=\"width: 20%;\"><col style=\"width: 20%;\"></colgroup>\r\n<tbody>\r\n<tr style=\"text-align: center;\">\r\n<td style=\"border-width: 0px; text-align: center;\"><img src=\"https://aidefault.liquid-themes.com/wp-content/uploads/2023/08/Path-143406.svg\" alt=\"\" width=\"79\" height=\"28\"></td>\r\n<td style=\"border-width: 0px; text-align: center;\"><img src=\"https://aidefault.liquid-themes.com/wp-content/uploads/2023/08/Path-159906.svg\" alt=\"\" width=\"48\" height=\"48\"></td>\r\n<td style=\"border-width: 0px; text-align: center;\"><img src=\"https://aidefault.liquid-themes.com/wp-content/uploads/2023/08/Path-159907.svg\" alt=\"\" width=\"55\" height=\"34\"></td>\r\n<td style=\"border-width: 0px; text-align: center;\"><img src=\"https://aidefault.liquid-themes.com/wp-content/uploads/2023/08/Path-159908.svg\" alt=\"\" width=\"47\" height=\"48\"></td>\r\n<td style=\"border-width: 0px; text-align: center;\"><img src=\"https://aidefault.liquid-themes.com/wp-content/uploads/2023/08/Path-159909.svg\" alt=\"\" width=\"80\" height=\"20\"></td>\r\n</tr>\r\n</tbody>\r\n</table>', 'custom-about', 0, '2024-02-13 03:46:38', '2024-02-14 14:11:26', 0, 1, 0),
 (2, 'Privacy and Policy', '<p style=\"text-align: center;\"><span class=\"highlight\">Privacy Policy</span></p>\r\n<h1 style=\"text-align: center;\">Privacy and Policy</h1>\r\n<p class=\"leading\" style=\"max-width: 80%; margin-left: auto; margin-right: auto; text-align: center;\">With our tool, you can generate text in seconds, freeing up your <span style=\"color: rgb(89, 89, 89);\">time to focus on other important tasks that matter the most.</span></p>\r\n<p><img style=\"display: block; border-radius: 25px; margin-left: auto; margin-right: auto;\" src=\"https://gcdnb.pbrd.co/images/D92RJsyqJdHy.png?o=1\" alt=\"\" width=\"1450\" height=\"761\"></p>\r\n<p>&nbsp;</p>\r\n<p>&nbsp;</p>\r\n<p><span class=\"highlight\">Privacy Policy</span></p>\r\n<p class=\"leading\">Our newest theme update brings modern and clean design templates to Hub Collection which is already one of the biggest template collections ever built. <span style=\"color: rgb(89, 89, 89);\">These layouts are designed in a simple and unique style that can improve your daily workflow and save you an enormous amount of time.</span></p>\r\n<p>Test built the Liquid app as a Commercial app. This Service is provided by Test and is intended for use as is.</p>\r\n<p>If you choose to use our Service, then you agree to the collection and use of information in relation to this policy. The Personal Information that we collect is used for providing and improving the Service. We will not use or share your information with anyone except as described in this Privacy Policy.</p>\r\n<p>The terms used in this Privacy Policy have the same meanings as in our Terms and Conditions, which are accessible at Liquid unless otherwise defined in this Privacy Policy.</p>\r\n<p>&nbsp;</p>\r\n<hr>\r\n<h5>&nbsp;</h5>\r\n<h5>Fair Use</h5>\r\n<p>For a better experience, while using our Service, we may require you to provide us with certain personally identifiable information, including but not limited to Test. The information that we request will be retained by us and used as described in this privacy policy.</p>\r\n<p>The app does use third-party services that may collect information used to identify you.</p>\r\n<p>Link to the privacy policy of third-party service providers used by the app</p>\r\n<p>We want to inform you that whenever you use our Service, in a case of an error in the app we collect data and information (through third-party products) on your phone called Log Data. This Log Data may include information such as your device Internet Protocol (&ldquo;IP&rdquo;) address, device name, operating system version, the configuration of the app when utilizing our Service, the time and date of your use of the Service, and other statistics.</p>\r\n<p>&nbsp;</p>\r\n<h5 class=\"lqd-text-el m-0 p-0\"><span class=\"lqd-text-item relative elementor-repeater-item-c3d0556\">Cookies</span></h5>\r\n<p>Cookies are files with a small amount of data that are commonly used as anonymous unique identifiers. These are sent to your browser from the websites that you visit and are stored on your device&rsquo;s internal memory.</p>\r\n<p>This Service does not use these &ldquo;cookies&rdquo; explicitly. However, the app may use third-party code and libraries that use &ldquo;cookies&rdquo; to collect information and improve their services. You have the option to either accept or refuse</p>\r\n<p>&nbsp;</p>\r\n<p style=\"text-align: center;\"><span class=\"info-box\">Still have a question? <span style=\"color: rgb(8, 53, 248);\"><a style=\"color: rgb(8, 53, 248);\" href=\"#\">Browse documentation</a></span> or <span style=\"color: rgb(8, 53, 248);\"><a style=\"color: rgb(8, 53, 248);\" href=\"#\">submit a ticket</a>.</span></span></p>', 'custom-privacy-and-policy', 0, '2024-02-13 03:48:09', '2024-02-14 14:15:29', 0, 1, 0),
 (3, 'How It Works', '<p style=\"text-align: center;\">Trusted by these amazing companies</p>\r\n<table style=\"border-collapse: collapse; width: 100.068%; border-width: 0px;\" border=\"1\"><colgroup><col style=\"width: 25.0342%;\"><col style=\"width: 25.0342%;\"><col style=\"width: 25.0342%;\"><col style=\"width: 25.0342%;\"></colgroup>\r\n<tbody>\r\n<tr>\r\n<td style=\"border-width: 0px;\"><img style=\"display: block; margin-left: auto; margin-right: auto;\" src=\"https://aidefault.liquid-themes.com/wp-content/uploads/2023/08/nike.svg\" alt=\"\" width=\"88\" height=\"32\"></td>\r\n<td style=\"border-width: 0px;\"><img style=\"display: block; margin-left: auto; margin-right: auto;\" src=\"https://aidefault.liquid-themes.com/wp-content/uploads/2023/08/Path-133531.svg\" alt=\"\" width=\"86\" height=\"37\"></td>\r\n<td style=\"border-width: 0px;\"><img style=\"display: block; margin-left: auto; margin-right: auto;\" src=\"https://aidefault.liquid-themes.com/wp-content/uploads/2023/08/Path-46878.svg\" alt=\"\" width=\"49\" height=\"35\"></td>\r\n<td style=\"border-width: 0px;\"><img style=\"display: block; margin-left: auto; margin-right: auto;\" src=\"https://aidefault.liquid-themes.com/wp-content/uploads/2023/08/volkswagen-1.svg\" alt=\"\" width=\"53\" height=\"53\"></td>\r\n</tr>\r\n</tbody>\r\n</table>\r\n<p class=\"leading\" style=\"text-align: center;\">&nbsp;</p>\r\n<p class=\"leading\" style=\"text-align: center;\">At MagicAI, we are passionate about harnessing the power of artificial intelligence to unlock limitless creativity and efficiency.&nbsp;<span style=\"color: rgb(89, 89, 89);\">Our cutting-edge AI Generators are designed to revolutionize the way you create, streamline your workflows, and supercharge your productivity.</span></p>\r\n<p class=\"leading\" style=\"text-align: center;\">&nbsp;</p>\r\n<p><span class=\"num-block\">1</span></p>\r\n<h4>Select a Template</h4>\r\n<p>Our mission is to empower individuals and businesses to unleash their creative potential and achieve extraordinary results. We believe that AI has the ability to augment human capabilities, enhance decision-making processes, and accelerate innovation.</p>\r\n<p>&nbsp;</p>\r\n<p><span class=\"num-block\">2</span></p>\r\n<h4>Explain your idea</h4>\r\n<p>AI generators are sophisticated systems trained on vast amounts of data to learn patterns, understand context, and generate original content. They are designed to mimic human creativity by analyzing existing examples.</p>\r\n<p>&nbsp;</p>\r\n<p><span class=\"num-block\">3</span></p>\r\n<h4>Done!</h4>\r\n<p>By developing state-of-the-art AI Generators, we aim to democratize access to advanced AI technologies, enabling users from all backgrounds to excel in their creative endeavors.</p>\r\n<p>&nbsp;</p>\r\n<p style=\"text-align: center;\"><span class=\"info-box\">Still have a question? <span style=\"color: rgb(8, 53, 248);\"><a style=\"color: rgb(8, 53, 248);\" href=\"#\">Browse documentation</a></span> or <span style=\"color: rgb(8, 53, 248);\"><a style=\"color: rgb(8, 53, 248);\" href=\"#\">submit a ticket</a>.</span></span></p>\r\n<p>&nbsp;</p>\r\n<p><img style=\"border-radius: 25px;\" src=\"https://gcdnb.pbrd.co/images/OZmBXkQ5MQyH.png?o=1\" alt=\"How it works\" width=\"1620\" height=\"870\"></p>\r\n<p>&nbsp;</p>\r\n<p><span class=\"highlight\">Invite a Friend</span></p>\r\n<h4>Affiliate System.</h4>\r\n<p class=\"leading\">We pride ourselves on offering AI Generators that are unmatched in their quality, <span style=\"color: rgb(89, 89, 89);\">versatility, and ease of use. Here&rsquo;s what sets us apart from the competition:</span></p>\r\n<h5>Done!</h5>\r\n<p>Join our community of innovators, creators, and forward-thinkers who are leveraging the power of AI to revolutionize their industries. Start your journey with MagicAI today and unlock the full potential of AI Generators.</p>\r\n<p>&nbsp;</p>\r\n<p><img src=\"https://aidefault.liquid-themes.com/wp-content/uploads/2023/08/icon-2.jpg\" alt=\"\" width=\"48\" height=\"48\"></p>\r\n<h5>Invite your Friend</h5>\r\n<p>With our AI Generators, the possibilities are endless. From generating compelling marketing copy and designing stunning visuals to automating data analysis and creating personalized user experiences.</p>\r\n<p>&nbsp;</p>\r\n<p><img src=\"https://aidefault.liquid-themes.com/wp-content/uploads/2023/08/icon-3.jpg\" alt=\"\" width=\"48\" height=\"48\"></p>\r\n<h5>Make Money</h5>\r\n<p>Ready to experience the future of creativity? Sign up now and embark on an exciting adventure of limitless possibilities.</p>\r\n<p>&nbsp;</p>\r\n<p>&nbsp;</p>\r\n<p style=\"text-align: center;\"><span class=\"info-box\">Still have a question? <span style=\"color: rgb(8, 53, 248);\"><a style=\"color: rgb(8, 53, 248);\" href=\"#\">Browse documentation</a></span> or <span style=\"color: rgb(8, 53, 248);\"><a style=\"color: rgb(8, 53, 248);\" href=\"#\">submit a ticket</a>.</span></span></p>', 'custom-how-it-works', 0, '2024-02-13 03:49:08', '2024-02-14 13:37:35', 1, 1, 0),
 (4, 'Features', '<p><img style=\"border-radius: 25px;\" src=\"https://gcdnb.pbrd.co/images/iTA0Xv7SHrVp.png?o=1\" alt=\"About us\" width=\"1526 &times;\" height=\"866\"></p>\r\n<p>&nbsp;</p>\r\n<p><span class=\"highlight\">Introducing</span></p>\r\n<h3 class=\"lqd-text-el m-0 p-0\"><span class=\"lqd-text-item relative elementor-repeater-item-eaff06a\">Custom Chatbots.</span></h3>\r\n<p class=\"leading\">We pride ourselves on offering AI Generators that are unmatched in their quality, <span style=\"color: rgb(89, 89, 89);\">versatility, and ease of use. Here&rsquo;s what sets us apart from the competition:</span></p>\r\n<p>With our AI Generators, the possibilities are endless. From generating compelling marketing copy and designing stunning visuals to automating data analysis and creating personalized user experiences, our tools will transform the way you work and help you achieve remarkable outcomes.</p>\r\n<p>Join our community of innovators, creators, and forward-thinkers who are leveraging the power of AI to revolutionize their industries. Start your journey with MagicAI today and unlock the full potential of AI Generators.</p>\r\n<p>Ready to experience the future of creativity? Sign up now and embark on an exciting adventure of limitless possibilities.</p>\r\n<ul style=\"list-style: disc; list-style-position: inside;\">\r\n<li><strong>New &mdash;</strong>&nbsp;AI Voiceover in 30 Languages</li>\r\n<li><strong>New &mdash;</strong>&nbsp;Custom Avatar for Chatbot</li>\r\n<li><strong>Improved &mdash;</strong>&nbsp;Auto Translate</li>\r\n</ul>', 'custom-features', 0, '2024-02-14 12:27:38', '2024-02-14 13:25:50', 1, 1, 0);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `password_reset_tokens`
---
-
-CREATE TABLE `password_reset_tokens` (
-  `email` varchar(191) NOT NULL,
-  `token` varchar(191) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `payment_proofs`
---
-
-CREATE TABLE `payment_proofs` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `order_id` varchar(191) NOT NULL,
-  `plan_id` bigint(20) UNSIGNED NOT NULL,
-  `total_amount` decimal(15,2) DEFAULT NULL,
-  `proof_image` varchar(191) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `paystack_payment_infos`
---
-
-CREATE TABLE `paystack_payment_infos` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `email` varchar(191) DEFAULT NULL,
-  `reference` varchar(191) DEFAULT NULL,
-  `trans` varchar(191) DEFAULT NULL,
-  `status` varchar(191) DEFAULT NULL,
-  `message` varchar(191) DEFAULT NULL,
-  `transaction` varchar(191) DEFAULT NULL,
-  `trxref` varchar(191) DEFAULT NULL,
-  `amount` varchar(191) DEFAULT NULL,
-  `currency` varchar(191) DEFAULT NULL,
-  `plan_code` varchar(191) DEFAULT NULL,
-  `customer_code` varchar(191) DEFAULT NULL,
-  `other` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `pdf_data`
---
-
-CREATE TABLE `pdf_data` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `chat_id` int(11) NOT NULL,
-  `content` text NOT NULL,
-  `vector` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`vector`)),
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `pebblely`
---
-
-CREATE TABLE `pebblely` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `image` varchar(191) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `permissions`
---
-
-CREATE TABLE `permissions` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(191) NOT NULL,
-  `guard_name` varchar(191) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `permissions`
---
-
 INSERT INTO `permissions` (`id`, `name`, `guard_name`, `created_at`, `updated_at`) VALUES
-(1, 'marketplace', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(2, 'themes', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(3, 'user_management', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(4, 'announcements', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(5, 'google_adsense', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(6, 'support_requests', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(7, 'templates', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(8, 'chat_settings', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(9, 'frontend', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(10, 'finance', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(11, 'pages', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(12, 'blog', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(13, 'affiliates_admin', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(14, 'coupons_admin', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(15, 'email_templates', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(16, 'introductions', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(17, 'mailchimp_newsletter', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(18, 'hubspot', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(19, 'api_integration', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(20, 'settings', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(21, 'site_health', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(22, 'license', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(23, 'update', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(24, 'menu_setting', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(25, 'VIP_CHAT_WIDGET', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `personal_access_tokens`
---
-
-CREATE TABLE `personal_access_tokens` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `tokenable_type` varchar(191) NOT NULL,
-  `tokenable_id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(191) NOT NULL,
-  `token` varchar(64) NOT NULL,
-  `abilities` text DEFAULT NULL,
-  `last_used_at` timestamp NULL DEFAULT NULL,
-  `expires_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `photo_studios`
---
-
-CREATE TABLE `photo_studios` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) DEFAULT NULL,
-  `photo` text DEFAULT NULL,
-  `payload` text DEFAULT NULL,
-  `credits` int(11) NOT NULL DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `status` varchar(191) DEFAULT NULL,
-  `request_id` varchar(191) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `plans`
---
-
-CREATE TABLE `plans` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `active` tinyint(1) NOT NULL DEFAULT 1,
-  `name` varchar(191) DEFAULT NULL,
-  `price` double NOT NULL DEFAULT 0,
-  `price_tax_included` tinyint(1) DEFAULT 0,
-  `currency` varchar(191) NOT NULL DEFAULT 'USD',
-  `frequency` varchar(191) NOT NULL DEFAULT 'monthly',
-  `is_featured` tinyint(1) NOT NULL DEFAULT 0,
-  `stripe_product_id` varchar(191) DEFAULT NULL,
-  `ai_name` varchar(191) DEFAULT NULL,
-  `max_tokens` bigint(20) DEFAULT NULL,
-  `can_create_ai_images` tinyint(1) DEFAULT NULL,
-  `plan_type` varchar(191) NOT NULL DEFAULT 'all',
-  `features` text DEFAULT NULL,
-  `type` varchar(191) NOT NULL DEFAULT 'subscription',
-  `is_team_plan` tinyint(1) NOT NULL DEFAULT 0,
-  `plan_allow_seat` int(11) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `trial_days` int(11) NOT NULL DEFAULT 0,
-  `open_ai_items` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`open_ai_items`)),
-  `description` text DEFAULT NULL,
-  `plan_ai_tools` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`plan_ai_tools`)),
-  `plan_features` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`plan_features`)),
-  `social_media_agent_limits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`social_media_agent_limits`)),
-  `social_media_automation_limits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`social_media_automation_limits`)),
-  `blogpilot_limits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`blogpilot_limits`)),
-  `default_ai_model` varchar(191) DEFAULT 'gpt-3.5-turbo',
-  `ai_models` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`ai_models`)),
-  `user_api` tinyint(1) NOT NULL DEFAULT 0,
-  `hidden_url` varchar(191) DEFAULT NULL,
-  `hidden` tinyint(1) NOT NULL DEFAULT 0,
-  `max_subscribe` int(11) DEFAULT NULL,
-  `chatbot_limit` int(11) DEFAULT NULL,
-  `chatbot_channels` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`chatbot_channels`)),
-  `chatbot_human_agent` tinyint(1) NOT NULL DEFAULT 1,
-  `last_date` date DEFAULT NULL,
-  `reset_credits_on_renewal` tinyint(1) NOT NULL DEFAULT 0,
-  `multi_model_support` tinyint(1) DEFAULT 0,
-  `voice_call_seconds_limit` int(11) NOT NULL DEFAULT -1,
-  `affiliate_status` tinyint(1) NOT NULL DEFAULT 1,
-  `model_council_support` tinyint(1) DEFAULT 0,
-  `deep_research_request_limit` int(11) NOT NULL DEFAULT 5,
-  `ugc_videos_limit` int(11) NOT NULL DEFAULT -1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `privacy_terms`
---
-
-CREATE TABLE `privacy_terms` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `type` varchar(191) DEFAULT NULL,
-  `lang` varchar(191) DEFAULT NULL,
-  `content` text DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `products`
---
-
-CREATE TABLE `products` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(191) DEFAULT NULL,
-  `type` int(11) DEFAULT NULL,
-  `key_features` text DEFAULT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `company_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `prompt_library`
---
-
-CREATE TABLE `prompt_library` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(191) NOT NULL,
-  `prompt` text NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `user_id` int(11) NOT NULL,
-  `show_for_all` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `rate_limits`
---
-
-CREATE TABLE `rate_limits` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `ip_address` varchar(191) NOT NULL,
-  `attempts` int(11) NOT NULL DEFAULT 0,
-  `last_attempt_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `type` varchar(191) NOT NULL DEFAULT 'image'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `recent_search_keys`
---
-
-CREATE TABLE `recent_search_keys` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `keyword` varchar(191) NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `referers`
---
-
-CREATE TABLE `referers` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `session_id` varchar(191) NOT NULL,
-  `referer` varchar(191) NOT NULL,
-  `domain` varchar(128) NOT NULL,
-  `created_at` timestamp NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `revenuecat_products`
---
-
-CREATE TABLE `revenuecat_products` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `plan_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `gatewayproduct_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `entitlement_id` varchar(191) DEFAULT NULL,
-  `package_id` varchar(191) DEFAULT NULL,
-  `google_id` varchar(191) DEFAULT NULL,
-  `apple_id` varchar(191) DEFAULT NULL,
-  `amazon_id` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `roles`
---
-
-CREATE TABLE `roles` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(191) NOT NULL,
-  `guard_name` varchar(191) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `roles`
---
+(1, 'marketplace', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(2, 'themes', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(3, 'user_management', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(4, 'announcements', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(5, 'google_adsense', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(6, 'support_requests', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(7, 'templates', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(8, 'chat_settings', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(9, 'frontend', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(10, 'finance', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(11, 'pages', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(12, 'blog', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(13, 'affiliates_admin', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(14, 'coupons_admin', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(15, 'email_templates', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(16, 'introductions', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(17, 'mailchimp_newsletter', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(18, 'hubspot', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(19, 'api_integration', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(20, 'settings', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(21, 'site_health', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(22, 'license', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(23, 'update', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(24, 'menu_setting', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(25, 'VIP_CHAT_WIDGET', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26');
 
 INSERT INTO `roles` (`id`, `name`, `guard_name`, `created_at`, `updated_at`) VALUES
-(1, 'user', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(2, 'admin', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(3, 'super_admin', 'web', '2026-05-22 12:53:16', '2026-05-22 12:53:16');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `role_has_permissions`
---
-
-CREATE TABLE `role_has_permissions` (
-  `permission_id` bigint(20) UNSIGNED NOT NULL,
-  `role_id` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `settings`
---
-
-CREATE TABLE `settings` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `invoice_currency` varchar(191) DEFAULT NULL,
-  `invoice_name` varchar(191) DEFAULT NULL,
-  `invoice_website` varchar(191) DEFAULT NULL,
-  `invoice_address` varchar(191) DEFAULT NULL,
-  `invoice_city` varchar(191) DEFAULT NULL,
-  `invoice_state` varchar(191) DEFAULT NULL,
-  `invoice_postal` varchar(191) DEFAULT NULL,
-  `invoice_country` varchar(191) DEFAULT NULL,
-  `invoice_phone` varchar(191) DEFAULT NULL,
-  `invoice_vat` varchar(191) DEFAULT NULL,
-  `default_currency` varchar(191) NOT NULL DEFAULT '2',
-  `tax_rate` varchar(191) DEFAULT NULL,
-  `stripe_active` varchar(191) NOT NULL DEFAULT '0',
-  `stripe_key` varchar(191) DEFAULT NULL,
-  `stripe_secret` varchar(191) DEFAULT NULL,
-  `stripe_base_url` varchar(191) NOT NULL DEFAULT 'https://api.stripe.com',
-  `bank_transfer_active` varchar(191) NOT NULL DEFAULT '0',
-  `bank_transfer_instructions` varchar(191) DEFAULT NULL,
-  `bank_transfer_informations` varchar(191) DEFAULT NULL,
-  `site_name` varchar(191) NOT NULL DEFAULT 'MagicAI',
-  `site_url` varchar(191) NOT NULL DEFAULT 'https://liquid-themes.com',
-  `site_email` varchar(191) DEFAULT NULL,
-  `google_analytics_active` varchar(191) NOT NULL DEFAULT '0',
-  `google_analytics_code` text DEFAULT NULL,
-  `logo` varchar(191) NOT NULL DEFAULT 'magicAI-logo.svg',
-  `favicon` varchar(191) DEFAULT NULL,
-  `meta_title` text DEFAULT NULL,
-  `meta_description` text DEFAULT NULL,
-  `facebook_active` tinyint(1) NOT NULL DEFAULT 0,
-  `facebook_api_key` text DEFAULT NULL,
-  `facebook_api_secret` text DEFAULT NULL,
-  `facebook_redirect_url` text DEFAULT NULL,
-  `github_active` tinyint(1) NOT NULL DEFAULT 0,
-  `github_api_key` text DEFAULT NULL,
-  `github_api_secret` text DEFAULT NULL,
-  `github_redirect_url` text DEFAULT NULL,
-  `google_active` tinyint(1) NOT NULL DEFAULT 0,
-  `google_api_key` text DEFAULT NULL,
-  `google_api_secret` text DEFAULT NULL,
-  `google_redirect_url` text DEFAULT NULL,
-  `twitter_active` tinyint(1) NOT NULL DEFAULT 0,
-  `twitter_api_key` text DEFAULT NULL,
-  `twitter_api_secret` text DEFAULT NULL,
-  `twitter_redirect_url` text DEFAULT NULL,
-  `register_active` tinyint(1) NOT NULL DEFAULT 1,
-  `default_country` varchar(191) NOT NULL DEFAULT 'United States',
-  `smtp_host` varchar(191) DEFAULT NULL,
-  `smtp_port` varchar(191) DEFAULT NULL,
-  `smtp_username` varchar(191) DEFAULT NULL,
-  `smtp_password` varchar(191) DEFAULT NULL,
-  `smtp_email` varchar(191) DEFAULT NULL,
-  `smtp_sender_name` varchar(191) DEFAULT NULL,
-  `smtp_encryption` varchar(191) NOT NULL DEFAULT 'TLS',
-  `openai_api_secret` text DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `logo_path` varchar(191) NOT NULL DEFAULT 'assets/img/logo/magicAI-logo.svg',
-  `favicon_path` varchar(191) DEFAULT NULL,
-  `openai_default_model` varchar(191) NOT NULL DEFAULT 'gpt-3.5-turbo',
-  `openai_default_language` varchar(191) NOT NULL DEFAULT 'en-US',
-  `openai_default_tone_of_voice` varchar(191) NOT NULL DEFAULT 'professional',
-  `openai_default_creativity` varchar(191) NOT NULL DEFAULT '0.75',
-  `openai_max_input_length` varchar(191) NOT NULL DEFAULT '300',
-  `openai_max_output_length` varchar(191) NOT NULL DEFAULT '200',
-  `affiliate_minimum_withdrawal` varchar(191) NOT NULL DEFAULT '10',
-  `affiliate_commission_percentage` varchar(191) NOT NULL DEFAULT '10',
-  `frontend_pricing_section` tinyint(1) NOT NULL DEFAULT 1,
-  `frontend_custom_templates_section` tinyint(1) NOT NULL DEFAULT 1,
-  `frontend_business_partners_section` tinyint(1) NOT NULL DEFAULT 1,
-  `frontend_additional_url` varchar(191) DEFAULT NULL,
-  `frontend_custom_js` varchar(191) DEFAULT NULL,
-  `frontend_custom_css` varchar(191) DEFAULT NULL,
-  `frontend_footer_facebook` varchar(191) DEFAULT NULL,
-  `frontend_footer_twitter` varchar(191) DEFAULT NULL,
-  `frontend_footer_instagram` varchar(191) DEFAULT NULL,
-  `script_version` double NOT NULL DEFAULT 10,
-  `logo_collapsed` varchar(191) NOT NULL DEFAULT 'magicAI-logo-Collapsed.png',
-  `logo_collapsed_path` varchar(191) NOT NULL DEFAULT 'assets/img/logo/magicAI-logo-Collapsed.png',
-  `stripe_status_for_now` varchar(191) NOT NULL DEFAULT 'disabled',
-  `logo_dark` varchar(191) NOT NULL DEFAULT 'magicAI-logo-dark.svg',
-  `logo_dashboard` text DEFAULT NULL,
-  `logo_dashboard_dark` text DEFAULT NULL,
-  `logo_collapsed_dark` varchar(191) NOT NULL DEFAULT 'magicAI-logo-collapsed-dark.svg',
-  `logo_2x` text DEFAULT NULL,
-  `logo_dark_2x` text DEFAULT NULL,
-  `logo_dashboard_2x` text DEFAULT NULL,
-  `logo_dashboard_dark_2x` text DEFAULT NULL,
-  `logo_collapsed_2x` text DEFAULT NULL,
-  `logo_collapsed_dark_2x` text DEFAULT NULL,
-  `logo_dark_path` varchar(191) NOT NULL DEFAULT 'assets/img/logo/magicAI-logo-dark.svg',
-  `logo_dashboard_path` text DEFAULT NULL,
-  `logo_dashboard_dark_path` text DEFAULT NULL,
-  `logo_collapsed_dark_path` varchar(191) NOT NULL DEFAULT 'assets/img/logo/magicAI-logo-collapsed-dark.svg',
-  `logo_2x_path` text DEFAULT NULL,
-  `logo_dark_2x_path` text DEFAULT NULL,
-  `logo_dashboard_2x_path` text DEFAULT NULL,
-  `logo_dashboard_dark_2x_path` text DEFAULT NULL,
-  `logo_collapsed_2x_path` text DEFAULT NULL,
-  `logo_collapsed_dark_2x_path` text DEFAULT NULL,
-  `feature_ai_writer` tinyint(1) NOT NULL DEFAULT 1,
-  `feature_ai_image` tinyint(1) NOT NULL DEFAULT 1,
-  `feature_ai_chat` tinyint(1) NOT NULL DEFAULT 1,
-  `feature_ai_code` tinyint(1) NOT NULL DEFAULT 1,
-  `feature_ai_voice_clone` tinyint(1) NOT NULL DEFAULT 0,
-  `feature_ai_speech_to_text` tinyint(1) NOT NULL DEFAULT 1,
-  `feature_affilates` tinyint(1) NOT NULL DEFAULT 1,
-  `logo_sticky` text DEFAULT NULL,
-  `logo_sticky_path` text DEFAULT NULL,
-  `logo_sticky_2x` text DEFAULT NULL,
-  `logo_sticky_2x_path` text DEFAULT NULL,
-  `meta_keywords` text DEFAULT NULL,
-  `gdpr_status` tinyint(1) NOT NULL DEFAULT 0,
-  `gdpr_button` varchar(191) NOT NULL DEFAULT 'Accept',
-  `gdpr_content` varchar(191) DEFAULT 'This website uses cookies to improve your web experience.',
-  `menu_options` text DEFAULT NULL,
-  `privacy_enable` tinyint(1) NOT NULL DEFAULT 0,
-  `privacy_enable_login` tinyint(1) NOT NULL DEFAULT 0,
-  `privacy_content` text DEFAULT NULL,
-  `terms_content` text DEFAULT NULL,
-  `login_without_confirmation` tinyint(1) NOT NULL DEFAULT 1,
-  `feature_ai_voiceover` tinyint(1) DEFAULT 1,
-  `gcs_file` text DEFAULT NULL,
-  `gcs_name` text DEFAULT NULL,
-  `frontend_code_before_head` text DEFAULT NULL,
-  `frontend_code_before_body` text DEFAULT NULL,
-  `dashboard_code_before_head` text DEFAULT NULL,
-  `dashboard_code_before_body` text DEFAULT NULL,
-  `feature_ai_article_wizard` tinyint(4) NOT NULL DEFAULT 1,
-  `feature_ai_vision` tinyint(4) NOT NULL DEFAULT 1,
-  `feature_ai_pdf` tinyint(4) NOT NULL DEFAULT 1,
-  `feature_ai_chat_image` tinyint(4) NOT NULL DEFAULT 1,
-  `mobile_payment_active` tinyint(1) NOT NULL DEFAULT 0,
-  `feature_ai_rewriter` tinyint(4) NOT NULL DEFAULT 1,
-  `feature_ai_youtube` tinyint(4) NOT NULL DEFAULT 1,
-  `feature_ai_rss` tinyint(4) NOT NULL DEFAULT 1,
-  `team_functionality` tinyint(1) NOT NULL DEFAULT 0,
-  `feature_ai_advanced_editor` tinyint(1) NOT NULL DEFAULT 1,
-  `user_count` int(11) NOT NULL DEFAULT 0,
-  `free_open_ai_items` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`free_open_ai_items`)),
-  `user_api_option` tinyint(4) NOT NULL DEFAULT 0,
-  `auth_view_options` text DEFAULT NULL,
-  `tour_seen` tinyint(1) NOT NULL DEFAULT 1,
-  `recaptcha_login` tinyint(1) NOT NULL DEFAULT 0,
-  `recaptcha_register` tinyint(1) NOT NULL DEFAULT 0,
-  `recaptcha_sitekey` varchar(191) DEFAULT NULL,
-  `recaptcha_secretkey` varchar(191) DEFAULT NULL,
-  `login_with_otp` tinyint(1) NOT NULL DEFAULT 0,
-  `synthesia_secret_key` text DEFAULT NULL,
-  `pebblely_key` text DEFAULT NULL,
-  `mrrobot_name` text DEFAULT NULL,
-  `mrrobot_search_words` text DEFAULT NULL,
-  `aimlapi_key` text DEFAULT NULL,
-  `ai_music_model` text DEFAULT NULL,
-  `x_logo` text DEFAULT NULL,
-  `xx_logo` text DEFAULT NULL,
-  `heygen_secret_key` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `settings`
---
+(1, 'user', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(2, 'admin', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(3, 'super_admin', 'web', '2026-10-07 12:35:26', '2026-10-07 12:35:26');
 
 INSERT INTO `settings` (`id`, `invoice_currency`, `invoice_name`, `invoice_website`, `invoice_address`, `invoice_city`, `invoice_state`, `invoice_postal`, `invoice_country`, `invoice_phone`, `invoice_vat`, `default_currency`, `tax_rate`, `stripe_active`, `stripe_key`, `stripe_secret`, `stripe_base_url`, `bank_transfer_active`, `bank_transfer_instructions`, `bank_transfer_informations`, `site_name`, `site_url`, `site_email`, `google_analytics_active`, `google_analytics_code`, `logo`, `favicon`, `meta_title`, `meta_description`, `facebook_active`, `facebook_api_key`, `facebook_api_secret`, `facebook_redirect_url`, `github_active`, `github_api_key`, `github_api_secret`, `github_redirect_url`, `google_active`, `google_api_key`, `google_api_secret`, `google_redirect_url`, `twitter_active`, `twitter_api_key`, `twitter_api_secret`, `twitter_redirect_url`, `register_active`, `default_country`, `smtp_host`, `smtp_port`, `smtp_username`, `smtp_password`, `smtp_email`, `smtp_sender_name`, `smtp_encryption`, `openai_api_secret`, `created_at`, `updated_at`, `logo_path`, `favicon_path`, `openai_default_model`, `openai_default_language`, `openai_default_tone_of_voice`, `openai_default_creativity`, `openai_max_input_length`, `openai_max_output_length`, `affiliate_minimum_withdrawal`, `affiliate_commission_percentage`, `frontend_pricing_section`, `frontend_custom_templates_section`, `frontend_business_partners_section`, `frontend_additional_url`, `frontend_custom_js`, `frontend_custom_css`, `frontend_footer_facebook`, `frontend_footer_twitter`, `frontend_footer_instagram`, `script_version`, `logo_collapsed`, `logo_collapsed_path`, `stripe_status_for_now`, `logo_dark`, `logo_dashboard`, `logo_dashboard_dark`, `logo_collapsed_dark`, `logo_2x`, `logo_dark_2x`, `logo_dashboard_2x`, `logo_dashboard_dark_2x`, `logo_collapsed_2x`, `logo_collapsed_dark_2x`, `logo_dark_path`, `logo_dashboard_path`, `logo_dashboard_dark_path`, `logo_collapsed_dark_path`, `logo_2x_path`, `logo_dark_2x_path`, `logo_dashboard_2x_path`, `logo_dashboard_dark_2x_path`, `logo_collapsed_2x_path`, `logo_collapsed_dark_2x_path`, `feature_ai_writer`, `feature_ai_image`, `feature_ai_chat`, `feature_ai_code`, `feature_ai_voice_clone`, `feature_ai_speech_to_text`, `feature_affilates`, `logo_sticky`, `logo_sticky_path`, `logo_sticky_2x`, `logo_sticky_2x_path`, `meta_keywords`, `gdpr_status`, `gdpr_button`, `gdpr_content`, `menu_options`, `privacy_enable`, `privacy_enable_login`, `privacy_content`, `terms_content`, `login_without_confirmation`, `feature_ai_voiceover`, `gcs_file`, `gcs_name`, `frontend_code_before_head`, `frontend_code_before_body`, `dashboard_code_before_head`, `dashboard_code_before_body`, `feature_ai_article_wizard`, `feature_ai_vision`, `feature_ai_pdf`, `feature_ai_chat_image`, `mobile_payment_active`, `feature_ai_rewriter`, `feature_ai_youtube`, `feature_ai_rss`, `team_functionality`, `feature_ai_advanced_editor`, `user_count`, `free_open_ai_items`, `user_api_option`, `auth_view_options`, `tour_seen`, `recaptcha_login`, `recaptcha_register`, `recaptcha_sitekey`, `recaptcha_secretkey`, `login_with_otp`, `synthesia_secret_key`, `pebblely_key`, `mrrobot_name`, `mrrobot_search_words`, `aimlapi_key`, `ai_music_model`, `x_logo`, `xx_logo`, `heygen_secret_key`) VALUES
-(1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2', NULL, '0', NULL, NULL, 'https://api.stripe.com', '0', NULL, NULL, 'MagicAI', 'https://liquid-themes.com', NULL, '0', NULL, 'magicAI-logo.svg', NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, NULL, 1, 'United States', NULL, NULL, NULL, NULL, NULL, NULL, 'TLS', NULL, NULL, '2026-05-22 12:53:14', 'assets/img/logo/magicAI-logo.svg', NULL, 'gpt-3.5-turbo', 'en-US', 'professional', '0.75', '300', '200', '10', '10', 1, 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, 10, 'magicAI-logo-Collapsed.png', 'assets/img/logo/magicAI-logo-Collapsed.png', 'disabled', 'magicAI-logo-dark.svg', NULL, NULL, 'magicAI-logo-collapsed-dark.svg', NULL, NULL, NULL, NULL, NULL, NULL, 'assets/img/logo/magicAI-logo-dark.svg', NULL, NULL, 'assets/img/logo/magicAI-logo-collapsed-dark.svg', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, 1, 1, 0, 1, 1, NULL, NULL, NULL, NULL, NULL, 0, 'Accept', 'This website uses cookies to improve your web experience.', NULL, 0, 0, NULL, NULL, 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, '[\"post_title_generator\",\"summarize_text\",\"product_description\",\"article_generator\",\"product_name\",\"testimonial_review\",\"problem_agitate_solution\",\"blog_section\",\"blog_post_ideas\",\"blog_intros\",\"blog_conclusion\",\"facebook_ads\",\"youtube_video_description\",\"youtube_video_title\",\"youtube_video_tag\",\"instagram_captions\",\"instagram_hashtag\",\"social_media_post_tweet\",\"social_media_post_business\",\"facebook_headlines\",\"google_ads_headlines\",\"google_ads_description\",\"paragraph_generator\",\"pros_cons\",\"meta_description\",\"faq_generator\",\"email_generator\",\"email_answer_generator\",\"newsletter_generator\",\"grammar_correction\",\"tldr_summarization\",\"ai_image_generator\",\"custom-generation-eQao5n\",\"ai_speech_to_text\",\"ai_code_generator\",\"ai_article_wizard_generator\",\"ai_vision\",\"ai_pdf\",\"ai_chat_image\",\"ai_rewriter\",\"ai_webchat\",\"ai_video\"]', 0, NULL, 1, 0, 0, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2', NULL, '0', NULL, NULL, 'https://api.stripe.com', '0', NULL, NULL, 'MagicAI', 'https://liquid-themes.com', NULL, '0', NULL, 'magicAI-logo.svg', NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, NULL, 1, 'United States', NULL, NULL, NULL, NULL, NULL, NULL, 'TLS', NULL, NULL, '2026-10-07 12:35:25', 'assets/img/logo/magicAI-logo.svg', NULL, 'gpt-3.5-turbo', 'en-US', 'professional', '0.75', '300', '200', '10', '10', 1, 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, 10, 'magicAI-logo-Collapsed.png', 'assets/img/logo/magicAI-logo-Collapsed.png', 'disabled', 'magicAI-logo-dark.svg', NULL, NULL, 'magicAI-logo-collapsed-dark.svg', NULL, NULL, NULL, NULL, NULL, NULL, 'assets/img/logo/magicAI-logo-dark.svg', NULL, NULL, 'assets/img/logo/magicAI-logo-collapsed-dark.svg', NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, 1, 1, 0, 1, 1, NULL, NULL, NULL, NULL, NULL, 0, 'Accept', 'This website uses cookies to improve your web experience.', NULL, 0, 0, NULL, NULL, 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, '[\"post_title_generator\", \"summarize_text\", \"product_description\", \"article_generator\", \"product_name\", \"testimonial_review\", \"problem_agitate_solution\", \"blog_section\", \"blog_post_ideas\", \"blog_intros\", \"blog_conclusion\", \"facebook_ads\", \"youtube_video_description\", \"youtube_video_title\", \"youtube_video_tag\", \"instagram_captions\", \"instagram_hashtag\", \"social_media_post_tweet\", \"social_media_post_business\", \"facebook_headlines\", \"google_ads_headlines\", \"google_ads_description\", \"paragraph_generator\", \"pros_cons\", \"meta_description\", \"faq_generator\", \"email_generator\", \"email_answer_generator\", \"newsletter_generator\", \"grammar_correction\", \"tldr_summarization\", \"ai_image_generator\", \"custom-generation-eQao5n\", \"ai_speech_to_text\", \"ai_code_generator\", \"ai_article_wizard_generator\", \"ai_vision\", \"ai_pdf\", \"ai_chat_image\", \"ai_rewriter\", \"ai_webchat\", \"ai_video\"]', 0, NULL, 1, 0, 0, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `settings_two`
---
-
-CREATE TABLE `settings_two` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `theme` varchar(191) NOT NULL DEFAULT 'default',
-  `stable_diffusion_api_key` varchar(191) DEFAULT NULL,
-  `stable_diffusion_default_model` varchar(191) DEFAULT NULL,
-  `google_recaptcha_status` tinyint(1) NOT NULL DEFAULT 0,
-  `google_recaptcha_site_key` varchar(191) DEFAULT NULL,
-  `google_recaptcha_secret_key` varchar(191) DEFAULT NULL,
-  `languages` varchar(191) DEFAULT 'en',
-  `languages_default` varchar(191) NOT NULL DEFAULT 'en',
-  `liquid_license_type` text DEFAULT NULL,
-  `liquid_license_domain_key` text DEFAULT NULL,
-  `openai_default_stream_server` varchar(191) NOT NULL DEFAULT 'backend',
-  `ai_image_storage` varchar(191) NOT NULL DEFAULT 'public',
-  `stablediffusion_default_language` varchar(191) NOT NULL DEFAULT 'en-US',
-  `stablediffusion_default_model` varchar(191) NOT NULL DEFAULT 'stable-diffusion-xl-1024-v1-0',
-  `unsplash_api_key` text DEFAULT NULL,
-  `dalle` varchar(191) DEFAULT 'dall-e-3',
-  `daily_limit_enabled` tinyint(1) NOT NULL DEFAULT 0,
-  `allowed_images_count` int(11) NOT NULL DEFAULT 2,
-  `daily_voice_limit_enabled` tinyint(1) NOT NULL DEFAULT 0,
-  `allowed_voice_count` int(11) NOT NULL DEFAULT 1,
-  `serper_api_key` text DEFAULT NULL,
-  `elevenlabs_api_key` varchar(191) DEFAULT NULL,
-  `feature_tts_google` tinyint(1) NOT NULL DEFAULT 0,
-  `feature_tts_openai` tinyint(1) NOT NULL DEFAULT 1,
-  `feature_tts_elevenlabs` tinyint(1) NOT NULL DEFAULT 0,
-  `fine_tune_list` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`fine_tune_list`)),
-  `chatbot_status` varchar(191) DEFAULT 'disabled',
-  `chatbot_template` int(11) DEFAULT NULL,
-  `chatbot_position` varchar(191) DEFAULT 'bottom-left',
-  `chatbot_login_require` tinyint(4) NOT NULL DEFAULT 1,
-  `chatbot_rate_limit` int(11) DEFAULT 10,
-  `feature_ai_video` tinyint(1) NOT NULL DEFAULT 1,
-  `chatbot_show_timestamp` tinyint(1) NOT NULL DEFAULT 0,
-  `stablediffusion_bedrock_model` varchar(191) NOT NULL DEFAULT 'stability.stable-diffusion-xl-v1'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `settings_two`
---
-
-INSERT INTO `settings_two` (`id`, `theme`, `stable_diffusion_api_key`, `stable_diffusion_default_model`, `google_recaptcha_status`, `google_recaptcha_site_key`, `google_recaptcha_secret_key`, `languages`, `languages_default`, `liquid_license_type`, `liquid_license_domain_key`, `openai_default_stream_server`, `ai_image_storage`, `stablediffusion_default_language`, `stablediffusion_default_model`, `unsplash_api_key`, `dalle`, `daily_limit_enabled`, `allowed_images_count`, `daily_voice_limit_enabled`, `allowed_voice_count`, `serper_api_key`, `elevenlabs_api_key`, `feature_tts_google`, `feature_tts_openai`, `feature_tts_elevenlabs`, `fine_tune_list`, `chatbot_status`, `chatbot_template`, `chatbot_position`, `chatbot_login_require`, `chatbot_rate_limit`, `feature_ai_video`, `chatbot_show_timestamp`, `stablediffusion_bedrock_model`) VALUES
-(1, 'default', NULL, NULL, 0, NULL, NULL, 'en', 'en', NULL, NULL, 'backend', 'public', 'en-US', 'stable-diffusion-xl-1024-v1-0', NULL, 'dall-e-3', 0, 2, 0, 1, NULL, NULL, 0, 1, 0, NULL, 'disabled', NULL, 'bottom-left', 1, 10, 1, 0, 'stability.stable-diffusion-xl-v1');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `share_links`
---
-
-CREATE TABLE `share_links` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `url` varchar(191) NOT NULL,
-  `category` varchar(191) NOT NULL,
-  `chat` int(11) NOT NULL,
-  `message` int(11) NOT NULL,
-  `time` bigint(20) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `social_media_accounts`
---
-
-CREATE TABLE `social_media_accounts` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(191) NOT NULL,
-  `subtitle` varchar(191) DEFAULT NULL,
-  `key` varchar(191) NOT NULL,
-  `link` varchar(191) DEFAULT NULL,
-  `icon` longtext DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `social_media_accounts`
---
+INSERT INTO `settings_two` (`id`, `theme`, `stable_diffusion_api_key`, `stable_diffusion_default_model`, `google_recaptcha_status`, `google_recaptcha_site_key`, `google_recaptcha_secret_key`, `languages`, `languages_default`, `liquid_license_type`, `liquid_license_domain_key`, `openai_default_stream_server`, `ai_image_storage`, `stablediffusion_default_language`, `stablediffusion_default_model`, `unsplash_api_key`, `dalle`, `daily_limit_enabled`, `allowed_images_count`, `daily_voice_limit_enabled`, `allowed_voice_count`, `serper_api_key`, `elevenlabs_api_key`, `twilio_account_sid`, `twilio_auth_token`, `feature_tts_google`, `feature_tts_openai`, `feature_tts_elevenlabs`, `fine_tune_list`, `chatbot_status`, `chatbot_template`, `chatbot_position`, `chatbot_login_require`, `chatbot_rate_limit`, `feature_ai_video`, `chatbot_show_timestamp`, `stablediffusion_bedrock_model`) VALUES
+(1, 'default', NULL, NULL, 0, NULL, NULL, 'en', 'en', NULL, NULL, 'backend', 'public', 'en-US', 'stable-diffusion-xl-1024-v1-0', NULL, 'gpt-image-2', 0, 2, 0, 1, NULL, NULL, NULL, NULL, 0, 1, 0, NULL, 'disabled', NULL, 'bottom-left', 1, 10, 1, 0, 'stability.stable-diffusion-xl-v1');
 
 INSERT INTO `social_media_accounts` (`id`, `title`, `subtitle`, `key`, `link`, `icon`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'Linkedin', 'Developments in the sector', 'linkedin', '#', '<svg width=\"50\" height=\"52\" viewBox=\"0 0 50 52\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"> <path d=\"M42.4358 43.9153H35.1192V32.1428C35.1192 29.3353 35.0705 25.7228 31.3137 25.7228C27.5033 25.7228 26.9193 28.7803 26.9193 31.9403V43.9153H19.6051V19.7053H26.6297V23.0128H26.7271C28.1602 20.4978 30.8221 18.9953 33.6568 19.1028C41.0732 19.1028 42.4383 24.1153 42.4383 30.6328L42.4358 43.9153ZM11.3492 16.3953C9.00359 16.3953 7.10326 14.4428 7.10326 12.0328C7.10326 9.62284 9.00359 7.67034 11.3492 7.67034C13.6948 7.67034 15.5951 9.62284 15.5951 12.0328C15.5951 14.4428 13.6948 16.3953 11.3492 16.3953ZM15.0063 43.9153H7.68236V19.7053H15.0063V43.9153ZM46.0832 0.690341H4.00579C2.01786 0.667841 0.387613 2.30534 0.363281 4.34784V47.7578C0.387613 49.8028 2.01786 51.4403 4.00579 51.4178H46.0832C48.076 51.4428 49.7136 49.8053 49.7403 47.7578V4.34534C49.7111 2.29784 48.0736 0.660341 46.0832 0.687841\" /> </svg>', 1, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(2, 'Telegram', 'Fast instant communication', 'telegram', '#', '<svg width=\"54\" height=\"44\" viewBox=\"0 0 54 44\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"> <path d=\"M1.90766 21.6842L13.9835 25.7855L42.6529 8.25838C43.0684 8.0042 43.4942 8.56864 43.1358 8.89856L21.431 28.8769L20.6238 40.0616C20.5623 40.9125 21.5873 41.3862 22.1955 40.7881L28.8784 34.2166L41.0954 43.4649C42.4122 44.4619 44.319 43.7592 44.6743 42.1462L53.181 3.52121C53.6662 1.31777 51.5072 -0.541559 49.4001 0.265366L1.84622 18.475C0.35447 19.0463 0.395102 21.1706 1.90766 21.6842Z\" /> </svg>', 1, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(3, 'Behance', 'A wide visibility', 'behance', '#', '<svg width=\"54\" height=\"34\" viewBox=\"0 0 54 34\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"> <path d=\"M27.5018 23.0206V20.9609C27.5018 17.6598 24.8344 15.019 21.5598 15.019L22.8538 14.121C24.9665 12.695 26.234 10.2918 26.234 7.75669C26.234 5.69675 25.4155 3.84808 24.0686 2.52765C22.7481 1.18091 20.8996 0.362305 18.8397 0.362305H0.75V32.8446H17.6778C23.0914 32.8447 27.5018 28.4343 27.5018 23.0206ZM7.64256 5.74963H16.014C18.074 5.74963 19.7377 7.41337 19.7377 9.47308C19.7377 11.533 18.074 13.1968 16.014 13.1968H7.64256V5.74963ZM7.64256 27.6422V18.3201H16.3574C18.9454 18.3201 21.0317 20.4062 21.0317 22.968C21.0317 25.5559 18.9454 27.6422 16.3574 27.6422H7.64256Z\" /> <path d=\"M41.2872 8.5752C34.6851 8.5752 29.3242 14.1738 29.3242 21.0928C29.3242 28.0117 34.6851 33.6369 41.2872 33.6369C46.4368 33.6369 50.847 30.2038 52.5107 25.3973H46.7273C45.3278 28.8833 41.2872 28.3023 41.2872 28.3023C35.6886 27.8798 35.8999 22.5188 35.8999 22.5188H53.171C53.2238 22.0434 53.2503 21.5681 53.2503 21.0927C53.2503 14.1738 47.8893 8.5752 41.2872 8.5752ZM36.4017 18.3199C36.4017 15.4942 38.6992 13.1967 41.5249 13.1967C44.3769 13.1967 46.6746 15.4942 46.6746 18.3199H36.4017Z\" /> <path d=\"M34.7812 2.5625H48.2213V5.74625H34.7812V2.5625Z\" /> </svg>', 1, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(4, 'X', 'Latest news and updates', 'twitter', '#', '<svg id=\"Capa_1\" enable-background=\"new 0 0 1226.37 1226.37\" viewBox=\"0 0 1226.37 1226.37\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"m727.348 519.284 446.727-519.284h-105.86l-387.893 450.887-309.809-450.887h-357.328l468.492 681.821-468.492 544.549h105.866l409.625-476.152 327.181 476.152h357.328l-485.863-707.086zm-144.998 168.544-47.468-67.894-377.686-540.24h162.604l304.797 435.991 47.468 67.894 396.2 566.721h-162.604l-323.311-462.446z\"/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/></svg>', 1, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(5, 'Instagram', 'Share your photos', 'instagram', '#', '<svg height=\"511pt\" viewBox=\"0 0 511 511.9\" width=\"511pt\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"m510.949219 150.5c-1.199219-27.199219-5.597657-45.898438-11.898438-62.101562-6.5-17.199219-16.5-32.597657-29.601562-45.398438-12.800781-13-28.300781-23.101562-45.300781-29.5-16.296876-6.300781-34.898438-10.699219-62.097657-11.898438-27.402343-1.300781-36.101562-1.601562-105.601562-1.601562s-78.199219.300781-105.5 1.5c-27.199219 1.199219-45.898438 5.601562-62.097657 11.898438-17.203124 6.5-32.601562 16.5-45.402343 29.601562-13 12.800781-23.097657 28.300781-29.5 45.300781-6.300781 16.300781-10.699219 34.898438-11.898438 62.097657-1.300781 27.402343-1.601562 36.101562-1.601562 105.601562s.300781 78.199219 1.5 105.5c1.199219 27.199219 5.601562 45.898438 11.902343 62.101562 6.5 17.199219 16.597657 32.597657 29.597657 45.398438 12.800781 13 28.300781 23.101562 45.300781 29.5 16.300781 6.300781 34.898438 10.699219 62.101562 11.898438 27.296876 1.203124 36 1.5 105.5 1.5s78.199219-.296876 105.5-1.5c27.199219-1.199219 45.898438-5.597657 62.097657-11.898438 34.402343-13.300781 61.601562-40.5 74.902343-74.898438 6.296876-16.300781 10.699219-34.902343 11.898438-62.101562 1.199219-27.300781 1.5-36 1.5-105.5s-.101562-78.199219-1.300781-105.5zm-46.097657 209c-1.101562 25-5.300781 38.5-8.800781 47.5-8.601562 22.300781-26.300781 40-48.601562 48.601562-9 3.5-22.597657 7.699219-47.5 8.796876-27 1.203124-35.097657 1.5-103.398438 1.5s-76.5-.296876-103.402343-1.5c-25-1.097657-38.5-5.296876-47.5-8.796876-11.097657-4.101562-21.199219-10.601562-29.398438-19.101562-8.5-8.300781-15-18.300781-19.101562-29.398438-3.5-9-7.699219-22.601562-8.796876-47.5-1.203124-27-1.5-35.101562-1.5-103.402343s.296876-76.5 1.5-103.398438c1.097657-25 5.296876-38.5 8.796876-47.5 4.101562-11.101562 10.601562-21.199219 19.203124-29.402343 8.296876-8.5 18.296876-15 29.398438-19.097657 9-3.5 22.601562-7.699219 47.5-8.800781 27-1.199219 35.101562-1.5 103.398438-1.5 68.402343 0 76.5.300781 103.402343 1.5 25 1.101562 38.5 5.300781 47.5 8.800781 11.097657 4.097657 21.199219 10.597657 29.398438 19.097657 8.5 8.300781 15 18.300781 19.101562 29.402343 3.5 9 7.699219 22.597657 8.800781 47.5 1.199219 27 1.5 35.097657 1.5 103.398438s-.300781 76.300781-1.5 103.300781zm0 0\"/><path d=\"m256.449219 124.5c-72.597657 0-131.5 58.898438-131.5 131.5s58.902343 131.5 131.5 131.5c72.601562 0 131.5-58.898438 131.5-131.5s-58.898438-131.5-131.5-131.5zm0 216.800781c-47.097657 0-85.300781-38.199219-85.300781-85.300781s38.203124-85.300781 85.300781-85.300781c47.101562 0 85.300781 38.199219 85.300781 85.300781s-38.199219 85.300781-85.300781 85.300781zm0 0\"/><path d=\"m423.851562 119.300781c0 16.953125-13.746093 30.699219-30.703124 30.699219-16.953126 0-30.699219-13.746094-30.699219-30.699219 0-16.957031 13.746093-30.699219 30.699219-30.699219 16.957031 0 30.703124 13.742188 30.703124 30.699219zm0 0\"/></svg>', 1, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(6, 'Facebook', 'The most popular social media', 'facebook', '#', '<svg width=\"54\" height=\"54\" viewBox=\"0 0 54 54\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"> <path d=\"M27 0C12.087 0 0 12.087 0 27C0 40.5 10.5 51 24 54V35.1H17.1V27H24V21.6C24 16.2 27.9 13.5 32.4 13.5C34.2 13.5 36 13.8 36 13.8V20.7H33.3C30.6 20.7 30 22.5 30 24V27H36L35.1 35.1H30V54C43.5 51 54 40.5 54 27C54 12.087 41.913 0 27 0Z\" /> </svg>', 1, '2026-05-22 12:53:16', '2026-05-22 12:53:16');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `subscriptions`
---
-
-CREATE TABLE `subscriptions` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `plan_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `name` varchar(191) NOT NULL,
-  `stripe_id` varchar(191) NOT NULL,
-  `stripe_status` varchar(191) NOT NULL,
-  `stripe_price` varchar(191) DEFAULT NULL,
-  `quantity` int(11) DEFAULT NULL,
-  `trial_ends_at` timestamp NULL DEFAULT NULL,
-  `ends_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `paid_with` varchar(191) NOT NULL DEFAULT 'stripe',
-  `tax_rate` varchar(191) DEFAULT NULL,
-  `tax_value` varchar(191) DEFAULT NULL,
-  `coupon` varchar(191) DEFAULT NULL,
-  `total_amount` varchar(191) DEFAULT NULL,
-  `auto_renewal` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `subscriptions_yokassa`
---
-
-CREATE TABLE `subscriptions_yokassa` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `plan_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `name` varchar(191) NOT NULL,
-  `payment_method_id` varchar(191) NOT NULL,
-  `subscription_status` varchar(191) NOT NULL,
-  `trial_ends_at` timestamp NULL DEFAULT NULL,
-  `ends_at` timestamp NULL DEFAULT NULL,
-  `next_pay_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `tax_rate` varchar(191) DEFAULT NULL,
-  `tax_value` varchar(191) DEFAULT NULL,
-  `coupon` varchar(191) DEFAULT NULL,
-  `total_amount` varchar(191) DEFAULT NULL,
-  `auto_renewal` tinyint(1) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `subscription_items`
---
-
-CREATE TABLE `subscription_items` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `subscription_id` bigint(20) UNSIGNED NOT NULL,
-  `stripe_id` varchar(191) NOT NULL,
-  `stripe_product` varchar(191) NOT NULL,
-  `stripe_price` varchar(191) NOT NULL,
-  `quantity` int(11) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `teams`
---
-
-CREATE TABLE `teams` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `entity_credits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`entity_credits`)),
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `name` varchar(191) NOT NULL,
-  `allow_seats` int(11) NOT NULL DEFAULT 0,
-  `used_image_credit` int(11) NOT NULL DEFAULT 0,
-  `word_credit` int(11) NOT NULL DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `team_members`
---
-
-CREATE TABLE `team_members` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `team_id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `role` varchar(191) NOT NULL DEFAULT 'member',
-  `email` varchar(191) DEFAULT NULL,
-  `status` varchar(191) DEFAULT 'waiting',
-  `allow_unlimited_credits` tinyint(1) NOT NULL DEFAULT 1,
-  `remaining_images` decimal(15,2) DEFAULT NULL,
-  `remaining_words` decimal(15,2) DEFAULT NULL,
-  `used_image_credit` int(11) NOT NULL DEFAULT 0,
-  `used_word_credit` int(11) NOT NULL DEFAULT 0,
-  `joined_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `telescope_entries`
---
-
-CREATE TABLE `telescope_entries` (
-  `sequence` bigint(20) UNSIGNED NOT NULL,
-  `uuid` char(36) NOT NULL,
-  `batch_id` char(36) NOT NULL,
-  `family_hash` varchar(191) DEFAULT NULL,
-  `should_display_on_index` tinyint(1) NOT NULL DEFAULT 1,
-  `type` varchar(20) NOT NULL,
-  `content` longtext NOT NULL,
-  `created_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `telescope_entries_tags`
---
-
-CREATE TABLE `telescope_entries_tags` (
-  `entry_uuid` char(36) NOT NULL,
-  `tag` varchar(191) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `telescope_monitoring`
---
-
-CREATE TABLE `telescope_monitoring` (
-  `tag` varchar(191) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `testimonials`
---
-
-CREATE TABLE `testimonials` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `avatar` varchar(191) NOT NULL DEFAULT 'assets/img/auth/default-avatar.png',
-  `full_name` varchar(191) DEFAULT NULL,
-  `job_title` varchar(191) DEFAULT NULL,
-  `words` text DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `testimonials`
---
+(1, 'Linkedin', 'Developments in the sector', 'linkedin', '#', '<svg width=\"50\" height=\"52\" viewBox=\"0 0 50 52\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"> <path d=\"M42.4358 43.9153H35.1192V32.1428C35.1192 29.3353 35.0705 25.7228 31.3137 25.7228C27.5033 25.7228 26.9193 28.7803 26.9193 31.9403V43.9153H19.6051V19.7053H26.6297V23.0128H26.7271C28.1602 20.4978 30.8221 18.9953 33.6568 19.1028C41.0732 19.1028 42.4383 24.1153 42.4383 30.6328L42.4358 43.9153ZM11.3492 16.3953C9.00359 16.3953 7.10326 14.4428 7.10326 12.0328C7.10326 9.62284 9.00359 7.67034 11.3492 7.67034C13.6948 7.67034 15.5951 9.62284 15.5951 12.0328C15.5951 14.4428 13.6948 16.3953 11.3492 16.3953ZM15.0063 43.9153H7.68236V19.7053H15.0063V43.9153ZM46.0832 0.690341H4.00579C2.01786 0.667841 0.387613 2.30534 0.363281 4.34784V47.7578C0.387613 49.8028 2.01786 51.4403 4.00579 51.4178H46.0832C48.076 51.4428 49.7136 49.8053 49.7403 47.7578V4.34534C49.7111 2.29784 48.0736 0.660341 46.0832 0.687841\" /> </svg>', 1, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(2, 'Telegram', 'Fast instant communication', 'telegram', '#', '<svg width=\"54\" height=\"44\" viewBox=\"0 0 54 44\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"> <path d=\"M1.90766 21.6842L13.9835 25.7855L42.6529 8.25838C43.0684 8.0042 43.4942 8.56864 43.1358 8.89856L21.431 28.8769L20.6238 40.0616C20.5623 40.9125 21.5873 41.3862 22.1955 40.7881L28.8784 34.2166L41.0954 43.4649C42.4122 44.4619 44.319 43.7592 44.6743 42.1462L53.181 3.52121C53.6662 1.31777 51.5072 -0.541559 49.4001 0.265366L1.84622 18.475C0.35447 19.0463 0.395102 21.1706 1.90766 21.6842Z\" /> </svg>', 1, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(3, 'Behance', 'A wide visibility', 'behance', '#', '<svg width=\"54\" height=\"34\" viewBox=\"0 0 54 34\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"> <path d=\"M27.5018 23.0206V20.9609C27.5018 17.6598 24.8344 15.019 21.5598 15.019L22.8538 14.121C24.9665 12.695 26.234 10.2918 26.234 7.75669C26.234 5.69675 25.4155 3.84808 24.0686 2.52765C22.7481 1.18091 20.8996 0.362305 18.8397 0.362305H0.75V32.8446H17.6778C23.0914 32.8447 27.5018 28.4343 27.5018 23.0206ZM7.64256 5.74963H16.014C18.074 5.74963 19.7377 7.41337 19.7377 9.47308C19.7377 11.533 18.074 13.1968 16.014 13.1968H7.64256V5.74963ZM7.64256 27.6422V18.3201H16.3574C18.9454 18.3201 21.0317 20.4062 21.0317 22.968C21.0317 25.5559 18.9454 27.6422 16.3574 27.6422H7.64256Z\" /> <path d=\"M41.2872 8.5752C34.6851 8.5752 29.3242 14.1738 29.3242 21.0928C29.3242 28.0117 34.6851 33.6369 41.2872 33.6369C46.4368 33.6369 50.847 30.2038 52.5107 25.3973H46.7273C45.3278 28.8833 41.2872 28.3023 41.2872 28.3023C35.6886 27.8798 35.8999 22.5188 35.8999 22.5188H53.171C53.2238 22.0434 53.2503 21.5681 53.2503 21.0927C53.2503 14.1738 47.8893 8.5752 41.2872 8.5752ZM36.4017 18.3199C36.4017 15.4942 38.6992 13.1967 41.5249 13.1967C44.3769 13.1967 46.6746 15.4942 46.6746 18.3199H36.4017Z\" /> <path d=\"M34.7812 2.5625H48.2213V5.74625H34.7812V2.5625Z\" /> </svg>', 1, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(4, 'X', 'Latest news and updates', 'twitter', '#', '<svg id=\"Capa_1\" enable-background=\"new 0 0 1226.37 1226.37\" viewBox=\"0 0 1226.37 1226.37\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"m727.348 519.284 446.727-519.284h-105.86l-387.893 450.887-309.809-450.887h-357.328l468.492 681.821-468.492 544.549h105.866l409.625-476.152 327.181 476.152h357.328l-485.863-707.086zm-144.998 168.544-47.468-67.894-377.686-540.24h162.604l304.797 435.991 47.468 67.894 396.2 566.721h-162.604l-323.311-462.446z\"/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/></svg>', 1, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(5, 'Instagram', 'Share your photos', 'instagram', '#', '<svg height=\"511pt\" viewBox=\"0 0 511 511.9\" width=\"511pt\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"m510.949219 150.5c-1.199219-27.199219-5.597657-45.898438-11.898438-62.101562-6.5-17.199219-16.5-32.597657-29.601562-45.398438-12.800781-13-28.300781-23.101562-45.300781-29.5-16.296876-6.300781-34.898438-10.699219-62.097657-11.898438-27.402343-1.300781-36.101562-1.601562-105.601562-1.601562s-78.199219.300781-105.5 1.5c-27.199219 1.199219-45.898438 5.601562-62.097657 11.898438-17.203124 6.5-32.601562 16.5-45.402343 29.601562-13 12.800781-23.097657 28.300781-29.5 45.300781-6.300781 16.300781-10.699219 34.898438-11.898438 62.097657-1.300781 27.402343-1.601562 36.101562-1.601562 105.601562s.300781 78.199219 1.5 105.5c1.199219 27.199219 5.601562 45.898438 11.902343 62.101562 6.5 17.199219 16.597657 32.597657 29.597657 45.398438 12.800781 13 28.300781 23.101562 45.300781 29.5 16.300781 6.300781 34.898438 10.699219 62.101562 11.898438 27.296876 1.203124 36 1.5 105.5 1.5s78.199219-.296876 105.5-1.5c27.199219-1.199219 45.898438-5.597657 62.097657-11.898438 34.402343-13.300781 61.601562-40.5 74.902343-74.898438 6.296876-16.300781 10.699219-34.902343 11.898438-62.101562 1.199219-27.300781 1.5-36 1.5-105.5s-.101562-78.199219-1.300781-105.5zm-46.097657 209c-1.101562 25-5.300781 38.5-8.800781 47.5-8.601562 22.300781-26.300781 40-48.601562 48.601562-9 3.5-22.597657 7.699219-47.5 8.796876-27 1.203124-35.097657 1.5-103.398438 1.5s-76.5-.296876-103.402343-1.5c-25-1.097657-38.5-5.296876-47.5-8.796876-11.097657-4.101562-21.199219-10.601562-29.398438-19.101562-8.5-8.300781-15-18.300781-19.101562-29.398438-3.5-9-7.699219-22.601562-8.796876-47.5-1.203124-27-1.5-35.101562-1.5-103.402343s.296876-76.5 1.5-103.398438c1.097657-25 5.296876-38.5 8.796876-47.5 4.101562-11.101562 10.601562-21.199219 19.203124-29.402343 8.296876-8.5 18.296876-15 29.398438-19.097657 9-3.5 22.601562-7.699219 47.5-8.800781 27-1.199219 35.101562-1.5 103.398438-1.5 68.402343 0 76.5.300781 103.402343 1.5 25 1.101562 38.5 5.300781 47.5 8.800781 11.097657 4.097657 21.199219 10.597657 29.398438 19.097657 8.5 8.300781 15 18.300781 19.101562 29.402343 3.5 9 7.699219 22.597657 8.800781 47.5 1.199219 27 1.5 35.097657 1.5 103.398438s-.300781 76.300781-1.5 103.300781zm0 0\"/><path d=\"m256.449219 124.5c-72.597657 0-131.5 58.898438-131.5 131.5s58.902343 131.5 131.5 131.5c72.601562 0 131.5-58.898438 131.5-131.5s-58.898438-131.5-131.5-131.5zm0 216.800781c-47.097657 0-85.300781-38.199219-85.300781-85.300781s38.203124-85.300781 85.300781-85.300781c47.101562 0 85.300781 38.199219 85.300781 85.300781s-38.199219 85.300781-85.300781 85.300781zm0 0\"/><path d=\"m423.851562 119.300781c0 16.953125-13.746093 30.699219-30.703124 30.699219-16.953126 0-30.699219-13.746094-30.699219-30.699219 0-16.957031 13.746093-30.699219 30.699219-30.699219 16.957031 0 30.703124 13.742188 30.703124 30.699219zm0 0\"/></svg>', 1, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(6, 'Facebook', 'The most popular social media', 'facebook', '#', '<svg width=\"54\" height=\"54\" viewBox=\"0 0 54 54\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"> <path d=\"M27 0C12.087 0 0 12.087 0 27C0 40.5 10.5 51 24 54V35.1H17.1V27H24V21.6C24 16.2 27.9 13.5 32.4 13.5C34.2 13.5 36 13.8 36 13.8V20.7H33.3C30.6 20.7 30 22.5 30 24V27H36L35.1 35.1H30V54C43.5 51 54 40.5 54 27C54 12.087 41.913 0 27 0Z\" /> </svg>', 1, '2026-10-07 12:35:26', '2026-10-07 12:35:26');
 
 INSERT INTO `testimonials` (`id`, `avatar`, `full_name`, `job_title`, `words`, `created_at`, `updated_at`) VALUES
 (1, '202306020840avatar-1.jpg', 'Peline Jan', 'Entrepreneur', '“Not only did it save me time, but it also helped me \nproduce content that was more engaging and \neffective than what I had been creating on my own.”', '2023-05-29 19:30:53', '2023-06-02 08:40:35'),
 (2, '202306020840avatar-3.jpg', 'Tom Daniel', 'Writer', 'As a freelance writer, I was looking for a tool that could help me generate ideas and write faster. This AI Text website has done that and more.', '2023-05-30 07:52:22', '2023-06-02 08:40:47'),
 (3, '202306020840avatar-2.jpg', 'Eric Sanchez', 'UX Designer', 'The customer support team has been incredibly helpful whenever I’ve had any questions. I can’t imagine going back to my old content-creation methods!', '2023-05-30 07:53:14', '2023-06-02 08:40:58');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `tokens`
---
-
-CREATE TABLE `tokens` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `type` varchar(191) NOT NULL DEFAULT 'word',
-  `entity_id` bigint(20) UNSIGNED NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `tokens`
---
-
 INSERT INTO `tokens` (`id`, `type`, `entity_id`, `created_at`, `updated_at`) VALUES
-(1, 'word', 1, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(2, 'word', 2, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(3, 'word', 3, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(4, 'word', 4, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(5, 'word', 5, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(6, 'word', 6, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(7, 'word', 7, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(8, 'word', 8, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(9, 'word', 9, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(10, 'word', 10, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(11, 'word', 11, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(12, 'word', 12, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(13, 'word', 13, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(14, 'word', 14, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(15, 'word', 15, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(16, 'word', 16, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(17, 'word', 17, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(18, 'word', 18, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(19, 'word', 19, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(20, 'word', 20, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(21, 'word', 21, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(22, 'word', 22, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(23, 'word', 23, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(24, 'word', 24, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(25, 'word', 25, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(26, 'word', 26, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(27, 'word', 27, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(28, 'word', 28, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(29, 'word', 29, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(30, 'word', 30, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(31, 'word', 31, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(32, 'word', 32, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(33, 'word', 33, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(34, 'word', 34, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(35, 'word', 35, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(36, 'word', 36, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(37, 'word', 37, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(38, 'word', 38, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(39, 'word', 39, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(40, 'word', 40, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(41, 'word', 41, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(42, 'word', 42, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(43, 'word', 43, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(44, 'word', 44, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(45, 'word', 45, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(46, 'word', 46, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(47, 'word', 47, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(48, 'word', 48, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(49, 'word', 49, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(50, 'word', 50, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(51, 'word', 51, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(52, 'word', 52, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(53, 'word', 53, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(54, 'word', 54, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(55, 'word', 55, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(56, 'word', 56, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(57, 'word', 57, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(58, 'word', 58, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(59, 'word', 59, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(60, 'second', 60, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(61, 'second', 61, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(62, 'word', 62, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(63, 'word', 63, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(64, 'word', 64, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(65, 'image_to_video', 65, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(66, 'image', 66, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(67, 'image', 67, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(68, 'image', 68, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(69, 'image', 69, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(70, 'image', 70, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(71, 'image', 71, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(72, 'image', 72, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(73, 'image', 73, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(74, 'image', 74, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(75, 'image', 75, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(76, 'image', 76, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(77, 'image', 77, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(78, 'image', 78, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(79, 'word', 79, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(80, 'word', 80, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(81, 'word', 81, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(82, 'word', 82, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(83, 'word', 83, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(84, 'word', 84, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(85, 'word', 85, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(86, 'word', 86, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(87, 'word', 87, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(88, 'word', 88, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(89, 'word', 89, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(90, 'word', 90, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(91, 'word', 91, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(92, 'image', 92, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(93, 'image', 93, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(94, 'image', 94, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(95, 'plagiarism', 95, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(96, 'text_to_video', 96, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(97, 'text_to_video', 97, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(98, 'image', 98, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(99, 'word', 99, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(100, 'word', 100, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(101, 'image', 101, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(102, 'image', 102, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(103, 'image', 103, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(104, 'text_to_speech', 104, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(105, 'text_to_speech', 105, '2026-05-22 12:53:15', '2026-05-22 12:53:15'),
-(106, 'character', 106, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(107, 'character', 107, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(108, 'minute', 108, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(109, 'second', 109, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(110, 'second', 110, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(111, 'text_to_speech', 111, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(112, 'text_to_speech', 112, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(113, 'word', 113, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(114, 'text_to_speech', 114, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(115, 'word', 115, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(116, 'word', 116, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(117, 'speech_to_text', 117, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(118, 'image', 118, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(119, 'image', 119, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(120, 'image', 120, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(121, 'image', 121, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(122, 'image', 122, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(123, 'text_to_speech', 123, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(124, 'text_to_speech', 124, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(125, 'word', 125, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(126, 'word', 126, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(127, 'word', 127, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(128, 'word', 128, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(129, 'word', 129, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(130, 'word', 130, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(131, 'word', 131, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(132, 'word', 132, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(133, 'word', 133, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(134, 'word', 134, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(135, 'presentation', 135, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(136, 'text_to_video', 136, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(137, 'text_to_video', 137, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(138, 'text_to_video', 138, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(139, 'text_to_video', 139, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(140, 'text_to_video', 140, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(141, 'text_to_video', 141, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(142, 'text_to_video', 142, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(143, 'text_to_video', 143, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(144, 'text_to_video', 144, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(145, 'text_to_video', 145, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(146, 'text_to_video', 146, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(147, 'text_to_video', 147, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(148, 'text_to_video', 148, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(149, 'text_to_video', 149, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(150, 'text_to_video', 150, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(151, 'image', 151, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(152, 'image', 152, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(153, 'image', 153, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(154, 'image', 154, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(155, 'image', 155, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(156, 'image', 156, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(157, 'image', 157, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(158, 'image', 158, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(159, 'text_to_video', 159, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(160, 'image_to_video', 160, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(161, 'image', 161, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(162, 'image', 162, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(163, 'text_to_video', 163, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(164, 'image_to_video', 164, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(165, 'text_to_video', 165, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(166, 'text_to_video', 166, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(167, 'image_to_video', 167, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(168, 'text_to_video', 168, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(169, 'image', 169, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(170, 'image', 170, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(171, 'image', 171, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(172, 'image', 172, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(173, 'image', 173, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(174, 'image', 174, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(175, 'image', 175, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(176, 'image', 176, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(177, 'image', 177, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(178, 'image', 178, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(179, 'image', 179, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(180, 'text_to_video', 180, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(181, 'image_to_video', 181, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(182, 'text_to_video', 182, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(183, 'image_to_video', 183, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(184, 'image_to_video', 184, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(185, 'text_to_video', 185, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(186, 'image_to_video', 186, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(187, 'image_to_video', 187, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(188, 'image_to_video', 188, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(189, 'text_to_video', 189, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(190, 'image_to_video', 190, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(191, 'text_to_video', 191, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(192, 'image_to_video', 192, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(193, 'image_to_video', 193, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(194, 'text_to_video', 194, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(195, 'text_to_video', 195, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(196, 'text_to_video', 196, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(197, 'text_to_video', 197, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(198, 'text_to_speech', 198, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(199, 'word', 199, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(200, 'word', 200, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(201, 'word', 201, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(202, 'word', 202, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(203, 'word', 203, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(204, 'word', 204, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(205, 'word', 205, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(206, 'word', 206, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(207, 'word', 207, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(208, 'word', 208, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(209, 'word', 209, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(210, 'word', 210, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(211, 'word', 211, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(212, 'word', 212, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(213, 'word', 213, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(214, 'word', 214, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(215, 'word', 215, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(216, 'word', 216, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(217, 'word', 217, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(218, 'word', 218, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(219, 'word', 219, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(220, 'word', 220, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(221, 'word', 221, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(222, 'word', 222, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(223, 'word', 223, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(224, 'word', 224, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(225, 'word', 225, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(226, 'image', 226, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(227, 'video_to_video', 227, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(228, 'video_to_video', 228, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(229, 'video_to_video', 229, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(230, 'video_to_video', 230, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(231, 'video_to_video', 231, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(232, 'image', 232, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(233, 'text_to_video', 233, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(234, 'text_to_video', 234, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(235, 'text_to_video', 235, '2026-05-22 12:53:16', '2026-05-22 12:53:16'),
-(236, 'text_to_video', 236, '2026-05-22 12:53:16', '2026-05-22 12:53:16');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `usage`
---
-
-CREATE TABLE `usage` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `total_user_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `this_week_user_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `last_week_user_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `total_word_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `this_week_word_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `last_week_word_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `total_image_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `this_week_image_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `last_week_image_count` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `total_sales` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `this_week_sales` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `last_week_sales` int(10) UNSIGNED NOT NULL DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `usage`
---
+(1, 'word', 1, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(2, 'word', 2, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(3, 'word', 3, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(4, 'word', 4, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(5, 'word', 5, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(6, 'word', 6, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(7, 'word', 7, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(8, 'second', 8, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(9, 'word', 9, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(10, 'image', 10, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(11, 'image', 11, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(12, 'word', 12, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(13, 'image', 13, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(14, 'image', 14, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(15, 'image', 15, '2026-10-07 12:35:19', '2026-10-07 12:35:19'),
+(16, 'word', 22, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(17, 'word', 23, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(18, 'word', 17, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(19, 'word', 24, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(20, 'word', 25, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(21, 'word', 26, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(22, 'word', 27, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(23, 'word', 28, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(24, 'word', 29, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(25, 'word', 30, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(26, 'word', 31, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(27, 'word', 16, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(28, 'word', 32, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(29, 'word', 33, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(30, 'word', 34, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(31, 'word', 35, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(32, 'word', 36, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(33, 'word', 37, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(34, 'word', 38, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(35, 'word', 39, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(36, 'word', 40, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(37, 'word', 41, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(38, 'word', 42, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(39, 'word', 43, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(40, 'word', 44, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(41, 'word', 45, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(42, 'word', 46, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(43, 'word', 47, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(44, 'word', 48, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(45, 'word', 49, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(46, 'word', 50, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(47, 'word', 51, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(48, 'word', 52, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(49, 'word', 53, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(50, 'word', 54, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(51, 'word', 55, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(52, 'word', 56, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(53, 'word', 57, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(54, 'word', 58, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(55, 'word', 59, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(56, 'word', 60, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(57, 'word', 61, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(58, 'word', 62, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(59, 'word', 63, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(60, 'word', 64, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(61, 'word', 65, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(62, 'word', 66, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(63, 'word', 67, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(64, 'word', 68, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(65, 'word', 69, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(66, 'word', 70, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(67, 'word', 71, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(68, 'word', 72, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(69, 'word', 73, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(70, 'word', 74, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(71, 'word', 75, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(72, 'word', 76, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(73, 'word', 77, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(74, 'word', 78, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(75, 'word', 79, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(76, 'word', 80, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(77, 'word', 81, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(78, 'word', 82, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(79, 'word', 83, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(80, 'word', 84, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(81, 'word', 85, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(82, 'word', 86, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(83, 'word', 87, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(84, 'word', 88, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(85, 'word', 18, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(86, 'word', 19, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(87, 'word', 89, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(88, 'word', 90, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(89, 'second', 91, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(90, 'second', 92, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(91, 'word', 93, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(92, 'word', 94, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(93, 'word', 95, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(94, 'image', 96, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(95, 'image', 97, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(96, 'image', 98, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(97, 'image', 99, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(98, 'image', 100, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(99, 'image', 101, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(100, 'image', 102, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(101, 'word', 103, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(102, 'word', 104, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(103, 'word', 105, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(104, 'word', 106, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(105, 'word', 107, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(106, 'word', 108, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(107, 'word', 109, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(108, 'word', 110, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(109, 'word', 111, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(110, 'word', 112, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(111, 'word', 113, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(112, 'word', 114, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(113, 'word', 115, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(114, 'word', 116, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(115, 'word', 117, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(116, 'word', 118, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(117, 'image', 119, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(118, 'image', 120, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(119, 'image', 121, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(120, 'plagiarism', 122, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(121, 'text_to_video', 123, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(122, 'text_to_video', 124, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(123, 'second', 125, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(124, 'second', 126, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(125, 'second', 127, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(126, 'second', 128, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(127, 'second', 129, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(128, 'minute', 130, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(129, 'second', 131, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(130, 'image', 132, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(131, 'word', 133, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(132, 'word', 134, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(133, 'image', 135, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(134, 'image', 136, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(135, 'image', 137, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(136, 'character', 138, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(137, 'character', 139, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(138, 'character', 20, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(139, 'character', 21, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(140, 'character', 140, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(141, 'character', 141, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(142, 'minute', 142, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(143, 'second', 143, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(144, 'second', 144, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(145, 'character', 145, '2026-10-07 12:35:25', '2026-10-07 12:35:25'),
+(146, 'character', 146, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(147, 'word', 147, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(148, 'character', 148, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(149, 'word', 149, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(150, 'word', 150, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(151, 'speech_to_text', 151, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(152, 'image', 152, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(153, 'image', 153, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(154, 'image', 154, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(155, 'character', 155, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(156, 'character', 156, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(157, 'word', 157, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(158, 'word', 158, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(159, 'word', 159, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(160, 'word', 160, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(161, 'word', 161, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(162, 'word', 162, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(163, 'word', 163, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(164, 'word', 164, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(165, 'word', 165, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(166, 'word', 166, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(167, 'word', 167, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(168, 'presentation', 168, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(169, 'text_to_video', 169, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(170, 'text_to_video', 170, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(171, 'text_to_video', 171, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(172, 'text_to_video', 172, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(173, 'text_to_video', 173, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(174, 'text_to_video', 174, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(175, 'text_to_video', 175, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(176, 'text_to_video', 176, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(177, 'text_to_video', 177, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(178, 'text_to_video', 178, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(179, 'text_to_video', 179, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(180, 'text_to_video', 180, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(181, 'text_to_video', 181, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(182, 'text_to_video', 182, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(183, 'text_to_video', 183, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(184, 'image', 184, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(185, 'image', 185, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(186, 'image', 186, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(187, 'image', 187, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(188, 'image', 188, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(189, 'image', 189, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(190, 'image', 190, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(191, 'image', 191, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(192, 'text_to_video', 192, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(193, 'image_to_video', 193, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(194, 'image', 194, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(195, 'image', 195, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(196, 'text_to_video', 196, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(197, 'image_to_video', 197, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(198, 'text_to_video', 198, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(199, 'text_to_video', 199, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(200, 'image_to_video', 200, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(201, 'text_to_video', 201, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(202, 'text_to_video', 202, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(203, 'image_to_video', 203, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(204, 'text_to_video', 204, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(205, 'text_to_video', 205, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(206, 'image_to_video', 206, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(207, 'text_to_video', 207, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(208, 'image', 208, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(209, 'image', 209, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(210, 'image', 210, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(211, 'image', 211, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(212, 'image', 212, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(213, 'image', 213, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(214, 'image', 214, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(215, 'image', 215, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(216, 'image', 216, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(217, 'image', 217, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(218, 'image', 218, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(219, 'text_to_video', 219, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(220, 'image_to_video', 220, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(221, 'text_to_video', 221, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(222, 'image_to_video', 222, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(223, 'image_to_video', 223, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(224, 'text_to_video', 224, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(225, 'image_to_video', 225, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(226, 'image_to_video', 226, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(227, 'image_to_video', 227, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(228, 'text_to_video', 228, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(229, 'image_to_video', 229, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(230, 'text_to_video', 230, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(231, 'image_to_video', 231, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(232, 'image_to_video', 232, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(233, 'text_to_video', 233, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(234, 'text_to_video', 234, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(235, 'text_to_video', 235, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(236, 'text_to_video', 236, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(237, 'minute', 237, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(238, 'word', 238, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(239, 'word', 239, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(240, 'word', 240, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(241, 'word', 241, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(242, 'word', 242, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(243, 'word', 243, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(244, 'word', 244, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(245, 'word', 245, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(246, 'word', 246, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(247, 'word', 247, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(248, 'word', 248, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(249, 'word', 249, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(250, 'word', 250, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(251, 'word', 251, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(252, 'word', 252, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(253, 'word', 253, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(254, 'word', 254, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(255, 'word', 255, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(256, 'word', 256, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(257, 'word', 257, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(258, 'word', 258, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(259, 'word', 259, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(260, 'word', 260, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(261, 'word', 261, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(262, 'word', 262, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(263, 'word', 263, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(264, 'word', 264, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(265, 'image', 265, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(266, 'video_to_video', 266, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(267, 'video_to_video', 267, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(268, 'video_to_video', 268, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(269, 'video_to_video', 269, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(270, 'video_to_video', 270, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(271, 'image', 271, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(272, 'text_to_video', 272, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(273, 'text_to_video', 273, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(274, 'text_to_video', 274, '2026-10-07 12:35:26', '2026-10-07 12:35:26'),
+(275, 'text_to_video', 275, '2026-10-07 12:35:26', '2026-10-07 12:35:26');
 
 INSERT INTO `usage` (`id`, `total_user_count`, `this_week_user_count`, `last_week_user_count`, `total_word_count`, `this_week_word_count`, `last_week_word_count`, `total_image_count`, `this_week_image_count`, `last_week_image_count`, `total_sales`, `this_week_sales`, `last_week_sales`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '2026-05-22 12:53:07', '2026-05-22 12:53:09');
+(1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '2026-10-07 12:35:16', '2026-10-07 12:35:19');
 
--- --------------------------------------------------------
+INSERT INTO `users` (`id`, `entity_credits`, `credit_system_type`, `shared_credits`, `coingate_subscriber_id`, `team_id`, `team_manager_id`, `name`, `surname`, `email`, `phone`, `type`, `password`, `avatar`, `company_name`, `company_website`, `country`, `address`, `city`, `state`, `postal`, `status`, `remaining_words`, `remaining_images`, `last_seen`, `github_id`, `github_token`, `google_id`, `google_token`, `facebook_id`, `facebook_token`, `twitter_id`, `twitter_token`, `google2fa_secret`, `created_at`, `updated_at`, `stripe_id`, `two_checkout_customer_reference`, `pm_type`, `pm_last_four`, `trial_ends_at`, `affiliate_code`, `affiliate_earnings`, `affiliate_bank_account`, `affiliate_id`, `email_confirmation_code`, `email_confirmed`, `password_reset_code`, `github_refresh_token`, `google_refresh_token`, `iyzico_id`, `revenuecat_id`, `apple_id`, `apple_token`, `apple_refresh_token`, `razorpay_id`, `api_keys`, `gemini_api_keys`, `anthropic_api_keys`, `remember_token`, `defi_setting`, `affiliate_status`, `tour_seen`, `otp`, `dash_notify_seen`, `xai_api_keys`, `last_activity_at`) VALUES
+(1, '{\"klap\": {\"ai-clip-klap\": {\"credit\": 100, \"isUnlimited\": true}}, \"x_ai\": {\"grok-3\": {\"credit\": 5000, \"isUnlimited\": true}, \"grok-4__5\": {\"credit\": 5000, \"isUnlimited\": true}, \"grok-4__6\": {\"credit\": 5000, \"isUnlimited\": true}, \"grok-2-1212\": {\"credit\": 5000, \"isUnlimited\": true}, \"grok-3-fast\": {\"credit\": 5000, \"isUnlimited\": true}, \"grok-3-mini\": {\"credit\": 5000, \"isUnlimited\": true}, \"grok-4-0709\": {\"credit\": 5000, \"isUnlimited\": true}, \"grok-3-mini-fast\": {\"credit\": 5000, \"isUnlimited\": true}, \"grok-2-vision-1212\": {\"credit\": 5000, \"isUnlimited\": true}, \"grok-4-fast-reasoning\": {\"credit\": 5000, \"isUnlimited\": true}, \"grok-4-1-fast-reasoning\": {\"credit\": 5000, \"isUnlimited\": true}, \"grok-4-1-fast-non-reasoning\": {\"credit\": 5000, \"isUnlimited\": true}}, \"azure\": {\"azure\": {\"credit\": 5000, \"isUnlimited\": true}, \"azure-openai\": {\"credit\": 5000, \"isUnlimited\": true}}, \"piapi\": {\"midjourney\": {\"credit\": 200, \"isUnlimited\": true}}, \"fal_ai\": {\"veed\": {\"credit\": 100, \"isUnlimited\": true}, \"veo2\": {\"credit\": 100, \"isUnlimited\": true}, \"veo3\": {\"credit\": 100, \"isUnlimited\": true}, \"kling\": {\"credit\": 100, \"isUnlimited\": true}, \"haiper\": {\"credit\": 100, \"isUnlimited\": true}, \"imagen4\": {\"credit\": 200, \"isUnlimited\": true}, \"minimax\": {\"credit\": 100, \"isUnlimited\": true}, \"flux-pro\": {\"credit\": 200, \"isUnlimited\": true}, \"klingV21\": {\"credit\": 100, \"isUnlimited\": true}, \"veo3-fast\": {\"credit\": 100, \"isUnlimited\": true}, \"klingImage\": {\"credit\": 100, \"isUnlimited\": true}, \"flux-2-flex\": {\"credit\": 200, \"isUnlimited\": true}, \"ideogram-v2\": {\"credit\": 200, \"isUnlimited\": true}, \"kling-video\": {\"credit\": 100, \"isUnlimited\": true}, \"nano-banana\": {\"credit\": 200, \"isUnlimited\": true}, \"flux-realism\": {\"credit\": 200, \"isUnlimited\": true}, \"flux/schnell\": {\"credit\": 200, \"isUnlimited\": true}, \"veo3__1/lite\": {\"credit\": 100, \"isUnlimited\": true}, \"nano-banana-2\": {\"credit\": 200, \"isUnlimited\": true}, \"flux-pro/v1__1\": {\"credit\": 200, \"isUnlimited\": true}, \"video-upscaler\": {\"credit\": 100, \"isUnlimited\": true}, \"animatediff-v2v\": {\"credit\": 100, \"isUnlimited\": true}, \"nano-banana-pro\": {\"credit\": 200, \"isUnlimited\": true}, \"flux-2-flex/edit\": {\"credit\": 200, \"isUnlimited\": true}, \"flux-pro/kontext\": {\"credit\": 200, \"isUnlimited\": true}, \"nano-banana/edit\": {\"credit\": 200, \"isUnlimited\": true}, \"seedream/v4/edit\": {\"credit\": 200, \"isUnlimited\": true}, \"veed/fabric-1__0\": {\"credit\": 100, \"isUnlimited\": true}, \"luma-dream-machine\": {\"credit\": 100, \"isUnlimited\": true}, \"nano-banana-2/edit\": {\"credit\": 200, \"isUnlimited\": true}, \"openai/gpt-image-2\": {\"credit\": 200, \"isUnlimited\": true}, \"nano-banana-pro/edit\": {\"credit\": 200, \"isUnlimited\": true}, \"veo3__1/text-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"veo3__1/image-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"xai/grok-imagine-image\": {\"credit\": 200, \"isUnlimited\": true}, \"google/gemini-omni-flash\": {\"credit\": 100, \"isUnlimited\": true}, \"seedream/v4/text-to-image\": {\"credit\": 200, \"isUnlimited\": true}, \"flux-pro/kontext/max/multi\": {\"credit\": 200, \"isUnlimited\": true}, \"veo3__1/fast/text-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"veo3__1/reference-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"cogvideox-5b/video-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"veo3__1/fast/image-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"veo3__1/lite/image-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"xai/grok-imagine-image/edit\": {\"credit\": 200, \"isUnlimited\": true}, \"veed/video-background-removal\": {\"credit\": 100, \"isUnlimited\": true}, \"flux-pro/kontext/text-to-image\": {\"credit\": 200, \"isUnlimited\": true}, \"kling-video/v3/pro/text-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"kling-video/v3/pro/image-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"veo3__1/first-last-frame-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"kling-2__5-turbo/pro/text-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"kling-2__5-turbo/pro/image-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"kling-video/v2__6/pro/text-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"kling-video/v2__6/pro/image-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"kling-video/v2__6/pro/motion-control\": {\"credit\": 100, \"isUnlimited\": true}, \"xai/grok-imagine-video/text-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"bytedance/seedance-2__0/text-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"bytedance/seedance-2__5/text-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"fast-animatediff/turbo/video-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"kling-video/v3/standard/text-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"xai/grok-imagine-video/image-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"bytedance/seedance-2__0/image-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"bytedance/seedance-2__5/image-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"kling-video/v3/standard/image-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"veo3__1/fast/first-last-frame-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"veo3__1/lite/first-last-frame-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"google/gemini-omni-flash/image-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"kling-2__5-turbo/standard/image-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"kling-video/v2__6/standard/motion-control\": {\"credit\": 100, \"isUnlimited\": true}, \"openai/gpt-image-2__5/flare/text-to-image\": {\"credit\": 200, \"isUnlimited\": true}, \"bytedance/seedance-2__0/fast/text-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"bytedance/seedance-2__0/reference-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"bytedance/seedance-2__5/reference-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"bytedance/seedance-2__0/fast/image-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"google/gemini-omni-flash/reference-to-video\": {\"credit\": 100, \"isUnlimited\": true}, \"openai/gpt-image-2__5/sunburst/text-to-image\": {\"credit\": 200, \"isUnlimited\": true}, \"bytedance/seedance-2__0/fast/reference-to-video\": {\"credit\": 100, \"isUnlimited\": true}}, \"gemini\": {\"lyria-3__5\": {\"credit\": 8, \"isUnlimited\": true}, \"lyria-3-pro\": {\"credit\": 8, \"isUnlimited\": true}, \"lyria-3-clip\": {\"credit\": 8, \"isUnlimited\": true}, \"gemini-1__5-pro\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-2__5-pro\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-1__5-flash\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-2__0-flash\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-3__5-flash\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-3__6-flash\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-3__7-flash\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-3__8-flash\": {\"credit\": 5000, \"isUnlimited\": true}, \"text-embedding-004\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-3-pro-preview\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-deep-research\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-embedding-exp\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-2__0-flash-lite\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-3-flash-preview\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-3__5-flash-lite\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-3__1-pro-preview\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-3__1-flash-live-preview\": {\"credit\": 5000, \"isUnlimited\": true}, \"gemini-2__5-flash-preview-05-20\": {\"credit\": 5000, \"isUnlimited\": true}}, \"google\": {\"google\": {\"credit\": 5000, \"isUnlimited\": true}}, \"heygen\": {\"heygen\": {\"credit\": 100, \"isUnlimited\": true}, \"heygen-tts\": {\"credit\": 8, \"isUnlimited\": true}, \"video-dubbing\": {\"credit\": 8, \"isUnlimited\": true}, \"heygen-lipsync\": {\"credit\": 8, \"isUnlimited\": true}, \"heygen-video-v3\": {\"credit\": 8, \"isUnlimited\": true}, \"heygen-video-agent\": {\"credit\": 8, \"isUnlimited\": true}}, \"novita\": {\"novita\": {\"credit\": 200, \"isUnlimited\": true}}, \"openai\": {\"o1\": {\"credit\": 5000, \"isUnlimited\": true}, \"o3\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-4\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5\": {\"credit\": 5000, \"isUnlimited\": true}, \"tts-1\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-4o\": {\"credit\": 5000, \"isUnlimited\": true}, \"sora-2\": {\"credit\": 8, \"isUnlimited\": true}, \"o1-mini\": {\"credit\": 5000, \"isUnlimited\": true}, \"o3-mini\": {\"credit\": 5000, \"isUnlimited\": true}, \"o4-mini\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-4__1\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5__1\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5__2\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5__4\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5__5\": {\"credit\": 5000, \"isUnlimited\": true}, \"tts-1-hd\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5-pro\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-6-sol\": {\"credit\": 5000, \"isUnlimited\": true}, \"whisper-1\": {\"credit\": 100, \"isUnlimited\": true}, \"gpt-5-mini\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5-nano\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-6-luna\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-live-1\": {\"credit\": 5000, \"isUnlimited\": true}, \"o1-preview\": {\"credit\": 5000, \"isUnlimited\": true}, \"sora-2-pro\": {\"credit\": 8, \"isUnlimited\": true}, \"davinci-002\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-4-turbo\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-4o-mini\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-6-astra\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-image-1\": {\"credit\": 200, \"isUnlimited\": true}, \"gpt-image-2\": {\"credit\": 200, \"isUnlimited\": true}, \"gpt-5__2-pro\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5__6-sol\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-realtime\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-4__1-mini\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-4__1-nano\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5__4-mini\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5__4-nano\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5__6-luna\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-3__5-turbo\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5__6-cyber\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5__6-terra\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-image-1__5\": {\"credit\": 200, \"isUnlimited\": true}, \"gpt-live-1-mini\": {\"credit\": 5000, \"isUnlimited\": true}, \"o3-deep-research\": {\"credit\": 5000, \"isUnlimited\": true}, \"text-davinci-003\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5-chat-latest\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-4-0125-preview\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-4-1106-preview\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-3__5-turbo-0125\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-3__5-turbo-1106\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5__1-chat-latest\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-5__3-chat-latest\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-image-2__5-flare\": {\"credit\": 200, \"isUnlimited\": true}, \"gpt-4o-search-preview\": {\"credit\": 5000, \"isUnlimited\": true}, \"o4-mini-deep-research\": {\"credit\": 5000, \"isUnlimited\": true}, \"text-embedding-3-large\": {\"credit\": 5000, \"isUnlimited\": true}, \"text-embedding-3-small\": {\"credit\": 5000, \"isUnlimited\": true}, \"text-embedding-ada-002\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-image-2__5-sunburst\": {\"credit\": 200, \"isUnlimited\": true}, \"gpt-4o-mini-search-preview\": {\"credit\": 5000, \"isUnlimited\": true}, \"gpt-4o-realtime-preview-2024-12-17\": {\"credit\": 5000, \"isUnlimited\": true}}, \"pexels\": {\"pexels\": {\"credit\": 200, \"isUnlimited\": true}}, \"serper\": {\"serper\": {\"credit\": 5000, \"isUnlimited\": true}}, \"vizard\": {\"ai-clip-vizard\": {\"credit\": 100, \"isUnlimited\": true}}, \"freepik\": {\"freepik\": {\"credit\": 200, \"isUnlimited\": true}}, \"minimax\": {\"music-01\": {\"credit\": 20, \"isUnlimited\": true}}, \"pixabay\": {\"pixabay\": {\"credit\": 200, \"isUnlimited\": true}}, \"rendley\": {\"rendley-auto-edit\": {\"credit\": 8, \"isUnlimited\": true}}, \"topview\": {\"ad-marketing-video-topview\": {\"credit\": 100, \"isUnlimited\": true}}, \"captions\": {\"ai-captions\": {\"credit\": 20, \"isUnlimited\": true}}, \"clipdrop\": {\"clipdrop\": {\"credit\": 200, \"isUnlimited\": true}}, \"creatify\": {\"ad-marketing-video\": {\"credit\": 100, \"isUnlimited\": true}}, \"gamma_ai\": {\"gamma-ai\": {\"credit\": 100, \"isUnlimited\": true}}, \"pebblely\": {\"pebblely\": {\"credit\": 200, \"isUnlimited\": true}}, \"together\": {\"black-forest-labs/FLUX__1-schnell\": {\"credit\": 200, \"isUnlimited\": true}}, \"unsplash\": {\"unsplash\": {\"credit\": 200, \"isUnlimited\": true}}, \"anthropic\": {\"voyage-2\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-2__0\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-2__1\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-opus-5\": {\"credit\": 5000, \"isUnlimited\": true}, \"voyage-code-2\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-fable-5\": {\"credit\": 5000, \"isUnlimited\": true}, \"voyage-large-2\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-opus-4-6\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-opus-4-7\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-opus-4-8\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-opus-5-5\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-sonnet-5\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-fable-5-1\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-sonnet-4-6\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-sonnet-5-5\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-3-opus-20240229\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-opus-4-20250514\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-3-haiku-20240307\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-3-haiku-20241022\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-3-sonnet-20240229\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-opus-4-1-20250805\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-opus-4-5-20251101\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-sonnet-4-20250514\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-3-5-sonnet-20240620\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-3-5-sonnet-20241022\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-3-7-sonnet-20250219\": {\"credit\": 5000, \"isUnlimited\": true}, \"claude-sonnet-4-5-20250929\": {\"credit\": 5000, \"isUnlimited\": true}}, \"deep_seek\": {\"deepseek-chat\": {\"credit\": 5000, \"isUnlimited\": true}, \"deepseek-v4-pro\": {\"credit\": 5000, \"isUnlimited\": true}, \"deepseek-reasoner\": {\"credit\": 5000, \"isUnlimited\": true}, \"deepseek-v4-flash\": {\"credit\": 5000, \"isUnlimited\": true}, \"deepseek-v4-flash-vision-exp\": {\"credit\": 5000, \"isUnlimited\": true}}, \"speechify\": {\"speechify\": {\"credit\": 5000, \"isUnlimited\": true}}, \"synthesia\": {\"synthesia\": {\"credit\": 100, \"isUnlimited\": true}}, \"elevenlabs\": {\"isolator\": {\"credit\": 5000, \"isUnlimited\": true}, \"eleven_v3\": {\"credit\": 5000, \"isUnlimited\": true}, \"eleven_v4\": {\"credit\": 5000, \"isUnlimited\": true}, \"elevenlabs\": {\"credit\": 5000, \"isUnlimited\": true}, \"eleven_v4_turbo\": {\"credit\": 5000, \"isUnlimited\": true}, \"elevenlabs-ai-music\": {\"credit\": 20, \"isUnlimited\": true}, \"elevenlabs-voice-chatbot\": {\"credit\": 5000, \"isUnlimited\": true}}, \"perplexity\": {\"perplexity\": {\"credit\": 5000, \"isUnlimited\": true}}, \"open_router\": {\"liquid/lfm-40b\": {\"credit\": 5000, \"isUnlimited\": true}, \"x-ai/grok-beta\": {\"credit\": 5000, \"isUnlimited\": true}, \"liquid/lfm-40b:free\": {\"credit\": 5000, \"isUnlimited\": true}, \"mistralai/ministral-3b\": {\"credit\": 5000, \"isUnlimited\": true}, \"mistralai/ministral-8b\": {\"credit\": 5000, \"isUnlimited\": true}, \"thedrummer/rocinante-12b\": {\"credit\": 5000, \"isUnlimited\": true}, \"anthropic/claude-3-5-haiku\": {\"credit\": 5000, \"isUnlimited\": true}, \"inflection/inflection-3-pi\": {\"credit\": 5000, \"isUnlimited\": true}, \"qwen/qwen-2__5-7b-instruct\": {\"credit\": 5000, \"isUnlimited\": true}, \"anthracite-org/magnum-v2-72b\": {\"credit\": 5000, \"isUnlimited\": true}, \"anthracite-org/magnum-v4-72b\": {\"credit\": 5000, \"isUnlimited\": true}, \"eva-unit-01/eva-qwen-2__5-14b\": {\"credit\": 5000, \"isUnlimited\": true}, \"anthropic/claude-3-5-haiku:beta\": {\"credit\": 5000, \"isUnlimited\": true}, \"meta-llama/llama-3__2-1b-instruct\": {\"credit\": 5000, \"isUnlimited\": true}, \"meta-llama/llama-3__2-3b-instruct\": {\"credit\": 5000, \"isUnlimited\": true}, \"neversleep/llama-3__1-lumimaid-70b\": {\"credit\": 5000, \"isUnlimited\": true}, \"anthropic/claude-3-5-haiku-20241022\": {\"credit\": 5000, \"isUnlimited\": true}, \"inflection/inflection-3-productivity\": {\"credit\": 5000, \"isUnlimited\": true}, \"meta-llama/llama-3__2-1b-instruct:free\": {\"credit\": 5000, \"isUnlimited\": true}, \"meta-llama/llama-3__2-3b-instruct:free\": {\"credit\": 5000, \"isUnlimited\": true}, \"nvidia/llama-3__1-nemotron-70b-instruct\": {\"credit\": 5000, \"isUnlimited\": true}, \"anthropic/claude-3-5-haiku-20241022:beta\": {\"credit\": 5000, \"isUnlimited\": true}, \"perplexity/llama-3__1-sonar-large-128k-chat\": {\"credit\": 5000, \"isUnlimited\": true}, \"perplexity/llama-3__1-sonar-small-128k-chat\": {\"credit\": 5000, \"isUnlimited\": true}, \"perplexity/llama-3__1-sonar-huge-128k-online\": {\"credit\": 5000, \"isUnlimited\": true}, \"perplexity/llama-3__1-sonar-large-128k-online\": {\"credit\": 5000, \"isUnlimited\": true}, \"perplexity/llama-3__1-sonar-small-128k-online\": {\"credit\": 5000, \"isUnlimited\": true}}, \"plagiarism_check\": {\"plagiarismcheck\": {\"credit\": 100, \"isUnlimited\": true}}, \"stable_diffusion\": {\"core\": {\"credit\": 200, \"isUnlimited\": true}, \"ultra\": {\"credit\": 200, \"isUnlimited\": true}, \"aws_bedrock\": {\"credit\": 200, \"isUnlimited\": true}, \"sd3__5-large\": {\"credit\": 200, \"isUnlimited\": true}, \"sd3__5-medium\": {\"credit\": 200, \"isUnlimited\": true}, \"sd3__5-large-turbo\": {\"credit\": 200, \"isUnlimited\": true}, \"stable-diffusion-xl-1024-v1-0\": {\"credit\": 200, \"isUnlimited\": true}}}', 'separated', 0.0000, NULL, NULL, NULL, 'Admin', 'Admin', 'admin@admin.com', '5555555555', 'super_admin', '$2y$10$XptdAOeFTxl7Yx2KmyfEluWY9Im6wpMIHoJ9V5yB96DgQgTafzzs6', 'assets/img/auth/default-avatar.png', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-10-07 12:35:19', '2026-10-07 12:35:25', NULL, NULL, NULL, NULL, NULL, 'P60NPGHAAFGD', '0', NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, 1, 0, NULL, 0, NULL, '2026-10-07 15:35:19');
 
---
--- Table structure for table `users`
---
 
-CREATE TABLE `users` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `entity_credits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`entity_credits`)),
-  `coingate_subscriber_id` varchar(191) DEFAULT NULL,
-  `team_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `team_manager_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `name` varchar(191) DEFAULT NULL,
-  `surname` varchar(191) DEFAULT NULL,
-  `email` varchar(191) NOT NULL,
-  `phone` varchar(191) DEFAULT NULL,
-  `type` varchar(191) NOT NULL DEFAULT 'user',
-  `password` varchar(191) NOT NULL,
-  `avatar` varchar(1055) NOT NULL DEFAULT 'assets/img/auth/default-avatar.png',
-  `company_name` varchar(191) DEFAULT NULL,
-  `company_website` varchar(191) DEFAULT NULL,
-  `country` varchar(191) DEFAULT NULL,
-  `address` text DEFAULT NULL,
-  `city` varchar(191) DEFAULT NULL,
-  `state` varchar(191) DEFAULT NULL,
-  `postal` varchar(191) DEFAULT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT 1,
-  `remaining_words` decimal(15,2) DEFAULT 0.00,
-  `remaining_images` decimal(15,2) DEFAULT 0.00,
-  `last_seen` date DEFAULT NULL,
-  `github_id` varchar(191) DEFAULT NULL,
-  `github_token` text DEFAULT NULL,
-  `google_id` varchar(191) DEFAULT NULL,
-  `google_token` text DEFAULT NULL,
-  `facebook_id` varchar(191) DEFAULT NULL,
-  `facebook_token` text DEFAULT NULL,
-  `twitter_id` varchar(191) DEFAULT NULL,
-  `twitter_token` varchar(191) DEFAULT NULL,
-  `google2fa_secret` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `stripe_id` varchar(191) DEFAULT NULL,
-  `two_checkout_customer_reference` varchar(191) DEFAULT NULL,
-  `pm_type` varchar(191) DEFAULT NULL,
-  `pm_last_four` varchar(4) DEFAULT NULL,
-  `trial_ends_at` timestamp NULL DEFAULT NULL,
-  `affiliate_code` varchar(191) DEFAULT NULL,
-  `affiliate_earnings` varchar(191) NOT NULL DEFAULT '0',
-  `affiliate_bank_account` text DEFAULT NULL,
-  `affiliate_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `email_confirmation_code` text DEFAULT NULL,
-  `email_confirmed` tinyint(1) NOT NULL DEFAULT 0,
-  `password_reset_code` text DEFAULT NULL,
-  `github_refresh_token` varchar(191) DEFAULT NULL,
-  `google_refresh_token` varchar(191) DEFAULT NULL,
-  `iyzico_id` varchar(191) DEFAULT NULL,
-  `revenuecat_id` varchar(191) DEFAULT NULL,
-  `apple_id` varchar(191) DEFAULT NULL,
-  `apple_token` text DEFAULT NULL,
-  `apple_refresh_token` varchar(191) DEFAULT NULL,
-  `razorpay_id` varchar(191) DEFAULT NULL,
-  `api_keys` text DEFAULT NULL,
-  `gemini_api_keys` text DEFAULT NULL,
-  `anthropic_api_keys` varchar(191) DEFAULT '',
-  `remember_token` varchar(100) DEFAULT NULL,
-  `defi_setting` text DEFAULT NULL,
-  `affiliate_status` tinyint(4) DEFAULT 1,
-  `tour_seen` tinyint(1) NOT NULL DEFAULT 0,
-  `otp` varchar(191) DEFAULT NULL,
-  `dash_notify_seen` tinyint(1) NOT NULL DEFAULT 0,
-  `xai_api_keys` text DEFAULT NULL,
-  `last_activity_at` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`id`, `entity_credits`, `coingate_subscriber_id`, `team_id`, `team_manager_id`, `name`, `surname`, `email`, `phone`, `type`, `password`, `avatar`, `company_name`, `company_website`, `country`, `address`, `city`, `state`, `postal`, `status`, `remaining_words`, `remaining_images`, `last_seen`, `github_id`, `github_token`, `google_id`, `google_token`, `facebook_id`, `facebook_token`, `twitter_id`, `twitter_token`, `google2fa_secret`, `created_at`, `updated_at`, `stripe_id`, `two_checkout_customer_reference`, `pm_type`, `pm_last_four`, `trial_ends_at`, `affiliate_code`, `affiliate_earnings`, `affiliate_bank_account`, `affiliate_id`, `email_confirmation_code`, `email_confirmed`, `password_reset_code`, `github_refresh_token`, `google_refresh_token`, `iyzico_id`, `revenuecat_id`, `apple_id`, `apple_token`, `apple_refresh_token`, `razorpay_id`, `api_keys`, `gemini_api_keys`, `anthropic_api_keys`, `remember_token`, `defi_setting`, `affiliate_status`, `tour_seen`, `otp`, `dash_notify_seen`, `xai_api_keys`, `last_activity_at`) VALUES
-(1, '{\"anthropic\":{\"claude-sonnet-4-5-20250929\":{\"credit\":5000,\"isUnlimited\":true},\"claude-sonnet-4-6\":{\"credit\":5000,\"isUnlimited\":true},\"claude-sonnet-4-20250514\":{\"credit\":5000,\"isUnlimited\":true},\"claude-3-7-sonnet-20250219\":{\"credit\":5000,\"isUnlimited\":true},\"claude-3-5-sonnet-20241022\":{\"credit\":5000,\"isUnlimited\":true},\"claude-3-5-sonnet-20240620\":{\"credit\":5000,\"isUnlimited\":true},\"claude-3-sonnet-20240229\":{\"credit\":5000,\"isUnlimited\":true},\"claude-opus-4-7\":{\"credit\":5000,\"isUnlimited\":true},\"claude-opus-4-6\":{\"credit\":5000,\"isUnlimited\":true},\"claude-opus-4-5-20251101\":{\"credit\":5000,\"isUnlimited\":true},\"claude-opus-4-1-20250805\":{\"credit\":5000,\"isUnlimited\":true},\"claude-opus-4-20250514\":{\"credit\":5000,\"isUnlimited\":true},\"claude-3-opus-20240229\":{\"credit\":5000,\"isUnlimited\":true},\"claude-3-haiku-20241022\":{\"credit\":5000,\"isUnlimited\":true},\"claude-3-haiku-20240307\":{\"credit\":5000,\"isUnlimited\":true},\"claude-2__1\":{\"credit\":5000,\"isUnlimited\":true},\"claude-2__0\":{\"credit\":5000,\"isUnlimited\":true},\"voyage-2\":{\"credit\":5000,\"isUnlimited\":true},\"voyage-large-2\":{\"credit\":5000,\"isUnlimited\":true},\"voyage-code-2\":{\"credit\":5000,\"isUnlimited\":true}},\"openai\":{\"davinci-002\":{\"credit\":5000,\"isUnlimited\":true},\"text-davinci-003\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-3__5-turbo\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-3__5-turbo-0125\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-3__5-turbo-1106\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-4\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-4-turbo\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-4-1106-preview\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-4-0125-preview\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-4o\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-4o-mini\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-4o-search-preview\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-4o-mini-search-preview\":{\"credit\":5000,\"isUnlimited\":true},\"o1-preview\":{\"credit\":5000,\"isUnlimited\":true},\"o1-mini\":{\"credit\":5000,\"isUnlimited\":true},\"o1\":{\"credit\":5000,\"isUnlimited\":true},\"o3-mini\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-4o-realtime-preview-2024-12-17\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-4__1\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-4__1-mini\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-4__1-nano\":{\"credit\":5000,\"isUnlimited\":true},\"o4-mini\":{\"credit\":5000,\"isUnlimited\":true},\"o3\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5-mini\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5-nano\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5-chat-latest\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5-pro\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5__1\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5__1-chat-latest\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5__2\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5__2-pro\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5__3-chat-latest\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5__4\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5__4-mini\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5__4-nano\":{\"credit\":5000,\"isUnlimited\":true},\"gpt-5__5\":{\"credit\":5000,\"isUnlimited\":true},\"o3-deep-research\":{\"credit\":5000,\"isUnlimited\":true},\"o4-mini-deep-research\":{\"credit\":5000,\"isUnlimited\":true},\"sora-2\":{\"credit\":8,\"isUnlimited\":true},\"sora-2-pro\":{\"credit\":8,\"isUnlimited\":true},\"text-embedding-ada-002\":{\"credit\":5000,\"isUnlimited\":true},\"text-embedding-3-small\":{\"credit\":5000,\"isUnlimited\":true},\"text-embedding-3-large\":{\"credit\":5000,\"isUnlimited\":true},\"whisper-1\":{\"credit\":100,\"isUnlimited\":true},\"dall-e-2\":{\"credit\":200,\"isUnlimited\":true},\"dall-e-3\":{\"credit\":200,\"isUnlimited\":true},\"gpt-image-1\":{\"credit\":200,\"isUnlimited\":true},\"gpt-image-1__5\":{\"credit\":200,\"isUnlimited\":true},\"gpt-image-2\":{\"credit\":200,\"isUnlimited\":true},\"tts-1\":{\"credit\":100,\"isUnlimited\":true},\"tts-1-hd\":{\"credit\":100,\"isUnlimited\":true}},\"stable_diffusion\":{\"image-to-video\":{\"credit\":100,\"isUnlimited\":true},\"stable-diffusion-xl-1024-v1-0\":{\"credit\":200,\"isUnlimited\":true},\"stable-diffusion-v1-6\":{\"credit\":200,\"isUnlimited\":true},\"sd3\":{\"credit\":200,\"isUnlimited\":true},\"sd3-turbo\":{\"credit\":200,\"isUnlimited\":true},\"sd3-medium\":{\"credit\":200,\"isUnlimited\":true},\"sd3-large\":{\"credit\":200,\"isUnlimited\":true},\"sd3-large-turbo\":{\"credit\":200,\"isUnlimited\":true},\"sd3__5-large\":{\"credit\":200,\"isUnlimited\":true},\"sd3__5-large-turbo\":{\"credit\":200,\"isUnlimited\":true},\"sd3__5-medium\":{\"credit\":200,\"isUnlimited\":true},\"core\":{\"credit\":200,\"isUnlimited\":true},\"ultra\":{\"credit\":200,\"isUnlimited\":true},\"aws_bedrock\":{\"credit\":200,\"isUnlimited\":true}},\"gemini\":{\"gemini-2__5-flash-preview-05-20\":{\"credit\":5000,\"isUnlimited\":true},\"gemini-3-pro-preview\":{\"credit\":5000,\"isUnlimited\":true},\"gemini-3__1-pro-preview\":{\"credit\":5000,\"isUnlimited\":true},\"gemini-2__5-pro\":{\"credit\":5000,\"isUnlimited\":true},\"gemini-deep-research\":{\"credit\":5000,\"isUnlimited\":true},\"gemini-2__0-flash\":{\"credit\":5000,\"isUnlimited\":true},\"gemini-2__0-flash-lite\":{\"credit\":5000,\"isUnlimited\":true},\"gemini-1__5-pro\":{\"credit\":5000,\"isUnlimited\":true},\"gemini-embedding-exp\":{\"credit\":5000,\"isUnlimited\":true},\"gemini-1__5-flash\":{\"credit\":5000,\"isUnlimited\":true},\"gemini-3-flash-preview\":{\"credit\":5000,\"isUnlimited\":true},\"gemini-3__1-flash-live-preview\":{\"credit\":5000,\"isUnlimited\":true},\"text-embedding-004\":{\"credit\":5000,\"isUnlimited\":true},\"lyria-3-clip\":{\"credit\":8,\"isUnlimited\":true},\"lyria-3-pro\":{\"credit\":8,\"isUnlimited\":true}},\"clipdrop\":{\"clipdrop\":{\"credit\":200,\"isUnlimited\":true}},\"novita\":{\"novita\":{\"credit\":200,\"isUnlimited\":true}},\"freepik\":{\"freepik\":{\"credit\":200,\"isUnlimited\":true}},\"plagiarism_check\":{\"plagiarismcheck\":{\"credit\":100,\"isUnlimited\":true}},\"synthesia\":{\"synthesia\":{\"credit\":100,\"isUnlimited\":true}},\"heygen\":{\"heygen\":{\"credit\":100,\"isUnlimited\":true}},\"pebblely\":{\"pebblely\":{\"credit\":200,\"isUnlimited\":true}},\"deep_seek\":{\"deepseek-chat\":{\"credit\":5000,\"isUnlimited\":true},\"deepseek-reasoner\":{\"credit\":5000,\"isUnlimited\":true}},\"unsplash\":{\"unsplash\":{\"credit\":200,\"isUnlimited\":true}},\"pexels\":{\"pexels\":{\"credit\":200,\"isUnlimited\":true}},\"pixabay\":{\"pixabay\":{\"credit\":200,\"isUnlimited\":true}},\"elevenlabs\":{\"elevenlabs\":{\"credit\":100,\"isUnlimited\":true},\"eleven_v3\":{\"credit\":100,\"isUnlimited\":true},\"elevenlabs-voice-chatbot\":{\"credit\":5000,\"isUnlimited\":true},\"isolator\":{\"credit\":5000,\"isUnlimited\":true},\"elevenlabs-ai-music\":{\"credit\":20,\"isUnlimited\":true}},\"google\":{\"google\":{\"credit\":100,\"isUnlimited\":true}},\"azure\":{\"azure\":{\"credit\":100,\"isUnlimited\":true},\"azure-openai\":{\"credit\":5000,\"isUnlimited\":true}},\"speechify\":{\"speechify\":{\"credit\":100,\"isUnlimited\":true}},\"serper\":{\"serper\":{\"credit\":5000,\"isUnlimited\":true}},\"perplexity\":{\"perplexity\":{\"credit\":5000,\"isUnlimited\":true}},\"x_ai\":{\"grok-2-1212\":{\"credit\":5000,\"isUnlimited\":true},\"grok-2-vision-1212\":{\"credit\":5000,\"isUnlimited\":true},\"grok-3\":{\"credit\":5000,\"isUnlimited\":true},\"grok-3-mini\":{\"credit\":5000,\"isUnlimited\":true},\"grok-3-fast\":{\"credit\":5000,\"isUnlimited\":true},\"grok-3-mini-fast\":{\"credit\":5000,\"isUnlimited\":true},\"grok-4-0709\":{\"credit\":5000,\"isUnlimited\":true},\"grok-4-fast-reasoning\":{\"credit\":5000,\"isUnlimited\":true},\"grok-4-1-fast-reasoning\":{\"credit\":5000,\"isUnlimited\":true},\"grok-4-1-fast-non-reasoning\":{\"credit\":5000,\"isUnlimited\":true}},\"gamma_ai\":{\"gamma-ai\":{\"credit\":100,\"isUnlimited\":true}},\"fal_ai\":{\"veed\":{\"credit\":100,\"isUnlimited\":true},\"veed\\/fabric-1__0\":{\"credit\":100,\"isUnlimited\":true},\"veo2\":{\"credit\":100,\"isUnlimited\":true},\"veo3\":{\"credit\":100,\"isUnlimited\":true},\"veo3__1\\/text-to-video\":{\"credit\":100,\"isUnlimited\":true},\"veo3__1\\/fast\\/text-to-video\":{\"credit\":100,\"isUnlimited\":true},\"veo3__1\\/first-last-frame-to-video\":{\"credit\":100,\"isUnlimited\":true},\"veo3__1\\/fast\\/first-last-frame-to-video\":{\"credit\":100,\"isUnlimited\":true},\"veo3__1\\/image-to-video\":{\"credit\":100,\"isUnlimited\":true},\"veo3__1\\/fast\\/image-to-video\":{\"credit\":100,\"isUnlimited\":true},\"veo3__1\\/reference-to-video\":{\"credit\":100,\"isUnlimited\":true},\"veo3__1\\/lite\":{\"credit\":100,\"isUnlimited\":true},\"veo3__1\\/lite\\/image-to-video\":{\"credit\":100,\"isUnlimited\":true},\"veo3__1\\/lite\\/first-last-frame-to-video\":{\"credit\":100,\"isUnlimited\":true},\"veo3-fast\":{\"credit\":100,\"isUnlimited\":true},\"nano-banana\":{\"credit\":200,\"isUnlimited\":true},\"nano-banana\\/edit\":{\"credit\":200,\"isUnlimited\":true},\"nano-banana-pro\":{\"credit\":200,\"isUnlimited\":true},\"nano-banana-pro\\/edit\":{\"credit\":200,\"isUnlimited\":true},\"nano-banana-2\":{\"credit\":200,\"isUnlimited\":true},\"nano-banana-2\\/edit\":{\"credit\":200,\"isUnlimited\":true},\"xai\\/grok-imagine-image\":{\"credit\":200,\"isUnlimited\":true},\"xai\\/grok-imagine-image\\/edit\":{\"credit\":200,\"isUnlimited\":true},\"xai\\/grok-imagine-video\\/text-to-video\":{\"credit\":100,\"isUnlimited\":true},\"xai\\/grok-imagine-video\\/image-to-video\":{\"credit\":100,\"isUnlimited\":true},\"seedream\\/v4\\/text-to-image\":{\"credit\":200,\"isUnlimited\":true},\"seedream\\/v4\\/edit\":{\"credit\":200,\"isUnlimited\":true},\"bytedance\\/seedance-2__0\\/text-to-video\":{\"credit\":100,\"isUnlimited\":true},\"bytedance\\/seedance-2__0\\/image-to-video\":{\"credit\":100,\"isUnlimited\":true},\"bytedance\\/seedance-2__0\\/reference-to-video\":{\"credit\":100,\"isUnlimited\":true},\"bytedance\\/seedance-2__0\\/fast\\/text-to-video\":{\"credit\":100,\"isUnlimited\":true},\"bytedance\\/seedance-2__0\\/fast\\/image-to-video\":{\"credit\":100,\"isUnlimited\":true},\"bytedance\\/seedance-2__0\\/fast\\/reference-to-video\":{\"credit\":100,\"isUnlimited\":true},\"flux-pro\":{\"credit\":200,\"isUnlimited\":true},\"flux-pro\\/kontext\\/max\\/multi\":{\"credit\":200,\"isUnlimited\":true},\"flux-pro\\/kontext\\/text-to-image\":{\"credit\":200,\"isUnlimited\":true},\"flux-pro\\/kontext\":{\"credit\":200,\"isUnlimited\":true},\"imagen4\":{\"credit\":200,\"isUnlimited\":true},\"ideogram-v2\":{\"credit\":200,\"isUnlimited\":true},\"flux-pro\\/v1__1\":{\"credit\":200,\"isUnlimited\":true},\"flux-realism\":{\"credit\":200,\"isUnlimited\":true},\"flux\\/schnell\":{\"credit\":200,\"isUnlimited\":true},\"flux-2-flex\":{\"credit\":200,\"isUnlimited\":true},\"flux-2-flex\\/edit\":{\"credit\":200,\"isUnlimited\":true},\"kling\":{\"credit\":100,\"isUnlimited\":true},\"klingV21\":{\"credit\":100,\"isUnlimited\":true},\"kling-2__5-turbo\\/pro\\/text-to-video\":{\"credit\":100,\"isUnlimited\":true},\"kling-2__5-turbo\\/pro\\/image-to-video\":{\"credit\":100,\"isUnlimited\":true},\"kling-2__5-turbo\\/standard\\/image-to-video\":{\"credit\":100,\"isUnlimited\":true},\"kling-video\\/v2__6\\/pro\\/text-to-video\":{\"credit\":100,\"isUnlimited\":true},\"kling-video\\/v2__6\\/pro\\/image-to-video\":{\"credit\":100,\"isUnlimited\":true},\"kling-video\\/v2__6\\/pro\\/motion-control\":{\"credit\":100,\"isUnlimited\":true},\"kling-video\\/v2__6\\/standard\\/motion-control\":{\"credit\":100,\"isUnlimited\":true},\"kling-video\\/v3\\/pro\\/text-to-video\":{\"credit\":100,\"isUnlimited\":true},\"kling-video\\/v3\\/pro\\/image-to-video\":{\"credit\":100,\"isUnlimited\":true},\"kling-video\\/v3\\/standard\\/text-to-video\":{\"credit\":100,\"isUnlimited\":true},\"kling-video\\/v3\\/standard\\/image-to-video\":{\"credit\":100,\"isUnlimited\":true},\"klingImage\":{\"credit\":100,\"isUnlimited\":true},\"kling-video\":{\"credit\":100,\"isUnlimited\":true},\"luma-dream-machine\":{\"credit\":100,\"isUnlimited\":true},\"haiper\":{\"credit\":100,\"isUnlimited\":true},\"minimax\":{\"credit\":100,\"isUnlimited\":true},\"video-upscaler\":{\"credit\":100,\"isUnlimited\":true},\"cogvideox-5b\\/video-to-video\":{\"credit\":100,\"isUnlimited\":true},\"animatediff-v2v\":{\"credit\":100,\"isUnlimited\":true},\"fast-animatediff\\/turbo\\/video-to-video\":{\"credit\":100,\"isUnlimited\":true},\"veed\\/video-background-removal\":{\"credit\":100,\"isUnlimited\":true}},\"minimax\":{\"music-01\":{\"credit\":100,\"isUnlimited\":true}},\"open_router\":{\"anthropic\\/claude-3-5-haiku-20241022\":{\"credit\":5000,\"isUnlimited\":true},\"anthropic\\/claude-3-5-haiku-20241022:beta\":{\"credit\":5000,\"isUnlimited\":true},\"anthropic\\/claude-3-5-haiku\":{\"credit\":5000,\"isUnlimited\":true},\"anthropic\\/claude-3-5-haiku:beta\":{\"credit\":5000,\"isUnlimited\":true},\"neversleep\\/llama-3__1-lumimaid-70b\":{\"credit\":5000,\"isUnlimited\":true},\"anthracite-org\\/magnum-v4-72b\":{\"credit\":5000,\"isUnlimited\":true},\"x-ai\\/grok-beta\":{\"credit\":5000,\"isUnlimited\":true},\"mistralai\\/ministral-8b\":{\"credit\":5000,\"isUnlimited\":true},\"mistralai\\/ministral-3b\":{\"credit\":5000,\"isUnlimited\":true},\"qwen\\/qwen-2__5-7b-instruct\":{\"credit\":5000,\"isUnlimited\":true},\"nvidia\\/llama-3__1-nemotron-70b-instruct\":{\"credit\":5000,\"isUnlimited\":true},\"inflection\\/inflection-3-pi\":{\"credit\":5000,\"isUnlimited\":true},\"inflection\\/inflection-3-productivity\":{\"credit\":5000,\"isUnlimited\":true},\"liquid\\/lfm-40b:free\":{\"credit\":5000,\"isUnlimited\":true},\"liquid\\/lfm-40b\":{\"credit\":5000,\"isUnlimited\":true},\"thedrummer\\/rocinante-12b\":{\"credit\":5000,\"isUnlimited\":true},\"eva-unit-01\\/eva-qwen-2__5-14b\":{\"credit\":5000,\"isUnlimited\":true},\"anthracite-org\\/magnum-v2-72b\":{\"credit\":5000,\"isUnlimited\":true},\"meta-llama\\/llama-3__2-3b-instruct:free\":{\"credit\":5000,\"isUnlimited\":true},\"meta-llama\\/llama-3__2-1b-instruct:free\":{\"credit\":5000,\"isUnlimited\":true},\"meta-llama\\/llama-3__2-3b-instruct\":{\"credit\":5000,\"isUnlimited\":true},\"meta-llama\\/llama-3__2-1b-instruct\":{\"credit\":5000,\"isUnlimited\":true},\"perplexity\\/llama-3__1-sonar-huge-128k-online\":{\"credit\":5000,\"isUnlimited\":true},\"perplexity\\/llama-3__1-sonar-large-128k-online\":{\"credit\":5000,\"isUnlimited\":true},\"perplexity\\/llama-3__1-sonar-large-128k-chat\":{\"credit\":5000,\"isUnlimited\":true},\"perplexity\\/llama-3__1-sonar-small-128k-online\":{\"credit\":5000,\"isUnlimited\":true},\"perplexity\\/llama-3__1-sonar-small-128k-chat\":{\"credit\":5000,\"isUnlimited\":true}},\"piapi\":{\"midjourney\":{\"credit\":200,\"isUnlimited\":true}},\"together\":{\"black-forest-labs\\/FLUX__1-schnell\":{\"credit\":200,\"isUnlimited\":true}},\"creatify\":{\"ad-marketing-video\":{\"credit\":100,\"isUnlimited\":true}},\"topview\":{\"ad-marketing-video-topview\":{\"credit\":100,\"isUnlimited\":true}},\"vizard\":{\"ai-clip-vizard\":{\"credit\":100,\"isUnlimited\":true}},\"klap\":{\"ai-clip-klap\":{\"credit\":100,\"isUnlimited\":true}}}', NULL, NULL, NULL, 'Admin', 'Admin', 'admin@admin.com', '5555555555', 'super_admin', '$2y$10$XptdAOeFTxl7Yx2KmyfEluWY9Im6wpMIHoJ9V5yB96DgQgTafzzs6', 'assets/img/auth/default-avatar.png', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 0.00, 0.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-05-22 12:53:09', '2026-05-22 12:53:14', NULL, NULL, NULL, NULL, NULL, 'P60NPGHAAFGD', '0', NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, 1, 0, NULL, 0, NULL, '2026-05-22 12:53:09');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `users_activity`
---
-
-CREATE TABLE `users_activity` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `email` varchar(191) DEFAULT NULL,
-  `type` varchar(191) DEFAULT NULL,
-  `ip` varchar(191) DEFAULT NULL,
-  `connection` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_affiliates`
---
-
-CREATE TABLE `user_affiliates` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `amount` double NOT NULL DEFAULT 0,
-  `status` varchar(191) NOT NULL DEFAULT 'Waiting',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_credits`
---
-
-CREATE TABLE `user_credits` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) DEFAULT NULL,
-  `credits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`credits`)),
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_docs_favorite`
---
-
-CREATE TABLE `user_docs_favorite` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `user_openai_id` bigint(20) UNSIGNED DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_favorites`
---
-
-CREATE TABLE `user_favorites` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `openai_id` bigint(20) UNSIGNED DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_integrations`
---
-
-CREATE TABLE `user_integrations` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `integration_id` int(11) DEFAULT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `credentials` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`credentials`)),
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_openai`
---
-
-CREATE TABLE `user_openai` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `is_demo` tinyint(1) DEFAULT 0,
-  `request_id` varchar(191) DEFAULT NULL,
-  `team_id` bigint(20) DEFAULT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `openai_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `input` text DEFAULT NULL,
-  `response` text DEFAULT NULL,
-  `output` text DEFAULT NULL,
-  `hash` text DEFAULT NULL,
-  `credits` varchar(191) DEFAULT NULL,
-  `words` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `slug` varchar(191) DEFAULT NULL,
-  `storage` varchar(191) DEFAULT NULL,
-  `folder_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`payload`)),
-  `status` varchar(191) DEFAULT 'COMPLETED',
-  `engine` varchar(191) DEFAULT NULL,
-  `model` varchar(191) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_openai_chat`
---
-
-CREATE TABLE `user_openai_chat` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `team_id` bigint(20) DEFAULT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `chat_type` varchar(191) DEFAULT NULL,
-  `chatbot_id` bigint(20) DEFAULT NULL,
-  `openai_chat_category_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `title` varchar(191) DEFAULT NULL,
-  `total_credits` varchar(191) DEFAULT NULL,
-  `total_words` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `is_chatbot` tinyint(4) NOT NULL DEFAULT 0,
-  `website_url` varchar(191) DEFAULT '',
-  `reference_url` varchar(191) NOT NULL DEFAULT '',
-  `doc_name` varchar(191) NOT NULL DEFAULT '',
-  `thread_id` varchar(191) DEFAULT NULL,
-  `is_pinned` tinyint(1) NOT NULL DEFAULT 0,
-  `openai_vector_id` varchar(191) DEFAULT NULL,
-  `openai_file_id` varchar(191) DEFAULT NULL,
-  `is_empty` tinyint(1) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_openai_chat_messages`
---
-
-CREATE TABLE `user_openai_chat_messages` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_openai_chat_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `input` text DEFAULT NULL,
-  `response` text DEFAULT NULL,
-  `output` text DEFAULT NULL,
-  `hash` text DEFAULT NULL,
-  `credits` varchar(191) DEFAULT NULL,
-  `words` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `images` text DEFAULT NULL,
-  `pdfName` text DEFAULT NULL,
-  `pdfPath` text DEFAULT NULL,
-  `outputImage` varchar(191) DEFAULT NULL,
-  `realtime` tinyint(1) NOT NULL DEFAULT 0,
-  `is_chatbot` tinyint(4) NOT NULL DEFAULT 0,
-  `used_skills` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`used_skills`))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_orders`
---
-
-CREATE TABLE `user_orders` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `order_id` varchar(191) DEFAULT NULL,
-  `plan_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `payment_type` varchar(191) DEFAULT NULL,
-  `price` double DEFAULT NULL,
-  `status` varchar(191) NOT NULL DEFAULT 'Waiting',
-  `country` varchar(191) NOT NULL DEFAULT 'United States of America',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `type` varchar(191) NOT NULL DEFAULT 'subscription',
-  `affiliate_earnings` double NOT NULL DEFAULT 0,
-  `tax_rate` varchar(191) DEFAULT NULL,
-  `tax_value` varchar(191) DEFAULT NULL,
-  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`payload`))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_support`
---
-
-CREATE TABLE `user_support` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `subject` varchar(191) NOT NULL,
-  `status` varchar(191) NOT NULL DEFAULT 'Waiting for answer',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `ticket_id` varchar(191) NOT NULL,
-  `priority` varchar(191) NOT NULL DEFAULT 'Low',
-  `category` varchar(191) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_support_messages`
---
-
-CREATE TABLE `user_support_messages` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_support_id` bigint(20) UNSIGNED DEFAULT NULL,
-  `sender` varchar(191) NOT NULL DEFAULT 'user',
-  `message` text NOT NULL,
-  `attachment` text DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user_usage_credits`
---
-
-CREATE TABLE `user_usage_credits` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `model_key` varchar(191) NOT NULL,
-  `credit` int(11) NOT NULL,
-  `unit_price` decimal(8,2) NOT NULL,
-  `total` decimal(10,2) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `webhookhistory`
---
-
-CREATE TABLE `webhookhistory` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `gatewaycode` varchar(191) DEFAULT NULL,
-  `webhook_id` varchar(191) DEFAULT NULL,
-  `create_time` varchar(191) DEFAULT NULL,
-  `resource_type` varchar(191) DEFAULT NULL,
-  `event_type` varchar(191) DEFAULT NULL,
-  `summary` varchar(191) DEFAULT NULL,
-  `resource_id` varchar(191) DEFAULT NULL,
-  `resource_state` varchar(191) DEFAULT NULL,
-  `parent_payment` varchar(191) DEFAULT NULL,
-  `amount_total` varchar(191) DEFAULT NULL,
-  `amount_currency` varchar(191) DEFAULT NULL,
-  `incoming_json` text DEFAULT NULL,
-  `status` varchar(191) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `account_deletion_reqs`
---
-ALTER TABLE `account_deletion_reqs`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `account_deletion_reqs_user_id_foreign` (`user_id`);
-
---
--- Indexes for table `activity`
---
-ALTER TABLE `activity`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `activity_user_id_foreign` (`user_id`);
-
---
--- Indexes for table `ads`
---
-ALTER TABLE `ads`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `advanced_features_section`
---
-ALTER TABLE `advanced_features_section`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `advertis`
---
-ALTER TABLE `advertis`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `ai_chat_model_plans`
---
-ALTER TABLE `ai_chat_model_plans`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `ai_chat_model_plans_entity_id_foreign` (`entity_id`);
-
---
--- Indexes for table `app_settings`
---
-ALTER TABLE `app_settings`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `app_settings_key_index` (`key`);
-
---
--- Indexes for table `article_wizard`
---
-ALTER TABLE `article_wizard`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `bad_words`
---
-ALTER TABLE `bad_words`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `banner_bottom_texts`
---
-ALTER TABLE `banner_bottom_texts`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `blogs`
---
-ALTER TABLE `blogs`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `blogs_slug_unique` (`slug`);
-
---
--- Indexes for table `cache`
---
-ALTER TABLE `cache`
-  ADD PRIMARY KEY (`key`);
-
---
--- Indexes for table `cache_locks`
---
-ALTER TABLE `cache_locks`
-  ADD PRIMARY KEY (`key`);
-
---
--- Indexes for table `chatbot`
---
-ALTER TABLE `chatbot`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `chatbot_data`
---
-ALTER TABLE `chatbot_data`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `chatbot_data_vectors`
---
-ALTER TABLE `chatbot_data_vectors`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `chatbot_history`
---
-ALTER TABLE `chatbot_history`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `chat_category`
---
-ALTER TABLE `chat_category`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `clients`
---
-ALTER TABLE `clients`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `companies`
---
-ALTER TABLE `companies`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `companies_user_id_foreign` (`user_id`);
-
---
--- Indexes for table `comparison_section_items`
---
-ALTER TABLE `comparison_section_items`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `coupons`
---
-ALTER TABLE `coupons`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `coupons_created_by_foreign` (`created_by`);
-
---
--- Indexes for table `coupon_users`
---
-ALTER TABLE `coupon_users`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `coupon_users_coupon_id_foreign` (`coupon_id`),
-  ADD KEY `coupon_users_user_id_foreign` (`user_id`);
-
---
--- Indexes for table `currencies`
---
-ALTER TABLE `currencies`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `customsettings`
---
-ALTER TABLE `customsettings`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `custom_biling_plans`
---
-ALTER TABLE `custom_biling_plans`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `dashboard_widgets`
---
-ALTER TABLE `dashboard_widgets`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `domains`
---
-ALTER TABLE `domains`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `domains_chatbot_id_domain_unique` (`chatbot_id`,`domain`),
-  ADD UNIQUE KEY `domains_uuid_unique` (`uuid`),
-  ADD KEY `domains_chatbot_id_index` (`chatbot_id`);
-
---
--- Indexes for table `elevenlab_voices`
---
-ALTER TABLE `elevenlab_voices`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `email_templates`
---
-ALTER TABLE `email_templates`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `engines`
---
-ALTER TABLE `engines`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_engines_key` (`key`);
-
---
--- Indexes for table `entities`
---
-ALTER TABLE `entities`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_entities_key` (`key`);
-
---
--- Indexes for table `exported_videos`
---
-ALTER TABLE `exported_videos`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `exported_videos_task_id_unique` (`task_id`),
-  ADD KEY `exported_videos_user_id_foreign` (`user_id`);
-
---
--- Indexes for table `extensions`
---
-ALTER TABLE `extensions`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `failed_jobs`
---
-ALTER TABLE `failed_jobs`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`);
-
---
--- Indexes for table `faq`
---
-ALTER TABLE `faq`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `favourite_list`
---
-ALTER TABLE `favourite_list`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `features_marquees`
---
-ALTER TABLE `features_marquees`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `folders`
---
-ALTER TABLE `folders`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `folders_created_by_foreign` (`created_by`);
-
---
--- Indexes for table `footer_items`
---
-ALTER TABLE `footer_items`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `frontend_channel_settings`
---
-ALTER TABLE `frontend_channel_settings`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `frontend_content_boxes`
---
-ALTER TABLE `frontend_content_boxes`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `frontend_curtains`
---
-ALTER TABLE `frontend_curtains`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `frontend_footer_settings`
---
-ALTER TABLE `frontend_footer_settings`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `frontend_future`
---
-ALTER TABLE `frontend_future`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `frontend_generators`
---
-ALTER TABLE `frontend_generators`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `frontend_sections_statuses_titles`
---
-ALTER TABLE `frontend_sections_statuses_titles`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `frontend_tools`
---
-ALTER TABLE `frontend_tools`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `frontend_who_is_for`
---
-ALTER TABLE `frontend_who_is_for`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `gatewayproducts`
---
-ALTER TABLE `gatewayproducts`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `gateways`
---
-ALTER TABLE `gateways`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `gateway_taxes`
---
-ALTER TABLE `gateway_taxes`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `health_check_result_history_items`
---
-ALTER TABLE `health_check_result_history_items`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `health_check_result_history_items_created_at_index` (`created_at`),
-  ADD KEY `health_check_result_history_items_batch_index` (`batch`);
-
---
--- Indexes for table `howitworks`
---
-ALTER TABLE `howitworks`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `integrations`
---
-ALTER TABLE `integrations`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `introductions`
---
-ALTER TABLE `introductions`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `jobs`
---
-ALTER TABLE `jobs`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `jobs_queue_index` (`queue`);
-
---
--- Indexes for table `menus`
---
-ALTER TABLE `menus`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `menus_key_unique` (`key`),
-  ADD KEY `idx_menus_parent_id` (`parent_id`),
-  ADD KEY `idx_menus_parent_id_order` (`parent_id`,`order`),
-  ADD KEY `idx_menus_is_active` (`is_active`);
-
---
--- Indexes for table `migrations`
---
-ALTER TABLE `migrations`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `model_has_permissions`
---
-ALTER TABLE `model_has_permissions`
-  ADD PRIMARY KEY (`permission_id`,`model_id`,`model_type`),
-  ADD KEY `model_has_permissions_model_id_model_type_index` (`model_id`,`model_type`);
-
---
--- Indexes for table `model_has_roles`
---
-ALTER TABLE `model_has_roles`
-  ADD PRIMARY KEY (`role_id`,`model_id`,`model_type`),
-  ADD KEY `model_has_roles_model_id_model_type_index` (`model_id`,`model_type`);
-
---
--- Indexes for table `notifications`
---
-ALTER TABLE `notifications`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `notifications_notifiable_type_notifiable_id_index` (`notifiable_type`,`notifiable_id`);
-
---
--- Indexes for table `oldgatewayproducts`
---
-ALTER TABLE `oldgatewayproducts`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `openai`
---
-ALTER TABLE `openai`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `openai_access_type_index` (`access_type`),
-  ADD KEY `idx_openai_active_title` (`active`,`title`);
-
---
--- Indexes for table `openai_chat_category`
---
-ALTER TABLE `openai_chat_category`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `openai_filters`
---
-ALTER TABLE `openai_filters`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `pages`
---
-ALTER TABLE `pages`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `password_reset_tokens`
---
-ALTER TABLE `password_reset_tokens`
-  ADD PRIMARY KEY (`email`);
-
---
--- Indexes for table `payment_proofs`
---
-ALTER TABLE `payment_proofs`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `payment_proofs_user_id_foreign` (`user_id`),
-  ADD KEY `payment_proofs_plan_id_foreign` (`plan_id`);
-
---
--- Indexes for table `paystack_payment_infos`
---
-ALTER TABLE `paystack_payment_infos`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `paystack_payment_infos_user_id_foreign` (`user_id`);
-
---
--- Indexes for table `pdf_data`
---
-ALTER TABLE `pdf_data`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `pebblely`
---
-ALTER TABLE `pebblely`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `permissions`
---
-ALTER TABLE `permissions`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `permissions_name_guard_name_unique` (`name`,`guard_name`);
-
---
--- Indexes for table `personal_access_tokens`
---
-ALTER TABLE `personal_access_tokens`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
-  ADD KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`);
-
---
--- Indexes for table `photo_studios`
---
-ALTER TABLE `photo_studios`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `plans`
---
-ALTER TABLE `plans`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `privacy_terms`
---
-ALTER TABLE `privacy_terms`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `products`
---
-ALTER TABLE `products`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `products_user_id_foreign` (`user_id`),
-  ADD KEY `products_company_id_foreign` (`company_id`);
-
---
--- Indexes for table `prompt_library`
---
-ALTER TABLE `prompt_library`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `rate_limits`
---
-ALTER TABLE `rate_limits`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `recent_search_keys`
---
-ALTER TABLE `recent_search_keys`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `recent_search_keys_keyword_index` (`keyword`),
-  ADD KEY `recent_search_keys_user_keyword_index` (`user_id`,`keyword`),
-  ADD KEY `recent_search_keys_user_created_index` (`user_id`,`created_at`);
-
---
--- Indexes for table `referers`
---
-ALTER TABLE `referers`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `referers_domain_index` (`domain`);
-
---
--- Indexes for table `revenuecat_products`
---
-ALTER TABLE `revenuecat_products`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `revenuecat_products_plan_id_foreign` (`plan_id`),
-  ADD KEY `revenuecat_products_gatewayproduct_id_foreign` (`gatewayproduct_id`);
-
---
--- Indexes for table `roles`
---
-ALTER TABLE `roles`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `roles_name_guard_name_unique` (`name`,`guard_name`);
-
---
--- Indexes for table `role_has_permissions`
---
-ALTER TABLE `role_has_permissions`
-  ADD PRIMARY KEY (`permission_id`,`role_id`),
-  ADD KEY `role_has_permissions_role_id_foreign` (`role_id`);
-
---
--- Indexes for table `settings`
---
-ALTER TABLE `settings`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `settings_two`
---
-ALTER TABLE `settings_two`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `share_links`
---
-ALTER TABLE `share_links`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `social_media_accounts`
---
-ALTER TABLE `social_media_accounts`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `social_media_accounts_key_unique` (`key`);
-
---
--- Indexes for table `subscriptions`
---
-ALTER TABLE `subscriptions`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `subscriptions_stripe_id_unique` (`stripe_id`),
-  ADD KEY `subscriptions_plan_id_foreign` (`plan_id`),
-  ADD KEY `subscriptions_user_id_stripe_status_index` (`user_id`,`stripe_status`),
-  ADD KEY `idx_subscriptions_user_status` (`user_id`,`stripe_status`);
-
---
--- Indexes for table `subscriptions_yokassa`
---
-ALTER TABLE `subscriptions_yokassa`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `subscriptions_yokassa_plan_id_foreign` (`plan_id`),
-  ADD KEY `subscriptions_yokassa_user_id_subscription_status_index` (`user_id`,`subscription_status`);
-
---
--- Indexes for table `subscription_items`
---
-ALTER TABLE `subscription_items`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `subscription_items_subscription_id_stripe_price_unique` (`subscription_id`,`stripe_price`),
-  ADD UNIQUE KEY `subscription_items_stripe_id_unique` (`stripe_id`);
-
---
--- Indexes for table `teams`
---
-ALTER TABLE `teams`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_teams_user_id` (`user_id`);
-
---
--- Indexes for table `team_members`
---
-ALTER TABLE `team_members`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `team_members_team_id_foreign` (`team_id`),
-  ADD KEY `team_members_user_id_foreign` (`user_id`);
-
---
--- Indexes for table `telescope_entries`
---
-ALTER TABLE `telescope_entries`
-  ADD PRIMARY KEY (`sequence`),
-  ADD UNIQUE KEY `telescope_entries_uuid_unique` (`uuid`),
-  ADD KEY `telescope_entries_batch_id_index` (`batch_id`),
-  ADD KEY `telescope_entries_family_hash_index` (`family_hash`),
-  ADD KEY `telescope_entries_created_at_index` (`created_at`),
-  ADD KEY `telescope_entries_type_should_display_on_index_index` (`type`,`should_display_on_index`);
-
---
--- Indexes for table `telescope_entries_tags`
---
-ALTER TABLE `telescope_entries_tags`
-  ADD PRIMARY KEY (`entry_uuid`,`tag`),
-  ADD KEY `telescope_entries_tags_tag_index` (`tag`);
-
---
--- Indexes for table `telescope_monitoring`
---
-ALTER TABLE `telescope_monitoring`
-  ADD PRIMARY KEY (`tag`);
-
---
--- Indexes for table `testimonials`
---
-ALTER TABLE `testimonials`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tokens`
---
-ALTER TABLE `tokens`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `tokens_entity_id_foreign` (`entity_id`);
-
---
--- Indexes for table `usage`
---
-ALTER TABLE `usage`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `users_email_unique` (`email`),
-  ADD KEY `users_stripe_id_index` (`stripe_id`),
-  ADD KEY `users_affiliate_id_foreign` (`affiliate_id`),
-  ADD KEY `users_razorpay_id_index` (`razorpay_id`),
-  ADD KEY `users_last_activity_at_index` (`last_activity_at`),
-  ADD KEY `idx_users_team_id` (`team_id`),
-  ADD KEY `idx_users_team_manager_id` (`team_manager_id`),
-  ADD KEY `idx_users_type` (`type`),
-  ADD KEY `idx_users_last_activity_at` (`last_activity_at`);
-
---
--- Indexes for table `users_activity`
---
-ALTER TABLE `users_activity`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `user_affiliates`
---
-ALTER TABLE `user_affiliates`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_affiliates_user_id_foreign` (`user_id`);
-
---
--- Indexes for table `user_credits`
---
-ALTER TABLE `user_credits`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `user_docs_favorite`
---
-ALTER TABLE `user_docs_favorite`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_docs_favorite_user_id_foreign` (`user_id`),
-  ADD KEY `user_docs_favorite_user_openai_id_foreign` (`user_openai_id`);
-
---
--- Indexes for table `user_favorites`
---
-ALTER TABLE `user_favorites`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_favorites_user_id_foreign` (`user_id`),
-  ADD KEY `user_favorites_openai_id_foreign` (`openai_id`);
-
---
--- Indexes for table `user_integrations`
---
-ALTER TABLE `user_integrations`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `user_openai`
---
-ALTER TABLE `user_openai`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_openai_openai_id_foreign` (`openai_id`),
-  ADD KEY `user_openai_folder_id_foreign` (`folder_id`),
-  ADD KEY `user_openai_user_id_updated_at_index` (`user_id`,`updated_at` DESC),
-  ADD KEY `idx_user_id_updated_at` (`user_id`,`updated_at`),
-  ADD KEY `idx_user_openai_user_team` (`user_id`,`team_id`);
-
---
--- Indexes for table `user_openai_chat`
---
-ALTER TABLE `user_openai_chat`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_openai_chat_user_id_foreign` (`user_id`),
-  ADD KEY `user_openai_chat_openai_chat_category_id_foreign` (`openai_chat_category_id`),
-  ADD KEY `user_openai_chat_is_empty_index` (`is_empty`);
-
---
--- Indexes for table `user_openai_chat_messages`
---
-ALTER TABLE `user_openai_chat_messages`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_openai_chat_messages_user_openai_chat_id_foreign` (`user_openai_chat_id`),
-  ADD KEY `user_openai_chat_messages_user_id_foreign` (`user_id`);
-
---
--- Indexes for table `user_orders`
---
-ALTER TABLE `user_orders`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_orders_plan_id_foreign` (`plan_id`),
-  ADD KEY `user_orders_user_id_foreign` (`user_id`);
-
---
--- Indexes for table `user_support`
---
-ALTER TABLE `user_support`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_support_user_id_foreign` (`user_id`);
-
---
--- Indexes for table `user_support_messages`
---
-ALTER TABLE `user_support_messages`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_support_messages_user_support_id_foreign` (`user_support_id`);
-
---
--- Indexes for table `user_usage_credits`
---
-ALTER TABLE `user_usage_credits`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_usage_credits_user_id_foreign` (`user_id`);
-
---
--- Indexes for table `webhookhistory`
---
-ALTER TABLE `webhookhistory`
-  ADD PRIMARY KEY (`id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `account_deletion_reqs`
---
-ALTER TABLE `account_deletion_reqs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `activity`
---
-ALTER TABLE `activity`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `ads`
---
-ALTER TABLE `ads`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT for table `advanced_features_section`
---
-ALTER TABLE `advanced_features_section`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `advertis`
---
-ALTER TABLE `advertis`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `ai_chat_model_plans`
---
-ALTER TABLE `ai_chat_model_plans`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `app_settings`
---
-ALTER TABLE `app_settings`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `article_wizard`
---
-ALTER TABLE `article_wizard`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `bad_words`
---
-ALTER TABLE `bad_words`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `banner_bottom_texts`
---
-ALTER TABLE `banner_bottom_texts`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `blogs`
---
-ALTER TABLE `blogs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `chatbot`
---
-ALTER TABLE `chatbot`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `chatbot_data`
---
-ALTER TABLE `chatbot_data`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `chatbot_data_vectors`
---
-ALTER TABLE `chatbot_data_vectors`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `chatbot_history`
---
-ALTER TABLE `chatbot_history`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `chat_category`
---
-ALTER TABLE `chat_category`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `clients`
---
-ALTER TABLE `clients`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `companies`
---
-ALTER TABLE `companies`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `comparison_section_items`
---
-ALTER TABLE `comparison_section_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT for table `coupons`
---
-ALTER TABLE `coupons`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `coupon_users`
---
-ALTER TABLE `coupon_users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `currencies`
---
-ALTER TABLE `currencies`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=133;
-
---
--- AUTO_INCREMENT for table `customsettings`
---
-ALTER TABLE `customsettings`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `custom_biling_plans`
---
-ALTER TABLE `custom_biling_plans`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `dashboard_widgets`
---
-ALTER TABLE `dashboard_widgets`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
-
---
--- AUTO_INCREMENT for table `domains`
---
-ALTER TABLE `domains`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `elevenlab_voices`
---
-ALTER TABLE `elevenlab_voices`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `email_templates`
---
-ALTER TABLE `email_templates`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `engines`
---
-ALTER TABLE `engines`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
-
---
--- AUTO_INCREMENT for table `entities`
---
-ALTER TABLE `entities`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=237;
-
---
--- AUTO_INCREMENT for table `exported_videos`
---
-ALTER TABLE `exported_videos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `extensions`
---
-ALTER TABLE `extensions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `failed_jobs`
---
-ALTER TABLE `failed_jobs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `faq`
---
-ALTER TABLE `faq`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `favourite_list`
---
-ALTER TABLE `favourite_list`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `features_marquees`
---
-ALTER TABLE `features_marquees`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT for table `folders`
---
-ALTER TABLE `folders`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `footer_items`
---
-ALTER TABLE `footer_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `frontend_channel_settings`
---
-ALTER TABLE `frontend_channel_settings`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `frontend_content_boxes`
---
-ALTER TABLE `frontend_content_boxes`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `frontend_curtains`
---
-ALTER TABLE `frontend_curtains`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `frontend_footer_settings`
---
-ALTER TABLE `frontend_footer_settings`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `frontend_future`
---
-ALTER TABLE `frontend_future`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `frontend_generators`
---
-ALTER TABLE `frontend_generators`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `frontend_sections_statuses_titles`
---
-ALTER TABLE `frontend_sections_statuses_titles`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `frontend_tools`
---
-ALTER TABLE `frontend_tools`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `frontend_who_is_for`
---
-ALTER TABLE `frontend_who_is_for`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `gatewayproducts`
---
-ALTER TABLE `gatewayproducts`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `gateways`
---
-ALTER TABLE `gateways`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `gateway_taxes`
---
-ALTER TABLE `gateway_taxes`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `health_check_result_history_items`
---
-ALTER TABLE `health_check_result_history_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `howitworks`
---
-ALTER TABLE `howitworks`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `integrations`
---
-ALTER TABLE `integrations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `introductions`
---
-ALTER TABLE `introductions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT for table `jobs`
---
-ALTER TABLE `jobs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `menus`
---
-ALTER TABLE `menus`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=269;
-
---
--- AUTO_INCREMENT for table `migrations`
---
-ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=383;
-
---
--- AUTO_INCREMENT for table `oldgatewayproducts`
---
-ALTER TABLE `oldgatewayproducts`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `openai`
---
-ALTER TABLE `openai`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
-
---
--- AUTO_INCREMENT for table `openai_chat_category`
---
-ALTER TABLE `openai_chat_category`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
-
---
--- AUTO_INCREMENT for table `openai_filters`
---
-ALTER TABLE `openai_filters`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
-
---
--- AUTO_INCREMENT for table `pages`
---
-ALTER TABLE `pages`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `payment_proofs`
---
-ALTER TABLE `payment_proofs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `paystack_payment_infos`
---
-ALTER TABLE `paystack_payment_infos`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `pdf_data`
---
-ALTER TABLE `pdf_data`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `pebblely`
---
-ALTER TABLE `pebblely`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `permissions`
---
-ALTER TABLE `permissions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
-
---
--- AUTO_INCREMENT for table `personal_access_tokens`
---
-ALTER TABLE `personal_access_tokens`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `photo_studios`
---
-ALTER TABLE `photo_studios`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `plans`
---
-ALTER TABLE `plans`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `privacy_terms`
---
-ALTER TABLE `privacy_terms`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `products`
---
-ALTER TABLE `products`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `prompt_library`
---
-ALTER TABLE `prompt_library`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `rate_limits`
---
-ALTER TABLE `rate_limits`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `recent_search_keys`
---
-ALTER TABLE `recent_search_keys`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `referers`
---
-ALTER TABLE `referers`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `revenuecat_products`
---
-ALTER TABLE `revenuecat_products`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `roles`
---
-ALTER TABLE `roles`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `settings`
---
-ALTER TABLE `settings`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `settings_two`
---
-ALTER TABLE `settings_two`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `share_links`
---
-ALTER TABLE `share_links`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `social_media_accounts`
---
-ALTER TABLE `social_media_accounts`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `subscriptions`
---
-ALTER TABLE `subscriptions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `subscriptions_yokassa`
---
-ALTER TABLE `subscriptions_yokassa`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `subscription_items`
---
-ALTER TABLE `subscription_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `teams`
---
-ALTER TABLE `teams`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `team_members`
---
-ALTER TABLE `team_members`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `telescope_entries`
---
-ALTER TABLE `telescope_entries`
-  MODIFY `sequence` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `testimonials`
---
-ALTER TABLE `testimonials`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `tokens`
---
-ALTER TABLE `tokens`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=237;
-
---
--- AUTO_INCREMENT for table `usage`
---
-ALTER TABLE `usage`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `users_activity`
---
-ALTER TABLE `users_activity`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_affiliates`
---
-ALTER TABLE `user_affiliates`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_credits`
---
-ALTER TABLE `user_credits`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_docs_favorite`
---
-ALTER TABLE `user_docs_favorite`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_favorites`
---
-ALTER TABLE `user_favorites`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_integrations`
---
-ALTER TABLE `user_integrations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_openai`
---
-ALTER TABLE `user_openai`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_openai_chat`
---
-ALTER TABLE `user_openai_chat`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_openai_chat_messages`
---
-ALTER TABLE `user_openai_chat_messages`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_orders`
---
-ALTER TABLE `user_orders`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_support`
---
-ALTER TABLE `user_support`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_support_messages`
---
-ALTER TABLE `user_support_messages`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `user_usage_credits`
---
-ALTER TABLE `user_usage_credits`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `webhookhistory`
---
-ALTER TABLE `webhookhistory`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `account_deletion_reqs`
---
-ALTER TABLE `account_deletion_reqs`
-  ADD CONSTRAINT `account_deletion_reqs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `activity`
---
-ALTER TABLE `activity`
-  ADD CONSTRAINT `activity_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `ai_chat_model_plans`
---
-ALTER TABLE `ai_chat_model_plans`
-  ADD CONSTRAINT `ai_chat_model_plans_entity_id_foreign` FOREIGN KEY (`entity_id`) REFERENCES `entities` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `companies`
---
-ALTER TABLE `companies`
-  ADD CONSTRAINT `companies_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `coupons`
---
-ALTER TABLE `coupons`
-  ADD CONSTRAINT `coupons_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `coupon_users`
---
-ALTER TABLE `coupon_users`
-  ADD CONSTRAINT `coupon_users_coupon_id_foreign` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `coupon_users_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `domains`
---
-ALTER TABLE `domains`
-  ADD CONSTRAINT `domains_chatbot_id_foreign` FOREIGN KEY (`chatbot_id`) REFERENCES `chatbot` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
---
--- Constraints for table `exported_videos`
---
-ALTER TABLE `exported_videos`
-  ADD CONSTRAINT `exported_videos_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `folders`
---
-ALTER TABLE `folders`
-  ADD CONSTRAINT `folders_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `model_has_permissions`
---
-ALTER TABLE `model_has_permissions`
-  ADD CONSTRAINT `model_has_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `model_has_roles`
---
-ALTER TABLE `model_has_roles`
-  ADD CONSTRAINT `model_has_roles_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `payment_proofs`
---
-ALTER TABLE `payment_proofs`
-  ADD CONSTRAINT `payment_proofs_plan_id_foreign` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `payment_proofs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `paystack_payment_infos`
---
-ALTER TABLE `paystack_payment_infos`
-  ADD CONSTRAINT `paystack_payment_infos_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `products`
---
-ALTER TABLE `products`
-  ADD CONSTRAINT `products_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `products_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `recent_search_keys`
---
-ALTER TABLE `recent_search_keys`
-  ADD CONSTRAINT `recent_search_keys_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `revenuecat_products`
---
-ALTER TABLE `revenuecat_products`
-  ADD CONSTRAINT `revenuecat_products_gatewayproduct_id_foreign` FOREIGN KEY (`gatewayproduct_id`) REFERENCES `gatewayproducts` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `revenuecat_products_plan_id_foreign` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `role_has_permissions`
---
-ALTER TABLE `role_has_permissions`
-  ADD CONSTRAINT `role_has_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `role_has_permissions_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `subscriptions`
---
-ALTER TABLE `subscriptions`
-  ADD CONSTRAINT `subscriptions_plan_id_foreign` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `subscriptions_yokassa`
---
-ALTER TABLE `subscriptions_yokassa`
-  ADD CONSTRAINT `subscriptions_yokassa_plan_id_foreign` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `teams`
---
-ALTER TABLE `teams`
-  ADD CONSTRAINT `teams_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `team_members`
---
-ALTER TABLE `team_members`
-  ADD CONSTRAINT `team_members_team_id_foreign` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `team_members_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `telescope_entries_tags`
---
-ALTER TABLE `telescope_entries_tags`
-  ADD CONSTRAINT `telescope_entries_tags_entry_uuid_foreign` FOREIGN KEY (`entry_uuid`) REFERENCES `telescope_entries` (`uuid`) ON DELETE CASCADE;
-
---
--- Constraints for table `tokens`
---
-ALTER TABLE `tokens`
-  ADD CONSTRAINT `tokens_entity_id_foreign` FOREIGN KEY (`entity_id`) REFERENCES `entities` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `users`
---
-ALTER TABLE `users`
-  ADD CONSTRAINT `users_affiliate_id_foreign` FOREIGN KEY (`affiliate_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `user_affiliates`
---
-ALTER TABLE `user_affiliates`
-  ADD CONSTRAINT `user_affiliates_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `user_docs_favorite`
---
-ALTER TABLE `user_docs_favorite`
-  ADD CONSTRAINT `user_docs_favorite_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `user_docs_favorite_user_openai_id_foreign` FOREIGN KEY (`user_openai_id`) REFERENCES `user_openai` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `user_favorites`
---
-ALTER TABLE `user_favorites`
-  ADD CONSTRAINT `user_favorites_openai_id_foreign` FOREIGN KEY (`openai_id`) REFERENCES `openai` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `user_favorites_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `user_openai`
---
-ALTER TABLE `user_openai`
-  ADD CONSTRAINT `user_openai_folder_id_foreign` FOREIGN KEY (`folder_id`) REFERENCES `folders` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `user_openai_openai_id_foreign` FOREIGN KEY (`openai_id`) REFERENCES `openai` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `user_openai_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `user_openai_chat`
---
-ALTER TABLE `user_openai_chat`
-  ADD CONSTRAINT `user_openai_chat_openai_chat_category_id_foreign` FOREIGN KEY (`openai_chat_category_id`) REFERENCES `openai_chat_category` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `user_openai_chat_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `user_openai_chat_messages`
---
-ALTER TABLE `user_openai_chat_messages`
-  ADD CONSTRAINT `user_openai_chat_messages_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `user_openai_chat_messages_user_openai_chat_id_foreign` FOREIGN KEY (`user_openai_chat_id`) REFERENCES `user_openai_chat` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `user_orders`
---
-ALTER TABLE `user_orders`
-  ADD CONSTRAINT `user_orders_plan_id_foreign` FOREIGN KEY (`plan_id`) REFERENCES `plans` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `user_orders_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `user_support`
---
-ALTER TABLE `user_support`
-  ADD CONSTRAINT `user_support_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `user_support_messages`
---
-ALTER TABLE `user_support_messages`
-  ADD CONSTRAINT `user_support_messages_user_support_id_foreign` FOREIGN KEY (`user_support_id`) REFERENCES `user_support` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `user_usage_credits`
---
-ALTER TABLE `user_usage_credits`
-  ADD CONSTRAINT `user_usage_credits_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-COMMIT;
-
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;

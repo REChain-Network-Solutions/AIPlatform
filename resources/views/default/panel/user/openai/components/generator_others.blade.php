@@ -223,6 +223,15 @@
 					</x-button>
 				</form>
 			</x-card>
+
+			@if ($openai->type === 'audio')
+				<div
+					x-data
+					x-init="$nextTick(() => $dispatch('generator-changed', { generator: '{{ \App\Domains\Entity\Enums\EntityEnum::WHISPER_1->value }}', _force: Date.now() }))"
+				>
+					<x-cost-preview class="w-full justify-end" />
+				</div>
+			@endif
 		@endif
 	</div>
 

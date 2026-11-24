@@ -48,7 +48,6 @@ class UserOpenai extends Model
     protected $casts = [
         'payload' => 'array',
         'engine'  => EngineEnum::class,
-        'model'   => EntityEnum::class,
     ];
 
     protected $appends = [
@@ -63,6 +62,21 @@ class UserOpenai extends Model
     public const STORAGE_AWS = 's3';
 
     public const STORAGE_R2 = 'r2';
+
+    /**
+     * Historical documents keep whatever model id generated them, including ids that
+     * have since been retired from EntityEnum. An `EntityEnum::class` cast would call
+     * EntityEnum::from() and throw a ValueError on every read — and on every
+     * toArray(), which takes out the documents API for the whole page. tryFrom()
+     * degrades to null instead and leaves the original id in the column.
+     */
+    protected function model(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => $value === null ? null : EntityEnum::tryFrom($value),
+            set: fn (EntityEnum|string|null $value) => $value instanceof EntityEnum ? $value->value : $value,
+        );
+    }
 
     public function outputUrl(): Attribute
     {

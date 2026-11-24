@@ -1,3 +1,7 @@
+@php
+    $bundle_buy_in_cart = in_array($item['id'], $cartExists ?? []);
+@endphp
+
 @if ($item['is_buy'])
     @if (isset($item['parent']))
         @if (\App\Helpers\Classes\MarketplaceHelper::isRegistered($item['parent']['slug']))
@@ -6,11 +10,12 @@
                     @if ($item['only_premium'])
                         @if ($item['check_subscription'])
                             <x-button
-                                class="w-full shadow-xl shadow-black/10"
+                                class="w-full shadow-xl shadow-black/10 {{ $bundle_buy_in_cart ? 'in-cart' : '' }}"
                                 variant="success"
-                                target="_blank"
                                 size="lg"
-                                href="{{ $item['routes']['payment'] }}"
+                                data-bundle-buy
+                                data-cart-url="{{ route('dashboard.admin.marketplace.cart') }}"
+                                href="{{ route('dashboard.admin.marketplace.cart.add-delete', $item['id']) }}"
                             >
                                 {{ __('Purchase Bundle') }}
                             </x-button>
@@ -27,11 +32,12 @@
                         @endif
                     @else
                         <x-button
-                            class="w-full shadow-xl shadow-black/10"
+                            class="w-full shadow-xl shadow-black/10 {{ $bundle_buy_in_cart ? 'in-cart' : '' }}"
                             variant="success"
-                            target="_blank"
                             size="lg"
-                            href="{{ $item['routes']['payment'] }}"
+                            data-bundle-buy
+                            data-cart-url="{{ route('dashboard.admin.marketplace.cart') }}"
+                            href="{{ route('dashboard.admin.marketplace.cart.add-delete', $item['id']) }}"
                         >
                             {{ __('Purchase Bundle') }}
                         </x-button>
@@ -51,11 +57,12 @@
                 @if ($item['only_premium'])
                     @if ($item['check_subscription'])
                         <x-button
-                            class="w-full shadow-xl shadow-black/10"
+                            class="w-full shadow-xl shadow-black/10 {{ $bundle_buy_in_cart ? 'in-cart' : '' }}"
                             variant="success"
-                            target="_blank"
                             size="lg"
-                            href="{{ $item['routes']['payment'] }}"
+                            data-bundle-buy
+                            data-cart-url="{{ route('dashboard.admin.marketplace.cart') }}"
+                            href="{{ route('dashboard.admin.marketplace.cart.add-delete', $item['id']) }}"
                         >
                             {{ __('Purchase Bundle') }}
                         </x-button>
@@ -70,17 +77,18 @@
                             {{ __('Only Premium Customer') }}
                         </x-button>
                     @endif
-                @else
-                    <x-button
-                        class="w-full shadow-xl shadow-black/10"
-                        variant="success"
-                        target="_blank"
-                        size="lg"
-                        href="{{ $item['routes']['payment'] }}"
-                    >
-                        {{ __('Purchase Bundle') }}
-                    </x-button>
-                @endif
+            @else
+                <x-button
+                    class="w-full shadow-xl shadow-black/10 {{ $bundle_buy_in_cart ? 'in-cart' : '' }}"
+                    variant="success"
+                    size="lg"
+                    data-bundle-buy
+                    data-cart-url="{{ route('dashboard.admin.marketplace.cart') }}"
+                    href="{{ route('dashboard.admin.marketplace.cart.add-delete', $item['id']) }}"
+                >
+                    {{ __('Purchase Bundle') }}
+                </x-button>
+            @endif
             @endif
         @else
             <x-button
@@ -97,11 +105,12 @@
         @if ($item['only_premium'])
             @if ($item['check_subscription'])
                 <x-button
-                    class="w-full shadow-xl shadow-black/10"
+                    class="w-full shadow-xl shadow-black/10 {{ $bundle_buy_in_cart ? 'in-cart' : '' }}"
                     variant="success"
-                    target="_blank"
                     size="lg"
-                    href="{{ $item['routes']['payment'] }}"
+                    data-bundle-buy
+                    data-cart-url="{{ route('dashboard.admin.marketplace.cart') }}"
+                    href="{{ route('dashboard.admin.marketplace.cart.add-delete', $item['id']) }}"
                 >
                     {{ __('Purchase Bundle') }}
                 </x-button>
@@ -117,11 +126,12 @@
             @endif
         @else
             <x-button
-                class="w-full shadow-xl shadow-black/10"
+                class="w-full shadow-xl shadow-black/10 {{ $bundle_buy_in_cart ? 'in-cart' : '' }}"
                 variant="success"
-                target="_blank"
                 size="lg"
-                href="{{ $item['routes']['payment'] }}"
+                data-bundle-buy
+                data-cart-url="{{ route('dashboard.admin.marketplace.cart') }}"
+                href="{{ route('dashboard.admin.marketplace.cart.add-delete', $item['id']) }}"
             >
                 {{ __('Purchase Bundle') }}
             </x-button>

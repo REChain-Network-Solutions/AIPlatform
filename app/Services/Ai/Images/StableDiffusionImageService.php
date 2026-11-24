@@ -49,6 +49,10 @@ class StableDiffusionImageService implements ImageGeneratorInterface
             default           => 'sd3', // Default to SD3 for other models
         };
 
+        if ($endpoint === 'sd3') {
+            $payload[] = ['name' => 'model', 'contents' => $model->value];
+        }
+
         $response = $client->post($endpoint, [
             'headers'   => ['accept' => 'application/json'],
             'multipart' => $payload,

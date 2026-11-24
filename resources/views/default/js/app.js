@@ -206,30 +206,52 @@ document.addEventListener( 'alpine:init', () => {
 		inputFocused: false,
 		timer: null,
 		searchResults: '',
+		groupedResults: [],
 		recentSearchKeys: [],
 		recentLunchedDocs: '',
+		lastActivities: JSON.parse(localStorage.getItem('search-last-activities') || '[]'),
 		shortcutKey: navigator.userAgent.indexOf('Mac OS X') != -1 ? 'cmd' : 'ctrl',
+		// AI mode state
+		aiMode: false,
+		aiResponse: '',
+		aiStreaming: false,
+		aiEventSource: null,
+		// Keyboard navigation
+		focusedIndex: -1,
+		activeFilter: 'all',
+
+		get filteredResults() {
+			if (this.activeFilter === 'all') return this.groupedResults;
+			return this.groupedResults.filter(g => g.type === this.activeFilter);
+		},
+
+		get flatItems() {
+			return this.filteredResults.flatMap(g => g.items);
+		},
 
 		init() {
+			this.toggleModal = this.toggleModal.bind(this);
 			this.applyRecentSearch = this.applyRecentSearch.bind(this);
 
-			// Clear session storage on page load
 			sessionStorage.removeItem('headear-recent-lunch');
 			sessionStorage.removeItem('headear-recent-search-keys');
 
-			// Fetch initial data
 			this.fetchRecentSearchKeys();
 			this.fetchRecentLunchedDocs();
-
-			// Add global keyboard shortcuts
 			this.addKeyboardShortcuts();
 		},
 
 		toggleModal(status) {
-			if (status != null) {
-				return this.modalOpen = status;
+			const open = status !== undefined ? status : !this.modalOpen;
+
+			this.modalOpen = open;
+
+			if ( !this.modalOpen ) {
+				this.$nextTick(() => {
+					console.log(this.$el);
+					this.$el.querySelector('.header-search-input')?.blur();
+				});
 			}
-			this.modalOpen = !this.modalOpen;
 		},
 
 		handleFocus() {
@@ -248,41 +270,112 @@ document.addEventListener( 'alpine:init', () => {
 		},
 
 		handleSearch() {
+			// Detect /ai prefix and enter AI mode, stripping the prefix
+			if (!this.aiMode && this.searchTerm.startsWith('/ai')) {
+				this.aiMode = true;
+				this.searchTerm = this.searchTerm.replace(/^\/ai\s*/, '');
+				this.doneSearching = true;
+				this.pending = false;
+				this.isSearching = false;
+				clearTimeout(this.timer);
+				return;
+			}
+
+			// Already in AI mode — exit if input cleared, otherwise stay
+			if (this.aiMode) {
+				if (this.onlySpaces(this.searchTerm)) {
+					this.aiMode = false;
+					this.aiResponse = '';
+					this.doneSearching = false;
+					this.pending = true;
+					if (this.aiEventSource) {
+						this.aiEventSource.close();
+						this.aiEventSource = null;
+						this.aiStreaming = false;
+					}
+				}
+				return;
+			}
+
 			if (this.onlySpaces(this.searchTerm)) {
 				clearTimeout(this.timer);
 				this.isSearching = false;
 				this.doneSearching = false;
 				this.pending = true;
+				this.focusedIndex = -1;
 			} else {
 				this.isSearching = true;
 				this.pending = false;
 				this.doneSearching = false;
-
+				this.focusedIndex = -1;
 				clearTimeout(this.timer);
 				this.timer = setTimeout(() => this.performSearch(), 1000);
 			}
 		},
 
 		addKeyboardShortcuts() {
+			if (window._headerSearchShortcutRegistered) return;
+			window._headerSearchShortcutRegistered = true;
 			window.addEventListener('keydown', e => {
-				if ((e.ctrlKey || e.shiftKey || e.altKey || e.metaKey) && e.key === 'k') {
+				if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key === 'k') {
 					e.preventDefault();
 					e.stopPropagation();
-					if (this.inputFocused) return;
-
-					// Focus the search input
-					this.$el.querySelector('.header-search-input').focus();
-					this.inputFocused = true;
-
-					if (!this.onlySpaces(this.searchTerm)) {
-						this.doneSearching = true;
+					if (this.modalOpen) {
+						this.toggleModal(false);
+						return;
 					}
+					this.toggleModal(true);
+					this.$nextTick(() => {
+						const input = document.querySelector('.header-search-input');
+						if (input) {
+							input.focus();
+						}
+						this.inputFocused = true;
+						if (!this.onlySpaces(this.searchTerm)) {
+							this.doneSearching = true;
+						}
+					});
 				}
+
 				if (e.key === 'Escape') {
 					if (!this.inputFocused) return;
+					if (this.aiEventSource) {
+						this.aiEventSource.close();
+						this.aiEventSource = null;
+						this.aiStreaming = false;
+					}
 					this.$el.querySelector('.header-search-input').blur();
 					this.inputFocused = false;
 					this.doneSearching = false;
+					this.aiMode = false;
+					this.aiResponse = '';
+					this.searchTerm = '';
+				}
+
+				// AI mode: Enter triggers search
+				if (e.key === 'Enter' && this.modalOpen && this.aiMode) {
+					this.performAiSearch();
+					this.searchTerm = '';
+					return;
+				}
+
+				// Keyboard navigation through results
+				if (this.modalOpen && this.doneSearching && !this.aiMode) {
+					const total = this.flatItems.length;
+					if (total === 0) return;
+
+					if (e.key === 'ArrowDown') {
+						e.preventDefault();
+						this.focusedIndex = (this.focusedIndex + 1) % total;
+					} else if (e.key === 'ArrowUp') {
+						e.preventDefault();
+						this.focusedIndex = (this.focusedIndex - 1 + total) % total;
+					} else if (e.key === 'Enter' && this.focusedIndex >= 0) {
+						const item = this.flatItems[this.focusedIndex];
+						if (item?.url && item.url !== '#') {
+							window.location.href = item.url;
+						}
+					}
 				}
 			});
 		},
@@ -297,24 +390,68 @@ document.addEventListener( 'alpine:init', () => {
 			formData.append('search', this.searchTerm);
 
 			try {
-				const response = await fetch('/dashboard/api/search', {
+				const response = await fetch('/dashboard/api/global-search', {
 					method: 'POST',
 					body: formData
 				});
 				const result = await response.json();
 
-				this.searchResults = result.html;
+				this.groupedResults = result.groups || [];
 				this.doneSearching = true;
 				this.pending = false;
 				this.isSearching = false;
+				this.focusedIndex = -1;
 
-				// Store and update recent search keys
-				sessionStorage.setItem('headear-recent-search-keys', JSON.stringify(result.keywords));
-				this.recentSearchKeys = result.keywords;
+				if (result.keywords) {
+					sessionStorage.setItem('headear-recent-search-keys', JSON.stringify(result.keywords));
+					this.recentSearchKeys = result.keywords;
+				}
 			} catch (error) {
 				console.error('Search error:', error);
 				this.isSearching = false;
 			}
+		},
+
+		performAiSearch() {
+			const query = this.searchTerm.trim();
+			if (!query) return;
+
+			if (this.aiEventSource) {
+				this.aiEventSource.close();
+			}
+
+			this.aiResponse = '';
+			this.aiStreaming = true;
+			this.doneSearching = true;
+			this.isSearching = false;
+
+			const url = `/dashboard/api/global-search/ai?query=${encodeURIComponent(query)}`;
+			this.aiEventSource = new EventSource(url);
+
+			this.aiEventSource.addEventListener('data', e => {
+				try {
+					const payload = JSON.parse(e.data);
+					if (payload.text) {
+						this.aiResponse += payload.text;
+					} else if (payload.error) {
+						this.aiResponse += `\n[Error: ${payload.error}]`;
+					}
+				} catch (_) {}
+			});
+
+			this.aiEventSource.addEventListener('stop', () => {
+				this.aiStreaming = false;
+				this.aiEventSource.close();
+				this.aiEventSource = null;
+			});
+
+			this.aiEventSource.onerror = () => {
+				this.aiStreaming = false;
+				if (this.aiEventSource) {
+					this.aiEventSource.close();
+					this.aiEventSource = null;
+				}
+			};
 		},
 
 		async fetchRecentSearchKeys() {
@@ -368,7 +505,20 @@ document.addEventListener( 'alpine:init', () => {
 			} catch (error) {
 				console.error('Error deleting search key:', error);
 			}
-		}
+		},
+
+		trackActivity(item) {
+			this.lastActivities = [
+				item,
+				...this.lastActivities.filter(a => a.url !== item.url)
+			].slice(0, 8);
+			localStorage.setItem('search-last-activities', JSON.stringify(this.lastActivities));
+		},
+
+		deleteActivity(url) {
+			this.lastActivities = this.lastActivities.filter(a => a.url !== url);
+			localStorage.setItem('search-last-activities', JSON.stringify(this.lastActivities));
+		},
 	}));
 
 	// Documents view mode

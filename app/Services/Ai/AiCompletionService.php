@@ -12,7 +12,6 @@ use App\Helpers\Classes\Helper;
 use GuzzleHttp\Client;
 use Illuminate\Http\UploadedFile;
 use OpenAI as OpenAIMain;
-use OpenAI\Laravel\Facades\OpenAI;
 
 class AiCompletionService
 {
@@ -40,7 +39,7 @@ class AiCompletionService
 
         $model = Helper::defaultWordModel();
 
-        $result = OpenAI::responses()->create([
+        $result = app(ResponsesClient::class)->create([
             'model' => $model->value,
             'input' => [
                 ['role' => 'system', 'content' => $systemPrompt],
@@ -133,13 +132,16 @@ class AiCompletionService
             ->withBaseUri('https://api.x.ai/v1')
             ->make();
 
-        $result = $client->chat()->create([
-            'model'    => $model->value,
-            'messages' => [
-                ['role' => 'system', 'content' => $systemPrompt],
-                ['role' => 'user', 'content' => $userContent],
-            ],
-        ]);
+        $result = app(ResponsesClient::class)->guard(
+            fn () => $client->chat()->create([
+                'model'    => $model->value,
+                'messages' => [
+                    ['role' => 'system', 'content' => $systemPrompt],
+                    ['role' => 'user', 'content' => $userContent],
+                ],
+            ]),
+            ['model' => $model->value, 'endpoint' => 'xai-chat']
+        );
 
         return $result->choices[0]->message->content ?? '';
     }
@@ -180,7 +182,7 @@ class AiCompletionService
 
         $model = Helper::defaultWordModel();
 
-        $result = OpenAI::responses()->create([
+        $result = app(ResponsesClient::class)->create([
             'model' => $model->value,
             'input' => [
                 ['role' => 'system', 'content' => $systemPrompt],

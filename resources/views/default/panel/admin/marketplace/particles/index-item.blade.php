@@ -96,7 +96,7 @@
             @endif
 
 
-            @includeWhen($item['type'] === 'single', 'default.panel.admin.marketplace.particles.index-add-cart')
+            @includeWhen(in_array($item['type'], ['single', 'bundle']), 'default.panel.admin.marketplace.particles.index-add-cart')
         </div>
     </x-card>
 </div>

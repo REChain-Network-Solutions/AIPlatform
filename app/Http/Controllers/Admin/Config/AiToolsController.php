@@ -68,7 +68,6 @@ class AiToolsController extends Controller
         ]);
 
         $this->settingTwo->update([
-            'feature_ai_video'          => $request->has('feature_ai_video'),
             'daily_voice_limit_enabled' => $request->has('daily_voice_limit_enabled'),
             'daily_limit_enabled'       => $request->has('daily_limit_enabled'),
         ]);
